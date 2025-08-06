@@ -1,8 +1,8 @@
 ---
 description: The first post - why this blog exists and what to expect.
 layout: layouts/post.njk
-title: Real Hello World!
-date: 2017-01-29
+title: Hello World!
+date: 2017-01-27
 tags:
   - posts
   - announcements
