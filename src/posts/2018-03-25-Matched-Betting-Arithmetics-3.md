@@ -3,6 +3,7 @@ layout: layouts/post.njk
 title: Matched Betting Arithmetics 3 - Overlaying / Underlaying
 date: 2018-03-25
 description: This post explains the concepts of overlaying and underlaying in matched betting, including when and how to use them for maximizing profits.
+excerpt: "Overlaying and underlaying are advanced matched betting techniques that can help you maximize profits in specific scenarios. This post explains how they work and when to use them..."
 tags:
 - posts
 - mathematics

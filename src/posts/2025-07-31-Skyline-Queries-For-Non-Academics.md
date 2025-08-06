@@ -3,6 +3,8 @@ layout: layouts/post.njk
 title: Skyline Queries for Non-Academics
 date: 2025-07-31
 description: This post explains skyline queries and their applications in non-academic settings.
+excerpt: "<i>(Originally published on <a href='https://dev.to/gkoos/skyline-queries-for-non-academics-49am'>Dev.to</a>)</i><br><br>
+Imagine you're buying a laptop. You care about two things: price and battery life. You don’t know which laptop is the best, but you can easily spot laptops that are obviously worse than others..."
 canonical: https://dev.to/gkoos/skyline-queries-for-non-academics-49am
 tags:
 - posts

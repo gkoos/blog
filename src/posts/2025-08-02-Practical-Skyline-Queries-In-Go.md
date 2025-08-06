@@ -3,6 +3,8 @@ layout: layouts/post.njk
 title: Practical Skyline Queries In Go
 date: 2025-08-02
 descriptionn: A practical introduction to skyline queries in Go, including a command line tool for skyline calculations.
+excerpt: "<i>(Originally published on <a href='https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9'>Dev.to</a></i>)<br><br>
+We have a set of points in a multi-dimensional space, and we want to find the points that are not dominated by any other point. (Point A <i>dominates</i> another point B if A is better than B in all dimensions..."
 canonical: https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9
 tags:
 - posts

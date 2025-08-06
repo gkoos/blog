@@ -3,6 +3,7 @@ layout: layouts/post.njk
 title: Matched Betting Arithmetics 2 - Rating a Matched Bet
 date: 2017-02-09
 description: This post discusses how to rate a matched bet based on the back and lay odds.
+excerpt: "When selecting a bet to back and lay, our goal is to maximize profit (or for a qualifying bet, to minimize loss). Just by looking at the odds it's hard to tell if a bet is ludicrous or not, so let's try and create an index to rate those bets..."
 tags:
   - posts
   - mathematics

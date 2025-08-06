@@ -3,6 +3,8 @@ layout: layouts/post.njk
 title: Hash Map Deep Dive
 date: 2025-08-03
 description: A deep dive into hash maps, their implementation, and performance considerations in Go.
+excerpt: "<i>(Originally published on <a href='https://dev.to/gkoos/hash-map-deep-dive-2b7p'>Dev.to</a>)</i><br><br>
+A dict in Python. map in Go, Object or Map in Javascript. Associative arrays in PHP, Dictionary&lt;TKey, TValue&gt; in C++. Hash maps are implemented in virtually every high-level programming language. And they are awesome!..."
 canonical: https://dev.to/gkoos/hash-map-deep-dive-2b7p
 tags:
 - posts

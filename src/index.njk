@@ -68,10 +68,10 @@ pagination:
         </div>
         
         <div class="text-gray-600 leading-relaxed">
-          {% if post.templateContent %}
+          {% if post.data.excerpt %}
+            <p>{{ post.data.excerpt | safe }}</p>
+          {% elif post.templateContent %}
             <p>{{ post.templateContent | striptags | truncate(180, '...') }}</p>
-          {% else %}
-            <p>{{ post.data.excerpt }}</p>
           {% endif %}
         </div>
         

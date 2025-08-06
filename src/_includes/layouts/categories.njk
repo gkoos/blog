@@ -41,7 +41,7 @@ function renderArticles() {
       seen.add(t); return true;
     });
     return `
-    <article class="border-b border-gray-100 pb-12 last:border-b-0">
+    <article class="border-b border-gray-100 last:border-b-0">
       <div class="group">
         <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4 group-hover:text-gray-700 transition-colors">
           <a href="${post.url}" class="hover:no-underline">${post.title}</a>
@@ -54,17 +54,6 @@ function renderArticles() {
               ${visibleTags.map(tag => `<div class='flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5'>${tag}</div>`).join('')}
             </div>
           ` : ''}
-        </div>
-        <div class="text-gray-600 leading-relaxed">
-          <p>${post.excerpt ? post.excerpt : ''}</p>
-        </div>
-        <div class="mt-6">
-          <a href="${post.url}" class="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors">
-            Read more
-            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
         </div>
       </div>
     </article>
