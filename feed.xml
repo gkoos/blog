@@ -17,84 +17,12 @@
     </image>
     
       <item>
-        <title>Hash Map Deep Dive</title>
-        <link>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep_dive/</link>
-        <guid>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep_dive/</guid>
-        <pubDate>Sun, 03 Aug 2025 00:00:00 GMT</pubDate>
+        <title>Hello World!</title>
+        <link>https://gaborkoos.com/posts/2017-01-27-Hello-World/</link>
+        <guid>https://gaborkoos.com/posts/2017-01-27-Hello-World/</guid>
+        <pubDate>Fri, 27 Jan 2017 00:00:00 GMT</pubDate>
 
-        <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
-      </item>
-    
-      <item>
-        <title>Practical Skyline Queries In Go</title>
-        <link>https://gaborkoos.com/posts/2025-08-02-Practical-Skyline-Queries-In-Go/</link>
-        <guid>https://gaborkoos.com/posts/2025-08-02-Practical-Skyline-Queries-In-Go/</guid>
-        <pubDate>Sat, 02 Aug 2025 00:00:00 GMT</pubDate>
-
-        <description>(Originally published on Dev.to) Skyline Queries? Summer is in full swing, the weather outside is hot and sunny. And here I am at my desk, scribbling away while my mind is sipping margaritas in a hote...</description>
-      </item>
-    
-      <item>
-        <title>Skyline Queries for Non-Academics</title>
-        <link>https://gaborkoos.com/posts/2025-07-31-Skyline-Queries-For-Non-Academics/</link>
-        <guid>https://gaborkoos.com/posts/2025-07-31-Skyline-Queries-For-Non-Academics/</guid>
-        <pubDate>Thu, 31 Jul 2025 00:00:00 GMT</pubDate>
-
-        <description>This post explains skyline queries and their applications in non-academic settings.</description>
-      </item>
-    
-      <item>
-        <title>My Website Is Up</title>
-        <link>https://gaborkoos.com/posts/2019-02-28-My-Website/</link>
-        <guid>https://gaborkoos.com/posts/2019-02-28-My-Website/</guid>
-        <pubDate>Thu, 28 Feb 2019 00:00:00 GMT</pubDate>
-
-        <description>Announcing the launch of my personal website.</description>
-      </item>
-    
-      <item>
-        <title>Matched Betting Arithmetics 3 - Overlaying / Underlaying</title>
-        <link>https://gaborkoos.com/posts/2018-03-25-Matched-Betting-Arithmetics-3/</link>
-        <guid>https://gaborkoos.com/posts/2018-03-25-Matched-Betting-Arithmetics-3/</guid>
-        <pubDate>Sun, 25 Mar 2018 00:00:00 GMT</pubDate>
-
-        <description>This post explains the concepts of overlaying and underlaying in matched betting, including when and how to use them for maximizing profits.</description>
-      </item>
-    
-      <item>
-        <title>Matched Betting - Bet365 Offer</title>
-        <link>https://gaborkoos.com/posts/2017-04-2-Matched-Betting-Bet365-Offer/</link>
-        <guid>https://gaborkoos.com/posts/2017-04-2-Matched-Betting-Bet365-Offer/</guid>
-        <pubDate>Sun, 02 Apr 2017 00:00:00 GMT</pubDate>
-
-        <description>This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.</description>
-      </item>
-    
-      <item>
-        <title>Matched Betting - Sunbets Halftime Hero Offer</title>
-        <link>https://gaborkoos.com/posts/2017-02-16-Matched-Betting-Sunbets_Offer/</link>
-        <guid>https://gaborkoos.com/posts/2017-02-16-Matched-Betting-Sunbets_Offer/</guid>
-        <pubDate>Thu, 16 Feb 2017 00:00:00 GMT</pubDate>
-
-        <description>A mathematical approach to the Sun Bets Halftime Hero offer.</description>
-      </item>
-    
-      <item>
-        <title>Matched Betting Arithmetics 2 - Rating a Matched Bet</title>
-        <link>https://gaborkoos.com/posts/2017-02-9-Matched-Betting-Arithmetics-2/</link>
-        <guid>https://gaborkoos.com/posts/2017-02-9-Matched-Betting-Arithmetics-2/</guid>
-        <pubDate>Thu, 09 Feb 2017 00:00:00 GMT</pubDate>
-
-        <description>This post discusses how to rate a matched bet based on the back and lay odds.</description>
-      </item>
-    
-      <item>
-        <title>Matched Betting Arithmetics</title>
-        <link>https://gaborkoos.com/posts/2017-02-1-Matched-Betting-Arithmetics/</link>
-        <guid>https://gaborkoos.com/posts/2017-02-1-Matched-Betting-Arithmetics/</guid>
-        <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
-
-        <description>This post introduces the basic concepts of matched betting and the mathematics behind it.</description>
+        <description>The first post - why this blog exists and what to expect.</description>
       </item>
     
       <item>
@@ -107,12 +35,84 @@
       </item>
     
       <item>
-        <title>Real Hello World!</title>
-        <link>https://gaborkoos.com/posts/2017-01-29-Hello-World/</link>
-        <guid>https://gaborkoos.com/posts/2017-01-29-Hello-World/</guid>
-        <pubDate>Sun, 29 Jan 2017 00:00:00 GMT</pubDate>
+        <title>Matched Betting Arithmetics</title>
+        <link>https://gaborkoos.com/posts/2017-02-1-Matched-Betting-Arithmetics/</link>
+        <guid>https://gaborkoos.com/posts/2017-02-1-Matched-Betting-Arithmetics/</guid>
+        <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
 
-        <description>The first post - why this blog exists and what to expect.</description>
+        <description>This post introduces the basic concepts of matched betting and the mathematics behind it.</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting Arithmetics 2 - Rating a Matched Bet</title>
+        <link>https://gaborkoos.com/posts/2017-02-9-Matched-Betting-Arithmetics-2/</link>
+        <guid>https://gaborkoos.com/posts/2017-02-9-Matched-Betting-Arithmetics-2/</guid>
+        <pubDate>Thu, 09 Feb 2017 00:00:00 GMT</pubDate>
+
+        <description>This post discusses how to rate a matched bet based on the back and lay odds.</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting - Sunbets Halftime Hero Offer</title>
+        <link>https://gaborkoos.com/posts/2017-02-16-Matched-Betting-Sunbets_Offer/</link>
+        <guid>https://gaborkoos.com/posts/2017-02-16-Matched-Betting-Sunbets_Offer/</guid>
+        <pubDate>Thu, 16 Feb 2017 00:00:00 GMT</pubDate>
+
+        <description>A mathematical approach to the Sun Bets Halftime Hero offer.</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting - Bet365 Offer</title>
+        <link>https://gaborkoos.com/posts/2017-04-2-Matched-Betting-Bet365-Offer/</link>
+        <guid>https://gaborkoos.com/posts/2017-04-2-Matched-Betting-Bet365-Offer/</guid>
+        <pubDate>Sun, 02 Apr 2017 00:00:00 GMT</pubDate>
+
+        <description>This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting Arithmetics 3 - Overlaying / Underlaying</title>
+        <link>https://gaborkoos.com/posts/2018-03-25-Matched-Betting-Arithmetics-3/</link>
+        <guid>https://gaborkoos.com/posts/2018-03-25-Matched-Betting-Arithmetics-3/</guid>
+        <pubDate>Sun, 25 Mar 2018 00:00:00 GMT</pubDate>
+
+        <description>This post explains the concepts of overlaying and underlaying in matched betting, including when and how to use them for maximizing profits.</description>
+      </item>
+    
+      <item>
+        <title>My Website Is Up</title>
+        <link>https://gaborkoos.com/posts/2019-02-28-My-Website/</link>
+        <guid>https://gaborkoos.com/posts/2019-02-28-My-Website/</guid>
+        <pubDate>Thu, 28 Feb 2019 00:00:00 GMT</pubDate>
+
+        <description>Announcing the launch of my personal website.</description>
+      </item>
+    
+      <item>
+        <title>Skyline Queries for Non-Academics</title>
+        <link>https://gaborkoos.com/posts/2025-07-31-Skyline-Queries-For-Non-Academics/</link>
+        <guid>https://gaborkoos.com/posts/2025-07-31-Skyline-Queries-For-Non-Academics/</guid>
+        <pubDate>Thu, 31 Jul 2025 00:00:00 GMT</pubDate>
+
+        <description>This post explains skyline queries and their applications in non-academic settings.</description>
+      </item>
+    
+      <item>
+        <title>Practical Skyline Queries In Go</title>
+        <link>https://gaborkoos.com/posts/2025-08-02-Practical-Skyline-Queries-In-Go/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-02-Practical-Skyline-Queries-In-Go/</guid>
+        <pubDate>Sat, 02 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>(Originally published on Dev.to) Skyline Queries? Summer is in full swing, the weather outside is hot and sunny. And here I am at my desk, scribbling away while my mind is sipping margaritas in a hote...</description>
+      </item>
+    
+      <item>
+        <title>Hash Map Deep Dive</title>
+        <link>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep_dive/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep_dive/</guid>
+        <pubDate>Sun, 03 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
       </item>
     
   </channel>
