@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hash Map Deep Dive</title>
+  <meta name="description" content="A deep dive into hash maps, their implementation, and performance considerations in Go.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hash Map Deep Dive">
+  <meta property="og:description" content="A deep dive into hash maps, their implementation, and performance considerations in Go.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Hash Map Deep Dive">
+  <meta name="twitter:description" content="A deep dive into hash maps, their implementation, and performance considerations in Go.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  
+  
+  
+    <link rel="canonical" href="https://dev.to/gkoos/hash-map-deep-dive-2b7p">
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Hash Map Deep Dive</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-08-03T00:00:00.000Z">Sun Aug 03 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">algorithms</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">Golang</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>(Originally published on <a href="https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9">Dev.to</a>)</em></p>
+<p><img src="https://i.imgur.com/GiyaHep.jpeg" alt="">
+A <code>dict</code> in Python. <code>map</code> in Go, <code>Object</code> or <code>Map</code> in Javascript. Associative arrays in PHP, <code>Dictionary&lt;TKey, TValue&gt;</code> in C++. Hash maps are implemented in virtually every high-level programming language. And they are awesome! Who doesn't want to store and then access data in constant time? Whether you're working with large datasets or grinding Leetcode problems, very often this data structure comes to the rescue. But what are they exactly and how do they work under the hood? In this article we will try and answer these questions.</p>
+<h2 id="table-of-contents" tabindex="-1"><a class="header-anchor" href="#table-of-contents">Table of Contents</a></h2>
+<nav class="table-of-contents"><ol><li><a href="#table-of-contents">Table of Contents</a></li><li><a href="#what-is-a-hash-map%3F">What Is a Hash Map?</a></li><li><a href="#what-is-a-hash-function%3F">What Is a Hash Function?</a></li><li><a href="#what-is-a-bucket%3F">What Is a Bucket?</a></li><li><a href="#load-factor">Load Factor</a></li><li><a href="#collision-resolution">Collision Resolution</a></li><li><a href="#some-real-world-examples">Some Real-World Examples</a><ol><li><a href="#programming-language-implementations">Programming Language Implementations</a></li><li><a href="#database-systems">Database Systems</a></li><li><a href="#version-control">Version Control</a></li></ol></li><li><a href="#putting-it-all-together%3A-how-implementation-knowledge-matters">Putting It All Together: How Implementation Knowledge Matters</a><ol><li><a href="#bad-implementation-(fights-against-python's-dict)">Bad Implementation (Fights Against Python&#39;s Dict)</a></li><li><a href="#good-implementation-(works-with-python's-dict)">Good Implementation (Works With Python&#39;s Dict)</a></li><li><a href="#performance-difference">Performance Difference</a></li></ol></li><li><a href="#conclusion">Conclusion</a></li></ol></nav><h2 id="what-is-a-hash-map%3F" tabindex="-1"><a class="header-anchor" href="#what-is-a-hash-map%3F">What Is a Hash Map?</a></h2>
+<p>At a high level, a hash map, or hash table is a data structure that implements an associative array abstract data type, a structure that can map keys to values. The key is used to uniquely identify a value in the map, and the value is the data that is being stored. Hash maps are designed to provide fast insertion, deletion, and lookup of key-value pairs.</p>
+<p>In fact, the average time complexity for these operations is O(1), which means that they can be performed in constant time! This feature makes hash maps probably the most used data structure in programming, however there are some caveats to this, as we will see later.</p>
+<p>The worst-case time complexity for these operations is O(n), which can happen in certain scenarios, and the more we know about the internals, the more likely we are to avoid these scenarios.</p>
+<p>According to the <a href="https://en.wikipedia.org/wiki/Hash_table">Wikipedia article</a>:</p>
+<blockquote>
+<p>a hash table is a data structure that implements an associative array, also called a dictionary or simply map; an associative array is an abstract data type that maps keys to values. A hash table uses a hash function to compute an index, also called a hash code, into an array of buckets or slots, from which the desired value can be found.</p>
+</blockquote>
+<p>So let's take a step back and look at the components of a hash map.</p>
+<h2 id="what-is-a-hash-function%3F" tabindex="-1"><a class="header-anchor" href="#what-is-a-hash-function%3F">What Is a Hash Function?</a></h2>
+<p>A hash function is a function that takes an input (or &quot;key&quot;) and typically returns an integer that is used to index the data in the hash map. The key is transformed into an integer, which is then used to determine the index in the underlying array where the value is stored.</p>
+<p>A good hash function has the following properties:</p>
+<ul>
+<li><strong>Deterministic</strong>: The same input will always produce the same output.</li>
+<li><strong>Uniform Distribution</strong>: The hash function should distribute keys uniformly across the hash table to minimize collisions.</li>
+<li><strong>Fast Computation</strong>: The hash function should be quick to compute, even for large inputs.</li>
+<li><strong>Minimize Collisions</strong>: The space of possible keys is typically much larger (often infinite) than the space of hash codes. This means that different keys may produce the same hash code. While these collisions are inevitable, a good hash function minimizes the chances of two different keys producing the same hash code.</li>
+</ul>
+<p>A simple example of a hash function is the modulo operation, which takes a key and returns the remainder when divided by the size of the hash table. For example, if we have a hash table of size 10 and a key of 23, the hash code would be <code>23 % 10 = 3</code>, meaning that the value associated with the key 23 would be stored at index 3 in the underlying array. And if the key is 33, the hash code would be <code>33 % 10 = 3</code> as well, which means that we have a collision. In this case, both keys would map to the same index in the array.</p>
+<h2 id="what-is-a-bucket%3F" tabindex="-1"><a class="header-anchor" href="#what-is-a-bucket%3F">What Is a Bucket?</a></h2>
+<p>A bucket is a slot in the hash table where a key-value pair is stored. In case of a collision, where two different keys produce the same hash code, the bucket can store multiple key-value pairs. This is often done using a linked list or another data structure to handle collisions.</p>
+<p>This diagram illustrates how all this works:
+<img src="https://i.imgur.com/H8wRU0P.png" alt=""></p>
+<p>Here we can see how the hash function maps keys to indices in the underlying array. The keys 23 and 33 both produce the same hash code of 3, which means that they are stored in the same bucket. The bucket can then store both key-value pairs, but when we retrieve a value, we need to check the keys in the bucket to find the correct one. This is where the time complexity can increase to O(n) in the worst case, if many (or even all) keys collide and are stored in the same bucket.</p>
+<h2 id="load-factor" tabindex="-1"><a class="header-anchor" href="#load-factor">Load Factor</a></h2>
+<p>The load factor is a measure of how full the hash table is. It is calculated as the number of elements in the hash table divided by the number of buckets (or slots) in the underlying array. A higher load factor means that there are more elements in the hash table relative to the number of buckets, which can lead to more collisions and slower performance.</p>
+<h2 id="collision-resolution" tabindex="-1"><a class="header-anchor" href="#collision-resolution">Collision Resolution</a></h2>
+<p>When two keys produce the same hash code, we have a collision. There are several strategies to handle collisions in hash maps:</p>
+<ol>
+<li>
+<p><strong>Chaining</strong>: In this method, each bucket contains a linked list (or another data structure) of all key-value pairs that hash to the same index. When a collision occurs, the new key-value pair is simply added to the list in the appropriate bucket. This is the most common method for handling collisions.</p>
+<ul>
+<li><strong>Complexity</strong>: Average O(1) for all operations, worst-case O(n) if all keys hash to the same bucket</li>
+<li><strong>Pros</strong>: Simple to implement, handles high load factors well, deletion is straightforward</li>
+<li><strong>Cons</strong>: Extra memory overhead for pointers, poor cache performance due to scattered memory access</li>
+</ul>
+</li>
+<li>
+<p><strong>Open Addressing</strong>: In this method, when a collision occurs, the hash table searches for the next available slot in the array to store the new key-value pair. There are several techniques for finding the next available slot:</p>
+<p><strong>Linear Probing</strong>: If a collision occurs, the algorithm checks the next slot in the array until it finds an empty one.</p>
+<ul>
+<li><strong>Complexity</strong>: Average O(1), worst-case O(n) due to primary clustering</li>
+<li><strong>Pros</strong>: Simple implementation, good cache performance for nearby accesses</li>
+<li><strong>Cons</strong>: Primary clustering (consecutive occupied slots), performance degrades with clustering</li>
+</ul>
+<p><strong>Quadratic Probing</strong>: Instead of checking the next slot, it checks slots at increasing distances (1, 4, 9, etc.) from the original index.</p>
+<ul>
+<li><strong>Complexity</strong>: Average O(1), better than linear probing due to reduced clustering</li>
+<li><strong>Pros</strong>: Reduces primary clustering compared to linear probing, still cache-friendly</li>
+<li><strong>Cons</strong>: Secondary clustering (keys with same hash follow same probe sequence), may not visit all slots</li>
+</ul>
+<p><strong>Double Hashing</strong>: Uses a second hash function to determine the step size for probing. Unlike linear probing which always moves to the next slot, or quadratic probing which uses a fixed sequence, double hashing calculates a unique step size for each key. The formula is typically: <code>index = (hash1(key) + i * hash2(key)) % table_size</code>, where <code>i</code> is the probe attempt number. The second hash function must return a value that's relatively prime to the table size to ensure all slots can be visited. For example, if <code>hash1(key) = 7</code> and <code>hash2(key) = 3</code>, then we'd probe indices 7, 10, 13, 16, etc.</p>
+<ul>
+<li><strong>Complexity</strong>: Average O(1), best performance among open addressing methods</li>
+<li><strong>Pros</strong>: Minimizes clustering, uniform distribution of probe sequences, visits all slots when properly implemented</li>
+<li><strong>Cons</strong>: More complex implementation, requires computing two hash functions, slightly more overhead per operation</li>
+</ul>
+</li>
+<li>
+<p><strong>Rehashing</strong>: If the load factor becomes too high, the hash table can be resized and all existing key-value pairs can be rehashed into the new table. This helps to maintain efficient performance as the number of elements grows.</p>
+<ul>
+<li><strong>Complexity</strong>: O(n) for the rehashing operation itself, but amortizes to O(1) per insertion over time</li>
+<li><strong>Pros</strong>: Maintains optimal performance by keeping load factor low, prevents performance degradation</li>
+<li><strong>Cons</strong>: Temporary performance spike during rehashing, requires additional memory during the resize operation</li>
+</ul>
+</li>
+</ol>
+<p>Each of these methods has its own trade-offs in terms of complexity, performance, and memory usage. The choice of collision resolution strategy can have a significant impact on the overall performance of the hash map.</p>
+<p>Here is a quick summary of the pros and cons of each collision resolution method:</p>
+<table>
+<thead>
+<tr>
+<th><strong>Feature</strong></th>
+<th><strong>Chaining</strong></th>
+<th><strong>Linear Probing</strong></th>
+<th><strong>Quadratic Probing</strong></th>
+<th><strong>Double Hashing</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Average Time Complexity</strong></td>
+<td>O(1)</td>
+<td>O(1)</td>
+<td>O(1)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><strong>Worst-case Time Complexity</strong></td>
+<td>O(n)</td>
+<td>O(n)</td>
+<td>O(n)</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td><strong>Memory Overhead</strong></td>
+<td>High (pointers)</td>
+<td>Low</td>
+<td>Low</td>
+<td>Low</td>
+</tr>
+<tr>
+<td><strong>Cache Performance</strong></td>
+<td>Poor</td>
+<td>Good</td>
+<td>Good</td>
+<td>Moderate</td>
+</tr>
+<tr>
+<td><strong>Implementation Complexity</strong></td>
+<td>Simple</td>
+<td>Simple</td>
+<td>Moderate</td>
+<td>Complex</td>
+</tr>
+<tr>
+<td><strong>Clustering Issues</strong></td>
+<td>None</td>
+<td>Primary clustering</td>
+<td>Secondary clustering</td>
+<td>Minimal</td>
+</tr>
+<tr>
+<td><strong>Load Factor Tolerance</strong></td>
+<td>High (&gt;1.0)</td>
+<td>Low (&lt;0.7)</td>
+<td>Low-Medium (&lt;0.7)</td>
+<td>Medium (&lt;0.8)</td>
+</tr>
+<tr>
+<td><strong>Deletion Complexity</strong></td>
+<td>Simple</td>
+<td>Complex (tombstones)</td>
+<td>Complex (tombstones)</td>
+<td>Complex (tombstones)</td>
+</tr>
+<tr>
+<td><strong>Space Efficiency</strong></td>
+<td>Lower</td>
+<td>Higher</td>
+<td>Higher</td>
+<td>Higher</td>
+</tr>
+<tr>
+<td><strong>Performance Degradation</strong></td>
+<td>Gradual</td>
+<td>Rapid at high load</td>
+<td>Moderate at high load</td>
+<td>Slow at high load</td>
+</tr>
+<tr>
+<td><strong>Hash Function Requirements</strong></td>
+<td>One</td>
+<td>One</td>
+<td>One</td>
+<td>Two</td>
+</tr>
+<tr>
+<td><strong>Best Use Cases</strong></td>
+<td>Unknown load factors, frequent deletions</td>
+<td>Cache-friendly applications, low load</td>
+<td>Better than linear, moderate load</td>
+<td>High performance, predictable load</td>
+</tr>
+</tbody>
+</table>
+<h2 id="some-real-world-examples" tabindex="-1"><a class="header-anchor" href="#some-real-world-examples">Some Real-World Examples</a></h2>
+<h3 id="programming-language-implementations" tabindex="-1"><a class="header-anchor" href="#programming-language-implementations">Programming Language Implementations</a></h3>
+<p>Many programming languages have built-in hash maps. These implementations often use a combination of the techniques described above to provide efficient performance and handle collisions effectively.</p>
+<ul>
+<li>
+<p><strong>Python</strong>'s <code>dict</code> uses open addressing with randomized probing, rehashing when the load factor exceeds about 0.66.</p>
+</li>
+<li>
+<p><strong>Java</strong>'s <code>HashMap</code> uses chaining with linked lists (converting to balanced trees for large buckets in Java 8+), rehashes at 0.75 load factor.</p>
+</li>
+<li>
+<p><strong>C++</strong>'s <code>unordered_map</code> typically uses chaining, but implementations may vary.</p>
+</li>
+</ul>
+<h3 id="database-systems" tabindex="-1"><a class="header-anchor" href="#database-systems">Database Systems</a></h3>
+<p>Hash maps are also widely used in database indexing. Many database systems use hash indexes to speed up data retrieval. These indexes allow for fast lookups by hashing the indexed columns and storing the resulting key-value pairs in a hash table. When a query is executed, the database can quickly find the relevant rows by computing the hash of the query key and looking it up in the hash index.</p>
+<p>Some popular database systems that use hash indexing include:</p>
+<ul>
+<li><strong>PostgreSQL</strong>: Supports hash indexes, but they are not as commonly used as B-tree indexes.</li>
+<li><strong>MongoDB</strong>: Uses hash indexes for sharding and to support equality queries on hashed fields.</li>
+<li><strong>Redis</strong>: Implements hash maps as a core data structure, allowing for efficient storage and retrieval of key-value pairs.</li>
+</ul>
+<p>These implementations often leverage the same underlying principles of hashing and collision resolution discussed earlier, but they may also incorporate additional optimizations specific to the database context.</p>
+<h3 id="version-control" tabindex="-1"><a class="header-anchor" href="#version-control">Version Control</a></h3>
+<p>Version control systems like Git use hash maps to efficiently manage file changes and track versions. Each commit in Git is identified by a SHA-1 hash of its contents, which serves as a unique key for the commit object. This allows Git to quickly look up commits, branches, and other objects in the repository. Git doesn't use traditional hash table collision resolution, it's designed around the assumption that cryptographic hash collisions won't occur in practice.</p>
+<h2 id="putting-it-all-together%3A-how-implementation-knowledge-matters" tabindex="-1"><a class="header-anchor" href="#putting-it-all-together%3A-how-implementation-knowledge-matters">Putting It All Together: How Implementation Knowledge Matters</a></h2>
+<p>And it's not just about the theory! Understanding how hash maps are implemented in your programming language of choice can lead to significant performance improvements in your code.</p>
+<p>For example, since Python's <code>dict</code> uses open addressing with optimized string handling, understanding this can lead to much better performance. Here's how to write efficient vs inefficient code:</p>
+<h3 id="bad-implementation-(fights-against-python's-dict)" tabindex="-1"><a class="header-anchor" href="#bad-implementation-(fights-against-python's-dict)">Bad Implementation (Fights Against Python's Dict)</a></h3>
+<pre class="language-python"><code class="language-python">def <span class="token function">count_words_bad</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token operator">:</span>
+    word_counts <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    words <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">for</span> word <span class="token keyword">in</span> <span class="token literal-property property">words</span><span class="token operator">:</span>
+        # This is inefficient <span class="token keyword">with</span> open addressing<span class="token operator">!</span>
+        <span class="token keyword">if</span> word <span class="token keyword">in</span> <span class="token literal-property property">word_counts</span><span class="token operator">:</span>          # First lookup
+            word_counts<span class="token punctuation">[</span>word<span class="token punctuation">]</span> <span class="token operator">+=</span> <span class="token number">1</span>       # Second lookup <span class="token operator">+</span> assignment
+        <span class="token keyword">else</span><span class="token operator">:</span>
+            word_counts<span class="token punctuation">[</span>word<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">1</span>        # Third lookup <span class="token operator">+</span> assignment
+    
+    <span class="token keyword">return</span> word_counts
+</code></pre>
+<p><strong>Problems:</strong></p>
+<ul>
+<li>Multiple hash lookups per word (up to 3!)</li>
+<li>Open addressing makes key-missing checks expensive</li>
+<li>Doesn't leverage Python's dict optimizations</li>
+</ul>
+<h3 id="good-implementation-(works-with-python's-dict)" tabindex="-1"><a class="header-anchor" href="#good-implementation-(works-with-python's-dict)">Good Implementation (Works With Python's Dict)</a></h3>
+<pre class="language-python"><code class="language-python">from collections <span class="token keyword">import</span> defaultdict<span class="token punctuation">,</span> Counter
+
+def <span class="token function">count_words_good_v1</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token operator">:</span>
+    # defaultdict eliminates key existence checks
+    word_counts <span class="token operator">=</span> <span class="token function">defaultdict</span><span class="token punctuation">(</span>int<span class="token punctuation">)</span>
+    words <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">for</span> word <span class="token keyword">in</span> <span class="token literal-property property">words</span><span class="token operator">:</span>
+        word_counts<span class="token punctuation">[</span>word<span class="token punctuation">]</span> <span class="token operator">+=</span> <span class="token number">1</span>  # Single operation<span class="token operator">!</span>
+    
+    <span class="token keyword">return</span> <span class="token function">dict</span><span class="token punctuation">(</span>word_counts<span class="token punctuation">)</span>
+
+def <span class="token function">count_words_good_v2</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token operator">:</span>
+    # Counter is optimized specifically <span class="token keyword">for</span> Python's dict implementation
+    words <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token function">Counter</span><span class="token punctuation">(</span>words<span class="token punctuation">)</span>
+
+def <span class="token function">count_words_good_v3</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token operator">:</span>
+    # dict<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token keyword">with</span> <span class="token keyword">default</span> avoids the membership test
+    word_counts <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+    words <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    
+    <span class="token keyword">for</span> word <span class="token keyword">in</span> <span class="token literal-property property">words</span><span class="token operator">:</span>
+        word_counts<span class="token punctuation">[</span>word<span class="token punctuation">]</span> <span class="token operator">=</span> word_counts<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>word<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span>  # Single lookup
+    
+    <span class="token keyword">return</span> word_counts
+</code></pre>
+<p><strong>Why These Are Better:</strong></p>
+<ul>
+<li><strong>Single hash operation</strong> per word instead of multiple</li>
+<li><strong>Leverages Python's string optimization</strong> - string keys are handled very efficiently</li>
+<li><strong>Works with open addressing</strong> - fewer probing operations needed</li>
+<li><strong>Uses built-in optimizations</strong> like <code>Counter</code> which is tuned for Python's implementation</li>
+</ul>
+<h3 id="performance-difference" tabindex="-1"><a class="header-anchor" href="#performance-difference">Performance Difference</a></h3>
+<p><strong>Typical Results:</strong> The good implementation is often 2-3x faster, simply by understanding and working with Python's dict implementation rather than against it!</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Hash maps are among the most fundamental and powerful data structures in computer science, providing near-constant time access to data that makes them indispensable in modern programming. Throughout this deep dive, we've explored how they achieve their remarkable O(1) average performance through clever use of hash functions, strategic collision resolution, and careful load factor management.</p>
+<p>The key insight is that the &quot;magic&quot; of hash maps isn't really magic at all — it's the result of well-designed algorithms and data structures working together. Understanding these internals helps us avoid the O(n) worst-case scenarios and write more efficient code.</p>
+<p><strong>Key Takeaways:</strong></p>
+<ul>
+<li><strong>Hash functions</strong> are the foundation—they determine how evenly data is distributed and directly impact collision rates</li>
+<li><strong>Collision resolution strategies</strong> each have distinct trade-offs: chaining for simplicity and robustness, open addressing for memory efficiency and cache performance</li>
+<li><strong>Load factor management</strong> through rehashing prevents performance degradation as hash maps grow</li>
+<li><strong>Implementation knowledge</strong> translates to real performance gains—understanding whether your language uses chaining or open addressing can make your code 2-3x faster</li>
+</ul>
+<p>Whether you're optimizing a Python script, debugging performance issues in Java, or making architectural decisions for a database system, this understanding of hash map internals gives you the tools to make informed choices. The next time you use a <code>dict</code>, <code>HashMap</code>, or <code>unordered_map</code>, you'll know exactly what's happening under the hood and how to make the most of these incredible data structures.</p>
+<p>Hash maps truly are awesome—and now you know why!</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

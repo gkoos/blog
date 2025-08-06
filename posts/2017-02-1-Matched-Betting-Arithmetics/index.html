@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Matched Betting Arithmetics</title>
-  <meta name="description" content="The edge cases of software engineering.">
+  <meta name="description" content="This post introduces the basic concepts of matched betting and the mathematics behind it.">
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Matched Betting Arithmetics">
-  <meta property="og:description" content="The edge cases of software engineering.">
+  <meta property="og:description" content="This post introduces the basic concepts of matched betting and the mathematics behind it.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
@@ -18,10 +18,15 @@
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
   <meta name="twitter:title" content="Matched Betting Arithmetics">
-  <meta name="twitter:description" content="The edge cases of software engineering.">
+  <meta name="twitter:description" content="This post introduces the basic concepts of matched betting and the mathematics behind it.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  
+  
+  
+
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
   <link rel="stylesheet" href="/assets/css/styles.css" />
@@ -71,32 +76,30 @@
         
           <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">mathematics</div>
         
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">betting</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">matched-betting</div>
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">matched betting</div>
         
       </div>
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
     <p>Matched betting is a strategy that uses simple maths to extract risk-free profits from free bets and bonuses offered by bookmakers. One of core principles of matched betting is that risk is removed by ensuring that whatever the outcome of the match you get the same return, thus removing the 'gambling' from the betting. This is achieved by covering all the possible outcomes of an event, in it's simplest form by <em>laying</em> your <em>back</em> bet with a betting exchange. Let's see the maths!</p>
-<h3>Back and Lay Bets</h3>
+<h3 id="back-and-lay-bets" tabindex="-1"><a class="header-anchor" href="#back-and-lay-bets">Back and Lay Bets</a></h3>
 <p>A <em>back</em> bet is where we bet that something will happen, like betting that Chelsea will win the Premier League. A <em>lay</em> bet is where we bet that something won’t happen, like betting that Chelsea won’t win the Premier League.
 Whenever a punter goes to a bookmaker to place a bet, they are placing a back bet and the bookmaker is laying their bet.</p>
-<h3>Betting Exchanges</h3>
+<h3 id="betting-exchanges" tabindex="-1"><a class="header-anchor" href="#betting-exchanges">Betting Exchanges</a></h3>
 <p>At a <em>betting exchange</em>, users bet against each other. This means that we can be either the backer or the layer, so we can use betting exchanges to lay our back bet we laid at the bookie.
 Betting exchanges make profit by charging a small commission fee for all winning bets. The commission is 5% at Betfair and 2% at Smarkets etc.</p>
-<h2>Calculations</h2>
+<h2 id="calculations" tabindex="-1"><a class="header-anchor" href="#calculations">Calculations</a></h2>
 <p>The problem needs to be solved for matched betting is as follows: given the back and lay odds of an event and our stake at the bookmaker, how much do we lay at the exchange to gain the same profit either the back bet wins or loses?</p>
-<h3>Decimal odds</h3>
+<h3 id="decimal-odds" tabindex="-1"><a class="header-anchor" href="#decimal-odds">Decimal odds</a></h3>
 <p>There are different forms of odds like fractions, decimal or American etc. For matched betting the decimal format is universally used as it makes the calculations easier.
 The formula for decimal odds is:</p>
 <p>Your Stake x Odds = Payout</p>
 <p>Say you are backing Manchester United and Man U’s decimal odds to win are 1.82, if you wagered £100 your potential return on your bet would be £182. Remember that this counts your original stake of 100 pounds, so your net profit on a winning bet would be £82.</p>
-<h3>Denotations</h3>
+<h3 id="denotations" tabindex="-1"><a class="header-anchor" href="#denotations">Denotations</a></h3>
 <p><em>o<sub>1</sub></em> denotes the decimal back odds of an event at a bookmaker and <em>o<sub>2</sub></em> is the decimal lay odds of the same event at a betting exchange where the commission is <em>c</em> (<em>100 c</em> in percentages). We lay <em>b<sub>2</sub></em> bet in the exchange and want to make the same profit either the back or the lay bet wins.</p>
 <p>There are different types of bonuses, these are the four most common ones:</p>
-<h3>Qualifying / Arbing Bet</h3>
+<h3 id="qualifying-%2F-arbing-bet" tabindex="-1"><a class="header-anchor" href="#qualifying-%2F-arbing-bet">Qualifying / Arbing Bet</a></h3>
 <p>Here the bettor bets with his own money with both the bookie and the exchange. Most of the times such a bet is needed to release the bonus from the bookmaker. Another use of this formula is <em>arbing</em> or arbitrage betting, where the odds differences provided by bookmakers guarantee sure profit regardless the outcome of the event. The table below breaks down how much we win or lose in each case at the bookie and the exchange:</p>
 <table>
 <thead>
@@ -125,7 +128,7 @@ The formula for decimal odds is:</p>
 <p><em><strong>b<sub>2</sub> = b<sub>1</sub> o<sub>1</sub> / (o<sub>2</sub> - c)</strong></em></p>
 <p>So this will be our lay stake.</p>
 <hr>
-<h3>Stake No Return (SNR) Bet</h3>
+<h3 id="stake-no-return-(snr)-bet" tabindex="-1"><a class="header-anchor" href="#stake-no-return-(snr)-bet">Stake No Return (SNR) Bet</a></h3>
 <p>Here the bookmaker gives <em>b<sub>1</sub></em> free money to bet, however the stake is not returned with any winnings. The table of the detailed profit breakdown is:</p>
 <table>
 <thead>
@@ -153,7 +156,7 @@ The formula for decimal odds is:</p>
 <p>Solving:</p>
 <p><em><strong>b<sub>2</sub> = b<sub>1</sub> (o<sub>1</sub> - 1) / (o<sub>2</sub> - c)</strong></em></p>
 <hr>
-<h3>Stake Return (SR) Bet</h3>
+<h3 id="stake-return-(sr)-bet" tabindex="-1"><a class="header-anchor" href="#stake-return-(sr)-bet">Stake Return (SR) Bet</a></h3>
 <p>Here again <em>b<sub>1</sub></em> free bonus is given but now it includes its stake in potential winnings. At first it sounds better than the SNR bonus, however such bonuses usually have minimum wagering requirements, making them more difficult to withdraw.</p>
 <table>
 <thead>
@@ -182,7 +185,7 @@ The formula for decimal odds is:</p>
 <p><em><strong>b<sub>2</sub> = b<sub>1</sub> o<sub>1</sub> / (o<sub>2</sub> - c)</strong></em></p>
 <p>(Note that it is exactly the same as the Qualifying bet.)</p>
 <hr>
-<h3>Risk Free Bet</h3>
+<h3 id="risk-free-bet" tabindex="-1"><a class="header-anchor" href="#risk-free-bet">Risk Free Bet</a></h3>
 <p>In this case, if we lose the back bet at the bookmaker, we get <em>f</em> worth of free bet. If we win, no bonus is added. Assuming we can extract <em>r f</em> of the bonus with a subsequent bet, the profit breakdown is as follows:</p>
 <table>
 <thead>

@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Version From config.json</title>
-  <meta name="description" content="How to use Webpack to inject version number from package.json into your app.">
+  <title>Matched Betting - Bet365 Offer</title>
+  <meta name="description" content="This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.">
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Version From config.json">
-  <meta property="og:description" content="How to use Webpack to inject version number from package.json into your app.">
+  <meta property="og:title" content="Matched Betting - Bet365 Offer">
+  <meta property="og:description" content="This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="Version From config.json">
-  <meta name="twitter:description" content="How to use Webpack to inject version number from package.json into your app.">
+  <meta name="twitter:title" content="Matched Betting - Bet365 Offer">
+  <meta name="twitter:description" content="This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  
+  
+  
+
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
   <link rel="stylesheet" href="/assets/css/styles.css" />
@@ -61,47 +66,54 @@
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
 <article>
-  <h1 class="text-3xl font-bold mb-4">Version From config.json</h1>
+  <h1 class="text-3xl font-bold mb-4">Matched Betting - Bet365 Offer</h1>
   <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-    <time datetime="2017-01-29T00:00:00.000Z">Sun Jan 29 2017</time>
+    <time datetime="2017-04-02T00:00:00.000Z">Sun Apr 02 2017</time>
     
     
       <span class="text-gray-300">•</span>
       <div class="flex flex-wrap gap-2">
         
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">mathematics</div>
         
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">webpack</div>
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">matched betting</div>
         
       </div>
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><a href="http://semver.org">Semvering</a> your app is cool. Especially as your software grows into maturity and you can watch those numbers increase! What's not so cool, however, is to maintain those version numbers throughout your apps, for example in your About page.</p>
-<p>So why not just fetching it from <code>package.json</code>, where you're supposed to provide the project metadata anyway?
-OK, the quick and dirty solution would be to require your <code>package.json</code> into your application and display the version number on demand:</p>
-<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">var</span> pjson <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./package.json'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
-console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>pjson<span class="token punctuation">.</span>version<span class="token punctuation">)</span><span class="token punctuation">;</span>
-</code></pre>
-<p>On the client side it has serious security implications though, as you don't want to expose your <code>package.json</code> to everyone out there. Dependency version numbers, build and test commands better be hidden from prying eyes. So what can you do now (assuming using webpack)?
-Well despite it's (in my strong opinion) rather counterintuitive syntax, there are very few things one cannot do with webpack. Here you can just add these lines to your <code>webpack.config.js</code>:</p>
-<pre class="language-javascript"><code class="language-javascript"><span class="token literal-property property">plugins</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-    <span class="token keyword">new</span> <span class="token class-name">webpack<span class="token punctuation">.</span>DefinePlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-        <span class="token constant">VERSION</span><span class="token operator">:</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token function">require</span><span class="token punctuation">(</span><span class="token string">"./package.json"</span><span class="token punctuation">)</span><span class="token punctuation">.</span>version<span class="token punctuation">)</span>
-    <span class="token punctuation">}</span><span class="token punctuation">)</span>
-<span class="token punctuation">]</span>
-</code></pre>
-<p>And then anywhere in your app you can use VERSION. For example, if your About page is rendered in a react component:</p>
-<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">var</span> <span class="token function-variable function">About</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">props</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
-    <span class="token keyword">return</span> <span class="token punctuation">(</span>
-        <span class="token operator">&lt;</span>div<span class="token operator">></span>
-            <span class="token operator">...</span>
-            <span class="token operator">&lt;</span>p className<span class="token operator">=</span><span class="token string">"version"</span><span class="token operator">></span>Version <span class="token punctuation">{</span><span class="token constant">VERSION</span><span class="token punctuation">}</span><span class="token operator">&lt;</span><span class="token operator">/</span>p<span class="token operator">></span>
-            <span class="token operator">...</span>
-        <span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">></span>
-    <span class="token punctuation">)</span><span class="token punctuation">;</span>
-<span class="token punctuation">}</span>
-</code></pre>
+    <p>In this post I'm discussing an offer I found on bet365:</p>
+<blockquote>
+<p>Back any single winner at 4/1 or more on any race televised live on ITV Racing and you can have a risk free bet to the same stake (up to £50) on the next race broadcast live on ITV Racing.</p>
+</blockquote>
+<p>What it says is basically if your back bet on winner (on selected races odds over 5) wins, you get (on top of your usual winnings) a free bet that you can use in the next selected race. It is somewhat similar to the risk-free bets, only there you get the free bet if your back bet <em>loses</em>, here if it <em>wins</em>. The principle however is the same, so we can lock in for guaranteed profit.</p>
+<p>So if we win the back bet at the bookmaker, we also get <em>f</em> worth of free bet. Assuming we pay <em>c</em> commission on the exchange and <em>r f</em> of the bonus can be extracted with a subsequent bet, the profit breakdown is as follows:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><strong>Bookie</strong></th>
+<th><strong>Exchange</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Back Bet wins</strong></td>
+<td><em>+ b<sub>1</sub> (o<sub>1</sub> - 1) + f r</em></td>
+<td><em>- b<sub>2</sub> (o<sub>2</sub> - 1)</em></td>
+</tr>
+<tr>
+<td><strong>Lay Bet Wins</strong></td>
+<td><em>- b<sub>1</sub></em></td>
+<td><em>+ b<sub>2</sub> (1 - c)</em></td>
+</tr>
+</tbody>
+</table>
+<p>The equation:</p>
+<p><em>b<sub>1</sub> (o<sub>1</sub> - 1) + f r - b<sub>2</sub> (o<sub>2</sub> - 1) = b<sub>2</sub> (1 - c) - b<sub>1</sub></em></p>
+<p>Solving</p>
+<p><em><strong>b<sub>2</sub> = (b<sub>1</sub> o<sub>1</sub> + f r) / (o<sub>2</sub> - c)</strong></em></p>
+<p>That is, by making a <em>b<sub>2</sub></em> lay bet, we can ensure profit for either outcome.</p>
 
   </div>
 </article>

@@ -3,25 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Funky Article</title>
-  <meta name="description" content="The edge cases of software engineering.">
+  <title>Matched Betting Arithmetics 2 - Rating a Matched Bet</title>
+  <meta name="description" content="This post discusses how to rate a matched bet based on the back and lay odds.">
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Funky Article">
-  <meta property="og:description" content="The edge cases of software engineering.">
+  <meta property="og:title" content="Matched Betting Arithmetics 2 - Rating a Matched Bet">
+  <meta property="og:description" content="This post discusses how to rate a matched bet based on the back and lay odds.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="Funky Article">
-  <meta name="twitter:description" content="The edge cases of software engineering.">
+  <meta name="twitter:title" content="Matched Betting Arithmetics 2 - Rating a Matched Bet">
+  <meta name="twitter:description" content="This post discusses how to rate a matched bet based on the back and lay odds.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  
+  
+  
+
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
   <link rel="stylesheet" href="/assets/css/styles.css" />
@@ -61,23 +66,39 @@
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
 <article>
-  <h1 class="text-3xl font-bold mb-4">Funky Article</h1>
+  <h1 class="text-3xl font-bold mb-4">Matched Betting Arithmetics 2 - Rating a Matched Bet</h1>
   <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-    <time datetime="2025-08-07T00:00:00.000Z">Thu Aug 07 2025</time>
+    <time datetime="2017-02-09T00:00:00.000Z">Thu Feb 09 2017</time>
     
     
       <span class="text-gray-300">•</span>
       <div class="flex flex-wrap gap-2">
         
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">funky</div>
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">mathematics</div>
         
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">eleventy</div>
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">matched betting</div>
         
       </div>
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p>Yeah yet another blog post!</p>
+    <p><em>This is the second part of the series on matched bet arithmetics.<br>
+Click <a href="/posts/2017-2-1-Matched-Betting-Arithmetics/">here</a> for Part 1.</em></p>
+<p>When selecting a bet to back and lay, our goal is to maximize profit (or for a qualifying bet, to minimize loss). Just by looking at the odds it's hard to tell if a bet is ludicrous or not, so let's try and create an index to rate those bets.</p>
+<p>We can tell how good the odds are by determining the amount of money we win or lose by backing and laying the bet. To normalize the results we will examine the ratio of our money after the bet has settled and the sum of the stakes we originally laid with both the bookmaker and the exchange. For calculating this quotient we can assume we backed the bet with £1 and laid it with the optimal lay stake.</p>
+<p>Using the notations and equations from the Qualifying Bet section of <a href="/posts/2017-2-1-Matched-Betting-Arithmetics/">Part 1</a>, our back bet is 1 and the lay bet is</p>
+<p><em>o<sub>1</sub> / (o<sub>2</sub> - c)</em></p>
+<p>Then our combined stake is</p>
+<p><em>(o<sub>1</sub> + o<sub>2</sub> - c) / (o<sub>2</sub> - c)</em></p>
+<p>Our total gain/loss from the second row of the corresponding profit breakdown table, substituting <em>b<sub>1</sub></em> and <em>b<sub>2</sub></em> with there calculated values above is</p>
+<p><em>o<sub>1</sub> / (o<sub>2</sub> - c) (1 - c)</em></p>
+<p>The sum of these two is our total cash once the bet has settled. This is</p>
+<p><em>o<sub>1</sub> (2 - c) / (o<sub>2</sub> - c)</em></p>
+<p>Now dividing this total by our combined stakes, a quotient greater than one means we gain some profit, smaller than one means we'll have some loss, while if it equals one we neither win nor lose a penny on the bet (which might come handy at qualifying bets).<br>
+The final formula is</p>
+<p><strong><em>R = o<sub>1</sub> (2 - c) / (o<sub>1</sub> + o<sub>2</sub> - c)</em></strong></p>
+<hr>
+<p>In the <a href="https://github.com/gkoos/totaliser"><em>totaliser</em></a> the percentage variant of this index is used. Note that all the four variants of betting/bonus types follow the same pattern so the same index can be used to determine how good the back and lay odds of a particular bet are for each one of them.</p>
 
   </div>
 </article>
