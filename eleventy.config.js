@@ -72,7 +72,6 @@ export default function (eleventyConfig) {
   // Ensure posts are sorted by date descending
   eleventyConfig.addCollection("posts", function(collectionApi) {
     return collectionApi.getFilteredByGlob("src/posts/*.md").sort((a, b) => {
-      console.log(a.inputPath, a.data.date, new Date(a.data.date));
       return new Date(b.data.date) - new Date(a.data.date);
     });
   });
