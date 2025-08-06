@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Practical Skyline Queries</title>
+  <meta name="description" content="The edge cases of software engineering.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Practical Skyline Queries">
+  <meta property="og:description" content="The edge cases of software engineering.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Practical Skyline Queries">
+  <meta name="twitter:description" content="The edge cases of software engineering.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Practical Skyline Queries</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-08-02T00:00:00.000Z">Sat Aug 02 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">skyline-queries</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">algorithms</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">go</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <h2>Skyline Queries?</h2>
+<p>Summer is in full swing, the weather outside is hot and sunny. And here I am at my desk, scribbling away while my mind is sipping margaritas in a hotel bar somewhere in the Caribbean. But how do I decide which hotel? Close to the beach? Good reviews? Cheap? Can I find a hotel that's closer to the beach, has better reviews, and is cheaper than all the other hotels? Probably not. But with so many options to choose from, I can eliminate hotels that are worse in every aspect than others. This is the essence of skyline queries: finding the best options in a multi-dimensional problem space (in this case, distance from the beach, prices and reviews).</p>
+<p>I wrote a quick introduction to skyline queries <a href="https://dev.to/gkoos/skyline-queries-for-non-academics-49am">here</a>, but for those who want something even quicker:</p>
+<p>We have a set of points in a multi-dimensional space, and we want to find the points that are not dominated by any other point. (Point A <em>dominates</em> another point B if A is better than B in all dimensions. Note that &quot;better&quot; can mean either larger - like ratings, or smaller - like distance to the beach.) The points that are not dominated by any other point are called <em>skyline points</em> and we find them by executing a <em>skyline query</em>.</p>
+<p>Now for small datasets like a bunch of hotels in an area, we can just iterate through all points, compare them to the others and find the skyline points. But this process can be useful for large datasets as well if we want to reduce complexity. Essentially, to simplify data, we have two options: we can reduce the number of dimensions or reduce the number of points. There are multiple ways to do the former, like Principal Component Analysis (PCA) or t-Distributed Stochastic Neighbor Embedding (t-SNE), but there are typically more points than dimensions, so focusing on reducing the number of points makes sense too. Skyline queries are a great way to do that.</p>
+<p>But for large datasets, we can't just iterate through all points and compare them to each other. We need a more efficient way to find the skyline points. This is where the algorithms come in. There are several algorithms for skyline queries, each with its own strengths and weaknesses. Some are more efficient for certain types of data, while others are more general-purpose.</p>
+<p>A short list of some of the skyline algorithms:</p>
+<ol>
+<li>
+<p><strong>Block Nested Loop (BNL)</strong> - the simplest algorithm, which iterates through all points and compares them to each other. It has a time complexity of O(n^2), where n is the number of points. This is not efficient for large datasets, but it is easy to implement and understand.</p>
+</li>
+<li>
+<p><strong>Divide and Conquer</strong> - this algorithm divides the points into smaller subsets, finds the skyline points in each subset, and then combines them. It has a time complexity of O(n log n) and is more efficient than BNL for larger datasets.</p>
+</li>
+<li>
+<p><strong>Sort and Sweep</strong> - this algorithm sorts the points along one dimension and then sweeps through them to find the skyline points. It has a time complexity of O(n log n) due to the sorting step.</p>
+</li>
+<li>
+<p><strong>R-tree based approaches</strong> - these algorithms use spatial indexing structures like R-trees to efficiently find skyline points. They can be very efficient for large datasets, but they require more complex data structures.</p>
+</li>
+<li>
+<p><strong>Skyline join</strong> - this algorithm is used in database systems to find skyline points in the result of a join operation. It can be very efficient for certain types of queries.</p>
+</li>
+<li>
+<p><strong>Skytree</strong> - this is a data structure that can be used to efficiently find skyline points. It is based on the concept of a tree, where each node represents a point and its children represent the points that are dominated by it. It has a time complexity of O(n log n) for finding skyline points (like similar tree-based algorithms).</p>
+</li>
+</ol>
+<p>Oddly enough, you will find these algorithms mostly in academic papers, but not in production code. Luckily for us, I created the <a href="https://github.com/gkoos/skyline">skyline</a> library that implements the BNL, Divide&amp;Conquer, and Skytree algorithms in go so we can carry on with this article.</p>
+<h2>What Are We Going to Build?</h2>
+<p>The title in this article says &quot;practical&quot;, so we <em>must</em> build something, right? However, skyline queries are either very trivial for small datasets or very computation-heavy for large datasets, so hosting a skyline query backend just for the sake of this article can be tricky (and expensive).</p>
+<p>Instead, we will build a simple command line tool that takes a CSV file where columns are dimensions and rows are points, with 2 dimensions to consider for the skyline query as command line arguments. The program calculates the skylines and outputs a new CSV file with the two dimensions and a new column that indicates whether the point is a skyline point or not. Then we can upload this new CSV to a tool like <a href="https://app.rawgraphs.io/">Rawgraphs</a> to visualize the results.</p>
+<p>This way, we neither have to deal with a complex frontend nor hosting a pricey backend. Your computer will do the heavy lifting of calculating the skyline points, the community will do the visualisation and I can keep this article short and sweet. How convenient!</p>
+<h3>Usage</h3>
+<p>To use the tool, you can checkout the accompanying <a href="https://github.com/gkoos/practical-skyline-queries-in-go">repository</a>, or just download one of the pre-built binaries from the <a href="https://github.com/gkoos/practical-skyline-queries-in-go/tree/main/releases">releases folder</a>. Or you can follow along with the code in this article.</p>
+<p>If you checked out the repository, you can run the tool with the following command:</p>
+<pre class="language-bash"><code class="language-bash">go run main.go <span class="token parameter variable">--input</span> data.csv <span class="token parameter variable">--output</span> skylines.csv <span class="token parameter variable">--dim1</span> <span class="token number">0</span> <span class="token parameter variable">--dim2</span> <span class="token number">1</span> <span class="token parameter variable">--dim1pref</span> max <span class="token parameter variable">--dim2pref</span> min <span class="token parameter variable">--algo</span> bnl
+</code></pre>
+<p>If you downloaded a pre-built binary, this changes to:</p>
+<pre class="language-bash"><code class="language-bash">./practical-skyline-queries <span class="token parameter variable">--input</span> data.csv <span class="token parameter variable">--output</span> skylines.csv <span class="token parameter variable">--dim1</span> <span class="token number">0</span> <span class="token parameter variable">--dim2</span> <span class="token number">1</span> <span class="token parameter variable">--dim1pref</span> max <span class="token parameter variable">--dim2pref</span> min <span class="token parameter variable">--algo</span> bnl
+</code></pre>
+<p>This will read the <code>data.csv</code> file, calculate the skyline points for the first two dimensions (0 and 1), and write the results to <code>skylines.csv</code>. The output file will contain the original two dimensions and an additional column <code>skyline</code> indicating whether the point is a skyline point or not.</p>
+<p><code>--dim1</code> and <code>--dim2</code> specify the dimensions to consider for the skyline query, which can be any two columns in the CSV file. The <code>--dim1pref</code> and <code>--dim2pref</code> flags specify whether we want to maximize or minimize the values in those dimensions (default is <code>min</code> for both).</p>
+<p><code>--algo</code> specifies the algorithm to use, which can be <code>bnl</code>, <code>dnc</code> (for Divide&amp;Conquer) or <code>skytree</code>. If you don't specify an algorithm, it defaults to <code>bnl</code>.</p>
+<p>The tool displays the time it took to calculate the skyline points, which can be useful for performance testing:</p>
+<pre class="language-bash"><code class="language-bash">$ go run main.go <span class="token parameter variable">--input</span> data.csv <span class="token parameter variable">--output</span> skylines.csv <span class="token parameter variable">--dim1</span> <span class="token number">0</span> <span class="token parameter variable">--dim2</span> <span class="token number">1</span> <span class="token parameter variable">--dim1pref</span> max <span class="token parameter variable">--dim2pref</span> min <span class="token parameter variable">--algo</span> bnl
+Skyline calculation completed<span class="token operator">!</span>
+✓ Completed <span class="token keyword">in</span> <span class="token number">1</span>.0456ms
+</code></pre>
+<p>Once the calculation is done, the easiest way to visualize the results is to upload the <code>skylines.csv</code> file to a tool like <a href="https://app.rawgraphs.io/">Rawgraphs</a>. You can select the two dimensions and the <code>skyline</code> column to visualize the skyline points in a scatter plot or any other suitable chart type.</p>
+<h3>Example Data</h3>
+<p>You can use the example data from the <code>/data</code> folder in the repository, or create your own CSV file. The file should have a header row with the names of the dimensions, and each subsequent row should contain the values for each point.</p>
+<p><a href="https://www.kaggle.com">Kaggle</a> has some great datasets to play with.</p>
+<h2>Let's Do This!</h2>
+<p>Ok, it's time to get our hands dirty and build this tool. Open your favorite IDE/code editor and let's get started.</p>
+<h3>Scaffolding the Project</h3>
+<p>First, create a new directory for your project and initialize a Go module:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">mkdir</span> practical-skyline-queries
+<span class="token builtin class-name">cd</span> practical-skyline-queries
+go mod init practical-skyline-queries
+</code></pre>
+<p>Next, create a <code>main.go</code> file in the project directory. This will be the entry point of our application.</p>
+<p>Then, because Go is a compiled language, we need to add scripts to build the binary for different platforms. One way to do it would be using Makefile, but I'm on Windows so let's just use a Go script. Create <code>build.go</code> in the root of the project and add the following code:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">//go:build ignore</span>
+
+<span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"fmt"</span>
+	<span class="token string">"os"</span>
+	<span class="token string">"os/exec"</span>
+	<span class="token string">"path/filepath"</span>
+<span class="token punctuation">)</span>
+
+func <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span>Args<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">2</span> <span class="token punctuation">{</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Usage: go run build.go [all|linux|windows|macos|clean]"</span><span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token literal-property property">command</span> <span class="token operator">:</span><span class="token operator">=</span> os<span class="token punctuation">.</span>Args<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+
+	<span class="token keyword">switch</span> command <span class="token punctuation">{</span>
+	<span class="token keyword">case</span> <span class="token string">"all"</span><span class="token operator">:</span>
+		<span class="token function">buildAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">case</span> <span class="token string">"linux"</span><span class="token operator">:</span>
+		<span class="token function">buildLinux</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">case</span> <span class="token string">"windows"</span><span class="token operator">:</span>
+		<span class="token function">buildWindows</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">case</span> <span class="token string">"macos"</span><span class="token operator">:</span>
+		<span class="token function">buildMacOS</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">case</span> <span class="token string">"clean"</span><span class="token operator">:</span>
+		<span class="token function">clean</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">default</span><span class="token operator">:</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Unknown command: %s\n"</span><span class="token punctuation">,</span> command<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">buildAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Building for all platforms..."</span><span class="token punctuation">)</span>
+	<span class="token function">buildLinux</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token function">buildWindows</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token function">buildMacOS</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">buildLinux</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Building for Linux..."</span><span class="token punctuation">)</span>
+	<span class="token function">build</span><span class="token punctuation">(</span><span class="token string">"linux"</span><span class="token punctuation">,</span> <span class="token string">"amd64"</span><span class="token punctuation">,</span> <span class="token string">"releases/linux/practical-skyline-queries"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">buildWindows</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Building for Windows..."</span><span class="token punctuation">)</span>
+	<span class="token function">build</span><span class="token punctuation">(</span><span class="token string">"windows"</span><span class="token punctuation">,</span> <span class="token string">"amd64"</span><span class="token punctuation">,</span> <span class="token string">"releases/windows/practical-skyline-queries.exe"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">buildMacOS</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Building for macOS..."</span><span class="token punctuation">)</span>
+	<span class="token function">build</span><span class="token punctuation">(</span><span class="token string">"darwin"</span><span class="token punctuation">,</span> <span class="token string">"amd64"</span><span class="token punctuation">,</span> <span class="token string">"releases/macos/practical-skyline-queries"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">build</span><span class="token punctuation">(</span><span class="token parameter">goos<span class="token punctuation">,</span> goarch<span class="token punctuation">,</span> output string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	os<span class="token punctuation">.</span><span class="token function">MkdirAll</span><span class="token punctuation">(</span>filepath<span class="token punctuation">.</span><span class="token function">Dir</span><span class="token punctuation">(</span>output<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">0755</span><span class="token punctuation">)</span>
+
+	<span class="token literal-property property">cmd</span> <span class="token operator">:</span><span class="token operator">=</span> exec<span class="token punctuation">.</span><span class="token function">Command</span><span class="token punctuation">(</span><span class="token string">"go"</span><span class="token punctuation">,</span> <span class="token string">"build"</span><span class="token punctuation">,</span> <span class="token string">"-o"</span><span class="token punctuation">,</span> output<span class="token punctuation">)</span>
+	cmd<span class="token punctuation">.</span>Env <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>os<span class="token punctuation">.</span><span class="token function">Environ</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">"GOOS="</span><span class="token operator">+</span>goos<span class="token punctuation">,</span> <span class="token string">"GOARCH="</span><span class="token operator">+</span>goarch<span class="token punctuation">)</span>
+
+	<span class="token keyword">if</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> cmd<span class="token punctuation">.</span><span class="token function">Run</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Error building for %s/%s: %v\n"</span><span class="token punctuation">,</span> goos<span class="token punctuation">,</span> goarch<span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Successfully built: %s\n"</span><span class="token punctuation">,</span> output<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">clean</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Cleaning build artifacts..."</span><span class="token punctuation">)</span>
+	os<span class="token punctuation">.</span><span class="token function">RemoveAll</span><span class="token punctuation">(</span><span class="token string">"bin"</span><span class="token punctuation">)</span>
+	os<span class="token punctuation">.</span><span class="token function">RemoveAll</span><span class="token punctuation">(</span><span class="token string">"releases"</span><span class="token punctuation">)</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Clean complete!"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This script will allow you to build the binary for different platforms (Linux, Windows, macOS) and clean up the build artifacts. You can run it with:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># Build for all platforms</span>
+go run build.go all
+
+<span class="token comment"># Build for specific platforms</span>
+go run build.go linux
+go run build.go windows
+go run build.go macos
+
+<span class="token comment"># Clean build artifacts</span>
+go run build.go clean
+</code></pre>
+<p>If you want to use git for version control, you can initialize a new repository:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> init
+</code></pre>
+<p>And create a <code>.gitignore</code> file to exclude unnecessary files.</p>
+<h3>Dependencies</h3>
+<p>For parsing command line arguments, we can use the <code>flag</code> package of the standard library as it is sufficient for our use case (simple arguments).</p>
+<p>For reading and writing CSV files, we'll use the <code>encoding/csv</code> package from the standard library, which provides robust CSV parsing capabilities.</p>
+<p>To spice things up a bit, we can use the <a href="https://pkg.go.dev/github.com/fatih/color">color</a> package for colorized terminal output:</p>
+<pre class="language-bash"><code class="language-bash">go get github.com/fatih/color
+</code></pre>
+<p>The final external dependency we need is the <a href="https://pkg.go.dev/github.com/gkoos/skyline">skyline</a> library:</p>
+<pre class="language-bash"><code class="language-bash">go get github.com/gkoos/skyline
+</code></pre>
+<p>And this is all we need for our project. We can now start implementing the command line tool.</p>
+<h3>Coding Deep-Dive</h3>
+<p>Our tool has the following workflow:</p>
+<p><img src="https://i.imgur.com/n29uWfE.png" alt="Skyline Query Tool Workflow"></p>
+<p>Let's implement each step!</p>
+<h4>Command Line Arguments</h4>
+<p>The entry point of our application is the <code>main.go</code> file. Here we will parse the command line arguments to get the input CSV file, output CSV file, dimensions to consider for the skyline query, the preferences for each dimension and the algorithm to use.</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
+<span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"flag"</span>
+	<span class="token string">"fmt"</span>
+	<span class="token string">"os"</span>
+	<span class="token string">"time"</span>
+
+	<span class="token string">"github.com/fatih/color"</span>
+<span class="token punctuation">)</span>
+
+type Config struct <span class="token punctuation">{</span>
+	InputFile  string
+	OutputFile string
+	Dim1       int
+	Dim2       int
+	Dim1Pref   string
+	Dim2Pref   string
+	Algorithm  string
+<span class="token punctuation">}</span>
+
+func <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">start</span> <span class="token operator">:</span><span class="token operator">=</span> time<span class="token punctuation">.</span><span class="token function">Now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	config<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">parseArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		flag<span class="token punctuation">.</span><span class="token function">Usage</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		os<span class="token punctuation">.</span><span class="token function">Exit</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token function">run</span><span class="token punctuation">(</span>config<span class="token punctuation">)</span>
+
+	<span class="token literal-property property">elapsed</span> <span class="token operator">:</span><span class="token operator">=</span> time<span class="token punctuation">.</span><span class="token function">Since</span><span class="token punctuation">(</span>start<span class="token punctuation">)</span>
+	color<span class="token punctuation">.</span><span class="token function">Green</span><span class="token punctuation">(</span><span class="token string">"✓ Completed in %v"</span><span class="token punctuation">,</span> elapsed<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">parseArgs</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token operator">*</span>Config<span class="token punctuation">,</span> error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">inputFile</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">String</span><span class="token punctuation">(</span><span class="token string">"input"</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token string">"Path to the input CSV file - required"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">outputFile</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">String</span><span class="token punctuation">(</span><span class="token string">"output"</span><span class="token punctuation">,</span> <span class="token string">""</span><span class="token punctuation">,</span> <span class="token string">"Path to the output CSV file - required"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">d1</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">Int</span><span class="token punctuation">(</span><span class="token string">"dim1"</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"Index of Dimension 1 (e.g., 0 for the first column) - required"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">d2</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">Int</span><span class="token punctuation">(</span><span class="token string">"dim2"</span><span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token string">"Index of Dimension 2 (e.g., 1 for the second column) - required"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">d1Pref</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">String</span><span class="token punctuation">(</span><span class="token string">"dim1pref"</span><span class="token punctuation">,</span> <span class="token string">"min"</span><span class="token punctuation">,</span> <span class="token string">"Preference for Dimension 1 (min|max)"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">d2Pref</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">String</span><span class="token punctuation">(</span><span class="token string">"dim2pref"</span><span class="token punctuation">,</span> <span class="token string">"min"</span><span class="token punctuation">,</span> <span class="token string">"Preference for Dimension 2 (min|max)"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">algorithm</span> <span class="token operator">:</span><span class="token operator">=</span> flag<span class="token punctuation">.</span><span class="token function">String</span><span class="token punctuation">(</span><span class="token string">"algo"</span><span class="token punctuation">,</span> <span class="token string">"bnl"</span><span class="token punctuation">,</span> <span class="token string">"Skyline algorithm to use (bnl|dnc|skytree)"</span><span class="token punctuation">)</span>
+
+	flag<span class="token punctuation">.</span><span class="token function">Parse</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Validation</span>
+	<span class="token keyword">if</span> <span class="token operator">*</span>inputFile <span class="token operator">==</span> <span class="token string">""</span> <span class="token operator">||</span> <span class="token operator">*</span>outputFile <span class="token operator">==</span> <span class="token string">""</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"input and output file paths must be specified"</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> <span class="token operator">*</span>d1 <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token operator">||</span> <span class="token operator">*</span>d2 <span class="token operator">&lt;</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"dimensions must be specified (>= 0)"</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> <span class="token operator">*</span>d1Pref <span class="token operator">!=</span> <span class="token string">"min"</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span>d1Pref <span class="token operator">!=</span> <span class="token string">"max"</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"invalid preference for Dimension 1: %s (must be 'min' or 'max')"</span><span class="token punctuation">,</span> <span class="token operator">*</span>d1Pref<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> <span class="token operator">*</span>d2Pref <span class="token operator">!=</span> <span class="token string">"min"</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span>d2Pref <span class="token operator">!=</span> <span class="token string">"max"</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"invalid preference for Dimension 2: %s (must be 'min' or 'max')"</span><span class="token punctuation">,</span> <span class="token operator">*</span>d2Pref<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> <span class="token operator">*</span>algorithm <span class="token operator">!=</span> <span class="token string">"bnl"</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span>algorithm <span class="token operator">!=</span> <span class="token string">"dnc"</span> <span class="token operator">&amp;&amp;</span> <span class="token operator">*</span>algorithm <span class="token operator">!=</span> <span class="token string">"skytree"</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"invalid algorithm: %s (must be 'bnl', 'dnc', or 'skytree')"</span><span class="token punctuation">,</span> <span class="token operator">*</span>algorithm<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	
+	<span class="token keyword">return</span> <span class="token operator">&amp;</span>Config<span class="token punctuation">{</span>
+		<span class="token literal-property property">InputFile</span><span class="token operator">:</span>  <span class="token operator">*</span>inputFile<span class="token punctuation">,</span>
+		<span class="token literal-property property">OutputFile</span><span class="token operator">:</span> <span class="token operator">*</span>outputFile<span class="token punctuation">,</span>
+		<span class="token literal-property property">Dim1</span><span class="token operator">:</span>       <span class="token operator">*</span>d1<span class="token punctuation">,</span>
+		<span class="token literal-property property">Dim2</span><span class="token operator">:</span>       <span class="token operator">*</span>d2<span class="token punctuation">,</span>
+		<span class="token literal-property property">Dim1Pref</span><span class="token operator">:</span>   <span class="token operator">*</span>d1Pref<span class="token punctuation">,</span>
+		<span class="token literal-property property">Dim2Pref</span><span class="token operator">:</span>   <span class="token operator">*</span>d2Pref<span class="token punctuation">,</span>
+		<span class="token literal-property property">Algorithm</span><span class="token operator">:</span>  <span class="token operator">*</span>algorithm<span class="token punctuation">,</span>
+	<span class="token punctuation">}</span><span class="token punctuation">,</span> nil
+<span class="token punctuation">}</span>
+
+func <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">config <span class="token operator">*</span>Config</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Input File: %s\n"</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span>InputFile<span class="token punctuation">)</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Output File: %s\n"</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span>OutputFile<span class="token punctuation">)</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Dimensions: %d, %d\n"</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim1<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim2<span class="token punctuation">)</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Preferences: %s, %s\n"</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim1Pref<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim2Pref<span class="token punctuation">)</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Algorithm: %s\n"</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span>Algorithm<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Here we already have a basic command line tool that can parse the input arguments. The <code>parseArgs</code> function validates the input and returns a <code>Config</code> struct with the parsed values. If any validation fails, it prints an error message and exits. Not the most user-friendly, but we can ensure that the parameters are valid before proceeding with the skyline calculation. Well, except if the input file does not exist, or is not valid CSV. But we will handle that later.</p>
+<p>Let's try:</p>
+<pre class="language-bash"><code class="language-bash">go run main.go <span class="token parameter variable">--input</span> input.csv <span class="token parameter variable">--output</span> output.csv <span class="token parameter variable">--dim1</span> <span class="token number">0</span> <span class="token parameter variable">--dim2</span> <span class="token number">1</span>
+Input File: input.csv
+Output File: output.csv
+Dimensions: <span class="token number">0</span>, <span class="token number">1</span>
+Preferences: min, min
+Algorithm: bnl
+</code></pre>
+<p>Thanks to <code>flag</code>, we can display a usage message with <code>-h</code> or <code>--help</code>:</p>
+<pre class="language-bash"><code class="language-bash">go run main.go <span class="token parameter variable">--help</span>
+Usage of main.exe:
+  <span class="token parameter variable">-algo</span> string
+		Skyline algorithm to use <span class="token punctuation">(</span>bnl<span class="token operator">|</span>dnc<span class="token operator">|</span>skytree<span class="token punctuation">)</span> <span class="token punctuation">(</span>default <span class="token string">"bnl"</span><span class="token punctuation">)</span>
+  <span class="token parameter variable">-dim1</span> int
+		Index of Dimension <span class="token number">1</span> <span class="token punctuation">(</span>e.g., <span class="token number">0</span> <span class="token keyword">for</span> the first <span class="token function">column</span><span class="token punctuation">)</span> - required <span class="token punctuation">(</span>default -1<span class="token punctuation">)</span>
+  <span class="token parameter variable">-dim1pref</span> string
+		Preference <span class="token keyword">for</span> Dimension <span class="token number">1</span> <span class="token punctuation">(</span>min<span class="token operator">|</span>max<span class="token punctuation">)</span> <span class="token punctuation">(</span>default <span class="token string">"min"</span><span class="token punctuation">)</span>
+  <span class="token parameter variable">-dim2</span> int
+		Index of Dimension <span class="token number">2</span> <span class="token punctuation">(</span>e.g., <span class="token number">1</span> <span class="token keyword">for</span> the second <span class="token function">column</span><span class="token punctuation">)</span> - required <span class="token punctuation">(</span>default -1<span class="token punctuation">)</span>
+  <span class="token parameter variable">-dim2pref</span> string
+		Preference <span class="token keyword">for</span> Dimension <span class="token number">2</span> <span class="token punctuation">(</span>min<span class="token operator">|</span>max<span class="token punctuation">)</span> <span class="token punctuation">(</span>default <span class="token string">"min"</span><span class="token punctuation">)</span>
+  <span class="token parameter variable">-input</span> string
+		Path to the input CSV <span class="token function">file</span> - required
+  <span class="token parameter variable">-output</span> string
+		Path to the output CSV <span class="token function">file</span> - required
+</code></pre>
+<h4>Reading the CSV File</h4>
+<p>Next, we need to read the input CSV file and parse it into a slice of slices of strings. Each inner slice will represent a row in the CSV file, and each string will represent a value in that row. However, even if the data can have several dimensions, we will only consider the two dimensions specified by the user for the skyline query and only keep this streamlined data in memory.</p>
+<p>First, let's add <code>&quot;encoding/csv&quot;</code> to the imports:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"encoding/csv"</span>
+	<span class="token string">"flag"</span>
+	<span class="token string">"fmt"</span>
+	<span class="token string">"os"</span>
+	<span class="token string">"time"</span>
+
+	<span class="token string">"github.com/fatih/color"</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>Next, we will implement the <code>readCSV</code> function that reads the CSV file and returns the data as a slice of slices of strings:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
+func <span class="token function">readCSV</span><span class="token punctuation">(</span>filePath string<span class="token punctuation">,</span> dim1 int<span class="token punctuation">,</span> dim2 int<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">,</span> error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token comment">// Open the CSV file</span>
+	file<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> os<span class="token punctuation">.</span><span class="token function">Open</span><span class="token punctuation">(</span>filePath<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"error opening file: %v"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	defer file<span class="token punctuation">.</span><span class="token function">Close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Create CSV reader</span>
+	<span class="token literal-property property">reader</span> <span class="token operator">:</span><span class="token operator">=</span> csv<span class="token punctuation">.</span><span class="token function">NewReader</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span>
+
+	<span class="token keyword">var</span> result <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span>string
+	<span class="token literal-property property">recordCount</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+
+	<span class="token comment">// Read records one by one to save memory</span>
+	<span class="token keyword">for</span> <span class="token punctuation">{</span>
+		record<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> reader<span class="token punctuation">.</span><span class="token function">Read</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+			<span class="token keyword">if</span> err<span class="token punctuation">.</span><span class="token function">Error</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">"EOF"</span> <span class="token punctuation">{</span>
+				<span class="token keyword">break</span>
+			<span class="token punctuation">}</span>
+			<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"error reading CSV: %v"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token punctuation">}</span>
+
+		<span class="token comment">// Check dimensions on first record</span>
+		<span class="token keyword">if</span> recordCount <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+			<span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>record<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> dim1 <span class="token operator">||</span> <span class="token function">len</span><span class="token punctuation">(</span>record<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> dim2 <span class="token punctuation">{</span>
+				<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"dimension indices out of range: file has %d columns, requested dims %d and %d"</span><span class="token punctuation">,</span>
+					<span class="token function">len</span><span class="token punctuation">(</span>record<span class="token punctuation">)</span><span class="token punctuation">,</span> dim1<span class="token punctuation">,</span> dim2<span class="token punctuation">)</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+
+		<span class="token comment">// Extract only the specified dimensions</span>
+		result <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>result<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">{</span>record<span class="token punctuation">[</span>dim1<span class="token punctuation">]</span><span class="token punctuation">,</span> record<span class="token punctuation">[</span>dim2<span class="token punctuation">]</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+		recordCount<span class="token operator">++</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Check if file was empty</span>
+	<span class="token keyword">if</span> recordCount <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"CSV file is empty"</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token keyword">return</span> result<span class="token punctuation">,</span> nil
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The logic is straightforward: we read the CSV file line by line, checking that the requested dimensions are valid, and extracting only the relevant columns into memory.</p>
+<p>Now let's add this step to the <code>run</code> function:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">config <span class="token operator">*</span>Config</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	data<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">readCSV</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>InputFile<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim1<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim2<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error reading CSV: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Process the data</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Data: %v\n"</span><span class="token punctuation">,</span> data<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Now we can run the tool with a valid CSV file and see if it reads the data correctly:</p>
+<pre class="language-bash"><code class="language-bash">go run main.go <span class="token parameter variable">--input</span> data/hotels.csv <span class="token parameter variable">--output</span> output.csv <span class="token parameter variable">--dim1</span> <span class="token number">1</span> <span class="token parameter variable">--dim2</span> <span class="token number">2</span>
+Data: <span class="token punctuation">[</span><span class="token punctuation">[</span>rating user_rating<span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.2</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.8</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">3.5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.1</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">3.9</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">4.6</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.4</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">2</span> <span class="token number">3.2</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.9</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.3</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">3.8</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.7</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.0</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">2</span> <span class="token number">3.9</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.5</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">3.6</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.1</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">2</span> <span class="token number">4.3</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">3.7</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">4.4</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.8</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">2</span> <span class="token number">3.4</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.6</span><span class="token punctuation">]</span> 
+<span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">3.3</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.2</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">2</span> <span class="token number">4.0</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">4.9</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">3</span> <span class="token number">3.1</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">5</span> <span class="token number">4.7</span><span class="token punctuation">]</span> <span class="token punctuation">[</span><span class="token number">4</span> <span class="token number">3.8</span><span class="token punctuation">]</span><span class="token punctuation">]</span>
+✓ Completed <span class="token keyword">in</span> <span class="token number">524.7</span>µs
+</code></pre>
+<h4>Skyline Calculation</h4>
+<p>And now let the fun begin! First, let's import the skyline library we installed earlier. We also need to import the <code>strconv</code> package for converting string values to float64, which is necessary for the skyline calculations:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+  <span class="token comment">// ...other imports</span>
+  <span class="token string">"strconv"</span>
+  <span class="token comment">// ...</span>
+  <span class="token string">"github.com/gkoos/skyline/skyline"</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>Note that while we download the module with <code>go get github.com/gkoos/skyline</code>, we import the <code>skyline</code> subpackage in our code: <code>&quot;github.com/gkoos/skyline/skyline&quot;</code>.</p>
+<p>Now we can implement the skyline calculation. We will create a function <code>computeSkyline</code> that takes the data and the preferences for each dimension, transforms the data into the appropriate format, and returns the skyline points:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
+func <span class="token function">computeSkyline</span><span class="token punctuation">(</span>data <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">,</span> config <span class="token operator">*</span>Config<span class="token punctuation">)</span> <span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span>skyline<span class="token punctuation">.</span>Point<span class="token punctuation">,</span> error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token comment">// Make sure there's data</span>
+	<span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> <span class="token number">1</span> <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"not enough data for skyline calculation (need at least 2 rows including header)"</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Prepare data for skyline calculation (skip header)</span>
+	<span class="token literal-property property">rawData</span> <span class="token operator">:</span><span class="token operator">=</span> data<span class="token punctuation">[</span><span class="token number">1</span><span class="token operator">:</span><span class="token punctuation">]</span>
+
+	<span class="token comment">// Convert string data to skyline.Point format</span>
+	<span class="token keyword">var</span> points <span class="token punctuation">[</span><span class="token punctuation">]</span>skyline<span class="token punctuation">.</span>Point
+	<span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">row</span> <span class="token operator">:</span><span class="token operator">=</span> range rawData <span class="token punctuation">{</span>
+		<span class="token comment">// Convert strings to float64</span>
+		val1<span class="token punctuation">,</span> <span class="token literal-property property">err1</span> <span class="token operator">:</span><span class="token operator">=</span> strconv<span class="token punctuation">.</span><span class="token function">ParseFloat</span><span class="token punctuation">(</span>row<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span>
+		val2<span class="token punctuation">,</span> <span class="token literal-property property">err2</span> <span class="token operator">:</span><span class="token operator">=</span> strconv<span class="token punctuation">.</span><span class="token function">ParseFloat</span><span class="token punctuation">(</span>row<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span>
+		<span class="token keyword">if</span> err1 <span class="token operator">!=</span> nil <span class="token operator">||</span> err2 <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+			<span class="token keyword">return</span> nil<span class="token punctuation">,</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"error parsing numeric values in row: %v"</span><span class="token punctuation">,</span> row<span class="token punctuation">)</span>
+		<span class="token punctuation">}</span>
+		points <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>points<span class="token punctuation">,</span> skyline<span class="token punctuation">.</span>Point<span class="token punctuation">{</span>val1<span class="token punctuation">,</span> val2<span class="token punctuation">}</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Set up preferences from config</span>
+	<span class="token keyword">var</span> prefs skyline<span class="token punctuation">.</span>Preference
+	<span class="token keyword">if</span> config<span class="token punctuation">.</span>Dim1Pref <span class="token operator">==</span> <span class="token string">"min"</span> <span class="token punctuation">{</span>
+		prefs <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>prefs<span class="token punctuation">,</span> skyline<span class="token punctuation">.</span>Min<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+		prefs <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>prefs<span class="token punctuation">,</span> skyline<span class="token punctuation">.</span>Max<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> config<span class="token punctuation">.</span>Dim2Pref <span class="token operator">==</span> <span class="token string">"min"</span> <span class="token punctuation">{</span>
+		prefs <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>prefs<span class="token punctuation">,</span> skyline<span class="token punctuation">.</span>Min<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+		prefs <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>prefs<span class="token punctuation">,</span> skyline<span class="token punctuation">.</span>Max<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Calculate skyline</span>
+	<span class="token keyword">return</span> skyline<span class="token punctuation">.</span><span class="token function">Skyline</span><span class="token punctuation">(</span>points<span class="token punctuation">,</span> nil<span class="token punctuation">,</span> prefs<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Algorithm<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Let's add this step to the <code>run</code> function as well:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">config <span class="token operator">*</span>Config</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	data<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">readCSV</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>InputFile<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim1<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim2<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error reading CSV: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	result<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">computeSkyline</span><span class="token punctuation">(</span>data<span class="token punctuation">,</span> config<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error calculating skyline: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	color<span class="token punctuation">.</span><span class="token function">Green</span><span class="token punctuation">(</span><span class="token string">"Skyline calculation completed!"</span><span class="token punctuation">)</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Skyline (%s): %v\n"</span><span class="token punctuation">,</span> config<span class="token punctuation">.</span>Algorithm<span class="token punctuation">,</span> result<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h4>Writing the Output CSV</h4>
+<p>Finally, we need to write the skyline points to the output CSV file. We will create a function <code>writeCSV</code> that takes the skyline points and writes them to a CSV file along with the original data:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">writeOutputCSV</span><span class="token punctuation">(</span>filePath string<span class="token punctuation">,</span> originalData <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">,</span> skylinePoints <span class="token punctuation">[</span><span class="token punctuation">]</span>skyline<span class="token punctuation">.</span>Point<span class="token punctuation">,</span> config <span class="token operator">*</span>Config<span class="token punctuation">)</span> error <span class="token punctuation">{</span>
+	file<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> os<span class="token punctuation">.</span><span class="token function">Create</span><span class="token punctuation">(</span>filePath<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"error creating file: %v"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+	defer file<span class="token punctuation">.</span><span class="token function">Close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token literal-property property">writer</span> <span class="token operator">:</span><span class="token operator">=</span> csv<span class="token punctuation">.</span><span class="token function">NewWriter</span><span class="token punctuation">(</span>file<span class="token punctuation">)</span>
+	defer writer<span class="token punctuation">.</span><span class="token function">Flush</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Write header</span>
+	<span class="token literal-property property">header</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">{</span>originalData<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> originalData<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"skyline"</span><span class="token punctuation">}</span>
+	<span class="token keyword">if</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> writer<span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span>header<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		<span class="token keyword">return</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"error writing header: %v"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Convert skyline points to a map for quick lookup</span>
+	<span class="token literal-property property">skylineMap</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>map<span class="token punctuation">[</span>string<span class="token punctuation">]</span>bool<span class="token punctuation">)</span>
+	<span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">point</span> <span class="token operator">:</span><span class="token operator">=</span> range skylinePoints <span class="token punctuation">{</span>
+		<span class="token literal-property property">key</span> <span class="token operator">:</span><span class="token operator">=</span> fmt<span class="token punctuation">.</span><span class="token function">Sprintf</span><span class="token punctuation">(</span><span class="token string">"%.6f,%.6f"</span><span class="token punctuation">,</span> point<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> point<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+		skylineMap<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Write data rows</span>
+	<span class="token keyword">for</span> <span class="token literal-property property">i</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token function">len</span><span class="token punctuation">(</span>originalData<span class="token punctuation">)</span><span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+		<span class="token literal-property property">row</span> <span class="token operator">:</span><span class="token operator">=</span> originalData<span class="token punctuation">[</span>i<span class="token punctuation">]</span>
+
+		<span class="token comment">// Parse the values</span>
+		val1<span class="token punctuation">,</span> <span class="token literal-property property">err1</span> <span class="token operator">:</span><span class="token operator">=</span> strconv<span class="token punctuation">.</span><span class="token function">ParseFloat</span><span class="token punctuation">(</span>row<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span>
+		val2<span class="token punctuation">,</span> <span class="token literal-property property">err2</span> <span class="token operator">:</span><span class="token operator">=</span> strconv<span class="token punctuation">.</span><span class="token function">ParseFloat</span><span class="token punctuation">(</span>row<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">)</span>
+		<span class="token keyword">if</span> err1 <span class="token operator">!=</span> nil <span class="token operator">||</span> err2 <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+			<span class="token keyword">continue</span> <span class="token comment">// Skip invalid rows</span>
+		<span class="token punctuation">}</span>
+
+		<span class="token literal-property property">key</span> <span class="token operator">:</span><span class="token operator">=</span> fmt<span class="token punctuation">.</span><span class="token function">Sprintf</span><span class="token punctuation">(</span><span class="token string">"%.6f,%.6f"</span><span class="token punctuation">,</span> val1<span class="token punctuation">,</span> val2<span class="token punctuation">)</span>
+		<span class="token literal-property property">isSkyline</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token string">"false"</span>
+		<span class="token keyword">if</span> skylineMap<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token punctuation">{</span>
+			isSkyline <span class="token operator">=</span> <span class="token string">"true"</span>
+		<span class="token punctuation">}</span>
+
+		<span class="token literal-property property">record</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">{</span>row<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">,</span> row<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> isSkyline<span class="token punctuation">}</span>
+		<span class="token keyword">if</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> writer<span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span>record<span class="token punctuation">)</span><span class="token punctuation">;</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+			<span class="token keyword">return</span> fmt<span class="token punctuation">.</span><span class="token function">Errorf</span><span class="token punctuation">(</span><span class="token string">"error writing record: %v"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token keyword">return</span> nil
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This function creates a new CSV file, writes the header, and then writes each row of the original data along with a new column indicating whether the point is a skyline point or not. We also make sure to skip invalid rows that cannot be parsed as floats.</p>
+<p>We can now add this step to the <code>run</code> function:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">run</span><span class="token punctuation">(</span><span class="token parameter">config <span class="token operator">*</span>Config</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	data<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">readCSV</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>InputFile<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim1<span class="token punctuation">,</span> config<span class="token punctuation">.</span>Dim2<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error reading CSV: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	result<span class="token punctuation">,</span> <span class="token literal-property property">err</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">computeSkyline</span><span class="token punctuation">(</span>data<span class="token punctuation">,</span> config<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error calculating skyline: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	err <span class="token operator">=</span> <span class="token function">writeOutputCSV</span><span class="token punctuation">(</span>config<span class="token punctuation">.</span>OutputFile<span class="token punctuation">,</span> data<span class="token punctuation">,</span> result<span class="token punctuation">,</span> config<span class="token punctuation">)</span>
+	<span class="token keyword">if</span> err <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+		color<span class="token punctuation">.</span><span class="token function">Red</span><span class="token punctuation">(</span><span class="token string">"Error writing output CSV: %v\n"</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span>
+		<span class="token keyword">return</span>
+	<span class="token punctuation">}</span>
+
+	color<span class="token punctuation">.</span><span class="token function">Green</span><span class="token punctuation">(</span><span class="token string">"Skyline calculation completed!"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>And that's it! We have a complete command line tool that reads a CSV file, calculates the skyline points for the specified dimensions, and writes the results to a new CSV file.</p>
+<h3>Testing the Tool</h3>
+<p>Now we can see if everything works as expected. Let's run the tool with a sample CSV file:</p>
+<pre class="language-bash"><code class="language-bash">go run main.go <span class="token parameter variable">--input</span> data/hotels.csv <span class="token parameter variable">--output</span> output.csv <span class="token parameter variable">--dim1</span> <span class="token number">1</span> <span class="token parameter variable">--dim2</span> <span class="token number">2</span> <span class="token parameter variable">--dim1pref</span> max <span class="token parameter variable">--dim2pref</span> max
+Skyline calculation completed<span class="token operator">!</span>
+✓ Completed <span class="token keyword">in</span> <span class="token number">1</span>.0456ms
+</code></pre>
+<p>Let's check the <code>output.csv</code> file:</p>
+<pre class="language-csv"><code class="language-csv">rating<span class="token punctuation">,</span>user_rating<span class="token punctuation">,</span>skyline
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.2</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.8</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">3.5</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.1</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">3.9</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4.6</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.4</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3.2</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.9</span><span class="token punctuation">,</span><span class="token boolean">true</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.3</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">3.8</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.7</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.0</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3.9</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.5</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">3.6</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.1</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">2</span><span class="token punctuation">,</span><span class="token number">4.3</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">3.7</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">4.4</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.8</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">2</span><span class="token punctuation">,</span><span class="token number">3.4</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.6</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">3.3</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.2</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">2</span><span class="token punctuation">,</span><span class="token number">4.0</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">4.9</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">3</span><span class="token punctuation">,</span><span class="token number">3.1</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">5</span><span class="token punctuation">,</span><span class="token number">4.7</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+<span class="token number">4</span><span class="token punctuation">,</span><span class="token number">3.8</span><span class="token punctuation">,</span><span class="token boolean">false</span>
+</code></pre>
+<p>We can see that the output file contains the original dimensions and a new column <code>skyline</code> indicating whether the point is a skyline point or not.</p>
+<h3>Visualizing the Results</h3>
+<p>Open your browser and go to <a href="https://app.rawgraphs.io/">Rawgraphs</a>. Upload the <code>output.csv</code> file, choose Bubble Chart (it's their version of a scatter plot), select the <code>rating</code> and <code>user_rating</code> columns for the X and Y axes, and use the <code>skyline</code> column to color the points. You should see a scatter plot with the skyline points highlighted.</p>
+<p><img src="https://i.imgur.com/ZO7LHK0.png" alt="Rawgraphs Skyline Visualization"></p>
+<p>And this means our hotels dataset only has one skyline point, which is the hotel with the highest rating and user rating. Too bad we probably can't afford it!</p>
+<p>(Also, we lost the name of the hotel in the process, but we can easily modify the code to keep it if needed.)</p>
+<h3>Next Steps</h3>
+<p>Where the skyline library truly shines is with large datasets. You can try it with a larger dataset, like the <a href="https://www.kaggle.com/datasets/airbnb/seattle">Airbnb listings dataset</a>, or any other dataset you find interesting. Just make sure to adjust the dimensions (and the algorithm used!) accordingly.</p>
+<p>The only reason we only used two dimensions for the calculations and ditched the rest is that we wanted to keep the example simple and easy to visualize. However, the skyline library can handle any number of dimensions, so you can easily extend the tool to support more dimensions if needed.</p>
+<p>Important to remember that as the dataset grows, the BNL algorithm may become very inefficient, so you might want to switch to the Divide&amp;Conquer or Skytree algorithms for better performance. You can do this by changing the <code>--algo</code> flag when running the tool. It's not always easy to tell beforehand which algorithm will perform best, so you might want to try them all and see which one works best for your dataset.</p>
+<h2>Conclusion</h2>
+<p>In this article, we built a command-line tool in Go to compute skyline points from a CSV file. We covered reading and writing CSV files, calculating the skyline, and visualizing the results. With this foundation, you can explore more advanced features and optimizations, such as handling larger datasets or integrating with other data processing tools.</p>
+<p>Another feature of the skyline library is that it can handle dynamic data, meaning you can add or remove points and recalculate the skyline without having to reprocess the entire dataset. This can be useful for real-time applications or when dealing with streaming data.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+
+
+
+
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>import chaos</title>
+    <link>https://gaborkoos.com</link>
+    <description>The edge cases of software engineering.</description>
+    <atom:link href="https://gaborkoos.com/feed.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&amp;height=614&amp;width=620&amp;expires=33290472379</url>
+      <title>import chaos</title>
+      <link>https://gaborkoos.com</link>
+    </image>
+    
+      <item>
+        <title>Funky Article</title>
+        <link>https://gaborkoos.com/posts/another%20post/</link>
+        <guid>https://gaborkoos.com/posts/another%20post/</guid>
+        <pubDate>Thu, 07 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>Yeah yet another blog post!</description>
+      </item>
+    
+      <item>
+        <title>Second Post</title>
+        <link>https://gaborkoos.com/posts/post2/</link>
+        <guid>https://gaborkoos.com/posts/post2/</guid>
+        <pubDate>Wed, 06 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>This is my second blog post styled with Tailwind CSS and Eleventy!</description>
+      </item>
+    
+      <item>
+        <title>Hello World</title>
+        <link>https://gaborkoos.com/posts/hello-world/</link>
+        <guid>https://gaborkoos.com/posts/hello-world/</guid>
+        <pubDate>Tue, 05 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>This is my first blog post styled with Tailwind CSS and Eleventy!</description>
+      </item>
+    
+      <item>
+        <title>Practical Skyline Queries</title>
+        <link>https://gaborkoos.com/posts/article1/</link>
+        <guid>https://gaborkoos.com/posts/article1/</guid>
+        <pubDate>Sat, 02 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>Skyline Queries? Summer is in full swing, the weather outside is hot and sunny. And here I am at my desk, scribbling away while my mind is sipping margaritas in a hotel bar somewhere in the Caribbean....</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting Arithmetics 2 - Rating a Matched Bet</title>
+        <link>https://gaborkoos.com/posts/2017-2-9-Matched-Betting-Arithmetics-2/</link>
+        <guid>https://gaborkoos.com/posts/2017-2-9-Matched-Betting-Arithmetics-2/</guid>
+        <pubDate>Thu, 09 Feb 2017 00:00:00 GMT</pubDate>
+
+        <description>This is the second part of the series on matched bet arithmetics. Click here for Part 1. When selecting a bet to back and lay, our goal is to maximize profit (or for a qualifying bet, to minimize loss...</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting Arithmetics</title>
+        <link>https://gaborkoos.com/posts/2017-2-1-Matched-Betting-Arithmetics/</link>
+        <guid>https://gaborkoos.com/posts/2017-2-1-Matched-Betting-Arithmetics/</guid>
+        <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
+
+        <description>Matched betting is a strategy that uses simple maths to extract risk-free profits from free bets and bonuses offered by bookmakers. One of core principles of matched betting is that risk is removed by...</description>
+      </item>
+    
+      <item>
+        <title>Version From config.json</title>
+        <link>https://gaborkoos.com/posts/2017-1-30-Version-From-config.json/</link>
+        <guid>https://gaborkoos.com/posts/2017-1-30-Version-From-config.json/</guid>
+        <pubDate>Sun, 29 Jan 2017 00:00:00 GMT</pubDate>
+
+        <description>How to use Webpack to inject version number from package.json into your app.</description>
+      </item>
+    
+      <item>
+        <title>Real Hello World!</title>
+        <link>https://gaborkoos.com/posts/2017-1-29-Hello-World/</link>
+        <guid>https://gaborkoos.com/posts/2017-1-29-Hello-World/</guid>
+        <pubDate>Sun, 29 Jan 2017 00:00:00 GMT</pubDate>
+
+        <description>The first post - why this blog exists and what to expect.</description>
+      </item>
+    
+  </channel>
+</rss>
