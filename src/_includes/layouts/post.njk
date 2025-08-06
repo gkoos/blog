@@ -1,4 +1,10 @@
 {% extends "layouts/base.njk" %}
+{% block head %}
+  {{ super() }}
+  {% if canonical %}
+    <link rel="canonical" href="{{ canonical }}">
+  {% endif %}
+{% endblock %}
 {% block content %}
 <article>
   <h1 class="text-3xl font-bold mb-4">{{ title }}</h1>

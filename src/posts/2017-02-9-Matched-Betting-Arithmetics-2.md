@@ -2,18 +2,20 @@
 layout: layouts/post.njk
 title: Matched Betting Arithmetics 2 - Rating a Matched Bet
 date: 2017-02-09
+description: This post discusses how to rate a matched bet based on the back and lay odds.
 tags:
   - posts
   - mathematics
-  - betting
-  - matched-betting
+  - matched betting
 ---
-_This is the second part of the series on matched bet arithmetics. Click [here](/Matched-Betting-Arithmetics/) for Part 1._<br>
+_This is the second part of the series on matched bet arithmetics.<br>
+Click [here](/posts/2017-2-1-Matched-Betting-Arithmetics/) for Part 1._
+
 When selecting a bet to back and lay, our goal is to maximize profit (or for a qualifying bet, to minimize loss). Just by looking at the odds it's hard to tell if a bet is ludicrous or not, so let's try and create an index to rate those bets.
 
 We can tell how good the odds are by determining the amount of money we win or lose by backing and laying the bet. To normalize the results we will examine the ratio of our money after the bet has settled and the sum of the stakes we originally laid with both the bookmaker and the exchange. For calculating this quotient we can assume we backed the bet with £1 and laid it with the optimal lay stake.
 
-Using the notations and equations from the Qualifying Bet section of [Part 1](/Matched-Betting-Arithmetics/), our back bet is 1 and the lay bet is
+Using the notations and equations from the Qualifying Bet section of [Part 1](/posts/2017-2-1-Matched-Betting-Arithmetics/), our back bet is 1 and the lay bet is
 
 _o<sub>1</sub> / (o<sub>2</sub> - c)_
 

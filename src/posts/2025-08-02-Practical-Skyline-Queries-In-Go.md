@@ -1,50 +1,41 @@
 ---
 layout: layouts/post.njk
-title: Practical Skyline Queries
+title: Practical Skyline Queries In Go
 date: 2025-08-02
+descriptionn: A practical introduction to skyline queries in Go, including a command line tool for skyline calculations.
+canonical: https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9
 tags:
-  - posts
-  - skyline-queries
-  - algorithms
-  - go
+- posts
+- tutorials
+- algorithms
+- Golang
 ---
+_(Originally published on [Dev.to](https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9))_
+
 ## Skyline Queries?
 
 Summer is in full swing, the weather outside is hot and sunny. And here I am at my desk, scribbling away while my mind is sipping margaritas in a hotel bar somewhere in the Caribbean. But how do I decide which hotel? Close to the beach? Good reviews? Cheap? Can I find a hotel that's closer to the beach, has better reviews, and is cheaper than all the other hotels? Probably not. But with so many options to choose from, I can eliminate hotels that are worse in every aspect than others. This is the essence of skyline queries: finding the best options in a multi-dimensional problem space (in this case, distance from the beach, prices and reviews).
 
-
-I wrote a quick introduction to skyline queries [here](https://dev.to/gkoos/skyline-queries-for-non-academics-49am), but for those who want something even quicker:
-
+I wrote a quick introduction to skyline queries [here](/posts/2025-07-31-Skyline-Queries-For-Non-Academics/), but for those who want something even quicker:
 
 We have a set of points in a multi-dimensional space, and we want to find the points that are not dominated by any other point. (Point A *dominates* another point B if A is better than B in all dimensions. Note that "better" can mean either larger - like ratings, or smaller - like distance to the beach.) The points that are not dominated by any other point are called *skyline points* and we find them by executing a *skyline query*.
 
-
 Now for small datasets like a bunch of hotels in an area, we can just iterate through all points, compare them to the others and find the skyline points. But this process can be useful for large datasets as well if we want to reduce complexity. Essentially, to simplify data, we have two options: we can reduce the number of dimensions or reduce the number of points. There are multiple ways to do the former, like Principal Component Analysis (PCA) or t-Distributed Stochastic Neighbor Embedding (t-SNE), but there are typically more points than dimensions, so focusing on reducing the number of points makes sense too. Skyline queries are a great way to do that.
 
-
 But for large datasets, we can't just iterate through all points and compare them to each other. We need a more efficient way to find the skyline points. This is where the algorithms come in. There are several algorithms for skyline queries, each with its own strengths and weaknesses. Some are more efficient for certain types of data, while others are more general-purpose.
-
 
 A short list of some of the skyline algorithms:
 
 1. **Block Nested Loop (BNL)** - the simplest algorithm, which iterates through all points and compares them to each other. It has a time complexity of O(n^2), where n is the number of points. This is not efficient for large datasets, but it is easy to implement and understand.
-
 2. **Divide and Conquer** - this algorithm divides the points into smaller subsets, finds the skyline points in each subset, and then combines them. It has a time complexity of O(n log n) and is more efficient than BNL for larger datasets.
-
 3. **Sort and Sweep** - this algorithm sorts the points along one dimension and then sweeps through them to find the skyline points. It has a time complexity of O(n log n) due to the sorting step.
-
 4. **R-tree based approaches** - these algorithms use spatial indexing structures like R-trees to efficiently find skyline points. They can be very efficient for large datasets, but they require more complex data structures.
-
 5. **Skyline join** - this algorithm is used in database systems to find skyline points in the result of a join operation. It can be very efficient for certain types of queries.
-
 6. **Skytree** - this is a data structure that can be used to efficiently find skyline points. It is based on the concept of a tree, where each node represents a point and its children represent the points that are dominated by it. It has a time complexity of O(n log n) for finding skyline points (like similar tree-based algorithms).
-
 
 Oddly enough, you will find these algorithms mostly in academic papers, but not in production code. Luckily for us, I created the [skyline](https://github.com/gkoos/skyline) library that implements the BNL, Divide&Conquer, and Skytree algorithms in go so we can carry on with this article.
 
-
 ## What Are We Going to Build?
-
 
 The title in this article says "practical", so we *must* build something, right? However, skyline queries are either very trivial for small datasets or very computation-heavy for large datasets, so hosting a skyline query backend just for the sake of this article can be tricky (and expensive). 
 
@@ -349,19 +340,19 @@ Thanks to `flag`, we can display a usage message with `-h` or `--help`:
 go run main.go --help
 Usage of main.exe:
   -algo string
-		Skyline algorithm to use (bnl|dnc|skytree) (default "bnl")
+        Skyline algorithm to use (bnl|dnc|skytree) (default "bnl")
   -dim1 int
-		Index of Dimension 1 (e.g., 0 for the first column) - required (default -1)
+        Index of Dimension 1 (e.g., 0 for the first column) - required (default -1)
   -dim1pref string
-		Preference for Dimension 1 (min|max) (default "min")
+        Preference for Dimension 1 (min|max) (default "min")
   -dim2 int
-		Index of Dimension 2 (e.g., 1 for the second column) - required (default -1)
+        Index of Dimension 2 (e.g., 1 for the second column) - required (default -1)
   -dim2pref string
-		Preference for Dimension 2 (min|max) (default "min")
+        Preference for Dimension 2 (min|max) (default "min")
   -input string
-		Path to the input CSV file - required
+        Path to the input CSV file - required
   -output string
-		Path to the output CSV file - required
+        Path to the output CSV file - required
 ```
 
 #### Reading the CSV File
@@ -648,23 +639,7 @@ rating,user_rating,skyline
 2,3.2,false
 5,4.9,true
 4,4.3,false
-3,3.8,false
-4,4.7,false
-5,4.0,false
-2,3.9,false
-4,4.5,false
-3,3.6,false
-5,4.1,false
-2,4.3,false
-4,3.7,false
-3,4.4,false
-5,4.8,false
-2,3.4,false
-4,4.6,false
-3,3.3,false
-5,4.2,false
-2,4.0,false
-4,4.9,false
+...
 3,3.1,false
 5,4.7,false
 4,3.8,false

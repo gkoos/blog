@@ -2,11 +2,11 @@
 layout: layouts/post.njk
 title: Matched Betting Arithmetics
 date: 2017-02-01
+description: This post introduces the basic concepts of matched betting and the mathematics behind it.
 tags:
   - posts
   - mathematics
-  - betting
-  - matched-betting
+  - matched betting
 ---
 
 Matched betting is a strategy that uses simple maths to extract risk-free profits from free bets and bonuses offered by bookmakers. One of core principles of matched betting is that risk is removed by ensuring that whatever the outcome of the match you get the same return, thus removing the 'gambling' from the betting. This is achieved by covering all the possible outcomes of an event, in it's simplest form by *laying* your *back* bet with a betting exchange. Let's see the maths!
