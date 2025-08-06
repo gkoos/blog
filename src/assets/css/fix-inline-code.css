@@ -1,0 +1,8 @@
+/* Remove ::before and ::after content from inline code if set by Tailwind Typography */
+.prose code::before, .prose code::after,
+.prose :not(pre) > code::before, .prose :not(pre) > code::after,
+.prose code[data-theme]::before, .prose code[data-theme]::after,
+.prose pre code::before, .prose pre code::after {
+  content: none !important;
+  display: none !important;
+}

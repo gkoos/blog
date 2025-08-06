@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+{% set posts = collections.posts | reverse %}
+{% set siteUrl = "https://gaborkoos.com" %}
+{% set feedTitle = "import chaos" %}
+{% set feedDescription = "The edge cases of software engineering." %}
+{% set feedImage = "https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379" %}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>{{ feedTitle }}</title>
+    <link>{{ siteUrl }}</link>
+    <description>{{ feedDescription }}</description>
+    <atom:link href="{{ siteUrl }}/feed.xml" rel="self" type="application/rss+xml"/>
+    <image>
+      <url>{{ feedImage }}</url>
+      <title>{{ feedTitle }}</title>
+      <link>{{ siteUrl }}</link>
+    </image>
+    {% for post in posts %}
+      <item>
+        <title>{{ post.data.title }}</title>
+        <link>{{ post.url | absoluteUrl(siteUrl) }}</link>
+        <guid>{{ post.url | absoluteUrl(siteUrl) }}</guid>
+        <pubDate>{{ post.data.date | toDate | dateToRfc822 | fixRfc822Midnight }}</pubDate>
+
+        <description>
+          {%- if post.data.description -%}
+            {{ post.data.description | escape | safe }}
+          {%- elif post.templateContent -%}
+            {{ post.templateContent | striptags | truncate(200, true, '...') | escape | safe }}
+          {%- else -%}
+            (No summary available)
+          {%- endif -%}
+        </description>
+      </item>
+    {% endfor %}
+  </channel>
+</rss>

@@ -1,0 +1,126 @@
+---
+title: import chaos
+layout: layouts/base.njk
+pagination:
+  data: collections.posts
+  size: 10        # posts per page
+  alias: posts
+---
+
+<!-- Hero Section -->
+<div class="text-center mb-16 relative overflow-hidden hero-bg">
+  <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight relative text-white [text-shadow:0_0_16px_white,0_0_32px_white]">
+    import chaos
+  </h1>
+  <p class="text-xl max-w-2xl mx-auto leading-relaxed relative text-white [text-shadow:0_0_8px_white,0_0_16px_white,0_0_2px_black,0_0_8px_black]">
+    The edge cases of software engineering.
+  </p>
+</div>
+<style>
+  .hero-bg {
+  background-image: url('/assets/images/chaos.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+@media (min-width: 640px) {
+  .hero-bg {
+    background-size: 80%;
+  }
+}
+.hero-bg:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+.hero-bg > * {
+  position: relative;
+
+  z-index: 1;
+}
+</style>
+
+<!-- Posts Grid -->
+<div class="space-y-12">
+  {% for post in posts | reverse %}
+    <article class="border-b border-gray-100 pb-12 last:border-b-0">
+      <div class="group">
+        <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4 group-hover:text-gray-700 transition-colors">
+          <a href="{{ post.url }}" class="hover:no-underline">{{ post.data.title }}</a>
+        </h2>
+        
+        <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+          <time datetime="{{ post.date.toISOString() }}">{{ post.date.toDateString() }}</time>
+          {% set visibleTags = post.data.tags | filterTags %}
+          {% if visibleTags.length > 0 %}
+            <span class="text-gray-300">•</span>
+            <div class="flex flex-wrap gap-2">
+              {% for tag in visibleTags %}
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">{{ tag }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="text-gray-600 leading-relaxed">
+          {% if post.templateContent %}
+            <p>{{ post.templateContent | striptags | truncate(180, '...') }}</p>
+          {% else %}
+            <p>{{ post.data.excerpt }}</p>
+          {% endif %}
+        </div>
+        
+        <div class="mt-6">
+          <a href="{{ post.url }}" class="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors">
+            Read more
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </article>
+  {% else %}
+    <div class="text-center py-16">
+      <div class="text-gray-400 mb-4">
+        <svg class="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
+        </svg>
+      </div>
+      <h3 class="text-lg font-medium text-gray-900 mb-2">No posts yet</h3>
+      <p class="text-gray-600">Check back soon for new content!</p>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if pagination.href.previous or pagination.href.next %}
+  <nav class="flex justify-between items-center mt-16 pt-8 border-t border-gray-100">
+    {% if pagination.href.previous %}
+      <a href="{{ pagination.href.previous }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors">
+        <svg class="mr-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+        Previous
+      </a>
+    {% else %}
+      <div></div>
+    {% endif %}
+
+    {% if pagination.href.next %}
+      <a href="{{ pagination.href.next }}" class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-900 transition-colors">
+        Next
+        <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+        </svg>
+      </a>
+    {% else %}
+      <div></div>
+    {% endif %}
+  </nav>
+{% endif %}

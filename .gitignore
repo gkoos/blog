@@ -1,0 +1,32 @@
+# Node
+node_modules/
+
+# Build output
+dist/
+
+# Local env
+.env
+.env.*
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Eleventy cache
+.cache/
+
+# Misc
+*.log
+*.tmp
+*.swp
+
+# Ignore local config
+*.local.js

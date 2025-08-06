@@ -1,0 +1,21 @@
+{% extends "layouts/base.njk" %}
+{% block content %}
+<article>
+  <h1 class="text-3xl font-bold mb-4">{{ title }}</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="{{ date.toISOString() }}">{{ date.toDateString() }}</time>
+    {% set visibleTags = tags | filterTags %}
+    {% if visibleTags.length > 0 %}
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        {% for tag in visibleTags %}
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">{{ tag }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    {{ content | safe }}
+  </div>
+</article>
+{% endblock %}

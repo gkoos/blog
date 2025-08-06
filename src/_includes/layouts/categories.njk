@@ -1,0 +1,94 @@
+{% extends "layouts/base.njk" %}
+{% set cats = categories.categories %}
+{% set posts = categories.posts %}
+
+{% block content %}
+<div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+  <h1 class="text-3xl font-bold mb-8">Categories</h1>
+  <div id="category-list" class="flex flex-wrap gap-3 mb-8">
+    {# Render unique categories using a Set workaround #}
+    {% set seen = [] %}
+    {% for cat in cats %}
+      {% if not (cat.tag in seen) %}
+        {% set _ = seen.push(cat.tag) %}
+        <div class="cat-btn flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5 cursor-pointer opacity-50" data-tag="{{ cat.tag }}">
+          {{ cat.tag }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+  <div id="article-list">
+    <!-- Articles will be rendered here by JS -->
+  </div>
+</div>
+<script>
+const allPosts = {{ posts | dump | safe }};
+const allCats = {{ cats | dump | safe }};
+const articleList = document.getElementById('article-list');
+const catBtns = Array.from(document.querySelectorAll('.cat-btn'));
+let activeTags = new Set(); // All categories OFF by default
+
+
+function renderArticles() {
+  const filtered = allPosts.filter(post => post.tags.some(t => activeTags.has(t)));
+  const sorted = filtered.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+  articleList.innerHTML = sorted.map(post => {
+    // Tag pills logic (unique, user-facing tags only)
+    const systemTags = new Set(["posts", "all", "page"]);
+    const seen = new Set();
+    const visibleTags = post.tags.filter(t => {
+      if (systemTags.has(t) || seen.has(t)) return false;
+      seen.add(t); return true;
+    });
+    return `
+    <article class="border-b border-gray-100 pb-12 last:border-b-0">
+      <div class="group">
+        <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4 group-hover:text-gray-700 transition-colors">
+          <a href="${post.url}" class="hover:no-underline">${post.title}</a>
+        </h2>
+        <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+          <time datetime="${new Date(post.date).toISOString()}">${new Date(post.date).toDateString()}</time>
+          ${visibleTags.length > 0 ? `
+            <span class="text-gray-300">•</span>
+            <div class="flex flex-wrap gap-2">
+              ${visibleTags.map(tag => `<div class='flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5'>${tag}</div>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+        <div class="text-gray-600 leading-relaxed">
+          <p>${post.excerpt ? post.excerpt : ''}</p>
+        </div>
+        <div class="mt-6">
+          <a href="${post.url}" class="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors">
+            Read more
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </article>
+    `;
+  }).join('');
+}
+
+
+catBtns.forEach(btn => {
+  btn.classList.add('opacity-50'); // All start as inactive
+  btn.addEventListener('click', function() {
+    const tag = btn.getAttribute('data-tag');
+    if (activeTags.has(tag)) {
+      activeTags.delete(tag);
+      btn.classList.add('opacity-50'); // Inactive state
+    } else {
+      activeTags.add(tag);
+      btn.classList.remove('opacity-50'); // Active (normal) state
+    }
+    renderArticles();
+  });
+});
+
+renderArticles(); // No articles shown by default
+</script>
+
+{% endblock %}
