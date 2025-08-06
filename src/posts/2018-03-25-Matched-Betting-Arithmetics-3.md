@@ -9,7 +9,7 @@ tags:
 - mathematics
 - matched betting
 ---
-_This is the second part of the series on matched bet arithmetics.<br>
+_This is the third part of the series on matched bet arithmetics.<br>
 Click [here](/posts/2017-2-1-Matched-Betting-Arithmetics/) for Part 1.<br>
 Click [here](/posts/2017-2-9-Matched-Betting-Arithmetics-2/) for Part 2._
 
