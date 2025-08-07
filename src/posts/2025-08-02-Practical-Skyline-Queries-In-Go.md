@@ -11,6 +11,7 @@ tags:
 - tutorials
 - algorithms
 - Golang
+- skyline (go library)
 ---
 _(Originally published on [Dev.to](https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9))_
 
