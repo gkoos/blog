@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Taming Goroutines - Efficient Concurrency with a Worker Pool in Go</title>
+  <meta name="description" content="A deep dive into hash maps, their implementation, and performance considerations in Go.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Taming Goroutines - Efficient Concurrency with a Worker Pool in Go">
+  <meta property="og:description" content="A deep dive into hash maps, their implementation, and performance considerations in Go.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Taming Goroutines - Efficient Concurrency with a Worker Pool in Go">
+  <meta name="twitter:description" content="A deep dive into hash maps, their implementation, and performance considerations in Go.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Taming Goroutines - Efficient Concurrency with a Worker Pool in Go</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-08-07T00:00:00.000Z">Thu Aug 07 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">concurrency</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>So you've learned everything about Go's goroutines and channels, and you're excited to dive into concurrent programming. But wait! Before you start spawning thousands of goroutines, let's take a step back and understand how to do this efficiently. In this article, we'll explore the concept of a <em>worker pool</em> and how it can help you manage concurrency in Go without overwhelming your system.</p>
+<p>Let's say you're moving to a new place. Your stuff is in moving boxes and the van is waiting outside. You could try to carry the boxes, one at a time, but that would take forever. What can you do? If you are in good shape, you could carry two boxes at a time, but let's face it, we are couch potatoes. Instead, you invite your friends over and ask them to help. Now you have a team of people carrying boxes, and the job gets done much faster. Cool, but how many friends? There's only one door, and if too many people try to carry boxes at once, they will bump into each other and slow down the process.</p>
+<p>In Go, goroutines are like those friends helping you move. They are lightweight threads that can run concurrently, allowing you to perform multiple tasks at once without the overhead of traditional threads. However, just like inviting too many friends can lead to chaos, spawning too many goroutines can lead to performance issues. This is where a worker pool comes in handy.</p>
+<h2 id="1.-goroutines-and-channels%3A-a-quick-recap" tabindex="-1"><a class="header-anchor" href="#1.-goroutines-and-channels%3A-a-quick-recap">1. Goroutines and Channels: A Quick Recap</a></h2>
+<p>But before we dive into worker pools, let's quickly recap our building blocks: <em>goroutines</em> and <em>channels</em>. Goroutines are lightweight threads managed by the Go runtime. They allow you to run functions concurrently without the complexity of managing threads yourself. Channels are used to communicate between goroutines, enabling them to synchronize and share data safely. There are other ways for goroutines to communicate, but this is the safest and most idiomatic way in Go in accordance with &quot;Don't communicate by sharing memory; share memory by communicating&quot;.</p>
+<p>Here's a basic example of using a goroutine with a channel:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">)</span>
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">someWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>  <span class="token comment">// Send result to channel when ready</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Main goroutine continues other work...</span>
+<span class="token function">otherWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// When we need the result, we receive from the channel</span>
+<span class="token literal-property property">result</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ch  <span class="token comment">// This blocks until the goroutine sends a value</span>
+fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Got result: %d\n"</span><span class="token punctuation">,</span> result<span class="token punctuation">)</span>
+</code></pre>
+<p>In this example, the main goroutine can continue executing other tasks while <code>someWork()</code> runs concurrently. When the result is needed, <code>&lt;-ch</code> blocks the main goroutine until the worker goroutine sends the value through the channel.</p>
+<p>A channel can be <em>blocking</em> or <em>non-blocking</em>: a blocking channel will wait until a value is sent or received, while a non-blocking channel will return immediately if no value is available. The example above uses a blocking channel.</p>
+<h2 id="2.-concurrency-%E2%89%A0-parallelism" tabindex="-1"><a class="header-anchor" href="#2.-concurrency-%E2%89%A0-parallelism">2. Concurrency ≠ Parallelism</a></h2>
+<p>It's important to understand that concurrency does not mean parallelism. Go allows you to run many goroutines, but it can't run more parallel threads than the number of available CPU cores. The Go runtime will spawn and run your <em>concurrent</em> goroutines, but not all of them will run in <em>parallel</em> at the same time. Yes, they all will be scheduled to run, but not necessarily all at once.</p>
+<p>Also, goroutines introduce some overhead, such as stack space and scheduler work. If you spawn thousands of goroutines, you might end up hurting performance instead of improving it. Go is great at managing goroutines efficiently, but it's still important to be mindful of how many you create.</p>
+<h2 id="3.-parallelizing-a-divide-%26-conquer-algorithm" tabindex="-1"><a class="header-anchor" href="#3.-parallelizing-a-divide-%26-conquer-algorithm">3. Parallelizing a Divide &amp; Conquer Algorithm</a></h2>
+<p>A family of algorithms that can benefit from concurrency the most is the recursive divide-and-conquer algorithms. These algorithms break down a problem into smaller subproblems, solve them independently, and then combine the results.</p>
+<p>The most classic example of a divide-and-conquer algorithm is <strong>QuickSort</strong>. You divide the dataset into two partitions, sort each partition, and then combine the results.</p>
+<h3 id="3.1-sequential-quicksort" tabindex="-1"><a class="header-anchor" href="#3.1-sequential-quicksort">3.1 Sequential QuickSort</a></h3>
+<p>Let's see a non-parallel version of QuickSort:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">quickSort</span><span class="token punctuation">(</span>arr <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int <span class="token punctuation">{</span>
+    <span class="token comment">// Halt condition: if the array has less than 0 or 1 element, it's sorted</span>
+    <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">||</span> <span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> arr
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Divide the array into two partitions</span>
+    <span class="token comment">// Everything less than the pivot goes to the left, everything greater (or equal) goes to the right</span>
+    <span class="token literal-property property">pivot</span> <span class="token operator">:</span><span class="token operator">=</span> arr<span class="token punctuation">[</span><span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span><span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">]</span>
+    <span class="token literal-property property">left</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token literal-property property">right</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">v</span> <span class="token operator">:</span><span class="token operator">=</span> range arr <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> v <span class="token operator">&lt;</span> pivot <span class="token punctuation">{</span>
+            left <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> v<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> v <span class="token operator">></span> pivot <span class="token punctuation">{</span>
+            right <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>right<span class="token punctuation">,</span> v<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Recursively sort the partitions</span>
+    left <span class="token operator">=</span> <span class="token function">quickSort</span><span class="token punctuation">(</span>left<span class="token punctuation">)</span>
+    right <span class="token operator">=</span> <span class="token function">quickSort</span><span class="token punctuation">(</span>right<span class="token punctuation">)</span>
+
+    <span class="token comment">// Combine the left array, the pivot element, and the right array</span>
+    <span class="token comment">// Here both left and right are already sorted because of the recursive calls</span>
+    <span class="token keyword">return</span> <span class="token function">append</span><span class="token punctuation">(</span><span class="token function">append</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> pivot<span class="token punctuation">)</span><span class="token punctuation">,</span> right<span class="token operator">...</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>If we look at this code, we can see that the sorting of left and right partitions can be done in parallel. We can spawn two goroutines to sort the left and right partitions concurrently, which can significantly speed up the sorting process for large datasets. We can't do much about the merging step, but it's still an improvement.</p>
+<h3 id="3.2-parallel-quicksort---the-naive-approach" tabindex="-1"><a class="header-anchor" href="#3.2-parallel-quicksort---the-naive-approach">3.2 Parallel QuickSort - The Naive Approach</a></h3>
+<p>Here's a simple parallel version using raw goroutines:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">quickSort</span><span class="token punctuation">(</span>arr <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span> <span class="token operator">||</span> <span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> arr
+    <span class="token punctuation">}</span>
+
+    <span class="token literal-property property">pivot</span> <span class="token operator">:</span><span class="token operator">=</span> arr<span class="token punctuation">[</span><span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span><span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">]</span>
+    <span class="token literal-property property">left</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token literal-property property">right</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">v</span> <span class="token operator">:</span><span class="token operator">=</span> range arr <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> v <span class="token operator">&lt;</span> pivot <span class="token punctuation">{</span>
+            left <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> v<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> v <span class="token operator">></span> pivot <span class="token punctuation">{</span>
+            right <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>right<span class="token punctuation">,</span> v<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Create channels to receive the sorted partitions</span>
+    <span class="token literal-property property">leftCh</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">)</span>
+    <span class="token literal-property property">rightCh</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">)</span>
+
+    <span class="token comment">// Sort the left and right partitions in goroutines</span>
+    go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        leftCh <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">quickSort</span><span class="token punctuation">(</span>left<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        rightCh <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">quickSort</span><span class="token punctuation">(</span>right<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+    <span class="token comment">// Wait for both goroutines to finish and collect the results</span>
+    left <span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>leftCh
+    right <span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>rightCh
+
+    <span class="token keyword">return</span> <span class="token function">append</span><span class="token punctuation">(</span><span class="token function">append</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> pivot<span class="token punctuation">)</span><span class="token punctuation">,</span> right<span class="token operator">...</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>In this version, we spawn two goroutines to sort the left and right partitions concurrently. This can spin out of control quickly. Although with careful (or lucky) pivot element selection, the depth of recursion will be <code>O(log n)</code>, in the worst case, it can go up to <code>O(n)</code>. And on every recursion level, we spawn two goroutines, which means the number of goroutines grows exponentially, so it's easy to go over the number of available CPU cores. And remember, each goroutine has its own stack space and scheduling overhead.</p>
+<h3 id="3.3-optimized-parallel-quicksort-with-a-worker-pool" tabindex="-1"><a class="header-anchor" href="#3.3-optimized-parallel-quicksort-with-a-worker-pool">3.3 Optimized Parallel QuickSort with a Worker Pool</a></h3>
+<p>To avoid the issues with spawning too many goroutines, we can use a <strong>worker pool</strong>. A worker pool is a design pattern where a limited number of workers pull tasks from a queue. This throttles concurrency to what the CPU can handle and prevents thrashing from too many goroutines. We can also fall back to a sequential implementation if no workers are available, instead of just waiting for a free worker slot. This fallback is also useful for small datasets where the overhead of spawning goroutines outweighs the benefits of parallelism.</p>
+<p>Here's how we can implement a worker pool for QuickSort:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+    <span class="token string">"fmt"</span>
+    <span class="token string">"runtime"</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment">// Global worker pool - semaphore to limit concurrent goroutines</span>
+<span class="token keyword">var</span> workerPool chan struct<span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+func <span class="token function">init</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Initialize with number of CPU cores</span>
+    workerPool <span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> runtime<span class="token punctuation">.</span><span class="token function">NumCPU</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">quickSortWithPool</span><span class="token punctuation">(</span>arr <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> <span class="token number">1</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> arr
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Use sequential for small arrays to avoid overhead</span>
+    <span class="token keyword">if</span> <span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">1000</span> <span class="token punctuation">{</span>
+        <span class="token keyword">return</span> <span class="token function">quickSortSequential</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Partition the array</span>
+    <span class="token literal-property property">pivot</span> <span class="token operator">:</span><span class="token operator">=</span> arr<span class="token punctuation">[</span><span class="token function">len</span><span class="token punctuation">(</span>arr<span class="token punctuation">)</span><span class="token operator">/</span><span class="token number">2</span><span class="token punctuation">]</span>
+    <span class="token literal-property property">left</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token literal-property property">right</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">v</span> <span class="token operator">:</span><span class="token operator">=</span> range arr <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> v <span class="token operator">&lt;</span> pivot <span class="token punctuation">{</span>
+            left <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> v<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> v <span class="token operator">></span> pivot <span class="token punctuation">{</span>
+            right <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>right<span class="token punctuation">,</span> v<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Channels to receive results</span>
+    <span class="token literal-property property">leftCh</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+    <span class="token literal-property property">rightCh</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+    <span class="token comment">// Try to get a worker for left partition</span>
+    select <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> workerPool <span class="token operator">&lt;</span><span class="token operator">-</span> struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token operator">:</span> <span class="token comment">// Got worker slot</span>
+        go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            defer <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">&lt;</span><span class="token operator">-</span>workerPool <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Release slot when done</span>
+            leftCh <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">quickSortWithPool</span><span class="token punctuation">(</span>left<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">default</span><span class="token operator">:</span> <span class="token comment">// No workers available - use sequential</span>
+        leftCh <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">quickSortSequential</span><span class="token punctuation">(</span>left<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Try to get a worker for right partition</span>
+    select <span class="token punctuation">{</span>
+    <span class="token keyword">case</span> workerPool <span class="token operator">&lt;</span><span class="token operator">-</span> struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token operator">:</span> <span class="token comment">// Got worker slot</span>
+        go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            defer <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token operator">&lt;</span><span class="token operator">-</span>workerPool <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// Release slot when done</span>
+            rightCh <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">quickSortWithPool</span><span class="token punctuation">(</span>right<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">default</span><span class="token operator">:</span> <span class="token comment">// No workers available - use sequential</span>
+        rightCh <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">quickSortSequential</span><span class="token punctuation">(</span>right<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Wait for both results</span>
+    <span class="token literal-property property">sortedLeft</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>leftCh
+    <span class="token literal-property property">sortedRight</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>rightCh
+
+    <span class="token comment">// Combine results</span>
+    <span class="token keyword">return</span> <span class="token function">append</span><span class="token punctuation">(</span><span class="token function">append</span><span class="token punctuation">(</span>sortedLeft<span class="token punctuation">,</span> pivot<span class="token punctuation">)</span><span class="token punctuation">,</span> sortedRight<span class="token operator">...</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>We make sure we never spawn more goroutines than the number of available CPU cores. There are several further optimizations we can do, such as falling back to sequential after a certain depth of recursion, batch processing or in-place partitioning (for better cache locality). There is great potential in better pivot selection too. But the basic idea is to use a worker pool to limit the number of concurrent goroutines and avoid overwhelming the system.</p>
+<h2 id="4.-benchmarking" tabindex="-1"><a class="header-anchor" href="#4.-benchmarking">4. Benchmarking</a></h2>
+<p>In the accompanying <a href="https://github.com/gkoos/article-taming-goroutines">code repository</a>, you can find the implementations of the sequential QuickSort, the naive parallel QuickSort, and the worker pool version, with a thin wrapper to run them on a randomised dataset of 100,000 elements. If you run them, the results will be something like this:</p>
+<pre class="language-"><code class="language-">$ go run sequential<span class="token operator">/</span>main<span class="token punctuation">.</span>go 
+Sorted Data<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">0</span> <span class="token number">2</span> <span class="token number">7</span> <span class="token number">9</span> <span class="token number">10</span> <span class="token number">20</span> <span class="token number">22</span> <span class="token number">26</span> <span class="token number">29</span> <span class="token number">38</span><span class="token punctuation">]</span> <span class="token operator">...</span> <span class="token punctuation">[</span><span class="token number">999931</span> <span class="token number">999939</span> <span class="token number">999945</span> <span class="token number">999964</span> <span class="token number">999967</span> <span class="token number">999972</span> <span class="token number">999979</span> <span class="token number">999984</span> <span class="token number">999988</span> <span class="token number">999997</span><span class="token punctuation">]</span>
+Elapsed time<span class="token operator">:</span> <span class="token number">32</span><span class="token punctuation">.</span>9421ms
+
+$ go run parallel<span class="token operator">/</span>main<span class="token punctuation">.</span>go
+Sorted Data<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">0</span> <span class="token number">2</span> <span class="token number">7</span> <span class="token number">9</span> <span class="token number">10</span> <span class="token number">20</span> <span class="token number">22</span> <span class="token number">26</span> <span class="token number">29</span> <span class="token number">38</span><span class="token punctuation">]</span> <span class="token operator">...</span> <span class="token punctuation">[</span><span class="token number">999931</span> <span class="token number">999939</span> <span class="token number">999945</span> <span class="token number">999964</span> <span class="token number">999967</span> <span class="token number">999972</span> <span class="token number">999979</span> <span class="token number">999984</span> <span class="token number">999988</span> <span class="token number">999997</span><span class="token punctuation">]</span>
+Elapsed time<span class="token operator">:</span> <span class="token number">66</span><span class="token punctuation">.</span>6936ms
+
+$ go run workerpool<span class="token operator">/</span>main<span class="token punctuation">.</span>go
+Sorted Data<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">0</span> <span class="token number">2</span> <span class="token number">7</span> <span class="token number">9</span> <span class="token number">10</span> <span class="token number">20</span> <span class="token number">22</span> <span class="token number">26</span> <span class="token number">29</span> <span class="token number">38</span><span class="token punctuation">]</span> <span class="token operator">...</span> <span class="token punctuation">[</span><span class="token number">999931</span> <span class="token number">999939</span> <span class="token number">999945</span> <span class="token number">999964</span> <span class="token number">999967</span> <span class="token number">999972</span> <span class="token number">999979</span> <span class="token number">999984</span> <span class="token number">999988</span> <span class="token number">999997</span><span class="token punctuation">]</span>
+Elapsed time<span class="token operator">:</span> <span class="token number">31</span><span class="token punctuation">.</span>0905ms
+</code></pre>
+<p>The results show that the naive parallel QuickSort is significantly slower than the sequential version, while the worker pool significantly improves the performance of the parallel algorithm, just beating the single-threaded execution.</p>
+<p>The poor performance of the naive parallel version may come as surprise, but it nicely demonstrates our point: carelessly spawning goroutines can lead to serious performance degradation. Also, the simple, sequential QuickSort is doing great, it's not trivial to come up with something quicker.</p>
+<h2 id="summary" tabindex="-1"><a class="header-anchor" href="#summary">Summary</a></h2>
+<p>In this article, we examined what happens when we let goroutines spiral out of control and what we can do about it.</p>
+<p>Our worker pool is very simple: a robust implementation would use a more sophisticated task queue with job cancellation, timeouts via <code>context.Context</code> etc. We did not cover memory management patterns, such as using <code>sync.Pool</code> to reuse memory allocations for the left and right partitions. And the list goes on.</p>
+<p>Concurrency is a vast topic, and there are many patterns and techniques to explore, we only started scratching the surface here.</p>
+<p>The worker pool pattern is a powerful tool for managing goroutines, but not the only one. The key takeaway is: controlled parallelism beats chaotic concurrency every time.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

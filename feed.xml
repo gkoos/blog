@@ -36,8 +36,8 @@
     
       <item>
         <title>Matched Betting Arithmetics</title>
-        <link>https://gaborkoos.com/posts/2017-02-1-Matched-Betting-Arithmetics/</link>
-        <guid>https://gaborkoos.com/posts/2017-02-1-Matched-Betting-Arithmetics/</guid>
+        <link>https://gaborkoos.com/posts/2017-02-01-Matched-Betting-Arithmetics/</link>
+        <guid>https://gaborkoos.com/posts/2017-02-01-Matched-Betting-Arithmetics/</guid>
         <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
 
         <description>This post introduces the basic concepts of matched betting and the mathematics behind it.</description>
@@ -45,8 +45,8 @@
     
       <item>
         <title>Matched Betting Arithmetics 2 - Rating a Matched Bet</title>
-        <link>https://gaborkoos.com/posts/2017-02-9-Matched-Betting-Arithmetics-2/</link>
-        <guid>https://gaborkoos.com/posts/2017-02-9-Matched-Betting-Arithmetics-2/</guid>
+        <link>https://gaborkoos.com/posts/2017-02-09-Matched-Betting-Arithmetics-2/</link>
+        <guid>https://gaborkoos.com/posts/2017-02-09-Matched-Betting-Arithmetics-2/</guid>
         <pubDate>Thu, 09 Feb 2017 00:00:00 GMT</pubDate>
 
         <description>This post discusses how to rate a matched bet based on the back and lay odds.</description>
@@ -65,6 +65,15 @@
         <title>Matched Betting - Bet365 Offer</title>
         <link>https://gaborkoos.com/posts/2017-04-2-Matched-Betting-Bet365-Offer/</link>
         <guid>https://gaborkoos.com/posts/2017-04-2-Matched-Betting-Bet365-Offer/</guid>
+        <pubDate>Sun, 02 Apr 2017 00:00:00 GMT</pubDate>
+
+        <description>This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.</description>
+      </item>
+    
+      <item>
+        <title>Matched Betting - Bet365 Offer</title>
+        <link>https://gaborkoos.com/posts/2017-04-02-Matched-Betting-Bet365-Offer/</link>
+        <guid>https://gaborkoos.com/posts/2017-04-02-Matched-Betting-Bet365-Offer/</guid>
         <pubDate>Sun, 02 Apr 2017 00:00:00 GMT</pubDate>
 
         <description>This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.</description>
@@ -108,9 +117,18 @@
     
       <item>
         <title>Hash Map Deep Dive</title>
-        <link>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep_dive/</link>
-        <guid>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep_dive/</guid>
+        <link>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep-Dive/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-03-Hash-Map-Deep-Dive/</guid>
         <pubDate>Sun, 03 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
+      </item>
+    
+      <item>
+        <title>Taming Goroutines - Efficient Concurrency with a Worker Pool in Go</title>
+        <link>https://gaborkoos.com/posts/2025-08-08-Taming-Goroutines/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-08-Taming-Goroutines/</guid>
+        <pubDate>Thu, 07 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
       </item>
