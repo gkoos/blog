@@ -133,5 +133,14 @@
         <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
       </item>
     
+      <item>
+        <title>Skyline 1.2.0 Is Out!</title>
+        <link>https://gaborkoos.com/posts/2025-08-08-Skyline-1.2.0-Is-Out/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-08-Skyline-1.2.0-Is-Out/</guid>
+        <pubDate>Fri, 08 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>Version 1.2.0 of the Skyline library is now available! This release implements partial skyline queries, allowing you to exclude dimensions from the skyline calculation. Apart from decreasing the amoun...</description>
+      </item>
+    
   </channel>
 </rss>
