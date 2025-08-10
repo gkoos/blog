@@ -142,5 +142,14 @@
         <description>Version 1.2.0 of the Skyline library is now available! This release implements partial skyline queries, allowing you to exclude dimensions from the skyline calculation. Apart from decreasing the amoun...</description>
       </item>
     
+      <item>
+        <title>Go Interfaces - Composition Over Inheritance (And Common Sense)</title>
+        <link>https://gaborkoos.com/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/</guid>
+        <pubDate>Sun, 10 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A post about golanfg interfaces</description>
+      </item>
+    
   </channel>
 </rss>
