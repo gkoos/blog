@@ -1,6 +1,6 @@
 ---
 layout: layouts/post.njk
-title: Go Interfaces - Composition Over Inheritance - And Common Sense
+title: Go Interfaces - Composition Over Inheritance (And Common Sense)
 date: 2025-08-10
 description: A post about golanfg interfaces
 excerpt: Coming from a language like C# or JavaScript, interfaces in Go can feel like a cruel joke. They’re not what you expect, and they don’t play by the rules you’re used to. This post is your survival guide to Go interfaces.
