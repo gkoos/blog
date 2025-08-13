@@ -160,5 +160,14 @@
         <description>A privacy-focused ephemeral email service.</description>
       </item>
     
+      <item>
+        <title>Go Interfaces - Beyond the Basics</title>
+        <link>https://gaborkoos.com/posts/2025-08-13-Go-Interfaces-Beyond-the-Basics/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-13-Go-Interfaces-Beyond-the-Basics/</guid>
+        <pubDate>Wed, 13 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A deep dive into golang interfaces</description>
+      </item>
+    
   </channel>
 </rss>
