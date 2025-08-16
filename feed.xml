@@ -169,5 +169,14 @@
         <description>A deep dive into golang interfaces</description>
       </item>
     
+      <item>
+        <title>Ffetch v1 Is Out!</title>
+        <link>https://gaborkoos.com/posts/2025-08-15-Ffetch-v1-Is-Out/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-15-Ffetch-v1-Is-Out/</guid>
+        <pubDate>Fri, 15 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A production-ready TypeScript-first drop-in replacement for native fetch.</description>
+      </item>
+    
   </channel>
 </rss>
