@@ -178,5 +178,23 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch.</description>
       </item>
     
+      <item>
+        <title>Ffetch v1.1 Is Out!</title>
+        <link>https://gaborkoos.com/posts/2025-08-17-Ffetch-v1.1-Is-Out/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-17-Ffetch-v1.1-Is-Out/</guid>
+        <pubDate>Sun, 17 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A production-ready TypeScript-first drop-in replacement for native fetch. V1.1 is out.</description>
+      </item>
+    
+      <item>
+        <title>Skyline 1.3.0 Is Out!</title>
+        <link>https://gaborkoos.com/posts/2025-08-18-Skyline-1.3.0-Is-Out/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-18-Skyline-1.3.0-Is-Out/</guid>
+        <pubDate>Mon, 18 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A practical introduction to skyline queries in Go, including a command line tool for skyline calculations.</description>
+      </item>
+    
   </channel>
 </rss>
