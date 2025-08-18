@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Channels vs Mutexes In Go - the Big Showdown</title>
+  <meta name="description" content="A comparison of channels and mutexes in Golang.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Channels vs Mutexes In Go - the Big Showdown">
+  <meta property="og:description" content="A comparison of channels and mutexes in Golang.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Channels vs Mutexes In Go - the Big Showdown">
+  <meta name="twitter:description" content="A comparison of channels and mutexes in Golang.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Channels vs Mutexes In Go - the Big Showdown</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-08-19T00:00:00.000Z">Tue Aug 19 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">concurrency</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Concurrency is Go's crown jewel - goroutines and channels make concurrent programming feel almost magical. But not every problem belongs in a channel. Many developers fall into the trap of overusing channels or misusing mutexes, resulting in slow, buggy, or unmaintainable code. In this article, we'll demystify <strong>when to use channels and when to use mutexes</strong>, and why blindly following &quot;Go concurrency patterns&quot; can backfire.</p>
+<h2 id="the-misconception" tabindex="-1"><a class="header-anchor" href="#the-misconception">The Misconception</a></h2>
+<p>Go's philosophy of &quot;do not communicate by sharing memory; share memory by communicating&quot; is often taken literally. Some gophers try to replace every mutex with a channel, thinking channels are the &quot;Go way&quot; to synchronize everything.</p>
+<p>But here's the hard truth: <strong>channels are not a free replacement for mutexes</strong>. They're great for coordinating goroutines, pipelines, and events - but not always the right tool for protecting shared state.</p>
+<p>On the surface, goroutines look more elegant, sure - and they are, in the right context. But trying to funnel all state access through channels, even for a simple counter or map, often leads to:</p>
+<ul>
+<li><strong>Unnecessary complexity</strong>: A simple counter increment can become dozens of lines of boilerplate channel code.</li>
+<li><strong>Performance penalties</strong>: Channels involve scheduling, allocation, and copying, so you're paying extra overhead where a mutex would suffice.</li>
+<li><strong>Subtle bugs</strong>: Improperly managed channels can deadlock or leak goroutines, sometimes in ways that are much harder to debug than a simple mutex.</li>
+</ul>
+<p>Example: Consider a simple counter that multiple goroutines increment. Using a channel for this can lead to complex and error-prone code, while a mutex would be straightforward and efficient:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// Using channels to protect a counter</span>
+<span class="token literal-property property">counter</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+<span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">)</span>
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token literal-property property">val</span> <span class="token operator">:</span><span class="token operator">=</span> range ch <span class="token punctuation">{</span>
+        counter <span class="token operator">+=</span> val
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">1</span>
+ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">1</span>
+<span class="token function">close</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span>
+</code></pre>
+<p>Ugh. This works, but it's overkill. A mutex does the same thing with less code and less overhead:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// Using a mutex to protect a counter</span>
+<span class="token keyword">var</span> mu sync<span class="token punctuation">.</span>Mutex
+<span class="token literal-property property">counter</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+
+mu<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+counter<span class="token operator">++</span>
+mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<h2 id="channels%3A-for-communication%2C-not-just-safety" tabindex="-1"><a class="header-anchor" href="#channels%3A-for-communication%2C-not-just-safety">Channels: For Communication, Not Just Safety</a></h2>
+<p>Channels shine when goroutines need to communicate or signal events. They can be used to implement fan-out/fan-in patterns, worker pools, or pipelines:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"fmt"</span>
+<span class="token punctuation">)</span>
+
+func <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">jobs</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">results</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Start 3 workers</span>
+	<span class="token keyword">for</span> <span class="token literal-property property">w</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> w <span class="token operator">&lt;</span> <span class="token number">3</span><span class="token punctuation">;</span> w<span class="token operator">++</span> <span class="token punctuation">{</span>
+		go <span class="token function">func</span><span class="token punctuation">(</span><span class="token parameter">id int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			<span class="token keyword">for</span> <span class="token literal-property property">j</span> <span class="token operator">:</span><span class="token operator">=</span> range jobs <span class="token punctuation">{</span>
+				results <span class="token operator">&lt;</span><span class="token operator">-</span> j <span class="token operator">*</span> <span class="token number">2</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span><span class="token punctuation">(</span>w<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Send jobs</span>
+	<span class="token keyword">for</span> <span class="token literal-property property">i</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;=</span> <span class="token number">5</span><span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+		jobs <span class="token operator">&lt;</span><span class="token operator">-</span> i
+	<span class="token punctuation">}</span>
+	<span class="token function">close</span><span class="token punctuation">(</span>jobs<span class="token punctuation">)</span>
+
+	<span class="token comment">// Collect results</span>
+	<span class="token keyword">for</span> <span class="token literal-property property">i</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">5</span><span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token operator">&lt;</span><span class="token operator">-</span>results<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Excellent for orchestrating goroutines.</li>
+<li>Can simplify complex coordination patterns.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Higher overhead than a mutex for simple state protection.</li>
+<li>Overcomplicates code if used for every shared variable.</li>
+</ul>
+<h2 id="mutexes%3A-the-right-tool-for-shared-state" tabindex="-1"><a class="header-anchor" href="#mutexes%3A-the-right-tool-for-shared-state">Mutexes: The Right Tool for Shared State</a></h2>
+<p>First of all, what is a mutex? A mutex (short for mutual exclusion) is a synchronization primitive that ensures only one goroutine (or thread) can access a piece of shared data at a time. It acts like a lock around critical sections, preventing race conditions when multiple goroutines attempt to read or write the same state concurrently.</p>
+<p>A <code>sync.Mutex</code> is designed to guard access to a shared resource. If you just need safe access to a map, counter, or struct, a mutex is often simpler and faster.</p>
+<p>Imagine you're maintaining a cache that multiple goroutines need to read and update. A <code>sync.Mutex</code> is the simplest and most efficient way to guard that shared map:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">var</span> <span class="token punctuation">(</span>
+    mu    sync<span class="token punctuation">.</span>Mutex
+    cache <span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>map<span class="token punctuation">[</span>string<span class="token punctuation">]</span>string<span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+
+func <span class="token function">set</span><span class="token punctuation">(</span>key<span class="token punctuation">,</span> value string<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	mu<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	defer mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	cache<span class="token punctuation">[</span>key<span class="token punctuation">]</span> <span class="token operator">=</span> value
+<span class="token punctuation">}</span>
+
+func <span class="token function">get</span><span class="token punctuation">(</span>key string<span class="token punctuation">)</span> <span class="token punctuation">(</span>string<span class="token punctuation">,</span> bool<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	mu<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	defer mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	v<span class="token punctuation">,</span> <span class="token literal-property property">ok</span> <span class="token operator">:</span><span class="token operator">=</span> cache<span class="token punctuation">[</span>key<span class="token punctuation">]</span>
+	<span class="token keyword">return</span> v<span class="token punctuation">,</span> ok
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Pros:</strong></p>
+<ul>
+<li>Extremely low overhead.</li>
+<li>Explicit locking makes reasoning about shared state straightforward.</li>
+<li>Predictable performance.</li>
+</ul>
+<p><strong>Cons:</strong></p>
+<ul>
+<li>Deadlocks if misused.</li>
+<li>Can be less elegant in complex pipelines or fan-out/fan-in patterns.</li>
+</ul>
+<h2 id="when-to-use-what" tabindex="-1"><a class="header-anchor" href="#when-to-use-what">When to Use What</a></h2>
+<table>
+<thead>
+<tr>
+<th>Use Case</th>
+<th>Recommended</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Protect a counter, map, or struct</td>
+<td><strong>Mutex</strong></td>
+</tr>
+<tr>
+<td>Implement a worker pool, pipeline, or event queue</td>
+<td><strong>Channel</strong></td>
+</tr>
+<tr>
+<td>Single producer → single consumer</td>
+<td>Channel works nicely</td>
+</tr>
+<tr>
+<td>Multiple goroutines updating the same state</td>
+<td>Mutex is usually simpler</td>
+</tr>
+</tbody>
+</table>
+<p>Rule of thumb: <strong>Use mutexes for shared state, channels for communication</strong>.</p>
+<h2 id="performance-reality" tabindex="-1"><a class="header-anchor" href="#performance-reality">Performance Reality</a></h2>
+<p>Benchmarks often surprise Go devs. Simple state mutations protected by mutexes are usually orders of magnitude faster than channel-based approaches because channels involve allocation, scheduling, and copying:</p>
+<ul>
+<li>Mutexes are extremely lightweight. They’re implemented in Go’s runtime using efficient atomic operations. Locking and unlocking often cost only a few nanoseconds.</li>
+<li>Channels, on the other hand, involve more moving parts. Sending or receiving on a channel may trigger:
+<ul>
+<li>Memory allocation for the buffered/unbuffered queue.</li>
+<li>Scheduling of waiting goroutines.</li>
+<li>Potential context switching if the receiver isn't ready.</li>
+</ul>
+</li>
+</ul>
+<p>That extra bookkeeping makes channels slower when all you need is to guard a shared variable.</p>
+<h3 id="benchmark%3A-mutex-vs-channel-counter" tabindex="-1"><a class="header-anchor" href="#benchmark%3A-mutex-vs-channel-counter">Benchmark: Mutex vs Channel Counter</a></h3>
+<p>Let's put this to the test with Go's benchmarking framework:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"sync"</span>
+	<span class="token string">"testing"</span>
+<span class="token punctuation">)</span>
+
+func <span class="token function">BenchmarkMutexCounter</span><span class="token punctuation">(</span><span class="token parameter">b <span class="token operator">*</span>testing<span class="token punctuation">.</span><span class="token constant">B</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">var</span> mu sync<span class="token punctuation">.</span>Mutex
+	<span class="token literal-property property">counter</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+
+	b<span class="token punctuation">.</span><span class="token function">RunParallel</span><span class="token punctuation">(</span><span class="token function">func</span><span class="token punctuation">(</span><span class="token parameter">pb <span class="token operator">*</span>testing<span class="token punctuation">.</span><span class="token constant">PB</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">for</span> pb<span class="token punctuation">.</span><span class="token function">Next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			mu<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+			counter<span class="token operator">++</span>
+			mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">BenchmarkChannelCounter</span><span class="token punctuation">(</span><span class="token parameter">b <span class="token operator">*</span>testing<span class="token punctuation">.</span><span class="token constant">B</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">counter</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+	<span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">,</span> <span class="token number">1000</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Goroutine that serializes all increments</span>
+	go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">for</span> <span class="token literal-property property">v</span> <span class="token operator">:</span><span class="token operator">=</span> range ch <span class="token punctuation">{</span>
+			counter <span class="token operator">+=</span> v
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	b<span class="token punctuation">.</span><span class="token function">RunParallel</span><span class="token punctuation">(</span><span class="token function">func</span><span class="token punctuation">(</span><span class="token parameter">pb <span class="token operator">*</span>testing<span class="token punctuation">.</span><span class="token constant">PB</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">for</span> pb<span class="token punctuation">.</span><span class="token function">Next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">1</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+	<span class="token function">close</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>And here’s an example of what the results might look like on a typical laptop (Go 1.23, 8-core CPU):</p>
+<pre class="language-"><code class="language-">BenchmarkMutexCounter<span class="token operator">-</span><span class="token number">8</span>      <span class="token number">1000000000</span>   <span class="token number">0.8</span> ns<span class="token operator">/</span>op
+BenchmarkChannelCounter<span class="token operator">-</span><span class="token number">8</span>     <span class="token number">20000000</span>    <span class="token number">60</span> ns<span class="token operator">/</span>op
+</code></pre>
+<p>Now obviously real-world workloads might slightly differ from synthetic benchmarks (e.g., context switches, OS scheduling etc.) but that's a <strong>~75× performance difference in favor of the mutex</strong>!</p>
+<p>So why the huge gap? The mutex path is just an atomic operation to acquire/release the lock. The channel path involves synchronization between two goroutines, queue management, and possibly waking up a sleeping goroutine.</p>
+<p>This demonstrates why mutexes are the right tool for protecting simple shared state.</p>
+<h2 id="real-world-examples" tabindex="-1"><a class="header-anchor" href="#real-world-examples">Real-World Examples</a></h2>
+<h3 id="1.-web-server-request-counting" tabindex="-1"><a class="header-anchor" href="#1.-web-server-request-counting">1. Web Server Request Counting</a></h3>
+<p>Imagine you're running an HTTP server and want to count requests:</p>
+<ul>
+<li>Mutex version: Fast, scalable, and works fine under load.</li>
+<li>Channel version: Every request handler has to ship a message through a channel, creating a bottleneck and slowing down throughput.</li>
+</ul>
+<p>In production, that's the difference between comfortably handling 100k requests/sec and falling behind at 10k requests/sec.</p>
+<h3 id="2.-shared-cache" tabindex="-1"><a class="header-anchor" href="#2.-shared-cache">2. Shared Cache</a></h3>
+<p>If multiple goroutines read and write a cache (like map[string]User), a mutex is perfect. Reads and writes happen inline with minimal cost.</p>
+<p>With a channel-based &quot;cache manager goroutine&quot;, every single read/write becomes a request–response round trip. Instead of O(1) map lookups, you now have O(1) + channel send/receive + scheduling. This introduces latency and makes your cache slower than just hitting the database in some cases.</p>
+<h3 id="3.-worker-pool-for-task-processing" tabindex="-1"><a class="header-anchor" href="#3.-worker-pool-for-task-processing">3. Worker Pool for Task Processing</a></h3>
+<p>With a mutex you could have a slice of tasks, protect it with a sync.Mutex, and have multiple goroutines pull work out of it. Each goroutine locks, pops a task, unlocks, processes, and repeats.</p>
+<p>But with channels, you can just push tasks into a job channel, spin up N workers, and let them consume concurrently:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">jobs</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan string<span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
+<span class="token literal-property property">results</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan string<span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
+
+<span class="token keyword">for</span> <span class="token literal-property property">w</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> w <span class="token operator">&lt;</span> <span class="token number">5</span><span class="token punctuation">;</span> w<span class="token operator">++</span> <span class="token punctuation">{</span>
+    go <span class="token function">func</span><span class="token punctuation">(</span><span class="token parameter">id int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token keyword">for</span> <span class="token literal-property property">job</span> <span class="token operator">:</span><span class="token operator">=</span> range jobs <span class="token punctuation">{</span>
+            results <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token function">process</span><span class="token punctuation">(</span>job<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">(</span>w<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">j</span> <span class="token operator">:</span><span class="token operator">=</span> range <span class="token punctuation">[</span><span class="token punctuation">]</span>string<span class="token punctuation">{</span><span class="token string">"a"</span><span class="token punctuation">,</span> <span class="token string">"b"</span><span class="token punctuation">,</span> <span class="token string">"c"</span><span class="token punctuation">}</span> <span class="token punctuation">{</span>
+    jobs <span class="token operator">&lt;</span><span class="token operator">-</span> j
+<span class="token punctuation">}</span>
+<span class="token function">close</span><span class="token punctuation">(</span>jobs<span class="token punctuation">)</span>
+</code></pre>
+<p>Here, channels are a natural fit because the problem is work distribution, not just shared memory safety.</p>
+<p>Using a mutex would require writing your own coordination logic, which is more error-prone and less readable.</p>
+<h3 id="4.-event-notifications-%2F-pub-sub" tabindex="-1"><a class="header-anchor" href="#4.-event-notifications-%2F-pub-sub">4. Event Notifications / Pub-Sub</a></h3>
+<p>With a mutex, you could maintain a slice of subscribers guarded by a mutex. Every time an event happens, you'd lock, loop over subscribers, and call their handler functions. This works, but it mixes synchronization, iteration, and business logic.</p>
+<p>Why goroutines + channels are better: channels let you decouple event production from consumption. Each subscriber can listen on its own channel and handle events at its own pace:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">subscribers</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>chan string<span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+func <span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span> chan string <span class="token punctuation">{</span>
+    <span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan string<span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span>
+    subscribers <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>subscribers<span class="token punctuation">,</span> ch<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> ch
+<span class="token punctuation">}</span>
+
+func <span class="token function">publish</span><span class="token punctuation">(</span><span class="token parameter">event string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> range subscribers <span class="token punctuation">{</span>
+        ch <span class="token operator">&lt;</span><span class="token operator">-</span> event
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Now you can spin up independent goroutines for each subscriber:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">sub</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">subscribe</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">for</span> <span class="token literal-property property">msg</span> <span class="token operator">:</span><span class="token operator">=</span> range sub <span class="token punctuation">{</span>
+        fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Received:"</span><span class="token punctuation">,</span> msg<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token function">publish</span><span class="token punctuation">(</span><span class="token string">"user_signed_in"</span><span class="token punctuation">)</span>
+<span class="token function">publish</span><span class="token punctuation">(</span><span class="token string">"user_signed_out"</span><span class="token punctuation">)</span>
+</code></pre>
+<p>With goroutines + channels, events flow asynchronously, subscribers don't block each other, and backpressure (buffered/unbuffered channels) is easy to model.</p>
+<p>Doing the same with a mutex-based subscriber list quickly becomes messy, especially if one subscriber is slow or blocks.</p>
+<h2 id="other-concurrency-primitives-in-go" tabindex="-1"><a class="header-anchor" href="#other-concurrency-primitives-in-go">Other Concurrency Primitives in Go</a></h2>
+<p>While mutexes and channels are the most common tools, Go's standard library includes a few other primitives worth knowing:</p>
+<ul>
+<li>
+<p><code>sync.RWMutex</code>: A variation of <code>sync.Mutex</code> that allows multiple readers to hold the lock simultaneously, but only one writer at a time. Useful for read-heavy workloads like caches.</p>
+</li>
+<li>
+<p><code>sync.Cond</code>: A condition variable that lets goroutines wait until a certain condition is met. More advanced than channels, but sometimes useful for implementing custom coordination patterns.</p>
+</li>
+<li>
+<p><code>sync.Once</code>: Ensures a piece of code runs only once, even if called from multiple goroutines. Commonly used for lazy initialization.</p>
+</li>
+<li>
+<p><code>sync.WaitGroup</code>: Waits for a collection of goroutines to finish. Perfect for spawning workers and waiting for them to complete before moving on.</p>
+</li>
+<li>
+<p><code>sync/atomic</code>: Provides low-level atomic operations (like atomic.AddInt64) for lock-free access to basic types. Often the fastest solution for counters and flags.</p>
+</li>
+</ul>
+<p>These tools complement mutexes and channels. For example, you might use a <code>sync.WaitGroup</code> to wait for a batch of goroutines to finish processing before sending a final result on a channel.</p>
+<p>Or the counter example with <code>sync/atomic</code> for lock-free incrementing:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"fmt"</span>
+	<span class="token string">"sync/atomic"</span>
+<span class="token punctuation">)</span>
+
+func <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">var</span> counter int64
+
+	<span class="token comment">// Increment atomically</span>
+	atomic<span class="token punctuation">.</span><span class="token function">AddInt64</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>counter<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Read atomically</span>
+	<span class="token literal-property property">value</span> <span class="token operator">:</span><span class="token operator">=</span> atomic<span class="token punctuation">.</span><span class="token function">LoadInt64</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>counter<span class="token punctuation">)</span>
+
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Counter:"</span><span class="token punctuation">,</span> value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This is often the fastest option for simple counters and flags because it avoids lock contention altogether.</p>
+<p>If we extend our benchmark from above:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">BenchmarkAtomicCounter</span><span class="token punctuation">(</span><span class="token parameter">b <span class="token operator">*</span>testing<span class="token punctuation">.</span><span class="token constant">B</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">var</span> counter int64
+
+	b<span class="token punctuation">.</span><span class="token function">RunParallel</span><span class="token punctuation">(</span><span class="token function">func</span><span class="token punctuation">(</span><span class="token parameter">pb <span class="token operator">*</span>testing<span class="token punctuation">.</span><span class="token constant">PB</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token keyword">for</span> pb<span class="token punctuation">.</span><span class="token function">Next</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			atomic<span class="token punctuation">.</span><span class="token function">AddInt64</span><span class="token punctuation">(</span><span class="token operator">&amp;</span>counter<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The results would be something like this:</p>
+<pre class="language-"><code class="language-">BenchmarkAtomicCounter<span class="token operator">-</span><span class="token number">8</span>    <span class="token number">1000000000</span>   <span class="token number">0.3</span> ns<span class="token operator">/</span>op
+BenchmarkMutexCounter<span class="token operator">-</span><span class="token number">8</span>     <span class="token number">1000000000</span>   <span class="token number">0.8</span> ns<span class="token operator">/</span>op
+BenchmarkChannelCounter<span class="token operator">-</span><span class="token number">8</span>     <span class="token number">20000000</span>   <span class="token number">60</span> ns<span class="token operator">/</span>op
+</code></pre>
+<p>Notice how atomic operations are ~2–3× faster than mutexes, while channels are orders of magnitude slower for this use case. It's a shame atomic operations are extremely limited: they only work on individual variables and basic types.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Mutexes are perfect for protecting state. Channels shine when you need to coordinate or distribute work/events.</p>
+<p>But many Go developers try to force channels into every concurrency problem because they feel more &quot;idiomatic.&quot; In reality, channels are not inherently better than mutexes. They're tools for communication, not a silver bullet. It's also important to note that <strong>channels and mutexes are not mutually exclusive</strong> - sometimes you'll combine them (e.g., worker pool with channel + shared stats protected by mutex). Think of channels as &quot;communication highways&quot; and mutexes as &quot;traffic lights&quot; for shared memory - each has its place.</p>
+<p>Overusing channels is a common beginner trap and leads to code that is harder to read, slower to run, and more error-prone — the exact opposite of Go's philosophy of simplicity. Just don't overthink it: <strong>mutexes for state, channels for communication</strong>.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
