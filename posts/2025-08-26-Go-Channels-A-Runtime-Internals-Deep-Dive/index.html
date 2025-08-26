@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Go Channels: A Runtime Internals Deep Dive</title>
+  <meta name="description" content="A deep-dive into Go&#39;s channel internals.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Go Channels: A Runtime Internals Deep Dive">
+  <meta property="og:description" content="A deep-dive into Go&#39;s channel internals.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Go Channels: A Runtime Internals Deep Dive">
+  <meta name="twitter:description" content="A deep-dive into Go&#39;s channel internals.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Go Channels: A Runtime Internals Deep Dive</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-08-26T00:00:00.000Z">Tue Aug 26 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">concurrency</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Go channels are one of the language's signature features. They provide a structured way for goroutines to communicate and coordinate. Instead of manually sharing memory and managing locks, channels let goroutines send and receive values directly, ensuring that data is transferred correctly and synchronization is handled automatically.</p>
+<p>But what really happens when we write something like:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">)</span>
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">42</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token literal-property property">value</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ch
+</code></pre>
+<p>Under the hood, channels are not magic. They are a carefully engineered data structure in the Go runtime, combining a ring buffer, wait queues, and integration with the scheduler. In this post, we'll explore the internals: how channels are represented, how send and receive operations work, what happens when you close a channel, how <code>select</code> interacts with channels, and how the scheduler and memory model come into play.</p>
+<h2 id="historical-context" tabindex="-1"><a class="header-anchor" href="#historical-context">Historical Context</a></h2>
+<p>Go didn't invent the concept of channels. They are inspired by <strong>Communicating Sequential Processes (CSP)</strong>, introduced by Tony Hoare in 1978. The core idea: processes don't share memory directly, they communicate by passing messages.</p>
+<p>Other influences include:</p>
+<ul>
+<li><strong>Occam</strong>, a CSP-based language for the Transputer.</li>
+<li><strong>Limbo/Newsqueak</strong>, which brought message-passing concurrency to Plan 9.</li>
+<li><strong>Rob Pike</strong> and <strong>Ken Thompson</strong>’s work on Plan 9, emphasizing simplicity and safe concurrent patterns.</li>
+</ul>
+<p>The channel primitive embodies the CSP principle that underpins Go's concurrency philosophy: <em>don't communicate by sharing memory; share memory by communicating.</em></p>
+<p>In contrast to Java's <code>BlockingQueue</code> or pthreads condition variables, Go chose to make channels built into the language, with first-class syntax and tight runtime integration. This allows channels to express communication patterns naturally while remaining safe and type-checked.</p>
+<h2 id="hchan%3A-memory-layout-%26-implementation-details" tabindex="-1"><a class="header-anchor" href="#hchan%3A-memory-layout-%26-implementation-details"><code>hchan</code>: Memory Layout &amp; Implementation Details</a></h2>
+<p>Every channel created with <code>make(chan T, N)</code> is represented internally by an <code>hchan</code> struct. Here's a simplified view:</p>
+<pre class="language-go"><code class="language-go">type hchan struct <span class="token punctuation">{</span>
+    qcount   uint           <span class="token comment">// number of elements in the buffer</span>
+    dataqsiz uint           <span class="token comment">// buffer capacity</span>
+    buf      unsafe<span class="token punctuation">.</span>Pointer <span class="token comment">// circular buffer for elements</span>
+    elemsize uint16         <span class="token comment">// size of each element</span>
+    closed   uint32         <span class="token comment">// is channel closed?</span>
+
+    sendx    uint32         <span class="token comment">// send index into buffer</span>
+    recvx    uint32         <span class="token comment">// receive index into buffer</span>
+
+    recvq    waitq          <span class="token comment">// waiting receivers</span>
+    sendq    waitq          <span class="token comment">// waiting senders</span>
+
+    lock     mutex
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Fields Breakdown:</p>
+<ul>
+<li><strong>Ring buffer</strong>: Buffered channels use <code>buf</code> as a circular array. <code>sendx</code> and <code>recvx</code> wrap around modulo buffer size.</li>
+<li><strong>Goroutine queues</strong>: <code>recvq</code> and <code>sendq</code> are linked lists of blocked goroutines, each represented as a <code>sudog</code> in the runtime. We'll briefly touch on <code>sudog</code> in the next section.</li>
+<li><strong>Closed flag</strong>: Once set, it changes the semantics of send and receive.</li>
+<li><strong>Lock</strong>: Each operation on a channel acquires the lock to maintain consistency.</li>
+</ul>
+<p>The memory layout is designed for fast common paths:</p>
+<ul>
+<li>The buffer is contiguous in memory, improving cache locality.</li>
+<li>The queues are lightweight linked lists, avoiding large allocations unless many goroutines are blocked.</li>
+<li>Fields like <code>sendx</code>, <code>recvx</code>, and <code>qcount</code> allow the runtime to quickly determine whether a send/receive can proceed immediately.</li>
+</ul>
+<p><code>hchan</code> is allocated on the heap. That means it's managed by Go's garbage collector just like slices, maps, or other heap objects. When there are no references to a channel, the <code>hchan</code> header and its associated buffer become eligible for collection.</p>
+<p>Concurrency control is provided by the embedded lock (<code>hchan.lock</code>). Internally, Go uses a spin–mutex hybrid strategy for this lock: in the uncontended case, goroutines may briefly spin to acquire it, avoiding expensive context switches. Under contention, they fall back to a traditional mutex with queuing. This design reduces overhead for high-frequency channel operations while still handling contention robustly.</p>
+<p>Together, these details make <code>hchan</code> both lightweight enough for everyday concurrency and sophisticated enough to handle thousands of goroutines hammering the same channel under load.</p>
+<h2 id="sudog-in-the-go-runtime" tabindex="-1"><a class="header-anchor" href="#sudog-in-the-go-runtime"><code>sudog</code> in the Go Runtime</a></h2>
+<p>A <code>sudog</code> (&quot;suspended goroutine&quot;) is an internal runtime structure that represents a goroutine waiting on a channel operation.</p>
+<p>The naming comes from old Plan 9/Alef/Inferno runtime code, which influenced Go's runtime. In that lineage, <em>su</em> stood for <em>synchronous</em>, so <code>sudog</code> means something closer to <em>synchronous goroutine record</em>.</p>
+<p>When a goroutine tries to send or receive on a channel and can't proceed immediately (because there's no matching receiver/sender):</p>
+<ol>
+<li>The goroutine is marked as waiting.</li>
+<li>The runtime creates or reuses a sudog object to store metadata about that wait.</li>
+<li>This <code>sudog</code> is put into the channel's wait queue (a linked list for senders and another for receivers).</li>
+<li>When a matching operation happens, the <code>sudog</code> is popped off the queue, and the corresponding goroutine is woken up.</li>
+</ol>
+<h3 id="what's-inside-a-sudog%3F" tabindex="-1"><a class="header-anchor" href="#what's-inside-a-sudog%3F">What's Inside a sudog?</a></h3>
+<p>From the Go runtime source (<code>runtime/runtime2.go</code>), a <code>sudog</code> holds:</p>
+<ul>
+<li>A pointer to the goroutine (<code>*g</code>) that's blocked.</li>
+<li>The element pointer (<code>elem</code>) for the value being sent/received.</li>
+<li>The channel it's waiting on.</li>
+<li>Links to the next/previous <code>sudog</code> in the wait queue.</li>
+<li>Debug/synchronization fields (like stack position, select cases, etc.).</li>
+</ul>
+<p>In simplified pseudocode:</p>
+<pre class="language-go"><code class="language-go">type sudog struct <span class="token punctuation">{</span>
+    g     <span class="token operator">*</span>g       <span class="token comment">// the waiting goroutine</span>
+    elem  unsafe<span class="token punctuation">.</span>Pointer <span class="token comment">// value being sent/received</span>
+    c     <span class="token operator">*</span>hchan   <span class="token comment">// channel this sudog is tied to</span>
+    next  <span class="token operator">*</span>sudog   <span class="token comment">// linked-list pointer</span>
+    prev  <span class="token operator">*</span>sudog
+    <span class="token comment">// ... other bookkeeping</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>So the <code>sudog</code> is the &quot;ticket&quot; that says:</p>
+<blockquote>
+<p>This goroutine <strong>G</strong> is parked on channel <strong>C</strong>, waiting to send/receive the value at elem.</p>
+</blockquote>
+<h3 id="lifecycle-of-a-sudog" tabindex="-1"><a class="header-anchor" href="#lifecycle-of-a-sudog">Lifecycle of a <code>sudog</code></a></h3>
+<ul>
+<li>Created/attached when a goroutine blocks on <code>ch &lt;- x</code> or <code>&lt;-ch</code>.</li>
+<li>Enqueued into either the send queue or receive queue inside the channel (<code>hchan</code>).</li>
+<li>Dequeued when a matching operation arrives.</li>
+<li>Used to resume the blocked goroutine by handing its value off and scheduling it runnable again.</li>
+<li>Recycled by the runtime's pool for reuse (to avoid allocations every time).</li>
+</ul>
+<h3 id="why-not-just-store-the-goroutine%3F" tabindex="-1"><a class="header-anchor" href="#why-not-just-store-the-goroutine%3F">Why Not Just Store the Goroutine?</a></h3>
+<p>Because the runtime needs extra context: not only which goroutine is waiting, but also what it's doing (sending or receiving, which channel, which value pointer, which select case). The <code>sudog</code> bundles all of that into a single structure.</p>
+<p>A key detail is that <code>sudog</code>s are pooled and reused by the runtime. This reduces garbage collector pressure, since channel-heavy programs (like servers handling thousands of goroutines) would otherwise generate massive amounts of short-lived allocations every time a goroutine blocks.</p>
+<p>Another subtlety: a single goroutine can be represented by multiple <code>sudog</code>s at once. This happens in a select statement, where the same goroutine is registered as waiting on several channels simultaneously. When one case succeeds, the runtime cancels the others and recycles those extra <code>sudog</code>s.</p>
+<h2 id="lifecycle-of-send%2Freceive" tabindex="-1"><a class="header-anchor" href="#lifecycle-of-send%2Freceive">Lifecycle of Send/Receive</a></h2>
+<p>Channel operations have a multi-step journey that ensures correctness under concurrency. Let's break down both sending and receiving:</p>
+<h3 id="sending-a-value-(ch-%3C--v)" tabindex="-1"><a class="header-anchor" href="#sending-a-value-(ch-%3C--v)">Sending a Value (<code>ch &lt;- v</code>)</a></h3>
+<p><strong>1. Acquire lock</strong></p>
+<ul>
+<li>Every send operation starts by acquiring the channel’s mutex.</li>
+<li>This ensures that multiple goroutines attempting to send or receive simultaneously do not corrupt internal state.</li>
+</ul>
+<p><strong>2. Check waiting receivers</strong></p>
+<ul>
+<li>If a receiver is blocked in <code>recvq</code>, the runtime can immediately copy the value to the receiver's stack.</li>
+<li>This is the fast path: no buffering is necessary, and both goroutines can proceed immediately.</li>
+<li>Edge case: if multiple receivers are waiting, the runtime dequeues one at a time in FIFO order to maintain fairness.</li>
+</ul>
+<p><strong>3. Check buffer availability (for buffered channels)</strong></p>
+<ul>
+<li>If no receiver is waiting, the send checks if the buffer has space.</li>
+<li>If space exists:
+<ul>
+<li>Place the value at <code>buf[sendx]</code>.</li>
+<li>Increment <code>sendx</code> (modulo buffer size).</li>
+<li>Increment <code>qcount</code>.</li>
+<li>Release the lock and return.</li>
+</ul>
+</li>
+<li>Edge case: high contention may cause the buffer to fill rapidly. The runtime ensures that multiple senders do not overwrite each other by keeping the mutex locked during the insertion.</li>
+</ul>
+<p><strong>4. Block if necessary</strong></p>
+<ul>
+<li>If the buffer is full and no receiver is waiting:
+<ul>
+<li>Create a <code>sudog</code> structure representing the current goroutine and its value.</li>
+<li>Enqueue it in <code>sendq</code>.</li>
+<li>Park the goroutine, the scheduler removes it from the run queue.</li>
+</ul>
+</li>
+<li>When a slot becomes available (either a receiver consumes from the buffer or another sender is dequeued due to a <code>select</code> wakeup), the goroutine is unparked.</li>
+</ul>
+<p><strong>5. Edge cases</strong></p>
+<ul>
+<li>Sending on a closed channel immediately panics.</li>
+<li>Multiple blocked senders: senders are dequeued in FIFO order to avoid starvation.</li>
+<li>Spurious wakeups: the scheduler may wake a goroutine that finds the buffer still full, it will requeue itself.</li>
+</ul>
+<h3 id="receiving-a-value-(x-%3A%3D-%3C-ch)" tabindex="-1"><a class="header-anchor" href="#receiving-a-value-(x-%3A%3D-%3C-ch)">Receiving a Value (<code>x := &lt;-ch</code>)</a></h3>
+<p><strong>1. Acquire lock</strong></p>
+<ul>
+<li>Protects access to the buffer and queues.</li>
+</ul>
+<p><strong>2. Check waiting senders</strong></p>
+<ul>
+<li>If a sender is blocked in <code>sendq</code>:
+<ul>
+<li>Copy the sender’s value directly to the receiver’s stack.</li>
+<li>Wake the sender.</li>
+<li>Return immediately.</li>
+</ul>
+</li>
+<li>Edge case: multiple senders waiting for an empty buffer - runtime dequeues one sender per receive, ensuring order and fairness.</li>
+</ul>
+<p><strong>3. Check buffer content</strong></p>
+<ul>
+<li>If buffered values exist:
+<ul>
+<li>Take the element at <code>buf[recvx]</code>.</li>
+<li>Increment <code>recvx</code>.</li>
+<li>Decrement <code>qcount</code>.</li>
+<li>Return immediately.</li>
+</ul>
+</li>
+<li>Edge case: a buffered channel that is near empty may have multiple receivers contending - lock ensures one receiver consumes each element safely.</li>
+</ul>
+<p><strong>4. Check closed channel</strong></p>
+<ul>
+<li>If the channel is closed and the buffer is empty, the receiver returns the zero value.</li>
+<li>Any subsequent receives continue to return zero values without blocking.</li>
+</ul>
+<p><strong>5. Block if necessary</strong></p>
+<ul>
+<li>If no data is available and the channel is open:
+<ul>
+<li>Create a <code>sudog</code> representing the receiver.</li>
+<li>Enqueue it in <code>recvq</code>.</li>
+<li>Park the goroutine until a value becomes available.</li>
+</ul>
+</li>
+</ul>
+<p><strong>6. Edge cases</strong></p>
+<ul>
+<li>Multiple blocked receivers on a channel that becomes closed: all are unparked and see zero values.</li>
+<li>Receivers that wake up due to a sender being unblocked from a select statement handle the value correctly, even under high concurrency.</li>
+</ul>
+<h3 id="simplified-pseudo-code%3A-chansend-%2F-chanrecv" tabindex="-1"><a class="header-anchor" href="#simplified-pseudo-code%3A-chansend-%2F-chanrecv">Simplified Pseudo-Code: <code>chansend</code> / <code>chanrecv</code></a></h3>
+<pre class="language-go"><code class="language-go">func <span class="token function">chansend</span><span class="token punctuation">(</span><span class="token parameter">c <span class="token operator">*</span>hchan<span class="token punctuation">,</span> val <span class="token constant">T</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">lock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+
+    <span class="token keyword">if</span> <span class="token literal-property property">receiver</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">dequeue</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>recvq<span class="token punctuation">)</span><span class="token punctuation">;</span> receiver <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+        <span class="token function">copy</span><span class="token punctuation">(</span>val<span class="token punctuation">,</span> receiver<span class="token punctuation">.</span>stackslot<span class="token punctuation">)</span>
+        <span class="token function">ready</span><span class="token punctuation">(</span>receiver<span class="token punctuation">)</span>
+        <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+        <span class="token keyword">return</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> c<span class="token punctuation">.</span>qcount <span class="token operator">&lt;</span> c<span class="token punctuation">.</span>dataqsiz <span class="token punctuation">{</span>
+        c<span class="token punctuation">.</span>buf<span class="token punctuation">[</span>c<span class="token punctuation">.</span>sendx<span class="token punctuation">]</span> <span class="token operator">=</span> val
+        c<span class="token punctuation">.</span>sendx <span class="token operator">=</span> <span class="token punctuation">(</span>c<span class="token punctuation">.</span>sendx <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> c<span class="token punctuation">.</span>dataqsiz
+        c<span class="token punctuation">.</span>qcount<span class="token operator">++</span>
+        <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+        <span class="token keyword">return</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">enqueue</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>sendq<span class="token punctuation">,</span> currentGoroutine<span class="token punctuation">,</span> val<span class="token punctuation">)</span>
+    <span class="token function">park</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-go"><code class="language-go">func <span class="token function">chanrecv</span><span class="token punctuation">(</span>c <span class="token operator">*</span>hchan<span class="token punctuation">)</span> <span class="token punctuation">(</span>val <span class="token constant">T</span><span class="token punctuation">,</span> ok bool<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">lock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+
+    <span class="token keyword">if</span> <span class="token literal-property property">sender</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">dequeue</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>sendq<span class="token punctuation">)</span><span class="token punctuation">;</span> sender <span class="token operator">!=</span> nil <span class="token punctuation">{</span>
+        val <span class="token operator">=</span> sender<span class="token punctuation">.</span>val
+        <span class="token function">ready</span><span class="token punctuation">(</span>sender<span class="token punctuation">)</span>
+        <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> val<span class="token punctuation">,</span> <span class="token boolean">true</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> c<span class="token punctuation">.</span>qcount <span class="token operator">></span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        val <span class="token operator">=</span> c<span class="token punctuation">.</span>buf<span class="token punctuation">[</span>c<span class="token punctuation">.</span>recvx<span class="token punctuation">]</span>
+        c<span class="token punctuation">.</span>recvx <span class="token operator">=</span> <span class="token punctuation">(</span>c<span class="token punctuation">.</span>recvx <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> c<span class="token punctuation">.</span>dataqsiz
+        c<span class="token punctuation">.</span>qcount<span class="token operator">--</span>
+        <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> val<span class="token punctuation">,</span> <span class="token boolean">true</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">if</span> c<span class="token punctuation">.</span>closed <span class="token operator">!=</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+        <span class="token keyword">return</span> <span class="token function">zeroValue</span><span class="token punctuation">(</span><span class="token constant">T</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token boolean">false</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token function">enqueue</span><span class="token punctuation">(</span>c<span class="token punctuation">.</span>recvq<span class="token punctuation">,</span> currentGoroutine<span class="token punctuation">)</span>
+    <span class="token function">park</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token function">unlock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
+    <span class="token keyword">return</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="direct-stack-copy-vs.-buffered-copy" tabindex="-1"><a class="header-anchor" href="#direct-stack-copy-vs.-buffered-copy">Direct Stack Copy vs. Buffered Copy</a></h3>
+<p>An important optimization in Go's channel implementation is how values are copied:</p>
+<ul>
+<li><strong>Buffered path:</strong> if the channel has a buffer and it's not full, a sender copies its value into the heap-allocated channel buffer. Later, when a receiver comes along, the value is copied again - from the buffer into the receiver's stack. That's two memory moves, plus buffer bookkeeping.</li>
+<li><strong>Unbuffered (synchronous) path:</strong> if a receiver is already waiting, the sender bypasses the buffer entirely. The runtime copies the value directly from the sender's stack frame into the receiver's stack frame. This avoids the intermediate heap write and read, making synchronous sends/receives about as efficient as they can be.</li>
+</ul>
+<p>This is part of why unbuffered channels are sometimes faster than buffered ones under low contention: fewer memory touches and no extra buffer indirection.</p>
+<p>It also explains why channels can safely transfer values without data races: because the handoff is done via controlled stack or buffer copies managed by the runtime, not by exposing shared mutable memory.</p>
+<h2 id="closing-channels" tabindex="-1"><a class="header-anchor" href="#closing-channels">Closing Channels</a></h2>
+<p>Closing a channel is more complex than it seems due to multiple goroutines potentially waiting to send or receive.</p>
+<h3 id="step-by-step-behavior" tabindex="-1"><a class="header-anchor" href="#step-by-step-behavior">Step-by-Step Behavior</a></h3>
+<p><strong>1. Acquire lock</strong></p>
+<ul>
+<li>Ensures the channel state is updated atomically.</li>
+</ul>
+<p><strong>2. Set <code>closed</code> flag</strong></p>
+<ul>
+<li>Changes semantics for all future sends and receives.</li>
+</ul>
+<p><strong>3. Wake all receivers</strong></p>
+<ul>
+<li>Every goroutine in <code>recvq</code> is unparked.</li>
+<li>They attempt to receive: if the buffer still has elements, they get real data; if the buffer is empty, they receive zero values.</li>
+</ul>
+<p><strong>4. Wake all senders</strong></p>
+<ul>
+<li>Every goroutine in <code>sendq</code> is unparked.</li>
+<li>Each sender panics because sending on a closed channel is invalid.</li>
+</ul>
+<p><strong>5. Edge Cases / Race Conditions</strong></p>
+<ul>
+<li>Multiple goroutines blocked on send: all are unparked and panic safely.</li>
+<li>Receivers and buffer race: receivers see buffered values first before zero values.</li>
+<li>Closing twice: runtime detects <code>closed</code> flag and panics.</li>
+<li>Concurrent send during close: if a goroutine manages to reach the send path simultaneously with closing, the mutex ensures the send sees the channel as closed and panics, avoiding undefined behavior.</li>
+</ul>
+<p><strong>6. Notes on fairness</strong></p>
+<ul>
+<li>FIFO ordering ensures that blocked receivers and senders are woken in a predictable order.</li>
+<li>Even under high contention, the runtime prevents starvation while maintaining correctness.</li>
+</ul>
+<h2 id="select-internals" tabindex="-1"><a class="header-anchor" href="#select-internals"><code>select</code> Internals</a></h2>
+<p>The <code>select</code> statement in Go allows a goroutine to wait on multiple channel operations simultaneously. Its power comes from combining non-determinism (randomized choice when multiple channels are ready) with safety (proper synchronization and fairness). Internally, <code>select</code> is implemented using structures and algorithms in the runtime that ensure correct behavior even under high contention.</p>
+<h3 id="how-select-works" tabindex="-1"><a class="header-anchor" href="#how-select-works">How <code>select</code> Works</a></h3>
+<p><strong>1. Compile-time representation:</strong> each case in a select statement is represented at runtime as an <code>scase</code> struct. It contains:</p>
+<ul>
+<li>A reference to the channel (<code>hchan</code>) involved.</li>
+<li>Whether the operation is a send or receive.</li>
+<li>The value to send (if applicable).</li>
+<li>Pointers to the goroutine’s stack slots for receives.</li>
+<li>Flags indicating readiness and selection status.</li>
+</ul>
+<p><strong>2. Randomized selection:</strong> when multiple cases are ready, Go runtime picks one pseudo-randomly to avoid starvation. This ensures that a channel that’s always ready does not permanently dominate other channels.</p>
+<p><strong>3. Blocking behavior</strong></p>
+<ul>
+<li>If at least one case is ready, <code>select</code> immediately executes one of them and proceeds.</li>
+<li>If no case is ready and there is no <code>default</code>, the goroutine is enqueued on all involved channels and parked.</li>
+<li>If a <code>default</code> case exists, the runtime executes it immediately, bypassing blocking.</li>
+</ul>
+<p><strong>4. Queue management:</strong> each channel's <code>sendq</code> or <code>recvq</code> may contain multiple goroutines waiting from various select statements.</p>
+<ul>
+<li>The runtime tracks which <code>select</code> cases are waiting to ensure that when a channel becomes ready, only one waiting goroutine per channel is woken and chosen correctly.</li>
+</ul>
+<p><strong>5. Wakeup and execution:</strong> when a channel in the select becomes ready:</p>
+<ul>
+<li>The scheduler wakes one of the waiting goroutines.</li>
+<li>The runtime determines which case of the select this goroutine represents.</li>
+<li>It executes that case and resumes execution immediately after the select statement.</li>
+</ul>
+<h3 id="example-scenarios" tabindex="-1"><a class="header-anchor" href="#example-scenarios">Example Scenarios</a></h3>
+<p><strong>Scenario 1: Multiple ready channels</strong></p>
+<pre class="language-go"><code class="language-go">select <span class="token punctuation">{</span>
+<span class="token keyword">case</span> ch1 <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">42</span><span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Sent to ch1"</span><span class="token punctuation">)</span>
+<span class="token keyword">case</span> ch2 <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">43</span><span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Sent to ch2"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>If both <code>ch1</code> and <code>ch2</code> have space, the runtime randomly picks one.</li>
+<li>The other case is skipped entirely.</li>
+<li>Randomization prevents starvation for goroutines blocked on the less active channel.</li>
+</ul>
+<p><strong>Scenario 2: No ready channels, with default</strong></p>
+<pre class="language-go"><code class="language-go">select <span class="token punctuation">{</span>
+<span class="token keyword">case</span> <span class="token literal-property property">val</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ch1<span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Received"</span><span class="token punctuation">,</span> val<span class="token punctuation">)</span>
+<span class="token keyword">default</span><span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"No channel ready"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>Since neither channel is ready, the <code>default</code> branch executes immediately.</li>
+<li>The goroutine does not block, preserving responsiveness.</li>
+</ul>
+<p><strong>Scenario 3: No ready channels, no default</strong></p>
+<pre class="language-go"><code class="language-go">select <span class="token punctuation">{</span>
+<span class="token keyword">case</span> <span class="token literal-property property">val</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ch1<span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Received"</span><span class="token punctuation">,</span> val<span class="token punctuation">)</span>
+<span class="token keyword">case</span> <span class="token literal-property property">val</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ch2<span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Received"</span><span class="token punctuation">,</span> val<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>The goroutine is enqueued on both <code>ch1</code> and <code>ch2</code> receive queues.</li>
+<li>It remains parked until either channel becomes ready.</li>
+<li>Once ready, the runtime wakes the goroutine and executes the corresponding case.</li>
+</ul>
+<h3 id="closed-channels-in-select" tabindex="-1"><a class="header-anchor" href="#closed-channels-in-select">Closed Channels in <code>select</code></a></h3>
+<p>Channels that are closed have special behavior in <code>select</code>:</p>
+<ul>
+<li>Receive from a closed channel is always ready, returning the zero value.</li>
+<li>If multiple channels are closed or ready, the runtime still uses randomized selection.</li>
+<li>Sending to a closed channel will panic, so select cases that attempt to send must handle this carefully, often using <code>recover</code> in higher-level patterns.</li>
+</ul>
+<h3 id="lifecycle-summary-of-a-select-operation" tabindex="-1"><a class="header-anchor" href="#lifecycle-summary-of-a-select-operation">Lifecycle Summary of a select Operation</a></h3>
+<ol>
+<li>Goroutine reaches <code>select</code>.</li>
+<li>Runtime inspects all channels for readiness.</li>
+<li>If any are ready:
+<ul>
+<li>Choose one case randomly.</li>
+<li>Execute and return immediately.</li>
+</ul>
+</li>
+<li>If none are ready:
+<ul>
+<li>If <code>default</code> exists, execute it.</li>
+<li>Otherwise, enqueue goroutine on all channels and park.</li>
+</ul>
+</li>
+<li>When a channel becomes ready:
+<ul>
+<li>Runtime wakes the goroutine.</li>
+<li>Executes the selected case.</li>
+<li>Removes the goroutine from all other queues.</li>
+</ul>
+</li>
+</ol>
+<h2 id="memory-model-%26-synchronization" tabindex="-1"><a class="header-anchor" href="#memory-model-%26-synchronization">Memory Model &amp; Synchronization</a></h2>
+<p>One of the most important - yet often overlooked - aspects of Go channels is how they fit into the Go memory model. At first glance, channels might seem like simple FIFO queues, but they are also synchronization points that define <em>happens-before</em> relationships between goroutines.</p>
+<h3 id="happens-before-with-channels" tabindex="-1"><a class="header-anchor" href="#happens-before-with-channels">Happens-Before with Channels</a></h3>
+<p>The Go memory model states:</p>
+<ul>
+<li>A send on a channel happens before the corresponding receive completes.</li>
+<li>A receive from a channel happens before the send completes only in the case of an unbuffered channel.</li>
+</ul>
+<p>This is crucial, because it means that data sent over a channel is fully visible to the receiving goroutine by the time it executes the receive. You don't need extra memory barriers, <code>sync/atomic</code>, or mutexes to establish visibility when you use channels correctly.</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">done</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">var</span> shared int
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    shared <span class="token operator">=</span> <span class="token number">42</span>
+    done <span class="token operator">&lt;</span><span class="token operator">-</span> struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">{</span><span class="token punctuation">}</span>  <span class="token comment">// send happens-before the receive</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token operator">&lt;</span><span class="token operator">-</span>done                  <span class="token comment">// receive completes here</span>
+fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>shared<span class="token punctuation">)</span>     <span class="token comment">// guaranteed to print 42</span>
+</code></pre>
+<p>In this example, the assignment to <code>shared</code> is guaranteed to be observed by the main goroutine. The send/receive pair forms the synchronization boundary.</p>
+<h3 id="buffered-channels-and-visibility" tabindex="-1"><a class="header-anchor" href="#buffered-channels-and-visibility">Buffered Channels and Visibility</a></h3>
+<p>For buffered channels, the happens-before guarantee applies to the value being sent but not to unrelated memory writes that occur before or after. This distinction can be subtle:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token literal-property property">x</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    x <span class="token operator">=</span> <span class="token number">99</span>
+    ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">1</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token operator">&lt;</span><span class="token operator">-</span>ch
+fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token comment">// guaranteed to see 99</span>
+</code></pre>
+<p>Here, because the write to <code>x</code> occurs before the send, and the send happens-before the receive, the main goroutine is guaranteed to see <code>x = 99</code>.</p>
+<p>But if you reverse the order, things get trickier:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token literal-property property">x</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span>
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">1</span>
+    x <span class="token operator">=</span> <span class="token number">99</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token operator">&lt;</span><span class="token operator">-</span>ch
+fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token comment">// NOT guaranteed to see 99</span>
+</code></pre>
+<p>Why? Because the assignment to <code>x</code> occurs <em>after</em> the send. The only synchronization point is the send→receive pair, and nothing orders the <code>x = 99</code> relative to the main goroutine's read of <code>x</code>.</p>
+<h3 id="closing-channels-1" tabindex="-1"><a class="header-anchor" href="#closing-channels-1">Closing Channels</a></h3>
+<p>Closing a channel introduces its own happens-before rule:</p>
+<ul>
+<li>A close on a channel happens before a receive that returns the zero value because of the close.
+This means you can safely use a closed channel as a broadcast signal:</li>
+</ul>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">done</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// do some work</span>
+    <span class="token function">close</span><span class="token punctuation">(</span>done<span class="token punctuation">)</span>  <span class="token comment">// happens-before all receivers unblocking</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token operator">&lt;</span><span class="token operator">-</span>done  <span class="token comment">// guaranteed to observe effects before close</span>
+</code></pre>
+<p>But the guarantee only applies to memory writes that happen before the <code>close</code>. Anything after <code>close(done)</code> is unordered relative to the receivers.</p>
+<p>Note that in idiomatic Go, closing a channel is relatively rare. Most programs simply let goroutines stop sending and rely on garbage collection. Channels are usually closed only for broadcast or completion signals, for example to indicate that no more work will be sent to multiple receivers. This pattern is common in fan-out/fan-in pipelines, worker pools, or signaling done conditions.</p>
+<p>Attempting to send on a closed channel triggers a runtime panic immediately. This is Go’s way of preventing silent corruption or unexpected behavior:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">)</span>
+<span class="token function">close</span><span class="token punctuation">(</span>ch<span class="token punctuation">)</span>          <span class="token comment">// channel is now closed</span>
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">42</span>       <span class="token comment">// panic: send on closed channel</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Receivers, on the other hand, are safe: a receive from a closed channel returns the zero value of the channel type:</p>
+<pre class="language-go"><code class="language-go">x<span class="token punctuation">,</span> <span class="token literal-property property">ok</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ch  <span class="token comment">// ok == false, x is zero value (0 for int)</span>
+</code></pre>
+<p>Why this matters:</p>
+<ul>
+<li><strong>Broadcast semantics:</strong> By closing a channel, multiple receivers can all unblock and detect completion safely.</li>
+<li><strong>Safe coordination:</strong> Receivers never panic, making closed channels useful as signals.</li>
+<li><strong>Explicit contract:</strong> Panic on send enforces the “don’t send after close” rule, reducing subtle bugs in concurrent programs.</li>
+</ul>
+<h3 id="practical-guidance" tabindex="-1"><a class="header-anchor" href="#practical-guidance">Practical Guidance</a></h3>
+<ul>
+<li>Always assume that only operations ordered by channel send/receive (or close/receive) are synchronized.</li>
+<li>If you need ordering guarantees for other side effects, make sure they happen before the send or close.</li>
+<li>Don't rely on timing or buffered channel semantics to &quot;probably&quot; make your code safe - stick to the rules of the memory model.</li>
+</ul>
+<h2 id="scheduler-integration" tabindex="-1"><a class="header-anchor" href="#scheduler-integration">Scheduler Integration</a></h2>
+<p>Go's channels are not just clever data structures - they're tightly woven into the runtime scheduler. This integration is what makes blocking channel operations feel natural and efficient.</p>
+<h3 id="the-g%2Fm%2Fp-model" tabindex="-1"><a class="header-anchor" href="#the-g%2Fm%2Fp-model">The G/M/P Model</a></h3>
+<p>Go's scheduler uses three main entities:</p>
+<ul>
+<li><strong>G (Goroutine):</strong> The lightweight, user-space thread of execution.</li>
+<li><strong>M (Machine):</strong> An OS thread bound to a goroutine when it runs.</li>
+<li><strong>P (Processor):</strong> A resource that manages runnable goroutines, acting as a bridge between <strong>G</strong>s and <strong>M</strong>s.
+Every goroutine must run on an <strong>M</strong>, and every <strong>M</strong> must own a <strong>P</strong> to execute Go code.</li>
+</ul>
+<h3 id="blocking-on-channels" tabindex="-1"><a class="header-anchor" href="#blocking-on-channels">Blocking on Channels</a></h3>
+<p>When a goroutine tries to send or receive on a channel and the operation cannot proceed immediately:</p>
+<ol>
+<li>The goroutine is parked (put to sleep).</li>
+<li>It's removed from the <strong>P</strong>'s run queue.</li>
+<li>A record of what it was waiting for is stored in the channel's <code>sudog</code> queue (a lightweight runtime structure that ties a goroutine to a channel operation).</li>
+<li>The scheduler then picks another runnable <strong>G</strong> to execute on that <strong>P</strong>.</li>
+<li>When the channel operation can proceed (e.g., another goroutine performs the corresponding send/receive), the parked goroutine is unblocked and can continue execution.
+This makes channel operations fully cooperative with the scheduler—there is no busy waiting.</li>
+</ol>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">ch</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan int<span class="token punctuation">)</span>
+
+go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token operator">&lt;</span><span class="token operator">-</span>ch<span class="token punctuation">)</span> <span class="token comment">// blocks, goroutine parked</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token comment">// main goroutine keeps running until it sends</span>
+ch <span class="token operator">&lt;</span><span class="token operator">-</span> <span class="token number">42</span>
+</code></pre>
+<p>Here the anonymous goroutine is descheduled the moment it blocks on &lt;-ch. The main goroutine keeps running until it eventually sends. At that point, the runtime wakes the parked goroutine, puts it back on a run queue, and resumes execution.</p>
+<h3 id="waking-up" tabindex="-1"><a class="header-anchor" href="#waking-up">Waking Up</a></h3>
+<p>When a channel operation becomes possible (e.g., a send finds a waiting receiver, or a receive finds a waiting sender):</p>
+<ul>
+<li>The runtime removes the waiting goroutine's <code>sudog</code> from the channel queue.</li>
+<li>It marks the goroutine as runnable.</li>
+<li>It places it onto a <strong>P</strong>'s local run queue or, if that’s full, the global queue.
+This ensures the goroutine gets scheduled again without manual intervention.</li>
+</ul>
+<h3 id="fairness-and-scheduling-order" tabindex="-1"><a class="header-anchor" href="#fairness-and-scheduling-order">Fairness and Scheduling Order</a></h3>
+<p>Go's channel implementation enforces FIFO queues for waiting senders and receivers. This provides fairness - goroutines blocked earlier get served first.</p>
+<p>But fairness interacts with the scheduler:</p>
+<ul>
+<li>Even if goroutine A was unblocked before goroutine B, the scheduler may not resume A immediately if B gets placed on a run queue with higher locality.</li>
+<li>There's no guarantee of strict timing order, only that operations complete without starvation.
+This is why you should never assume that the order of goroutines being resumed matches your mental model of &quot;who waited first.&quot;</li>
+</ul>
+<h3 id="impact-on-performance" tabindex="-1"><a class="header-anchor" href="#impact-on-performance">Impact on Performance</a></h3>
+<p>Because channels are scheduler-aware, blocking operations are relatively cheap compared to traditional system calls. Parking/unparking a goroutine only requires:</p>
+<ul>
+<li>Adjusting some runtime bookkeeping.</li>
+<li>Potentially waking an <strong>M</strong> if all <strong>P</strong>s are idle.
+However, this still introduces overhead compared to non-blocking operations. At high contention, channels can become bottlenecks - not because of the data transfer itself, but because of the scheduler activity (context switches, run queue management).</li>
+</ul>
+<h3 id="subtle-consequences" tabindex="-1"><a class="header-anchor" href="#subtle-consequences">Subtle Consequences</a></h3>
+<ul>
+<li><strong>Locality:</strong> A goroutine unparked due to a channel operation might resume on a different <strong>P</strong> than before, leading to cache misses.</li>
+<li><strong>Bursty wakeups:</strong> If many goroutines are waiting on a channel, a single close or broadcast-style send can cause a &quot;thundering herd&quot; of goroutines to wake up at once.</li>
+<li><strong>Select behavior:</strong> The scheduler has to juggle multiple wait queues for select statements, which can slightly complicate fairness.</li>
+</ul>
+<h2 id="closing-thoughts" tabindex="-1"><a class="header-anchor" href="#closing-thoughts">Closing Thoughts</a></h2>
+<p>Go channels are deceptively simple. From the outside, they look like <code>&lt;-</code> and <code>ch &lt;- v</code>. Underneath lies a sophisticated orchestration of buffers, queues, parked goroutines, and scheduler hooks. Every pipeline, worker pool, or fan-in/fan-out pattern leverages this machinery to safely and efficiently move data between goroutines.</p>
+<p>As Go evolves, channels remain central to its concurrency model, so understanding their internals gives you the intuition to use them effectively - and the caution to avoid misuse in high-contention scenarios.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

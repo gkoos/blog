@@ -205,5 +205,14 @@
         <description>A comparison of channels and mutexes in Golang.</description>
       </item>
     
+      <item>
+        <title>Go Channels: A Runtime Internals Deep Dive</title>
+        <link>https://gaborkoos.com/posts/2025-08-26-Go-Channels-A-Runtime-Internals-Deep-Dive/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-26-Go-Channels-A-Runtime-Internals-Deep-Dive/</guid>
+        <pubDate>Tue, 26 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A deep-dive into Go&#39;s channel internals.</description>
+      </item>
+    
   </channel>
 </rss>
