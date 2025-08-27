@@ -214,5 +214,14 @@
         <description>A deep-dive into Go&#39;s channel internals.</description>
       </item>
     
+      <item>
+        <title>Ffetch v1.2 Is Out!</title>
+        <link>https://gaborkoos.com/posts/2025-08-28-Ffetch-v1.2-Is-Out/</link>
+        <guid>https://gaborkoos.com/posts/2025-08-28-Ffetch-v1.2-Is-Out/</guid>
+        <pubDate>Thu, 28 Aug 2025 00:00:00 GMT</pubDate>
+
+        <description>A production-ready TypeScript-first drop-in replacement for native fetch. V1.2 is out.</description>
+      </item>
+    
   </channel>
 </rss>
