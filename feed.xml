@@ -224,5 +224,14 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V1.2 is out.</description>
       </item>
     
+      <item>
+        <title>Mermaid Editor Is Out!</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-05-Mermaid-Editor/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-05-Mermaid-Editor/</guid>
+        <pubDate>Fri, 05 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>A free mermaid diagram tool to edit, render and export diagrams and flowcharts.</description>
+      </item>
+    
   </channel>
 </rss>
