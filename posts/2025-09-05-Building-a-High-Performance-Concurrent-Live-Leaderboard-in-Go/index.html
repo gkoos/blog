@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Building a High-Performance Concurrent Live Leaderboard in Go</title>
+  <meta name="description" content="Implement a sharded, concurrent leaderboard in Go.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Building a High-Performance Concurrent Live Leaderboard in Go">
+  <meta property="og:description" content="Implement a sharded, concurrent leaderboard in Go.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Building a High-Performance Concurrent Live Leaderboard in Go">
+  <meta name="twitter:description" content="Implement a sharded, concurrent leaderboard in Go.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Building a High-Performance Concurrent Live Leaderboard in Go</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-09-05T00:00:00.000Z">Fri Sep 05 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">concurrency</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>The code for this article is available on GitHub: <a href="https://github.com/gkoos/article-leaderboard">gkoos/article-leaderboard</a>.</em></p>
+<h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
+<p>The goal of this article is to build a robust concurrent leaderboard in Go that can:</p>
+<ul>
+<li>Handle thousands of simultaneous updates from multiple goroutines.</li>
+<li>Serve frequent Top-N queries efficiently.</li>
+<li>Maintain predictable snapshots of scores despite concurrent writes.</li>
+<li>Be practical and production-ready, including guidance for scaling, memory usage, and extensions.</li>
+</ul>
+<p>We will balance theory with hands-on implementation. You will not only see the code but also understand why each design decision matters under concurrent workloads.</p>
+<p>Live leaderboards introduce several complexities:</p>
+<ul>
+<li>High-frequency writes: Many users may be updated simultaneously. Locks on a global map quickly become bottlenecks.</li>
+<li>Efficient Top-N queries: Sorting the entire dataset at every write is not feasible.</li>
+<li>Memory efficiency: Leaderboards may contain hundreds of thousands of users.</li>
+<li>Consistent snapshots: Users expect the Top-N query to reflect a meaningful state of the leaderboard, even as updates are occurring.</li>
+</ul>
+<p>The combination of concurrent writes and frequent reads demands careful use of Go's synchronization primitives and data structures.</p>
+<h2 id="understanding-the-problem" tabindex="-1"><a class="header-anchor" href="#understanding-the-problem">Understanding the Problem</a></h2>
+<p>A leaderboard typically supports two main operations:</p>
+<ul>
+<li><code>AddScore(userID string, score int)</code>: Stores a new score for a user. For simplicity, we will keep track of scores, not users, meaning that <strong>multiple high scores by the same user are allowed</strong>.</li>
+<li><code>Top(n int)</code>: Retrieve the top N highest scores.</li>
+</ul>
+<p>In addition, there are operational considerations:</p>
+<ul>
+<li>Updates must scale with concurrency.</li>
+<li>Top-N queries must be efficient, ideally faster than O(total users log total users).</li>
+<li>Locks should minimize contention, enabling multiple writers to proceed without blocking each other.</li>
+</ul>
+<h3 id="concurrency-challenges" tabindex="-1"><a class="header-anchor" href="#concurrency-challenges">Concurrency Challenges</a></h3>
+<ul>
+<li>High-Frequency Writes: Without sharding or concurrency-aware data structures, every update serializes through a single lock. With thousands of simultaneous updates, this performs horribly.</li>
+<li>Efficient Top-N Queries: A naive approach would be to sort all users for each query. For 100,000 users, this can take tens of milliseconds per query - unacceptable for live systems that require millisecond-level responsiveness.</li>
+<li>Memory Efficiency: Maintaining auxiliary structures like heaps or sorted arrays for every user requires careful memory management. Each additional shard or heap increases memory usage linearly.</li>
+<li>Consistent Snapshots: Users expect the leaderboard to make sense. If a Top-N query reads inconsistent values across multiple shards, it may return fluctuating or incorrect results.</li>
+</ul>
+<h2 id="design-considerations" tabindex="-1"><a class="header-anchor" href="#design-considerations">Design Considerations</a></h2>
+<p>Before we start coding, we must decide how to organize data structures to satisfy these requirements.</p>
+<h3 id="single-map-with-global-mutex" tabindex="-1"><a class="header-anchor" href="#single-map-with-global-mutex">Single Map with Global Mutex</a></h3>
+<pre class="language-go"><code class="language-go">type Leaderboard struct <span class="token punctuation">{</span>
+    mu     sync<span class="token punctuation">.</span>RWMutex
+    scores map<span class="token punctuation">[</span>string<span class="token punctuation">]</span>int
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Pros</strong>: Simple and easy to reason about.</p>
+<p><strong>Cons</strong>: Poor scalability under heavy writes - all updates serialize through one mutex.</p>
+<p>Use Case: Low concurrency or small datasets.</p>
+<h3 id="using-sync.map" tabindex="-1"><a class="header-anchor" href="#using-sync.map">Using <code>sync.Map</code></a></h3>
+<p>Go's <code>sync.Map</code> provides a concurrent map with lock-free reads:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">var</span> leaderboard sync<span class="token punctuation">.</span>Map
+
+leaderboard<span class="token punctuation">.</span><span class="token function">Store</span><span class="token punctuation">(</span><span class="token string">"user123"</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
+score<span class="token punctuation">,</span> <span class="token literal-property property">ok</span> <span class="token operator">:</span><span class="token operator">=</span> leaderboard<span class="token punctuation">.</span><span class="token function">Load</span><span class="token punctuation">(</span><span class="token string">"user123"</span><span class="token punctuation">)</span>
+</code></pre>
+<p><strong>Pros</strong>:</p>
+<ul>
+<li>Lock-free reads allow many goroutines to read simultaneously.</li>
+<li>Writes are atomic and safe for concurrent use.</li>
+</ul>
+<p><strong>Cons</strong>:</p>
+<ul>
+<li>Iteration is weakly consistent.</li>
+<li>Frequent writes reduce performance.</li>
+<li>Does not inherently support efficient Top-N queries, making it suboptimal for live leaderboards.</li>
+</ul>
+<h3 id="sharded-map-design" tabindex="-1"><a class="header-anchor" href="#sharded-map-design">Sharded Map Design</a></h3>
+<p>To scale with multiple writers, we can divide the leaderboard into shards. Each shard has its own map and mutex. This reduces lock contention and enables parallel updates.</p>
+<ul>
+<li>Writes to different shards proceed independently.</li>
+<li>Reads can occur concurrently across shards.</li>
+<li>Top-N queries merge per-shard results.</li>
+</ul>
+<p>This design achieves high concurrency while keeping code relatively simple, so we will stick with it for our implementation.</p>
+<h3 id="heap-based-top-n-per-shard" tabindex="-1"><a class="header-anchor" href="#heap-based-top-n-per-shard">Heap-Based Top-N per Shard</a></h3>
+<p>In every shard, we have to keep track of the top N scores efficiently. We could sort the entire shard on every query, but that would be insane. Or we could keep track of the top N scores in an ordered list, then a new score could be inserted (or rejected) in O(N) time. But we can actually do even better, with the help of a <em>top-N min-heap</em>.</p>
+<p>A min-heap is a complete binary tree where the value of each node is less than or equal to the values of its children:</p>
+<p><img src="https://i.imgur.com/NaGg1vM.png" alt="Min-Heap"></p>
+<p>This property makes it efficient to extract the minimum element (the root) and to insert new elements while maintaining the heap structure.</p>
+<p>It's a top-N min-heap because we only keep the top N scores in the heap. When a new score comes in, if it's less than the root of the heap, which is the smallest top N score, we reject it. If it's greater, we replace the root with the new score (we can do this, because the root element will be out of the top N) and re-heapify (restructure the heap). This ensures that we always have the top N scores in the heap. This approach provides O(1) rejection and O(log N) insertion complexity.</p>
+<p>This diagram shows what happens on insertion:</p>
+<p><img src="https://i.imgur.com/UkGOObG.png" alt="Insertion"></p>
+<p>Each shard keeps a local top-N heap and global Top-N is computed by merging these heaps. This approach avoids sorting the entire dataset on every Top-N query.</p>
+<h2 id="sharded-leaderboard-implementation" tabindex="-1"><a class="header-anchor" href="#sharded-leaderboard-implementation">Sharded Leaderboard Implementation</a></h2>
+<p>With all the theory under our belt, let's get to it! Fire up your favorite IDE and start with defining the shard structure and the main leaderboard type:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
+
+<span class="token keyword">package</span> leaderboard
+
+<span class="token keyword">import</span> <span class="token string">"sync"</span>
+
+<span class="token comment">// Shard represents a portion of the leaderboard</span>
+<span class="token comment">// It maintains a top-N min-heap of high scores</span>
+type shard struct <span class="token punctuation">{</span>
+	mu   sync<span class="token punctuation">.</span>RWMutex
+	topN <span class="token operator">*</span>TopNMinHeap
+<span class="token punctuation">}</span>
+
+type Leaderboard struct <span class="token punctuation">{</span>
+	shards <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>shard
+	n      int <span class="token comment">// global top-N size</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="heap-implementation" tabindex="-1"><a class="header-anchor" href="#heap-implementation">Heap Implementation</a></h3>
+<p>Next, we'll implement the top-N min-heap structure and methods to manage it. This includes insertion, rejection, and retrieval of the top N scores. We will use Go's <code>container/heap</code> package. We could implement our own heap for a small performance gain, but only at the cost of increased complexity - maybe in another article.</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/topnminheap.go</span>
+<span class="token keyword">package</span> leaderboard
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"container/heap"</span>
+<span class="token punctuation">)</span>
+
+<span class="token comment">// ScoreEntry represents a score and its associated player.</span>
+type ScoreEntry struct <span class="token punctuation">{</span>
+	PlayerID string
+	Score    int
+<span class="token punctuation">}</span>
+
+<span class="token comment">// TopNMinHeap is a min-heap that stores the top-N high scores with player IDs.</span>
+type TopNMinHeap struct <span class="token punctuation">{</span>
+	scores <span class="token punctuation">[</span><span class="token punctuation">]</span>ScoreEntry
+	maxN   int
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Len implements heap.Interface</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>h TopNMinHeap<span class="token punctuation">)</span> <span class="token function">Len</span><span class="token punctuation">(</span><span class="token punctuation">)</span> int <span class="token punctuation">{</span> <span class="token keyword">return</span> <span class="token function">len</span><span class="token punctuation">(</span>h<span class="token punctuation">.</span>scores<span class="token punctuation">)</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Less implements heap.Interface (min-heap)</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>h TopNMinHeap<span class="token punctuation">)</span> <span class="token function">Less</span><span class="token punctuation">(</span>i<span class="token punctuation">,</span> j int<span class="token punctuation">)</span> bool <span class="token punctuation">{</span> <span class="token keyword">return</span> h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">.</span>Score <span class="token operator">&lt;</span> h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">.</span>Score <span class="token punctuation">}</span>
+
+<span class="token comment">// Swap implements heap.Interface</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>h TopNMinHeap<span class="token punctuation">)</span> <span class="token function">Swap</span><span class="token punctuation">(</span><span class="token parameter">i<span class="token punctuation">,</span> j int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">,</span> h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span>i<span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Push implements heap.Interface</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>h <span class="token operator">*</span>TopNMinHeap<span class="token punctuation">)</span> <span class="token function">Push</span><span class="token punctuation">(</span><span class="token parameter">x any</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	h<span class="token punctuation">.</span>scores <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>h<span class="token punctuation">.</span>scores<span class="token punctuation">,</span> x<span class="token punctuation">.</span><span class="token punctuation">(</span>ScoreEntry<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Pop implements heap.Interface</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>h <span class="token operator">*</span>TopNMinHeap<span class="token punctuation">)</span> <span class="token function">Pop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> any <span class="token punctuation">{</span>
+	<span class="token literal-property property">old</span> <span class="token operator">:</span><span class="token operator">=</span> h<span class="token punctuation">.</span>scores
+	<span class="token literal-property property">n</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">len</span><span class="token punctuation">(</span>old<span class="token punctuation">)</span>
+	<span class="token literal-property property">x</span> <span class="token operator">:</span><span class="token operator">=</span> old<span class="token punctuation">[</span>n<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span>
+	h<span class="token punctuation">.</span>scores <span class="token operator">=</span> old<span class="token punctuation">[</span><span class="token operator">:</span>n<span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span>
+	<span class="token keyword">return</span> x
+<span class="token punctuation">}</span>
+
+<span class="token comment">// NewTopNMinHeap creates a TopNMinHeap with a specified maximum size.</span>
+func <span class="token function">NewTopNMinHeap</span><span class="token punctuation">(</span>maxN int<span class="token punctuation">)</span> <span class="token operator">*</span>TopNMinHeap <span class="token punctuation">{</span>
+	<span class="token keyword">return</span> <span class="token operator">&amp;</span>TopNMinHeap<span class="token punctuation">{</span>
+		<span class="token literal-property property">scores</span><span class="token operator">:</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span>ScoreEntry<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> maxN<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		<span class="token literal-property property">maxN</span><span class="token operator">:</span>   maxN<span class="token punctuation">,</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Add inserts a new score into the heap, maintaining the top-N property.</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>h <span class="token operator">*</span>TopNMinHeap<span class="token punctuation">)</span> <span class="token function">Add</span><span class="token punctuation">(</span><span class="token parameter">playerID string<span class="token punctuation">,</span> score int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">entry</span> <span class="token operator">:</span><span class="token operator">=</span> ScoreEntry<span class="token punctuation">{</span><span class="token literal-property property">PlayerID</span><span class="token operator">:</span> playerID<span class="token punctuation">,</span> <span class="token literal-property property">Score</span><span class="token operator">:</span> score<span class="token punctuation">}</span>
+	<span class="token keyword">if</span> h<span class="token punctuation">.</span><span class="token function">Len</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> h<span class="token punctuation">.</span>maxN <span class="token punctuation">{</span>
+		heap<span class="token punctuation">.</span><span class="token function">Push</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> entry<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token keyword">if</span> score <span class="token operator">></span> h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>Score <span class="token punctuation">{</span>
+		h<span class="token punctuation">.</span>scores<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> entry
+		heap<span class="token punctuation">.</span><span class="token function">Fix</span><span class="token punctuation">(</span>h<span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>First, we must implement the <code>heap.Interface</code>, which defines <code>Len</code>, <code>Less</code>, <code>Swap</code>, <code>Push</code>, and <code>Pop</code>. Then, we create a constructor <code>NewTopNMinHeap</code> to initialize the heap. Finally, the <code>Add</code> method handles inserting new scores while maintaining the top-N property: if the heap is not full, we simply push the new score. If it is full and the new score is greater than the minimum (the root), we replace the root and re-heapify (that is, we call <code>heap.Fix</code>).</p>
+<h3 id="shard-operations%3A-score-updates-and-reads" tabindex="-1"><a class="header-anchor" href="#shard-operations%3A-score-updates-and-reads">Shard Operations: Score Updates and Reads</a></h3>
+<p>Each shard should expose methods that safely add new scores and retrieve its current top-N snapshot. The mutex <code>mu</code> ensures that concurrent updates to the shard are safe.</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
+
+<span class="token operator">...</span>
+
+<span class="token comment">// AddScore adds a new score to the shard's top-N heap.</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>shard<span class="token punctuation">)</span> <span class="token function">AddScore</span><span class="token punctuation">(</span><span class="token parameter">playerID string<span class="token punctuation">,</span> score int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	s<span class="token punctuation">.</span>mu<span class="token punctuation">.</span><span class="token function">Lock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	defer s<span class="token punctuation">.</span>mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	s<span class="token punctuation">.</span>topN<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>playerID<span class="token punctuation">,</span> score<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Top returns a snapshot of the top-N scores for this shard.</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>s <span class="token operator">*</span>shard<span class="token punctuation">)</span> <span class="token function">Top</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>ScoreEntry <span class="token punctuation">{</span>
+	s<span class="token punctuation">.</span>mu<span class="token punctuation">.</span><span class="token function">RLock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	defer s<span class="token punctuation">.</span>mu<span class="token punctuation">.</span><span class="token function">RUnlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Return a copy to avoid exposing internal slice</span>
+	<span class="token literal-property property">top</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span>ScoreEntry<span class="token punctuation">,</span> <span class="token function">len</span><span class="token punctuation">(</span>s<span class="token punctuation">.</span>topN<span class="token punctuation">.</span>scores<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token function">copy</span><span class="token punctuation">(</span>top<span class="token punctuation">,</span> s<span class="token punctuation">.</span>topN<span class="token punctuation">.</span>scores<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> top
+<span class="token punctuation">}</span>
+</code></pre>
+<p><code>AddScore</code> locks the shard for writing, then adds the score to the heap using the <code>Add</code> method of the heap we defined earlier.</p>
+<p><code>Top</code> locks the shard for reading, and returns a copy of the heap slice so that callers cannot accidentally modify the internal heap.</p>
+<p>Using <code>RWMutex</code> allows multiple goroutines to read the top-N concurrently while writes are serialized.</p>
+<h3 id="initializing-the-leaderboard" tabindex="-1"><a class="header-anchor" href="#initializing-the-leaderboard">Initializing the Leaderboard</a></h3>
+<p>Now that each shard is doing its thing, we can initialize the leaderboard with a specified number of shards and the global top-N size:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
+
+<span class="token comment">// NewLeaderboard creates a sharded leaderboard with `numShards` shards and global top-N size `n`.</span>
+func <span class="token function">NewLeaderboard</span><span class="token punctuation">(</span>numShards<span class="token punctuation">,</span> n int<span class="token punctuation">)</span> <span class="token operator">*</span>Leaderboard <span class="token punctuation">{</span>
+	<span class="token literal-property property">lb</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&amp;</span>Leaderboard<span class="token punctuation">{</span>
+		<span class="token literal-property property">shards</span><span class="token operator">:</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>shard<span class="token punctuation">,</span> numShards<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		<span class="token literal-property property">n</span><span class="token operator">:</span>      n<span class="token punctuation">,</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token keyword">for</span> <span class="token literal-property property">i</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> numShards<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+		lb<span class="token punctuation">.</span>shards<span class="token punctuation">[</span>i<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token operator">&amp;</span>shard<span class="token punctuation">{</span>
+			<span class="token literal-property property">topN</span><span class="token operator">:</span> <span class="token function">NewTopNMinHeap</span><span class="token punctuation">(</span>n<span class="token punctuation">)</span><span class="token punctuation">,</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token keyword">return</span> lb
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This function creates a <code>Leaderboard</code> with the specified number of shards, each initialized with its own top-N min-heap. Returning a pointer ensures that all goroutines operate on the same shared leaderboard instance, which is essential for concurrent updates.</p>
+<h3 id="adding-scores" tabindex="-1"><a class="header-anchor" href="#adding-scores">Adding Scores</a></h3>
+<p>When we add a score to the leaderboard, we need to determine which shard to update. We use the FNV-1a hash of playerID to assign a player to a shard, which ensures a roughly uniform distribution of players across shards. This is important to avoid distribution skew, which could lead to some shards being overloaded while others are underutilized. Note that the same playerID will always map to the same shard, which for our current design is not crucial, but could be important if we later want to support per-player operations.</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
+
+<span class="token keyword">import</span> <span class="token string">"hash/fnv"</span>
+
+<span class="token operator">...</span>
+
+<span class="token comment">// getShard returns the shard for a given playerID.</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>lb <span class="token operator">*</span>Leaderboard<span class="token punctuation">)</span> <span class="token function">getShard</span><span class="token punctuation">(</span>playerID string<span class="token punctuation">)</span> <span class="token operator">*</span>shard <span class="token punctuation">{</span>
+	<span class="token literal-property property">h</span> <span class="token operator">:</span><span class="token operator">=</span> fnv<span class="token punctuation">.</span><span class="token function">New32a</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	h<span class="token punctuation">.</span><span class="token function">Write</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token function">byte</span><span class="token punctuation">(</span>playerID<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">idx</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">int</span><span class="token punctuation">(</span>h<span class="token punctuation">.</span><span class="token function">Sum32</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token function">len</span><span class="token punctuation">(</span>lb<span class="token punctuation">.</span>shards<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> lb<span class="token punctuation">.</span>shards<span class="token punctuation">[</span>idx<span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>With <code>getShard</code>, we can now easily implement the <code>AddScore</code> method to add scores to the leaderboard:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
+
+<span class="token comment">// AddScore adds a new score to the appropriate shard.</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>lb <span class="token operator">*</span>Leaderboard<span class="token punctuation">)</span> <span class="token function">AddScore</span><span class="token punctuation">(</span><span class="token parameter">playerID string<span class="token punctuation">,</span> score int</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">s</span> <span class="token operator">:</span><span class="token operator">=</span> lb<span class="token punctuation">.</span><span class="token function">getShard</span><span class="token punctuation">(</span>playerID<span class="token punctuation">)</span>
+	s<span class="token punctuation">.</span><span class="token function">AddScore</span><span class="token punctuation">(</span>playerID<span class="token punctuation">,</span> score<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><code>AddScore</code> calls <code>getShard</code> to find the correct shard, then adds the score to it via <code>shard.AddScore</code>. Each shard handles its own locking, so this scales with the number of shards.</p>
+<h3 id="retrieving-global-top-n" tabindex="-1"><a class="header-anchor" href="#retrieving-global-top-n">Retrieving Global Top-N</a></h3>
+<p>Now that we can add scores, there's only one thing left to do: retrieve the global top-N scores across all shards. We can do this by merging the top-N heaps from each shard. Since each shard's top-N is already sorted (as a min-heap), we can efficiently combine them using a max-heap to keep track of the overall top-N. (For very large numbers of shards, a more complex k-way merge could be implemented, but for typical shard counts, this approach is sufficient.)</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
+
+<span class="token comment">// Top returns the global top-N across all shards.</span>
+<span class="token function">func</span> <span class="token punctuation">(</span>lb <span class="token operator">*</span>Leaderboard<span class="token punctuation">)</span> <span class="token function">Top</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>ScoreEntry <span class="token punctuation">{</span>
+	<span class="token comment">// Temporary heap to compute global top-N</span>
+	<span class="token literal-property property">globalHeap</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">NewTopNMinHeap</span><span class="token punctuation">(</span>lb<span class="token punctuation">.</span>n<span class="token punctuation">)</span>
+
+	<span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">s</span> <span class="token operator">:</span><span class="token operator">=</span> range lb<span class="token punctuation">.</span>shards <span class="token punctuation">{</span>
+		<span class="token literal-property property">shardTop</span> <span class="token operator">:</span><span class="token operator">=</span> s<span class="token punctuation">.</span><span class="token function">Top</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// thread-safe snapshot</span>
+		<span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">entry</span> <span class="token operator">:</span><span class="token operator">=</span> range shardTop <span class="token punctuation">{</span>
+			globalHeap<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span>entry<span class="token punctuation">.</span>PlayerID<span class="token punctuation">,</span> entry<span class="token punctuation">.</span>Score<span class="token punctuation">)</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Copy to slice</span>
+	<span class="token literal-property property">top</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">]</span>ScoreEntry<span class="token punctuation">,</span> <span class="token function">len</span><span class="token punctuation">(</span>globalHeap<span class="token punctuation">.</span>scores<span class="token punctuation">)</span><span class="token punctuation">)</span>
+	<span class="token function">copy</span><span class="token punctuation">(</span>top<span class="token punctuation">,</span> globalHeap<span class="token punctuation">.</span>scores<span class="token punctuation">)</span>
+
+	<span class="token comment">// Sort descending (highest score first)</span>
+	<span class="token keyword">for</span> i<span class="token punctuation">,</span> <span class="token literal-property property">j</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token function">len</span><span class="token punctuation">(</span>top<span class="token punctuation">)</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> j<span class="token punctuation">;</span> i<span class="token punctuation">,</span> j <span class="token operator">=</span> i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> j<span class="token operator">-</span><span class="token number">1</span> <span class="token punctuation">{</span>
+		top<span class="token punctuation">[</span>i<span class="token punctuation">]</span><span class="token punctuation">,</span> top<span class="token punctuation">[</span>j<span class="token punctuation">]</span> <span class="token operator">=</span> top<span class="token punctuation">[</span>j<span class="token punctuation">]</span><span class="token punctuation">,</span> top<span class="token punctuation">[</span>i<span class="token punctuation">]</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token keyword">return</span> top
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Each shard returns a snapshot of its top-N, so we don't hold locks across multiple shards simultaneously. We insert all shard top-N entries into a temporary min-heap of size n to maintain the global top-N efficiently. Since the min-heap stores the smallest top-N score at the root, we reverse the slice to return the highest scores first.</p>
+<h2 id="testing-what-we've-built" tabindex="-1"><a class="header-anchor" href="#testing-what-we've-built">Testing What We've Built</a></h2>
+<p>Now that we have finished our leaderboard, let's see how it works. Here's a simple test program that demonstrates adding scores and retrieving the top-N concurrently:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
+
+<span class="token keyword">package</span> main
+
+<span class="token keyword">import</span> <span class="token punctuation">(</span>
+	<span class="token string">"fmt"</span>
+	<span class="token string">"math/rand"</span>
+	<span class="token string">"sync"</span>
+	<span class="token string">"time"</span>
+
+	<span class="token string">"./leaderboard"</span>
+<span class="token punctuation">)</span>
+
+func <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">const</span> <span class="token punctuation">(</span>
+		numShards   <span class="token operator">=</span> <span class="token number">8</span>
+		topN        <span class="token operator">=</span> <span class="token number">10</span>
+		numPlayers  <span class="token operator">=</span> <span class="token number">50</span>
+		numUpdates  <span class="token operator">=</span> <span class="token number">200</span>
+		updateDelay <span class="token operator">=</span> <span class="token number">10</span> <span class="token operator">*</span> time<span class="token punctuation">.</span>Millisecond
+	<span class="token punctuation">)</span>
+
+	<span class="token literal-property property">lb</span> <span class="token operator">:</span><span class="token operator">=</span> leaderboard<span class="token punctuation">.</span><span class="token function">NewLeaderboard</span><span class="token punctuation">(</span>numShards<span class="token punctuation">,</span> topN<span class="token punctuation">)</span>
+
+	<span class="token keyword">var</span> wg sync<span class="token punctuation">.</span>WaitGroup
+
+	<span class="token comment">// Spawn concurrent score updates</span>
+	<span class="token keyword">for</span> <span class="token literal-property property">i</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> numPlayers<span class="token punctuation">;</span> i<span class="token operator">++</span> <span class="token punctuation">{</span>
+		wg<span class="token punctuation">.</span><span class="token function">Add</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+		<span class="token literal-property property">playerID</span> <span class="token operator">:</span><span class="token operator">=</span> fmt<span class="token punctuation">.</span><span class="token function">Sprintf</span><span class="token punctuation">(</span><span class="token string">"player%02d"</span><span class="token punctuation">,</span> i<span class="token punctuation">)</span>
+		go <span class="token function">func</span><span class="token punctuation">(</span><span class="token parameter">pid string</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+			defer wg<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+			<span class="token keyword">for</span> <span class="token literal-property property">j</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> j <span class="token operator">&lt;</span> numUpdates<span class="token punctuation">;</span> j<span class="token operator">++</span> <span class="token punctuation">{</span>
+				<span class="token literal-property property">score</span> <span class="token operator">:</span><span class="token operator">=</span> rand<span class="token punctuation">.</span><span class="token function">Intn</span><span class="token punctuation">(</span><span class="token number">50000</span><span class="token punctuation">)</span>
+				lb<span class="token punctuation">.</span><span class="token function">AddScore</span><span class="token punctuation">(</span>pid<span class="token punctuation">,</span> score<span class="token punctuation">)</span>
+				time<span class="token punctuation">.</span><span class="token function">Sleep</span><span class="token punctuation">(</span>updateDelay<span class="token punctuation">)</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span><span class="token punctuation">(</span>playerID<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+
+	<span class="token comment">// Spawn a goroutine to print live top-N periodically</span>
+	<span class="token literal-property property">done</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan struct<span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+	go <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+		<span class="token literal-property property">ticker</span> <span class="token operator">:</span><span class="token operator">=</span> time<span class="token punctuation">.</span><span class="token function">NewTicker</span><span class="token punctuation">(</span><span class="token number">100</span> <span class="token operator">*</span> time<span class="token punctuation">.</span>Millisecond<span class="token punctuation">)</span>
+		defer ticker<span class="token punctuation">.</span><span class="token function">Stop</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+		<span class="token keyword">for</span> <span class="token punctuation">{</span>
+			select <span class="token punctuation">{</span>
+			<span class="token keyword">case</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ticker<span class="token punctuation">.</span><span class="token constant">C</span><span class="token operator">:</span>
+				<span class="token literal-property property">top</span> <span class="token operator">:</span><span class="token operator">=</span> lb<span class="token punctuation">.</span><span class="token function">Top</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+				fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Top Scores:"</span><span class="token punctuation">)</span>
+				<span class="token keyword">for</span> i<span class="token punctuation">,</span> <span class="token literal-property property">entry</span> <span class="token operator">:</span><span class="token operator">=</span> range top <span class="token punctuation">{</span>
+					fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"%2d: %s = %d\n"</span><span class="token punctuation">,</span> i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> entry<span class="token punctuation">.</span>PlayerID<span class="token punctuation">,</span> entry<span class="token punctuation">.</span>Score<span class="token punctuation">)</span>
+				<span class="token punctuation">}</span>
+				fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"-----"</span><span class="token punctuation">)</span>
+			<span class="token keyword">case</span> <span class="token operator">&lt;</span><span class="token operator">-</span>done<span class="token operator">:</span>
+				<span class="token keyword">return</span>
+			<span class="token punctuation">}</span>
+		<span class="token punctuation">}</span>
+	<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+	<span class="token comment">// Wait for all updates to finish</span>
+	wg<span class="token punctuation">.</span><span class="token function">Wait</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token function">close</span><span class="token punctuation">(</span>done<span class="token punctuation">)</span>
+
+	<span class="token comment">// Print final top-N</span>
+	fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Final Top Scores:"</span><span class="token punctuation">)</span>
+	<span class="token literal-property property">top</span> <span class="token operator">:</span><span class="token operator">=</span> lb<span class="token punctuation">.</span><span class="token function">Top</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token keyword">for</span> i<span class="token punctuation">,</span> <span class="token literal-property property">entry</span> <span class="token operator">:</span><span class="token operator">=</span> range top <span class="token punctuation">{</span>
+		fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"%2d: %s = %d\n"</span><span class="token punctuation">,</span> i<span class="token operator">+</span><span class="token number">1</span><span class="token punctuation">,</span> entry<span class="token punctuation">.</span>PlayerID<span class="token punctuation">,</span> entry<span class="token punctuation">.</span>Score<span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This program creates a leaderboard with 8 shards and a top-10 size. It spawns 50 goroutines, each simulating a player that updates their score 200 times with random values. Concurrently, another goroutine prints the current top-10 scores every 100 milliseconds.</p>
+<p>You can run this program with <code>go run main.go</code>, the output will be something like this:</p>
+<pre class="language-"><code class="language-">Top Scores<span class="token operator">:</span>
+ <span class="token number">1</span><span class="token operator">:</span> player05 <span class="token operator">=</span> <span class="token number">49830</span>
+ <span class="token number">2</span><span class="token operator">:</span> player07 <span class="token operator">=</span> <span class="token number">49873</span>
+ <span class="token number">3</span><span class="token operator">:</span> player46 <span class="token operator">=</span> <span class="token number">49966</span>
+ <span class="token number">4</span><span class="token operator">:</span> player24 <span class="token operator">=</span> <span class="token number">49800</span>
+ <span class="token number">5</span><span class="token operator">:</span> player25 <span class="token operator">=</span> <span class="token number">49961</span>
+ <span class="token number">6</span><span class="token operator">:</span> player10 <span class="token operator">=</span> <span class="token number">49802</span>
+ <span class="token number">7</span><span class="token operator">:</span> player30 <span class="token operator">=</span> <span class="token number">49812</span>
+ <span class="token number">8</span><span class="token operator">:</span> player02 <span class="token operator">=</span> <span class="token number">49726</span>
+ <span class="token number">9</span><span class="token operator">:</span> player19 <span class="token operator">=</span> <span class="token number">49750</span>
+<span class="token number">10</span><span class="token operator">:</span> player46 <span class="token operator">=</span> <span class="token number">49718</span>
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+<span class="token operator">...</span>
+<span class="token operator">--</span><span class="token operator">--</span><span class="token operator">-</span>
+Final Top Scores<span class="token operator">:</span>
+ <span class="token number">1</span><span class="token operator">:</span> player10 <span class="token operator">=</span> <span class="token number">49971</span>
+ <span class="token number">2</span><span class="token operator">:</span> player45 <span class="token operator">=</span> <span class="token number">49977</span>
+ <span class="token number">3</span><span class="token operator">:</span> player00 <span class="token operator">=</span> <span class="token number">49992</span>
+ <span class="token number">4</span><span class="token operator">:</span> player40 <span class="token operator">=</span> <span class="token number">49979</span>
+ <span class="token number">5</span><span class="token operator">:</span> player29 <span class="token operator">=</span> <span class="token number">49990</span>
+ <span class="token number">6</span><span class="token operator">:</span> player19 <span class="token operator">=</span> <span class="token number">49967</span>
+ <span class="token number">7</span><span class="token operator">:</span> player46 <span class="token operator">=</span> <span class="token number">49966</span>
+ <span class="token number">8</span><span class="token operator">:</span> player18 <span class="token operator">=</span> <span class="token number">49974</span>
+ <span class="token number">9</span><span class="token operator">:</span> player25 <span class="token operator">=</span> <span class="token number">49961</span>
+<span class="token number">10</span><span class="token operator">:</span> player39 <span class="token operator">=</span> <span class="token number">49960</span>
+</code></pre>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>In this article, we've built a high-performance concurrent live leaderboard in Go from the ground up. Starting from the core problem, we discussed the challenges posed by high-frequency writes, efficient top-N queries, and snapshot consistency under concurrency.</p>
+<p>We explored multiple design options:</p>
+<ul>
+<li>A single map with a global mutex: simple, but poor scalability.</li>
+<li>sync.Map: suitable for concurrent reads, but limited for top-N queries.</li>
+<li>Sharded leaderboard with per-shard top-N min-heaps: our chosen approach, balancing concurrency, efficiency, and simplicity.</li>
+</ul>
+<p>We implemented:</p>
+<ul>
+<li>Shard-level structures with read-write locks.</li>
+<li>Top-N min-heaps per shard for fast insertion and rejection.</li>
+<li>Global top-N queries that merge per-shard heaps efficiently without blocking concurrent updates.</li>
+</ul>
+<p>A demo/test harness illustrating live updates, concurrent writes, and periodic leaderboard snapshots.</p>
+<p>Key takeaways:</p>
+<ul>
+<li>Sharding reduces lock contention. Multiple goroutines can update scores concurrently with minimal blocking.</li>
+<li>Min-heaps maintain the top-N efficiently. Only the most relevant scores are stored, keeping operations O(log N).</li>
+<li>Global top-N merging is practical. By combining per-shard heaps, we avoid sorting the entire dataset and maintain fast queries.</li>
+<li>Concurrency safety is straightforward with per-shard locks. You don't need complex lock-free algorithms for most live leaderboard use cases.</li>
+<li>This design scales gracefully. Increasing the number of shards reduces contention, and the heap-based approach ensures memory efficiency.</li>
+</ul>
+<p>With this foundation, you can extend the leaderboard to support:</p>
+<ul>
+<li>Dynamic top-N per shard or multi-level leaderboards.</li>
+<li>Integration with persistent storage or distributed systems for larger-scale applications.</li>
+<li>Additional metrics such as timestamps, ranks, or achievements.</li>
+</ul>
+<p>This practical, hands-on approach gives you an idea of how to handle real-world concurrent workloads efficiently. You now have the tools to implement, benchmark, and extend production-ready concurrent systems in Go.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

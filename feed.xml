@@ -226,11 +226,20 @@
     
       <item>
         <title>Mermaid Editor Is Out!</title>
-        <link>https://blog.gaborkoos.com/posts/2025-09-05-Mermaid-Editor/</link>
-        <guid>https://blog.gaborkoos.com/posts/2025-09-05-Mermaid-Editor/</guid>
-        <pubDate>Fri, 05 Sep 2025 00:00:00 GMT</pubDate>
+        <link>https://blog.gaborkoos.com/posts/2025-09-04-Mermaid-Editor/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-04-Mermaid-Editor/</guid>
+        <pubDate>Thu, 04 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>A free mermaid diagram tool to edit, render and export diagrams and flowcharts.</description>
+      </item>
+    
+      <item>
+        <title>Building a High-Performance Concurrent Live Leaderboard in Go</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-05-Building-a-High-Performance-Concurrent-Live-Leaderboard-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-05-Building-a-High-Performance-Concurrent-Live-Leaderboard-in-Go/</guid>
+        <pubDate>Fri, 05 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>Implement a sharded, concurrent leaderboard in Go.</description>
       </item>
     
   </channel>
