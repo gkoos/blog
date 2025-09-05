@@ -1,7 +1,7 @@
 ---
 layout: layouts/post.njk
 title: Mermaid Editor Is Out!
-date: 2025-09-05
+date: 2025-09-04
 description: A free mermaid diagram tool to edit, render and export diagrams and flowcharts.
 excerpt: For my blog posts, I often need to create diagrams and flowcharts. I like using Mermaid for this, but I just couldn't find a free online tool without limitations, so I built one myself.
 tags:
