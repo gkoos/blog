@@ -242,5 +242,14 @@
         <description>Implement a sharded, concurrent leaderboard in Go.</description>
       </item>
     
+      <item>
+        <title>Arrays, Slices, and Maps in Go - My First freeCodeCamp Article</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-06-Arrays-Slices-and-Maps-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-06-Arrays-Slices-and-Maps-in-Go/</guid>
+        <pubDate>Sat, 06 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>A quick guide to Go&#39;s collection types, published on freeCodeCamp.</description>
+      </item>
+    
   </channel>
 </rss>
