@@ -251,5 +251,14 @@
         <description>A quick guide to Go&#39;s collection types, published on freeCodeCamp.</description>
       </item>
     
+      <item>
+        <title>Ffetch v2.0 Is Out!</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-07-Ffetch-v2.0-Is-Out/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-07-Ffetch-v2.0-Is-Out/</guid>
+        <pubDate>Sun, 07 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>A production-ready TypeScript-first drop-in replacement for native fetch. V2.0 is out.</description>
+      </item>
+    
   </channel>
 </rss>
