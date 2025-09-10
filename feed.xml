@@ -260,5 +260,14 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V2.0 is out.</description>
       </item>
     
+      <item>
+        <title>Nullmail Browser Extensions</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-10-Nullmail-Browser-Extension/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-10-Nullmail-Browser-Extension/</guid>
+        <pubDate>Wed, 10 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>A privacy-focused ephemeral email service with browser extensions.</description>
+      </item>
+    
   </channel>
 </rss>
