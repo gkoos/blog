@@ -269,5 +269,14 @@
         <description>A privacy-focused ephemeral email service with browser extensions.</description>
       </item>
     
+      <item>
+        <title>Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-12-Garbage-Collection-In-Go.md/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-12-Garbage-Collection-In-Go.md/</guid>
+        <pubDate>Fri, 12 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>Explore the evolution of garbage collection in Go, from early techniques to the latest advancements.</description>
+      </item>
+    
   </channel>
 </rss>

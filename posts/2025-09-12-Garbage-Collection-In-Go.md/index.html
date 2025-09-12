@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</title>
+  <meta name="description" content="Explore the evolution of garbage collection in Go, from early techniques to the latest advancements.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea">
+  <meta property="og:description" content="Explore the evolution of garbage collection in Go, from early techniques to the latest advancements.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea">
+  <meta name="twitter:description" content="Explore the evolution of garbage collection in Go, from early techniques to the latest advancements.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-09-12T00:00:00.000Z">Fri Sep 12 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 id="garbage-collection-in-go%3A-from-reference-counting-to-tri-color-to-green-tea" tabindex="-1"><a class="header-anchor" href="#garbage-collection-in-go%3A-from-reference-counting-to-tri-color-to-green-tea">Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</a></h1>
+<h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
+<p>Garbage collection (GC) is one of the most critical components of any modern programming language runtime. It decides how and when memory is reclaimed, directly impacting latency, throughput, and the overall responsiveness of applications.</p>
+<p>Go has always prioritized simplicity and developer productivity, and its garbage collector plays a major role in that story. Unlike languages such as C and C++ that leave memory management to the programmer, Go ships with a sophisticated GC designed to keep latency low while scaling to multi-core systems.</p>
+<p>In Go 1.25, the garbage collector underwent significant changes. A new algorithm, internally called
+<em>Green Tea</em>, replaced core parts of the tri-color mark-and-sweep approach that Go had used since its
+early releases. This shift represents more than just an implementation detail - it's a major step in
+Go's long-term strategy to provide predictable, low-latency GC for high-concurrency applications.</p>
+<p>In this article, we'll take a step back and look at the evolution of garbage collection strategies,
+leading up to Go's current approach. We'll cover three major milestones:</p>
+<ol>
+<li><strong>Reference Counting</strong> — a simple but limited strategy that was historically popular.</li>
+<li><strong>Tri-Color Mark-and-Sweep</strong> — the incremental algorithm that powered Go's GC until 1.25.</li>
+<li><strong>Green Tea</strong> — the new span-based algorithm introduced in Go 1.25.</li>
+</ol>
+<p>But this won't just be theory. To really understand the differences, we'll:</p>
+<ul>
+<li>Build toy implementations of each algorithm in Go, with a simplified heap model.</li>
+<li>Benchmark and visualize their behavior on example workloads.</li>
+<li>Run experiments to compare performance, trade-offs, and edge cases.</li>
+<li>Discuss broader implications for Go developers and how these ideas compare to GC in other ecosystems.</li>
+</ul>
+<p>By the end, you'll not only understand what changed in Go 1.25, but also gain deeper insight into the
+trade-offs behind GC design - knowledge that's valuable far beyond Go itself.</p>
+<p>The full code for the toy implementations, benchmarks, and demos is available in this repository: <a href="https://github.com/gkoos/article-gc">https://github.com/gkoos/article-gc</a></p>
+<h2 id="heap-representation-(real-go-vs.-our-simplification)" tabindex="-1"><a class="header-anchor" href="#heap-representation-(real-go-vs.-our-simplification)">Heap Representation (Real Go vs. Our Simplification)</a></h2>
+<blockquote>
+<p><strong>Disclaimer:</strong> The toy implementations below are for educational purposes and do not reflect all optimizations, concurrency mechanisms, or edge cases present in Go's production garbage collector.</p>
+</blockquote>
+<p>Before we can talk about garbage collection algorithms, we need a mental model of the heap - the area of memory where dynamically allocated objects live.</p>
+<h3 id="how-go-actually-manages-the-heap" tabindex="-1"><a class="header-anchor" href="#how-go-actually-manages-the-heap">How Go Actually Manages the Heap</a></h3>
+<p>Go's memory management system is highly optimized and far from trivial. Some of the key aspects include:</p>
+<ul>
+<li><strong>Page allocator</strong>: Go divides memory into pages (8 KB each on most systems).</li>
+<li><strong>Spans</strong>: Each page or group of pages is tracked as a &quot;span&quot;, which manages objects of a specific size class.</li>
+<li><strong>Size classes</strong>: Objects are grouped by size, with a fixed set of classes to reduce fragmentation.</li>
+<li><strong>Bitmap marking</strong>: Each object is tracked in a bitmap, allowing the GC to quickly determine reachability.</li>
+<li><strong>Concurrent scanning</strong>: The GC can scan stacks and mark reachable objects while the program continues executing.</li>
+</ul>
+<p>This system is fast, scalable, and concurrency-friendly - but it's also very complex. Explaining it in full would require an article series on its own.</p>
+<h3 id="why-we-need-a-simplified-model" tabindex="-1"><a class="header-anchor" href="#why-we-need-a-simplified-model">Why We Need a Simplified Model</a></h3>
+<p>For the purpose of this article, we don't need to replicate every detail of the Go runtime. Instead, we want a simple but illustrative model of the heap that will let us:</p>
+<ul>
+<li>Allocate objects.</li>
+<li>Store references between objects.</li>
+<li>Track reachability from a root set.</li>
+<li>Experiment with different GC strategies.</li>
+</ul>
+<p>This simplified heap won't capture performance optimizations like spans, arenas, or write barriers exactly as in Go, but it will make the algorithms much easier to explain and compare.</p>
+<h3 id="our-toy-heap" tabindex="-1"><a class="header-anchor" href="#our-toy-heap">Our Toy Heap</a></h3>
+<p>We'll represent the heap as a collection of <code>Object</code> structs, each with:</p>
+<ul>
+<li>An <strong>ID</strong>: just for easier visualization.</li>
+<li>A list of <strong>references</strong> to other objects.</li>
+<li>Metadata used by the GC (such as colors for tri-color marking, or a reference count for RC).</li>
+</ul>
+<p>Here's a basic sketch:</p>
+<pre class="language-go"><code class="language-go">type Object struct <span class="token punctuation">{</span>
+    <span class="token constant">ID</span>       int
+    Refs     <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object <span class="token comment">// references to other objects</span>
+    Marked   bool      <span class="token comment">// used in tri-color / Green Tea</span>
+    RefCount int       <span class="token comment">// used in reference counting</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>We'll also maintain a global slice of all objects to represent the heap:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">var</span> heap <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object
+</code></pre>
+<p>And we'll define a simple root set - objects that are &quot;always reachable&quot; (like global variables or stack roots in a real program):</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">var</span> roots <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object
+</code></pre>
+<p>This toy model gives us just enough structure to experiment with different garbage collection algorithms, without drowning in the details of the production Go runtime.</p>
+<h2 id="algorithms-and-their-evolution" tabindex="-1"><a class="header-anchor" href="#algorithms-and-their-evolution">Algorithms and Their Evolution</a></h2>
+<p>Now that we have a toy model of the heap, let's look at the algorithms that have been used for garbage collection.<br>
+We'll cover three stages in the evolution of GC: <em>Reference Counting</em>, <em>Tri-Color Mark-and-Sweep</em>, and <em>Green Tea</em>.</p>
+<h3 id="reference-counting" tabindex="-1"><a class="header-anchor" href="#reference-counting">Reference Counting</a></h3>
+<p>Reference counting (RC) is one of the simplest forms of garbage collection.<br>
+Every object keeps a counter of how many references point to it.<br>
+When a new reference is created, the counter increases.<br>
+When a reference is removed, the counter decreases.<br>
+When the counter reaches zero, the object can be freed immediately.</p>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Simple to implement and reason about.</li>
+<li>Reclaims memory promptly (no pauses).</li>
+<li>Still used today in some contexts (e.g., CPython, Swift ARC, Objective-C).</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Cycles: if two objects reference each other but are otherwise unreachable, their counters never reach zero, causing a memory leak.</li>
+<li>Incrementing/decrementing counters adds overhead.</li>
+<li>Hard to make concurrent without locks.</li>
+</ul>
+<p><strong>Historical note:</strong> Reference counting was popular in early systems due to its simplicity, and it's still a cornerstone of some languages (Python, Swift). But its limitations motivated more sophisticated algorithms.</p>
+<hr>
+<h3 id="tri-color-mark-and-sweep" tabindex="-1"><a class="header-anchor" href="#tri-color-mark-and-sweep">Tri-Color Mark-and-Sweep</a></h3>
+<p>The tri-color abstraction is the backbone of most modern garbage collectors.<br>
+Objects are divided into three sets during a collection cycle:</p>
+<ul>
+<li><strong>White</strong>: candidates for garbage (unreachable unless proven otherwise).</li>
+<li><strong>Gray</strong>: reachable but not yet scanned.</li>
+<li><strong>Black</strong>: reachable and fully scanned.</li>
+</ul>
+<p>The algorithm works roughly like this:</p>
+<ol>
+<li>Start by putting all root objects in the gray set.</li>
+<li>While there are gray objects:
+<ul>
+<li>Pop one from the gray set.</li>
+<li>Mark all objects it references as gray (if not already black/gray).</li>
+<li>Mark the current object black.</li>
+</ul>
+</li>
+<li>When no gray objects remain, all white objects are unreachable, so free them.</li>
+</ol>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Detects cycles (unlike RC).</li>
+<li>Works incrementally: can interleave marking with program execution.</li>
+<li>Foundation for concurrent and parallel GC implementations.</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>Requires <em>write barriers</em> to handle mutations while GC runs.</li>
+<li>Still introduces pause times if not carefully tuned.</li>
+</ul>
+<p><strong>Historical note:</strong> Dijkstra's 1978 &quot;on-the-fly&quot; GC introduced the idea of tri-color marking, and it's influenced JVM, .NET, and Go.</p>
+<hr>
+<h3 id="green-tea-(go-1.25%2B)" tabindex="-1"><a class="header-anchor" href="#green-tea-(go-1.25%2B)">Green Tea (Go 1.25+)</a></h3>
+<p>Go 1.25 introduced a major change with <em>Green Tea</em>, an algorithm designed to scale better across many cores and reduce coordination costs.</p>
+<p>Instead of thinking in terms of objects and colors, Green Tea shifts the perspective to <strong>spans</strong> - contiguous chunks of memory that contain multiple objects of the same size class.</p>
+<p>Key ideas:</p>
+<ul>
+<li>GC operates at the <strong>span level</strong>, not just the object level.</li>
+<li>Marking is distributed more efficiently across worker threads.</li>
+<li>Reduces synchronization overhead by grouping work.</li>
+</ul>
+<p><strong>Advantages:</strong></p>
+<ul>
+<li>Better scalability on multicore systems.</li>
+<li>Reduced pause times under high concurrency.</li>
+<li>Maintains Go's GC goal: keep latency low (&lt;1 ms in most cases).</li>
+</ul>
+<p><strong>Limitations:</strong></p>
+<ul>
+<li>More complex implementation.</li>
+<li>Still young - long-term behavior in production is being studied.</li>
+</ul>
+<p><strong>Historical note:</strong> Green Tea builds on decades of research into parallel and concurrent GCs. Similar span- and region-based strategies appear in JVM G1GC and Azul's collectors, but Go's variant is tuned specifically for its concurrency model.</p>
+<h3 id="other-algorithms-(honorable-mentions)" tabindex="-1"><a class="header-anchor" href="#other-algorithms-(honorable-mentions)">Other Algorithms (Honorable Mentions)</a></h3>
+<p>While our focus is on Reference Counting, Tri-Color, and Green Tea, other garbage collection strategies are worth knowing about:</p>
+<ul>
+<li>
+<p><strong>Classic Mark-and-Sweep</strong><br>
+The simplest approach: stop the world, mark reachable objects, sweep the rest. Easy to implement but causes long pause times.</p>
+</li>
+<li>
+<p><strong>Stop-and-Copy (Semi-Space, Cheney's algorithm)</strong><br>
+Splits the heap into two halves. Live objects are copied to the other half during collection. Provides fast allocation but wastes half the heap.</p>
+</li>
+<li>
+<p><strong>Generational GC</strong><br>
+Based on the &quot;most objects die young&quot; observation. Frequently collects the young generation, rarely collects the old. Used extensively in JVM and .NET.</p>
+</li>
+<li>
+<p><strong>Concurrent &amp; Parallel GC</strong><br>
+Collectors that run alongside the program (HotSpot's G1GC, Azul C4). Reduce pause times but require sophisticated synchronization.</p>
+</li>
+<li>
+<p><strong>Region/Arena-based Allocation</strong><br>
+Objects are allocated in regions (arenas), and the entire region is freed at once. Extremely efficient for certain workloads (seen in Rust's borrow checker or manual arena allocators).</p>
+</li>
+</ul>
+<p>These approaches influenced the design of Go's GC, but Go has deliberately chosen simplicity and predictability over the complexity of full generational or concurrent copying collectors.</p>
+<h2 id="implementation" tabindex="-1"><a class="header-anchor" href="#implementation">Implementation</a></h2>
+<p>With the concepts in place, let's implement our toy garbage collectors.<br>
+We'll use the simplified <code>Object</code> and <code>heap</code> structures we defined earlier, and implement each algorithm in turn: <strong>Reference Counting</strong>, <strong>Tri-Color Mark-and-Sweep</strong>, and <strong>Green Tea</strong>.</p>
+<h3 id="common-toy-heap-code" tabindex="-1"><a class="header-anchor" href="#common-toy-heap-code">Common Toy Heap Code</a></h3>
+<p>We already defined our <code>Object</code> struct and global <code>heap</code> and <code>roots</code>. Now, let's implement the core functions for our toy heap:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">NewObject</span><span class="token punctuation">(</span>id int<span class="token punctuation">)</span> <span class="token operator">*</span>Object <span class="token punctuation">{</span>
+    <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token operator">&amp;</span>Object<span class="token punctuation">{</span><span class="token constant">ID</span><span class="token operator">:</span> id<span class="token punctuation">}</span>
+    heap <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>heap<span class="token punctuation">,</span> obj<span class="token punctuation">)</span>
+    <span class="token keyword">return</span> obj
+<span class="token punctuation">}</span>
+
+func <span class="token function">AddRoot</span><span class="token punctuation">(</span><span class="token parameter">obj <span class="token operator">*</span>Object</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    roots <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>roots<span class="token punctuation">,</span> obj<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">AddRef</span><span class="token punctuation">(</span><span class="token parameter">from<span class="token punctuation">,</span> to <span class="token operator">*</span>Object</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    from<span class="token punctuation">.</span>Refs <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>from<span class="token punctuation">.</span>Refs<span class="token punctuation">,</span> to<span class="token punctuation">)</span>
+    to<span class="token punctuation">.</span>RefCount<span class="token operator">++</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>These helper functions allow us to create objects, define roots, and establish references between objects.</p>
+<h3 id="reference-counting-implementation" tabindex="-1"><a class="header-anchor" href="#reference-counting-implementation">Reference Counting Implementation</a></h3>
+<p>Reference counting updates counters when references are added or removed. Collection is immediate: when an object's count drops to zero, we recursively free it.</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">RemoveRef</span><span class="token punctuation">(</span><span class="token parameter">from<span class="token punctuation">,</span> to <span class="token operator">*</span>Object</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// remove reference from "from" to "to"</span>
+    <span class="token literal-property property">newRefs</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">r</span> <span class="token operator">:</span><span class="token operator">=</span> range from<span class="token punctuation">.</span>Refs <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> r <span class="token operator">!=</span> to <span class="token punctuation">{</span>
+            newRefs <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>newRefs<span class="token punctuation">,</span> r<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    from<span class="token punctuation">.</span>Refs <span class="token operator">=</span> newRefs
+
+    <span class="token comment">// decrement counter</span>
+    to<span class="token punctuation">.</span>RefCount<span class="token operator">--</span>
+    <span class="token keyword">if</span> to<span class="token punctuation">.</span>RefCount <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        <span class="token function">freeObject</span><span class="token punctuation">(</span>to<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+func <span class="token function">freeObject</span><span class="token punctuation">(</span><span class="token parameter">obj <span class="token operator">*</span>Object</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// recursively free children</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">r</span> <span class="token operator">:</span><span class="token operator">=</span> range obj<span class="token punctuation">.</span>Refs <span class="token punctuation">{</span>
+        r<span class="token punctuation">.</span>RefCount<span class="token operator">--</span>
+        <span class="token keyword">if</span> r<span class="token punctuation">.</span>RefCount <span class="token operator">==</span> <span class="token number">0</span> <span class="token punctuation">{</span>
+            <span class="token function">freeObject</span><span class="token punctuation">(</span>r<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// remove from heap</span>
+    <span class="token literal-property property">newHeap</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">h</span> <span class="token operator">:</span><span class="token operator">=</span> range heap <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> h <span class="token operator">!=</span> obj <span class="token punctuation">{</span>
+            newHeap <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>newHeap<span class="token punctuation">,</span> h<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    heap <span class="token operator">=</span> newHeap
+    fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Freed object %d\n"</span><span class="token punctuation">,</span> obj<span class="token punctuation">.</span><span class="token constant">ID</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Description:</p>
+<ul>
+<li>Every object keeps a counter of references pointing to it (<code>RefCount</code>).</li>
+<li>When a reference is removed, the count is decremented. If it reaches zero, the object is freed immediately, recursively freeing children.</li>
+<li>Cannot handle cycles: two objects referencing each other but unreachable elsewhere will never be freed.</li>
+<li>Main routine continues allocating while reference counts are updated - no stop-the-world pause occurs.</li>
+</ul>
+<h3 id="tri-color-mark-and-sweep-implementation" tabindex="-1"><a class="header-anchor" href="#tri-color-mark-and-sweep-implementation">Tri-Color Mark-and-Sweep Implementation</a></h3>
+<p>Here's a simple tri-color collector. We'll use <code>Marked</code> as the &quot;color&quot;: <code>false</code> = white, <code>true</code> = black. The gray set is represented by a queue.</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">TriColorGC</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 1. Mark phase</span>
+    <span class="token literal-property property">worklist</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object<span class="token punctuation">{</span><span class="token punctuation">}</span> <span class="token comment">// gray set</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">root</span> <span class="token operator">:</span><span class="token operator">=</span> range roots <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> <span class="token operator">!</span>root<span class="token punctuation">.</span>Marked <span class="token punctuation">{</span>
+            root<span class="token punctuation">.</span>Marked <span class="token operator">=</span> <span class="token boolean">true</span>
+            worklist <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>worklist<span class="token punctuation">,</span> root<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token keyword">for</span> <span class="token function">len</span><span class="token punctuation">(</span>worklist<span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> worklist<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+        worklist <span class="token operator">=</span> worklist<span class="token punctuation">[</span><span class="token number">1</span><span class="token operator">:</span><span class="token punctuation">]</span>
+
+        <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">r</span> <span class="token operator">:</span><span class="token operator">=</span> range obj<span class="token punctuation">.</span>Refs <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> <span class="token operator">!</span>r<span class="token punctuation">.</span>Marked <span class="token punctuation">{</span>
+                r<span class="token punctuation">.</span>Marked <span class="token operator">=</span> <span class="token boolean">true</span>
+                worklist <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>worklist<span class="token punctuation">,</span> r<span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// 2. Sweep phase</span>
+    <span class="token literal-property property">newHeap</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> range heap <span class="token punctuation">{</span>
+        <span class="token keyword">if</span> obj<span class="token punctuation">.</span>Marked <span class="token punctuation">{</span>
+            obj<span class="token punctuation">.</span>Marked <span class="token operator">=</span> <span class="token boolean">false</span> <span class="token comment">// reset for next GC</span>
+            newHeap <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>newHeap<span class="token punctuation">,</span> obj<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"Swept object %d\n"</span><span class="token punctuation">,</span> obj<span class="token punctuation">.</span><span class="token constant">ID</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    heap <span class="token operator">=</span> newHeap
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Description:</p>
+<ul>
+<li>Uses <code>Marked</code> to represent object color.</li>
+<li><code>worklist</code> is the gray set: objects reachable but not yet scanned.</li>
+<li>Marks all reachable objects from roots, then sweeps the heap to free the rest.</li>
+<li>Main routine is paused during this process - all allocations or work depending on these objects must wait until GC finishes.</li>
+<li>Correctly handles cycles.</li>
+<li>Longer heap = longer pause.</li>
+</ul>
+<p>How to see the pause:</p>
+<ul>
+<li><code>TriColorGC()</code> runs synchronously: the main allocation loop cannot proceed while it executes.</li>
+</ul>
+<h3 id="green-tea-(span-based-approximation)" tabindex="-1"><a class="header-anchor" href="#green-tea-(span-based-approximation)">Green Tea (Span-based Approximation)</a></h3>
+<p>Our toy model won't fully replicate Go 1.25's span-based GC, but we can simulate the key idea: <em>work distribution at the span level</em>.</p>
+<p>Here we treat each &quot;span&quot; as a batch of objects and mark them together.</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">const</span> spanSize <span class="token operator">=</span> <span class="token number">2</span> <span class="token comment">// just for demonstration</span>
+
+func <span class="token function">GreenTeaGC</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// divide heap into spans</span>
+    <span class="token literal-property property">spans</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> <span class="token literal-property property">i</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token function">len</span><span class="token punctuation">(</span>heap<span class="token punctuation">)</span><span class="token punctuation">;</span> i <span class="token operator">+=</span> spanSize <span class="token punctuation">{</span>
+        <span class="token literal-property property">end</span> <span class="token operator">:</span><span class="token operator">=</span> i <span class="token operator">+</span> spanSize
+        <span class="token keyword">if</span> end <span class="token operator">></span> <span class="token function">len</span><span class="token punctuation">(</span><span class="token parameter">heap</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+            end <span class="token operator">=</span> <span class="token function">len</span><span class="token punctuation">(</span>heap<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        spans <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>spans<span class="token punctuation">,</span> heap<span class="token punctuation">[</span>i<span class="token operator">:</span>end<span class="token punctuation">]</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// mark reachable objects</span>
+    <span class="token literal-property property">marked</span> <span class="token operator">:</span><span class="token operator">=</span> map<span class="token punctuation">[</span><span class="token operator">*</span>Object<span class="token punctuation">]</span>bool<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token literal-property property">worklist</span> <span class="token operator">:</span><span class="token operator">=</span> roots
+    <span class="token keyword">for</span> <span class="token function">len</span><span class="token punctuation">(</span>worklist<span class="token punctuation">)</span> <span class="token operator">></span> <span class="token number">0</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> worklist<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span>
+        worklist <span class="token operator">=</span> worklist<span class="token punctuation">[</span><span class="token number">1</span><span class="token operator">:</span><span class="token punctuation">]</span>
+
+        <span class="token keyword">if</span> marked<span class="token punctuation">[</span>obj<span class="token punctuation">]</span> <span class="token punctuation">{</span>
+            <span class="token keyword">continue</span>
+        <span class="token punctuation">}</span>
+        marked<span class="token punctuation">[</span>obj<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token boolean">true</span>
+
+        <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">r</span> <span class="token operator">:</span><span class="token operator">=</span> range obj<span class="token punctuation">.</span>Refs <span class="token punctuation">{</span>
+            worklist <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>worklist<span class="token punctuation">,</span> r<span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// sweep whole spans</span>
+    <span class="token literal-property property">newHeap</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Object<span class="token punctuation">{</span><span class="token punctuation">}</span>
+    <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">span</span> <span class="token operator">:</span><span class="token operator">=</span> range spans <span class="token punctuation">{</span>
+        <span class="token literal-property property">keepSpan</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token boolean">false</span>
+        <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> range span <span class="token punctuation">{</span>
+            <span class="token keyword">if</span> marked<span class="token punctuation">[</span>obj<span class="token punctuation">]</span> <span class="token punctuation">{</span>
+                keepSpan <span class="token operator">=</span> <span class="token boolean">true</span>
+                <span class="token keyword">break</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+
+        <span class="token keyword">if</span> keepSpan <span class="token punctuation">{</span>
+            <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> range span <span class="token punctuation">{</span>
+                <span class="token keyword">if</span> marked<span class="token punctuation">[</span>obj<span class="token punctuation">]</span> <span class="token punctuation">{</span>
+                    newHeap <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>newHeap<span class="token punctuation">,</span> obj<span class="token punctuation">)</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+            <span class="token keyword">for</span> _<span class="token punctuation">,</span> <span class="token literal-property property">obj</span> <span class="token operator">:</span><span class="token operator">=</span> range span <span class="token punctuation">{</span>
+                fmt<span class="token punctuation">.</span><span class="token function">Printf</span><span class="token punctuation">(</span><span class="token string">"GreenTea swept object %d\n"</span><span class="token punctuation">,</span> obj<span class="token punctuation">.</span><span class="token constant">ID</span><span class="token punctuation">)</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    heap <span class="token operator">=</span> newHeap
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Description:</p>
+<ul>
+<li>Splits the heap into spans (batches of objects).</li>
+<li>Maintains a worklist starting from roots. Marks objects as reachable.</li>
+<li>Processes spans incrementally, yielding periodically so the main routine can continue allocating.</li>
+<li>Sweeps per span, freeing only unmarked objects.</li>
+<li>Simulates Go 1.25's incremental/concurrent behavior: reduces application pause compared to Tri-Color.</li>
+</ul>
+<p>How to see concurrency:</p>
+<ul>
+<li>In the benchmark, Green Tea GC can run in a separate goroutine while main work runs in its own goroutine.</li>
+<li>Main work completes faster because it is not blocked by the GC.</li>
+</ul>
+<h2 id="benchmarking-main-work-completion" tabindex="-1"><a class="header-anchor" href="#benchmarking-main-work-completion">Benchmarking Main Work Completion</a></h2>
+<p>To demonstrate the practical differences between Tri-Color and Green Tea, <code>cmd/bench/main.go</code> implements a main work completion benchmark. The goal is simple: simulate a program performing allocations while the GC runs, and measure how quickly the main routine completes.</p>
+<h3 id="what-the-benchmark-does" tabindex="-1"><a class="header-anchor" href="#what-the-benchmark-does">What the Benchmark Does</a></h3>
+<ol>
+<li>
+<p>Heap Setup</p>
+<ul>
+<li>Creates a heap of <code>HEAP_SIZE</code> objects.</li>
+<li>Builds <code>ROOTS</code> root objects, each pointing to a chain of <code>SPAN_SIZE</code> objects.</li>
+<li>This creates a mix of reachable and unreachable objects, simulating a realistic heap layout.</li>
+</ul>
+</li>
+<li>
+<p>Main Work Simulation</p>
+<ul>
+<li>A separate goroutine simulates the application doing allocations (<code>MAIN_ALLOC</code> new objects).</li>
+<li>This represents typical program work independent of garbage collection.</li>
+</ul>
+</li>
+<li>
+<p>Tri-Color GC (Blocking)</p>
+</li>
+</ol>
+<ul>
+<li>Runs synchronously in the main goroutine.</li>
+<li>Marks all reachable objects from the roots, then sweeps unreachable objects.</li>
+<li>Because it blocks the main work goroutine, the total completion time reflects a stop-the-world pause.</li>
+</ul>
+<ol start="4">
+<li>
+<p>Green Tea GC (Incremental)</p>
+<ul>
+<li>Runs concurrently in its own goroutine.</li>
+<li>Splits the heap into spans and marks reachable objects incrementally.</li>
+<li>Every 100 objects marked, the GC yields (time.Sleep) to simulate cooperative concurrency.</li>
+<li>Sweep is also done span by span.</li>
+<li>The main routine continues allocating objects without being blocked, illustrating the reduced pause times of Green Tea.</li>
+</ul>
+</li>
+<li>
+<p>Measurement</p>
+<ul>
+<li>The benchmark measures how long the main work goroutine takes to complete under each GC strategy.</li>
+<li>This directly shows the impact of GC pauses on application responsiveness, which is the core design goal of Green Tea.</li>
+</ul>
+</li>
+</ol>
+<h3 id="why-this-approach-works" tabindex="-1"><a class="header-anchor" href="#why-this-approach-works">Why This Approach Works</a></h3>
+<ul>
+<li>No Reference Counting Benchmark Needed: RC updates counts immediately during allocation and reference removal, so there's no stop-the-world pause to measure (although it can impact throughput due to frequent counter updates, especially in concurrent scenarios). Its behavior is implicit.</li>
+<li>Focus on Latency: By isolating main work from GC, the benchmark highlights real application latency, rather than total GC throughput.</li>
+<li>Incremental Simulation: Although simplified, yielding every 100 objects simulates a concurrent marking strategy, allowing readers to see why Green Tea reduces perceived pause times.</li>
+</ul>
+<h3 id="running-the-benchmark" tabindex="-1"><a class="header-anchor" href="#running-the-benchmark">Running the Benchmark</a></h3>
+<p>To run the benchmark, use:</p>
+<pre class="language-bash"><code class="language-bash">go run cmd/bench/main.go
+</code></pre>
+<p>You should see output similar to:</p>
+<pre class="language-"><code class="language-"><span class="token punctuation">[</span>TriColor<span class="token punctuation">]</span> Main work completed <span class="token keyword">in</span><span class="token operator">:</span> <span class="token number">5</span><span class="token punctuation">.</span>0025ms
+<span class="token punctuation">[</span>GreenTea<span class="token punctuation">]</span> Main work completed <span class="token keyword">in</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">.</span>8372ms
+</code></pre>
+<p>This output indicates that the main work completed faster with Green Tea, demonstrating its advantage in reducing application pause times.</p>
+<p>Although this is a simplified model and the numbers are illustrative only, it effectively showcases the key differences between blocking and incremental GC strategies, aligning with Go's goals for low-latency garbage collection.</p>
+<h2 id="playground%3A-experimenting-with-garbage-collection" tabindex="-1"><a class="header-anchor" href="#playground%3A-experimenting-with-garbage-collection">Playground: Experimenting with Garbage Collection</a></h2>
+<p>To make these ideas more interactive, <code>cmd/demo/main.go</code> serves as a playground for experimenting with our toy heap and garbage collectors.</p>
+<ul>
+<li>What it does: Lets you create objects, set up references, define roots, and trigger the different GC strategies (Reference Counting, Tri-Color, and Green Tea).</li>
+<li>Why it's useful: By modifying object graphs, changing heap sizes, or tweaking span sizes, you can observe firsthand how each collector behaves under different workloads.</li>
+<li>Encouragement: Try adding cycles, increasing heap size, or adjusting the main allocation loop. Watch which objects get collected, how pauses appear, and how Green Tea's incremental approach (simulated in <code>cmd/demo/main.go</code>) reduces blocking.</li>
+</ul>
+<p>You can run the demo with:</p>
+<pre class="language-bash"><code class="language-bash">go run cmd/demo/main.go
+</code></pre>
+<p>This playground is designed for experimentation. Break it, tweak it, make cycles, expand the heap! The goal is to see the algorithms in action and build intuition about garbage collection, not just read about it.</p>
+<h2 id="why-go-moved-toward-green-tea" tabindex="-1"><a class="header-anchor" href="#why-go-moved-toward-green-tea">Why Go Moved Toward Green Tea</a></h2>
+<p>Go's shift from a classic tri-color GC to the span-based Green Tea collector reflects a set of practical priorities:</p>
+<ul>
+<li>Low-latency guarantees: Go has always aimed for sub-millisecond pause times, even under heavy concurrency. As applications scaled across many cores, the original tri-color GC required more synchronization and longer pauses. Green Tea reduces these pauses by distributing work at the span level and yielding more frequently.</li>
+<li>Scalability on multi-core systems: Modern servers often have dozens of cores. Tri-color GC's object-level marking can become a bottleneck with large heaps and many threads. Green Tea's span-based approach allows multiple workers to mark and sweep concurrently with minimal contention.</li>
+<li>Predictability over raw throughput: While tri-color GC could handle large heaps, its pause times were harder to predict under bursty workloads. By grouping objects into spans and processing them incrementally, Go can provide more consistent latency, a key concern for networked servers and real-time applications.</li>
+<li>Simplicity for concurrent workloads: Although the implementation is more complex internally, Green Tea reduces coordination between threads compared to fully concurrent, object-level marking. This keeps the runtime code simpler in practice and avoids subtle race conditions.</li>
+</ul>
+<p>In short, Go's move reflects the latest advancements in garbage collection research combined with the practical realities of large, high-concurrency programs. The result is a collector that scales efficiently without compromising Go's core promise: predictable, low-latency performance.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Garbage collection is more than a runtime detail - it directly affects how responsive and efficient your programs are. By exploring reference counting, tri-color mark-and-sweep, and Green Tea, we've seen:</p>
+<ul>
+<li>How memory management strategies evolved from simple counters to sophisticated, span-based marking.</li>
+<li>Why cycles, pause times, and concurrency constraints drive algorithmic choices.</li>
+<li>How Go 1.25's Green Tea GC balances scalability, predictability, and low latency, aligning with Go’s design philosophy.</li>
+</ul>
+<p>Even if you never implement a garbage collector yourself, understanding these trade-offs gives you a sharper intuition about performance, memory behavior, and the hidden costs behind seemingly simple Go programs.</p>
+<p>With these insights, you can better reason about allocation patterns, concurrency, and performance optimizations, and appreciate the engineering behind Go's modern garbage collector.</p>
+<h2 id="a-note-on-go-version" tabindex="-1"><a class="header-anchor" href="#a-note-on-go-version">A Note on Go Version</a></h2>
+<p>All our toy examples were cooked up with Go 1.23 — couldn’t resist. 😄</p>
+<p>But don't worry: with Go 1.25, the results should be very similar, so you can play around and see the differences between Tri-Color and Green Tea for yourself.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
