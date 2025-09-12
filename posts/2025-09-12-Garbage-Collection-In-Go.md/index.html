@@ -494,6 +494,9 @@ func <span class="token function">GreenTeaGC</span><span class="token punctuatio
 </ul>
 </li>
 </ol>
+<blockquote>
+<p>Note: Although tri-color marking is incremental in theory, our benchmark runs it as a blocking, synchronous operation to model the stop-the-world pauses that still occur in real implementations. In contrast, the Green Tea algorithm is designed to run incrementally and concurrently, so our benchmark allows the main work to continue while Green Tea GC operates in a separate goroutine, better reflecting its low-latency, non-blocking behavior.</p>
+</blockquote>
 <h3 id="why-this-approach-works" tabindex="-1"><a class="header-anchor" href="#why-this-approach-works">Why This Approach Works</a></h3>
 <ul>
 <li>No Reference Counting Benchmark Needed: RC updates counts immediately during allocation and reference removal, so there's no stop-the-world pause to measure (although it can impact throughput due to frequent counter updates, especially in concurrent scenarios). Its behavior is implicit.</li>
@@ -540,7 +543,7 @@ func <span class="token function">GreenTeaGC</span><span class="token punctuatio
 <p>Even if you never implement a garbage collector yourself, understanding these trade-offs gives you a sharper intuition about performance, memory behavior, and the hidden costs behind seemingly simple Go programs.</p>
 <p>With these insights, you can better reason about allocation patterns, concurrency, and performance optimizations, and appreciate the engineering behind Go's modern garbage collector.</p>
 <h2 id="a-note-on-go-version" tabindex="-1"><a class="header-anchor" href="#a-note-on-go-version">A Note on Go Version</a></h2>
-<p>All our toy examples were cooked up with Go 1.23 — couldn’t resist. 😄</p>
+<p>All our toy examples were cooked up with Go 1.23 — couldn't resist. 😄</p>
 <p>But don't worry: with Go 1.25, the results should be very similar, so you can play around and see the differences between Tri-Color and Green Tea for yourself.</p>
 
   </div>
