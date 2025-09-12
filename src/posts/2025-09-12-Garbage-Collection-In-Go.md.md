@@ -439,6 +439,8 @@ To demonstrate the practical differences between Tri-Color and Green Tea, `cmd/b
    - The benchmark measures how long the main work goroutine takes to complete under each GC strategy.
    - This directly shows the impact of GC pauses on application responsiveness, which is the core design goal of Green Tea.
 
+> Note: Although tri-color marking is incremental in theory, our benchmark runs it as a blocking, synchronous operation to model the stop-the-world pauses that still occur in real implementations. In contrast, the Green Tea algorithm is designed to run incrementally and concurrently, so our benchmark allows the main work to continue while Green Tea GC operates in a separate goroutine, better reflecting its low-latency, non-blocking behavior.
+
 ### Why This Approach Works
 
 - No Reference Counting Benchmark Needed: RC updates counts immediately during allocation and reference removal, so there's no stop-the-world pause to measure (although it can impact throughput due to frequent counter updates, especially in concurrent scenarios). Its behavior is implicit.
@@ -505,6 +507,6 @@ With these insights, you can better reason about allocation patterns, concurrenc
 
 ## A Note on Go Version
 
-All our toy examples were cooked up with Go 1.23 — couldn’t resist. 😄
+All our toy examples were cooked up with Go 1.23 — couldn't resist. 😄
 
 But don't worry: with Go 1.25, the results should be very similar, so you can play around and see the differences between Tri-Color and Green Tea for yourself.
