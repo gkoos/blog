@@ -279,6 +279,15 @@
       </item>
     
       <item>
+        <title>Making Your Fetch Requests Production-Ready with ffetch</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-13-Making-Your-Fetch-Requests-Production-Ready-With-Ffetch/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-13-Making-Your-Fetch-Requests-Production-Ready-With-Ffetch/</guid>
+        <pubDate>Sat, 13 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>How to use the ffetch library to make your fetch requests production-ready with retries, timeouts, cancellations and more.</description>
+      </item>
+    
+      <item>
         <title>How to Work with Collections in Go - My Second freeCodeCamp Article</title>
         <link>https://blog.gaborkoos.com/posts/2025-09-13-How-to-Work-with-Collections-in-Go/</link>
         <guid>https://blog.gaborkoos.com/posts/2025-09-13-How-to-Work-with-Collections-in-Go/</guid>

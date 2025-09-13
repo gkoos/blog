@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Making Your Fetch Requests Production-Ready with ffetch</title>
+  <meta name="description" content="How to use the ffetch library to make your fetch requests production-ready with retries, timeouts, cancellations and more.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Making Your Fetch Requests Production-Ready with ffetch">
+  <meta property="og:description" content="How to use the ffetch library to make your fetch requests production-ready with retries, timeouts, cancellations and more.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Making Your Fetch Requests Production-Ready with ffetch">
+  <meta name="twitter:description" content="How to use the ffetch library to make your fetch requests production-ready with retries, timeouts, cancellations and more.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Making Your Fetch Requests Production-Ready with ffetch</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-09-13T00:00:00.000Z">Sat Sep 13 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Your app is ready. You have a backend that does some magical things and then exposes some data throught an API. You have a frontend that consumes that API and displays the data to the user. You are using the Fetch API to make requests to your backend, then process the response and update the UI. Simple and straightforward, right?</p>
+<p>Well, in development, yes. Then, you deploy your app to production. And strange things start to happen. Most of the time all seems fine, but sometimes requests fail. The UI breaks. Users complain. You wonder what went wrong.</p>
+<p>The network is unpredictable and you have to be ready for it. You better have answers to these questions: What happens when the network is slow or unreliable? What happens when the backend is down or returns an error? If you consume external API's, what happens when you hit the rate limit and get blocked? How do you handle these scenarios gracefully and provide a good user experience?</p>
+<p>Honestly, vanilla Fetch is not enough to handle these scenarios. You need to add a lot of boilerplate code to handle errors, retries, timeouts, caching, etc. This can quickly become messy and hard to maintain.</p>
+<p>In this article, we will explore how to make your fetch requests production-ready using a library called <code>ffetch</code>. We will:</p>
+<ul>
+<li>build a backend with Node.js and Express with some endpoints</li>
+<li>build a frontend that polls those endpoints with vanilla JavaScript using the Fetch API</li>
+<li>make the backend flaky to simulate real-world scenarios</li>
+<li>see how fetch requests can fail and how to handle those failures</li>
+<li>introduce <code>ffetch</code> to simplify and enhance the fetch request handling</li>
+</ul>
+<h2 id="the-boilerplate" tabindex="-1"><a class="header-anchor" href="#the-boilerplate">The boilerplate</a></h2>
+<p>We will build the backbones of a simple multi-user tasklist. The backend will expose RESTful endpoints to create, read, update and delete users and tasks, and assign tasks to users. The frontend will poll the backend to get the latest data and display it to the user.</p>
+<h3 id="backend" tabindex="-1"><a class="header-anchor" href="#backend">Backend</a></h3>
+<p>We will use Node.js and Express to build the backend. We will also use a simple in-memory data store to keep things simple. Here are the user and task models:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">interface</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
+  id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>        <span class="token comment">// Unique identifier</span>
+  name<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>      <span class="token comment">// Full name</span>
+  email<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>     <span class="token comment">// Email address</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">interface</span> <span class="token class-name">Task</span> <span class="token punctuation">{</span>
+  id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">;</span>              <span class="token comment">// Unique identifier</span>
+  title<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>           <span class="token comment">// Short task title</span>
+  description<span class="token operator">?</span><span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">;</span>    <span class="token comment">// Optional detailed description</span>
+  priority<span class="token operator">:</span> <span class="token string">"low"</span> <span class="token operator">|</span> <span class="token string">"medium"</span> <span class="token operator">|</span> <span class="token string">"high"</span><span class="token punctuation">;</span> <span class="token comment">// Task priority</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>We will create the following endpoints:</p>
+<ul>
+<li>
+<p><code>GET /users</code>: Get all users (returns an array of user ids)</p>
+</li>
+<li>
+<p><code>POST /users</code>: Create a new user (returns the created user's id)</p>
+</li>
+<li>
+<p><code>GET /users/:id</code>: Get a user by id (returns the user object)</p>
+</li>
+<li>
+<p><code>PUT /users/:id</code>: Update a user (returns a success message)</p>
+</li>
+<li>
+<p><code>DELETE /users/:id</code>: Delete a user (returns a success message)</p>
+</li>
+<li>
+<p><code>GET /tasks</code>: Get all tasks (returns an array of task ids)</p>
+</li>
+<li>
+<p><code>GET /tasks/:id</code>: Get a task by id (returns the task object)</p>
+</li>
+<li>
+<p><code>POST /tasks</code>: Create a new task (returns the created task's id)</p>
+</li>
+<li>
+<p><code>PUT /tasks/:id</code>: Update a task (returns a success message)</p>
+</li>
+<li>
+<p><code>DELETE /tasks/:id</code>: Delete a task</p>
+</li>
+<li>
+<p><code>GET /users/:userId/tasks</code>: Get all tasks assigned to a user (returns an array of task ids)</p>
+</li>
+<li>
+<p><code>POST /users/:userId/tasks/:taskId</code>: Assign a task to a user (returns a success message)</p>
+</li>
+<li>
+<p><code>DELETE /users/:userId/tasks/:taskId</code>: Remove a task from a user (returns a success message)</p>
+</li>
+</ul>
+<h3 id="frontend" tabindex="-1"><a class="header-anchor" href="#frontend">Frontend</a></h3>
+<p>As frameworks usually add their own abstractions and ways of doing things, we will use vanilla TypeScript to keep things simple and framework-agnostic. We will create a SPA with two views: one for the userlist and one for a specific user. The userlist displays the user's name and the number of tasks assigned to them. Clicking on a user will take you to the user view, which shows the user's details and their tasks. And from the user view we can go back to the userlist.</p>
+<p>To keep things simple, we will use polling to get the latest data from the backend. Every 3 seconds, we will make requests to the backend to get the latest data for the current view, and update the UI accordingly.</p>
+<p>For the userlist view, we will make a request to <code>GET /users</code> to get all the user ids, then for each user, we will make a request to <code>GET /users/:id</code> to retrieve their details, and <code>GET /users/:id/tasks</code> to calculate the number of tasks assigned to them.</p>
+<p>For the user view, we will make a request to <code>GET /users/:id</code> to get the user's details, and <code>GET /users/:id/tasks</code> to get the task ids assigned to them. Then for each task id, we will make a request to <code>GET /tasks/:id</code> to retrieve the task details.</p>
+<h3 id="the-github-repo" tabindex="-1"><a class="header-anchor" href="#the-github-repo">The Github repo</a></h3>
+<p>You can find the complete code for this example in the accompanying <a href="https://github.com/gkoos/article-ffetch">Github repo</a>.</p>
+<p>Because of the amount of boilerplate, refer to the repo for the complete code. Every stage of the article will reference a branch in the repo.</p>
+<p>The repo contains both the backend and frontend code. The backend is in the <code>backend</code> folder and the frontend is in the <code>frontend</code> folder. When you clone the repo, run <code>npm install</code> in both folders to install the dependencies. Then you can run the backend with <code>npm run dev</code> in the <code>backend</code> folder, and the frontend with <code>npm run dev</code> in the <code>frontend</code> folder. The frontend will be served at <code>http://localhost:5173</code> and the backend at <code>http://localhost:3000</code>.</p>
+<p>Once you did all the chores and both your backend and frontend are running, you can open your browser and go to <code>http://localhost:5173</code> to see the app in action:</p>
+<p><img src="https://i.imgur.com/gBWDtUb.png" alt="App screenshot"></p>
+<h2 id="in-development" tabindex="-1"><a class="header-anchor" href="#in-development">In Development</a></h2>
+<p>If you navigate to <code>http://localhost:5173</code>, you should see everything working just fine. If you add a new user with</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> <span class="token parameter variable">-X</span> POST http://localhost:3000/users <span class="token punctuation">\</span>
+  <span class="token parameter variable">-H</span> <span class="token string">"Content-Type: application/json"</span> <span class="token punctuation">\</span>
+  <span class="token parameter variable">-d</span> <span class="token string">'{"name": "John Doe", "email": "john@example.com"}'</span>
+</code></pre>
+<p>you should see the user appear in the userlist view within 3 seconds. Feel free to play around with the app and add more users and tasks. Most likely everything will work just fine.</p>
+<p>Well, this is where we finally arrive at the point of this article. Our backend works just fine. Our frontend, despite the horrible boilerplate, also works just fine. But between the frontend and backend, there is the network. And the network is unreliable. So let's see what happens if we add a bit of flakiness to our backend.</p>
+<h2 id="simulating-network-errors" tabindex="-1"><a class="header-anchor" href="#simulating-network-errors">Simulating network errors</a></h2>
+<p>Let's add a middleware to our backend that randomly fails requests with a 20% chance and also adds some random delay up to 1 second. This will simulate network errors and help us test how our frontend handles them.</p>
+<p>You can find the flaky middleware in the <code>backend/src/middleware/flaky.ts</code> file. Here is the code:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">import</span> <span class="token punctuation">{</span> Request<span class="token punctuation">,</span> Response<span class="token punctuation">,</span> NextFunction <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'express'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">flaky</span><span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">,</span> res<span class="token operator">:</span> Response<span class="token punctuation">,</span> next<span class="token operator">:</span> NextFunction<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// Randomly fail requests with a 20% chance</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> <span class="token number">0.2</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">status</span><span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span> error<span class="token operator">:</span> <span class="token string">'Random failure'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Add random delay up to 2 seconds</span>
+  <span class="token keyword">const</span> delay <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">2000</span><span class="token punctuation">;</span>
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span>next<span class="token punctuation">,</span> delay<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Then, we can use this middleware in our Express app. You can find the code in the <code>backend/src/index.ts</code> file. Just import the middleware and use it before your routes:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token operator">...</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> flaky <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./middleware/flaky'</span><span class="token punctuation">;</span>
+<span class="token operator">...</span>
+
+app<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span><span class="token function">cors</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+app<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>express<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+app<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>flaky<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// Use the flaky middleware</span>
+</code></pre>
+<p>This code is in the <code>network-errors</code> branch of the repo, so you can check it out with <code>git checkout network-errors</code>.</p>
+<p>Now, if you restart your backend and refresh the frontend, you should start seeing some weird things. The console will be filled with errors. Some fields on the UI will be <code>undefined</code>. Things start to fall apart. And this is when, if you haven't already, you need to start thinking about how to handle these errors gracefully.</p>
+<p><img src="https://i.imgur.com/snJ0PGD.png" alt="Errors screenshot"></p>
+<h2 id="error-scenarios" tabindex="-1"><a class="header-anchor" href="#error-scenarios">Error Scenarios</a></h2>
+<p>First of all, let's identify what can go wrong and how we can handle it:</p>
+<ul>
+<li>Intermittent network failures: requests can fail randomly, so on certain errors we need to retry them a few times before giving up.</li>
+<li>When polling, we're not sending just one request, but multiple requests asynchronously. And 3 seconds later, we send another batch of requests. If a request from the previous batch is still pending when the next batch is sent, we might get an earlier response after a later one. This can lead to inconsistent UI state. We need to make sure that only the latest response is used to update the UI, so when a new polling cycle starts, we need to cancel any pending requests from the previous cycle.</li>
+<li>Similarly, if the user navigates to a different view while requests from the previous view are still pending, we might get responses for the previous view after we've already navigated away. This can also lead to inconsistent UI state. We need to make sure that only responses for the current view are used to update the UI, so when navigating to a different view, we need to cancel any pending requests from the previous view.</li>
+<li>If a request was successful at some point, but then fails in a subsequent polling cycle, we don't want to immediately show an error state to the user. We can cache successful responses so users don't notice every little hiccup in the network.</li>
+<li>We have to handle scenarios where say we're viewing a user that has been deleted in the backend. We need to handle 404 errors gracefully and navigate back to the userlist view or at least show a not found message.</li>
+<li>Also, we need to handle scenarios where the backend is completely down or unreachable. We need to show a global error message to the user and maybe retry the requests after some time.</li>
+<li>And the list goes on, especially if the UI allows creating, updating or deleting data. But for now, let's focus on the read operations and how to handle errors when fetching data.</li>
+</ul>
+<h2 id="handling-errors-with-vanilla-fetch" tabindex="-1"><a class="header-anchor" href="#handling-errors-with-vanilla-fetch">Handling errors with vanilla Fetch</a></h2>
+<p>Here, as with many things in JavaScript (or TypeScript), you have two options to handle these scenarios. You can write your own utility functions to wrap the Fetch API and add the necessary error handling logic, or you can pick a library that does this for you.</p>
+<p>Let's start with implementing everything ourselves. The code is on the <code>native-fetch</code> branch of the repo, so you can check it out with <code>git checkout native-fetch</code>.</p>
+<h3 id="what-needs-to-be-done" tabindex="-1"><a class="header-anchor" href="#what-needs-to-be-done">What needs to be done</a></h3>
+<ul>
+<li>Centralize all fetch logic in <code>poller.ts</code>.</li>
+<li>For each poll, create a new <code>AbortController</code> and cancel the previous one.</li>
+<li>Wrap fetch calls in a retry-and-timeout function.</li>
+<li>On success, update a cache and use it for rendering.</li>
+<li>On failure, retry as needed, and handle timeouts/cancellations gracefully.</li>
+</ul>
+<p>Our <code>poller.ts</code> file now looks like this:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// Cache for responses</span>
+<span class="token keyword">const</span> cache<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">any</span><span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// AbortController for cancelling requests</span>
+<span class="token keyword">let</span> currentController<span class="token operator">:</span> AbortController <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Helper: fetch with retries and timeout</span>
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span>url<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> options<span class="token operator">:</span> RequestInit <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span> retries <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">,</span> timeout <span class="token operator">=</span> <span class="token number">3000</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span><span class="token builtin">any</span><span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> attempt <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> attempt <span class="token operator">&lt;=</span> retries<span class="token punctuation">;</span> attempt<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> timer <span class="token operator">=</span> <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> timeout<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">try</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token operator">...</span>options<span class="token punctuation">,</span> signal<span class="token operator">:</span> controller<span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token function">clearTimeout</span><span class="token punctuation">(</span>timer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>res<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">HTTP </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>res<span class="token punctuation">.</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span> data<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">clearTimeout</span><span class="token punctuation">(</span>timer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>attempt <span class="token operator">===</span> retries<span class="token punctuation">)</span> <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Cancel all previous requests</span>
+<span class="token keyword">function</span> <span class="token function">cancelRequests</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>currentController<span class="token punctuation">)</span> currentController<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  currentController <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchUserListData</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">cancelRequests</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// Use cache if available</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">.</span>userList<span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">.</span>userList<span class="token punctuation">;</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>currentController<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'AbortController not initialized'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> userIds <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span><span class="token string">'http://localhost:3000/users'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> signal<span class="token operator">:</span> currentController<span class="token operator">!</span><span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>userIds<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span> signal<span class="token operator">:</span> currentController<span class="token operator">!</span><span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> taskCounts <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>userIds<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/tasks</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span> signal<span class="token operator">:</span> currentController<span class="token operator">!</span><span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>tasks<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=></span> tasks<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cache<span class="token punctuation">.</span>userList <span class="token operator">=</span> <span class="token punctuation">{</span> users<span class="token punctuation">,</span> taskCounts <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> cache<span class="token punctuation">.</span>userList<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// fallback to cache if available</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">.</span>userList<span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">.</span>userList<span class="token punctuation">;</span>
+    <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchUserDetailsData</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">cancelRequests</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> cacheKey <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">userDetails_</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>userId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>currentController<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'AbortController not initialized'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>userId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span> signal<span class="token operator">:</span> currentController<span class="token operator">!</span><span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> taskIds <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>userId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/tasks</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span> signal<span class="token operator">:</span> currentController<span class="token operator">!</span><span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> tasks <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>taskIds<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">fetchWithRetry</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/tasks/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span> signal<span class="token operator">:</span> currentController<span class="token operator">!</span><span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> user<span class="token punctuation">,</span> tasks <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>We deleted <code>api.ts</code> as all fetch logic is now in <code>poller.ts</code>. In our simplified use case it's bearable, but even here we needed to add a lot of boilerplate code to handle errors, retries, timeouts, cancellations and caching. And this is just for read operations. Imagine how much more code you would need to handle create, update and delete users, tasks and assignments.</p>
+<p>If you run the app now, you should see that it works much better. The UI is more stable and doesn't break as often. You can still see some errors in the console, but they are handled gracefully and don't affect the user experience as much.</p>
+<h3 id="downsides-of-this-approach" tabindex="-1"><a class="header-anchor" href="#downsides-of-this-approach">Downsides of this approach</a></h3>
+<ul>
+<li>More boilerplate code: We had to write a lot of code to handle errors, retries, timeouts, cancellations and caching. This can quickly become messy and hard to maintain.</li>
+<li>Not very reusable: The code is tightly coupled to our specific use case and not very reusable for other projects or scenarios.</li>
+<li>Limited features: The code only handles basic error scenarios. More complex scenarios like exponential backoff, circuit breakers, or global error handling would require even more code.</li>
+</ul>
+<h2 id="using-ffetch-for-better-fetch-handling" tabindex="-1"><a class="header-anchor" href="#using-ffetch-for-better-fetch-handling">Using <code>ffetch</code> for better fetch handling</a></h2>
+<p>To address the downsides of our custom fetch handling, I wrote a library called <a href="https://www.npmjs.com/package/@gkoos/ffetch"><code>ffetch</code></a>. It is a small and lightweight library that wraps the Fetch API and provides a simple and declarative way to handle errors, retries, timeouts, cancellations and some more features.</p>
+<p>Let's rewrite our fetch logic using <code>ffetch</code>. You can find the code on the <code>ffetch</code> branch of the repo, so you can check it out with <code>git checkout ffetch</code>.</p>
+<p>First, install <code>ffetch</code> in the <code>frontend</code> folder:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @gkoos/ffetch
+</code></pre>
+<p>Then, we can rewrite our <code>poller.ts</code> file using <code>ffetch</code>:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword">import</span> createClient <span class="token keyword">from</span> <span class="token string">'@gkoos/ffetch'</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Cache for responses</span>
+<span class="token keyword">const</span> cache<span class="token operator">:</span> Record<span class="token operator">&lt;</span><span class="token builtin">string</span><span class="token punctuation">,</span> <span class="token builtin">any</span><span class="token operator">></span> <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Create ffetch client</span>
+<span class="token keyword">const</span> api <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  timeout<span class="token operator">:</span> <span class="token number">3000</span><span class="token punctuation">,</span>
+  retries<span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+<span class="token keyword">function</span> <span class="token function">cancelRequests</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  api<span class="token punctuation">.</span><span class="token function">abortAll</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchUserListData</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">cancelRequests</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">.</span>userList<span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">.</span>userList<span class="token punctuation">;</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> userIds <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token string">'http://localhost:3000/users'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+      userIds<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> taskCounts <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+      userIds<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/tasks</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span>tasks<span class="token operator">:</span> <span class="token builtin">any</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">=></span> tasks<span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cache<span class="token punctuation">.</span>userList <span class="token operator">=</span> <span class="token punctuation">{</span> users<span class="token punctuation">,</span> taskCounts <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> cache<span class="token punctuation">.</span>userList<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">.</span>userList<span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">.</span>userList<span class="token punctuation">;</span>
+    <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchUserDetailsData</span><span class="token punctuation">(</span>userId<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">cancelRequests</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> cacheKey <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">userDetails_</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>userId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>userId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> taskIds <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/users/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>userId<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/tasks</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> tasks <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token builtin">Promise</span><span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+      taskIds<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span>id<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:3000/tasks/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>r <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">{</span> user<span class="token punctuation">,</span> tasks <span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token keyword">return</span> cache<span class="token punctuation">[</span>cacheKey<span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">throw</span> err<span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The code is much cleaner and easier to read. We don't have to worry about retries, timeouts or cancellations anymore. <code>ffetch</code> takes care of that for us. We just create a client with the desired options and use it to make requests.</p>
+<h3 id="other-benefits-of-using-ffetch" tabindex="-1"><a class="header-anchor" href="#other-benefits-of-using-ffetch">Other Benefits of using <code>ffetch</code></a></h3>
+<ul>
+<li>Circuit breaker: automatic endpoint cooldown after repeated failures</li>
+<li>Automatic exponential backoff for retries: increasing wait times between retries</li>
+<li>Global error handling: hooks for logging, modifying requests/responses, etc.</li>
+<li>We can fine-tune which failures should trigger a retry, and which should not. For example, we can choose to retry on network errors and 5xx server errors, but not on 4xx client errors.</li>
+</ul>
+<p><code>ffetch</code> doesn't do anything magical you couldn't build yourself, but it saves you from writing, testing, and maintaining all that boilerplate. It's a convenience wrapper that bakes in production-grade patterns (like circuit breaker and backoff) so you can focus on your app, not your fetch logic. It also stops at the fetch layer, so you can still use your own caching, state management, and UI libraries as you see fit.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>The main takeaway of this article is not that you should use <code>ffetch</code> specifically, but that you should not rely on vanilla Fetch for production-ready applications. The network is unreliable and you need to be prepared for it. You need to handle errors, retries, timeouts, cancellations and caching gracefully to provide a good user experience. What you exactly need to do depends on your specific use case and requirements, but you can't go to production handling the happy path only. Things can and will go wrong, and your app needs to handle at least the most common failure scenarios. And <code>ffetch</code> can help with that.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
