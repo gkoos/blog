@@ -278,5 +278,14 @@
         <description>Explore the evolution of garbage collection in Go, from early techniques to the latest advancements.</description>
       </item>
     
+      <item>
+        <title>How to Work with Collections in Go - My Second freeCodeCamp Article</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-13-How-to-Work-with-Collections-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-13-How-to-Work-with-Collections-in-Go/</guid>
+        <pubDate>Sat, 13 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>Go standard library helpers to work with collections, published on freeCodeCamp.</description>
+      </item>
+    
   </channel>
 </rss>
