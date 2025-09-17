@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stop Hammering Broken APIs - the Circuit Breaker Pattern</title>
+  <meta name="description" content="How to make your fetch requests production-ready by implementing the circuit breaker pattern to handle failing APIs gracefully.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Stop Hammering Broken APIs - the Circuit Breaker Pattern">
+  <meta property="og:description" content="How to make your fetch requests production-ready by implementing the circuit breaker pattern to handle failing APIs gracefully.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Stop Hammering Broken APIs - the Circuit Breaker Pattern">
+  <meta name="twitter:description" content="How to make your fetch requests production-ready by implementing the circuit breaker pattern to handle failing APIs gracefully.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Stop Hammering Broken APIs - the Circuit Breaker Pattern</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-09-17T00:00:00.000Z">Wed Sep 17 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
+<p>Modern applications rarely live in isolation. A single page load might involve calls to a payments API, a recommendation service, a geolocation provider, and your own backend. This web of dependencies makes apps powerful, but also fragile.</p>
+<p>What happens if one of these services slows down or starts failing? Without safeguards, your app may keep retrying, queuing up requests, or waiting on timeouts. The result: wasted resources, frustrated users, and sometimes cascading failures that spread from one misbehaving service into the rest of your system.</p>
+<p>This is where the <em>circuit breaker pattern</em> comes in. Inspired by electrical circuits, a software circuit breaker &quot;opens&quot; once failures reach a threshold. While the breaker is open, calls to the failing service are blocked immediately, giving it time to recover and protecting the rest of the system. After a cooldown period, the breaker closes again and normal traffic resumes.</p>
+<p>Circuit breakers are especially useful in multi-endpoint pipelines - scenarios where one failing dependency can cause an entire chain of requests to collapse. Think of:</p>
+<ul>
+<li>A checkout flow that needs both an orders service and a payments service.</li>
+<li>A user profile page that aggregates data from half a dozen microservices.</li>
+<li>A data processing script that calls one API and uses the results to query another.</li>
+</ul>
+<p>In each case, a single failing service can bring everything down unless failures are isolated and handled gracefully.</p>
+<p>In this article, we'll make the circuit breaker pattern concrete by building a small demo backend with multiple endpoints, then wiring them together into a pipeline. We'll show what happens when endpoints fail, how circuit breakers respond, and how you can observe the difference in practice.</p>
+<h2 id="what-we'll-build" tabindex="-1"><a class="header-anchor" href="#what-we'll-build">What We'll Build</a></h2>
+<p>To see what happens when upstream services are unreliable, we'll create a simple Express backend API with three endpoints:</p>
+<ul>
+<li><code>/users</code> - an endpoint to get user information.</li>
+<li><code>/orders/:id</code> - to fetch orders made by a user.</li>
+<li><code>/payments/:id</code> - to get payment status for an order.</li>
+</ul>
+<p>We'll add configurable failure rates to the orders and payments endpoints, so we can simulate instability. The users endpoint will always succeed, because without a stable starting point, the rest of the pipeline can't run. Note that as a responsible developer, your app has to deal with failures at every step, including the first one. But for this demo, we want to focus on the circuit breakers.</p>
+<p>Once our backend is ready, we'll create a client-side script that runs a pipeline every few seconds that:</p>
+<ul>
+<li>Fetches the list of users.</li>
+<li>For each user, fetches their orders.</li>
+<li>For each order, fetches the payment status.</li>
+<li>Displays the results in a table.</li>
+</ul>
+<p>First we simply implement this pipeline using native <code>fetch()</code>, then we switch to using a fetch wrapper that supports circuit breakers. We'll see how the behavior changes when endpoints start failing, and how circuit breakers can help keep the overall system more stable by decreasing load on failing services.</p>
+<h2 id="the-backend" tabindex="-1"><a class="header-anchor" href="#the-backend">The Backend</a></h2>
+<p>In this example, we'll use Express, so first make sure you have it installed:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> express
+</code></pre>
+<p>Then create a <code>server.js</code> file with the following code:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// server.js</span>
+<span class="token keyword">import</span> express <span class="token keyword">from</span> <span class="token string">"express"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> app <span class="token operator">=</span> <span class="token function">express</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token constant">PORT</span> <span class="token operator">=</span> <span class="token number">3000</span><span class="token punctuation">;</span>
+
+<span class="token comment">// configurable failure rates</span>
+<span class="token keyword">const</span> <span class="token constant">ORDERS_FAILURE_RATE</span> <span class="token operator">=</span> <span class="token function">parseFloat</span><span class="token punctuation">(</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">ORDERS_FAILURE_RATE</span> <span class="token operator">||</span> <span class="token string">"0.3"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> <span class="token constant">PAYMENTS_FAILURE_RATE</span> <span class="token operator">=</span> <span class="token function">parseFloat</span><span class="token punctuation">(</span>process<span class="token punctuation">.</span>env<span class="token punctuation">.</span><span class="token constant">PAYMENTS_FAILURE_RATE</span> <span class="token operator">||</span> <span class="token string">"1.0"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// simple in-memory data</span>
+<span class="token keyword">const</span> users <span class="token operator">=</span> <span class="token punctuation">[</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">"Alice"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">"Bob"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">"Charlie"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> orders <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token number">1</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">101</span><span class="token punctuation">,</span> <span class="token literal-property property">item</span><span class="token operator">:</span> <span class="token string">"Book"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">102</span><span class="token punctuation">,</span> <span class="token literal-property property">item</span><span class="token operator">:</span> <span class="token string">"Laptop"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token number">2</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">201</span><span class="token punctuation">,</span> <span class="token literal-property property">item</span><span class="token operator">:</span> <span class="token string">"Pen"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token number">3</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">301</span><span class="token punctuation">,</span> <span class="token literal-property property">item</span><span class="token operator">:</span> <span class="token string">"Notebook"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">302</span><span class="token punctuation">,</span> <span class="token literal-property property">item</span><span class="token operator">:</span> <span class="token string">"Keyboard"</span> <span class="token punctuation">}</span><span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">maybeFail</span><span class="token punctuation">(</span><span class="token parameter">rate</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">random</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">&lt;</span> rate<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// log helper</span>
+<span class="token keyword">function</span> <span class="token function">log</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> status</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">[</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">] </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>req<span class="token punctuation">.</span>method<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>req<span class="token punctuation">.</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> → </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+app<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/users"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token function">log</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> <span class="token string">"200 (success)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span>users<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+app<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/orders/:id"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">maybeFail</span><span class="token punctuation">(</span><span class="token constant">ORDERS_FAILURE_RATE</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">log</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> <span class="token string">"500 (failure)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    res<span class="token punctuation">.</span><span class="token function">status</span><span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">error</span><span class="token operator">:</span> <span class="token string">"Orders service unavailable"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token function">log</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> <span class="token string">"200 (success)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span>orders<span class="token punctuation">[</span>req<span class="token punctuation">.</span>params<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+app<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">"/payments/:id"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token function">maybeFail</span><span class="token punctuation">(</span><span class="token constant">PAYMENTS_FAILURE_RATE</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">log</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> <span class="token string">"500 (failure)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    res<span class="token punctuation">.</span><span class="token function">status</span><span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">error</span><span class="token operator">:</span> <span class="token string">"Payment service down"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token function">log</span><span class="token punctuation">(</span>req<span class="token punctuation">,</span> <span class="token string">"200 (success)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> req<span class="token punctuation">.</span>params<span class="token punctuation">.</span>id<span class="token punctuation">,</span> <span class="token literal-property property">status</span><span class="token operator">:</span> <span class="token string">"paid"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+app<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token constant">PORT</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Mock backend running on http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">PORT</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This code sets up an Express server with three endpoints. The <code>/users</code> endpoint always returns a static list of users. The <code>/orders/:id</code> and <code>/payments/:id</code> endpoints simulate failures based on configurable failure rates, which you can set using environment variables <code>ORDERS_FAILURE_RATE</code> and <code>PAYMENTS_FAILURE_RATE</code>. By default, the orders endpoint fails 30% of the time, and the payments endpoint fails 100% of the time. We log each request along with its status to the console for easy monitoring.</p>
+<p>To run the server, use:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">node</span> server.js
+</code></pre>
+<p>You can adjust the failure rates by setting the environment variables when starting the server. For example, to set a 20% failure rate for orders and a 70% failure rate for payments, you can run:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">ORDERS_FAILURE_RATE</span><span class="token operator">=</span><span class="token number">0.2</span> <span class="token assign-left variable">PAYMENTS_FAILURE_RATE</span><span class="token operator">=</span><span class="token number">0.7</span> <span class="token function">node</span> server.js
+</code></pre>
+<h2 id="the-client-pipeline" tabindex="-1"><a class="header-anchor" href="#the-client-pipeline">The Client Pipeline</a></h2>
+<p>Our &quot;frontend&quot; will be a simple Node.js script that runs the pipeline every 3 seconds and displays the results in the console, after clearing the previous output. Create a <code>pipeline.js</code> file start putting it together.</p>
+<p>First, let's define our state simply as an object holding the results of each call. The key for the orders and payments will be the user ID and order ID respectively, so we can easily look them up later. We can also define the API base URL:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// pipeline.js</span>
+<span class="token keyword">const</span> <span class="token constant">API_BASE</span> <span class="token operator">=</span> <span class="token string">"http://localhost:3000"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> state <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">users</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">orders</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">payments</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre>
+<p>The bulk of the logic will go inside a <code>runPipeline</code> function that we call every few seconds. We'll start by fetching the users, then for each user, fetch their orders, and for each order, fetch the payment status. We'll use <code>Promise.all</code> to parallelize requests where possible:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">runPipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// Fetch users</span>
+  <span class="token keyword">let</span> users<span class="token punctuation">;</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> usersRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API_BASE</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/users</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    users <span class="token operator">=</span> <span class="token keyword">await</span> usersRes<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Reset state if users fetch succeeded</span>
+    state<span class="token punctuation">.</span>users <span class="token operator">=</span> users<span class="token punctuation">;</span>
+    state<span class="token punctuation">.</span>orders <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    state<span class="token punctuation">.</span>payments <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// If there was an error fetching users, use the last known state</span>
+    <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Fan out orders requests in parallel</span>
+  <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+    users<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">user</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> ordersRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API_BASE</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/orders/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token keyword">const</span> orders <span class="token operator">=</span> <span class="token keyword">await</span> ordersRes<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        state<span class="token punctuation">.</span>orders<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> orders<span class="token punctuation">;</span>
+        <span class="token comment">// Fan out payments requests in parallel for each user's orders</span>
+        <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+          orders<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">order</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+            <span class="token keyword">try</span> <span class="token punctuation">{</span>
+              <span class="token keyword">const</span> paymentRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API_BASE</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/payments/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>order<span class="token punctuation">.</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+              <span class="token keyword">const</span> payment <span class="token operator">=</span> <span class="token keyword">await</span> paymentRes<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+              <span class="token punctuation">(</span>state<span class="token punctuation">.</span>payments<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">??=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">[</span>order<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> payment<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+              <span class="token punctuation">(</span>state<span class="token punctuation">.</span>payments<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">??=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">[</span>order<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+          <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        state<span class="token punctuation">.</span>orders<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Here, we first try to fetch the users. If that fails, we simply render the last known state and exit early. If it succeeds, we reset the orders and payments state. This is not ideal for a real app, as without it we would have almost implemented caching, but for this demo the cache would be in the way when trying to interpret the results.</p>
+<p>Then we have to make sure the pipeline runs every 3 seconds:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">loopPipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token function">runPipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">resolve</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> <span class="token number">3000</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">loopPipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This is one way to do it. If we were using <code>setInterval()</code>, we would have to be careful to avoid overlapping runs if one takes longer than the interval. We should abort all the previous requests, which would divert attention from the main topic of this article.</p>
+<p>Finally, we need a <code>renderTable</code> function to display the results in a table format. We'll clear the console each time to keep it tidy:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">function</span> <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>state<span class="token punctuation">.</span>users<span class="token punctuation">.</span>length<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"No data to display (no users)"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">const</span> table <span class="token operator">=</span> state<span class="token punctuation">.</span>users<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">user</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> orders <span class="token operator">=</span> state<span class="token punctuation">.</span>orders<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> payments <span class="token operator">=</span> state<span class="token punctuation">.</span>payments<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">||</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">User</span><span class="token operator">:</span> user<span class="token punctuation">.</span>name<span class="token punctuation">,</span>
+      <span class="token literal-property property">Orders</span><span class="token operator">:</span>
+        orders
+          <span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">order</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+            <span class="token keyword">const</span> payment <span class="token operator">=</span> payments<span class="token punctuation">[</span>order<span class="token punctuation">.</span>id<span class="token punctuation">]</span><span class="token punctuation">;</span>
+            <span class="token keyword">let</span> paymentStatus <span class="token operator">=</span> <span class="token string">"-"</span><span class="token punctuation">;</span>
+            <span class="token keyword">if</span> <span class="token punctuation">(</span>payment <span class="token operator">===</span> <span class="token keyword">null</span><span class="token punctuation">)</span> paymentStatus <span class="token operator">=</span> <span class="token string">"failed"</span><span class="token punctuation">;</span>
+            <span class="token keyword">else</span> <span class="token keyword">if</span> <span class="token punctuation">(</span>payment <span class="token operator">&amp;&amp;</span> payment<span class="token punctuation">.</span>status<span class="token punctuation">)</span> paymentStatus <span class="token operator">=</span> payment<span class="token punctuation">.</span>status<span class="token punctuation">;</span>
+            <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>order<span class="token punctuation">.</span>item<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> (</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>paymentStatus<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">)</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+          <span class="token punctuation">}</span><span class="token punctuation">)</span>
+          <span class="token punctuation">.</span><span class="token function">join</span><span class="token punctuation">(</span><span class="token string">", "</span><span class="token punctuation">)</span> <span class="token operator">||</span> <span class="token string">"-"</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  console<span class="token punctuation">.</span><span class="token function">table</span><span class="token punctuation">(</span>table<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Here, we map over the users and for each user, we look up their orders and payments. We format the orders and payment statuses into a string for display. If there are no users, we simply print a message indicating that.</p>
+<h2 id="running-the-example" tabindex="-1"><a class="header-anchor" href="#running-the-example">Running the Example</a></h2>
+<p>To run the demo, first make sure your backend server is running:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">node</span> server.js
+</code></pre>
+<p>Then, in another terminal, run the pipeline script:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">node</span> pipeline.js
+</code></pre>
+<p>This will start the pipeline, which will fetch data from the backend every 3 seconds and display it in the console. You should see a table with users, their orders, and payment statuses. As the orders and payments endpoints fail according to their configured failure rates, you'll see the data changing, depending on which requests succeed or fail.</p>
+<p>(Handling failures gracefully is where <code>partial data</code> comes in. In a real app, you might want to show cached data, indicate loading states, or provide retry options to the user etc. Sophisticated UIs have to implement sophisticated state management, it's not enough to just display the data hoping that everything works. The happy path is just one part of the story. Managing partial data and is a huge topic in itself, this article is much less ambitious and only aims to focus on the circuit breaker pattern.)</p>
+<p>If we run the server and then the pipeline script, we might see output like this:</p>
+<pre class="language-"><code class="language-">┌─────────┬───────────┬──────────────────────────────┐
+<span class="token function">│</span> <span class="token punctuation">(</span>index<span class="token punctuation">)</span> │ User      │ Orders                       │
+├─────────┼───────────┼──────────────────────────────┤
+│ <span class="token number">0</span>       │ <span class="token string">'Alice'</span>   │ <span class="token string">'Book (-), Laptop (-)'</span>       │
+│ <span class="token number">1</span>       │ <span class="token string">'Bob'</span>     │ <span class="token string">'-'</span>                          │
+│ <span class="token number">2</span>       │ <span class="token string">'Charlie'</span> │ <span class="token string">'Notebook (-), Keyboard (-)'</span> │
+└─────────┴───────────┴──────────────────────────────┘
+</code></pre>
+<p>And in the server console, we would see logs of each request and its status, helping us understand how often each endpoint is failing:</p>
+<pre class="language-"><code class="language-"><span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>010Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>users → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>013Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">1</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>013Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">2</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>014Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">3</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>014Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">101</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>014Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">201</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">49</span><span class="token punctuation">.</span>016Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">102</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>020Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>users → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>022Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">1</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>023Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">2</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>023Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">3</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>024Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">101</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>025Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">301</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>026Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">102</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T19<span class="token operator">:</span><span class="token number">56</span><span class="token operator">:</span><span class="token number">52</span><span class="token punctuation">.</span>027Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">302</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token operator">...</span>
+</code></pre>
+<p>What we will see in the logs, is that a poll starts with a <code>/users</code> request, which always succeeds. Then we see three <code>/orders/:id</code> requests, one for each user. Depending on the configured failure rate, some of these will fail. For each successful orders request, we then see one or more <code>/payments/:id</code> requests. Then the cycle repeats every 3 seconds.</p>
+<p>So we have 4-9 requests every 3 seconds in our current setup. Obviously, with more data and more complex pipelines, this can quickly grow to dozens or hundreds of requests per second. If one of the endpoints starts failing, this can lead to a lot of wasted requests hammering a service that is already struggling.</p>
+<h2 id="how-circuit-breakers-help" tabindex="-1"><a class="header-anchor" href="#how-circuit-breakers-help">How Circuit Breakers Help</a></h2>
+<p>Failing requests cause many issues. The one that circuit breakers are designed to solve is that they waste resources by continuing to send requests to a service that is already failing. This can exacerbate the problem, as the failing service may become overwhelmed and fail even more. Then rate limits may kick in, causing even more failures...</p>
+<p>In its simplest form, the circuit breaker &quot;opens&quot; when failures reach a threshold, blocking further requests temporarily until the system hopefully stabilizes. After a cooldown period, the breaker &quot;closes&quot; again and normal traffic resumes. Of course, if the problem persists, the breaker will open again.</p>
+<p>As even failing requests consume bandwidth and other resources, if we know that a request is most likely to fail, it's better to not send it at all. This is what a circuit breaker does - gives a little break to a struggling service, while protecting the rest of the system from being dragged down.</p>
+<h2 id="adding-a-circuit-breaker-to-our-pipeline" tabindex="-1"><a class="header-anchor" href="#adding-a-circuit-breaker-to-our-pipeline">Adding a Circuit Breaker to Our Pipeline</a></h2>
+<p>Implementing our own circuit breaker logic is possible, but it can be complex and error-prone. Instead, we'll use a library called <a href="https://www.npmjs.com/package/@gkoos/ffetch"><code>ffetch</code></a> that provides a simple way to add circuit breakers to our fetch requests. The library also supports retries, timeouts, and life-cycle hooks, making it a versatile choice for handling HTTP requests in any JavaScript environment. But you're not here for the marketing, so let's get to the point.</p>
+<p>First, install <code>ffetch</code>:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @gkoos/ffetch
+</code></pre>
+<p>Then, modify our <code>pipeline.js</code> to use <code>ffetch</code> instead of the native <code>fetch()</code>. We simply create a client with circuit breaker options and use it for our requests:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token comment">// pipeline.js</span>
+<span class="token keyword">import</span> createClient <span class="token keyword">from</span> <span class="token string">"@gkoos/ffetch"</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> api <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">timeout</span><span class="token operator">:</span> <span class="token number">5000</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">retries</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">circuit</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">threshold</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token literal-property property">reset</span><span class="token operator">:</span> <span class="token number">5000</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Here, we configure the client with a timeout of 5 seconds, no retries (retries would pollute the logs for us), and a circuit breaker that opens after 3 consecutive failures and resets after 5 seconds.</p>
+<p>Now, replace all instances of <code>fetch()</code> in the <code>runPipeline</code> function with <code>api()</code>, which uses our configured client:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">runPipeline</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// Fetch users</span>
+  <span class="token keyword">let</span> users<span class="token punctuation">;</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> usersRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API_BASE</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/users</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// &lt;--HERE</span>
+    users <span class="token operator">=</span> <span class="token keyword">await</span> usersRes<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Only reset state if users fetch succeeded</span>
+    state<span class="token punctuation">.</span>users <span class="token operator">=</span> users<span class="token punctuation">;</span>
+    state<span class="token punctuation">.</span>orders <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+    state<span class="token punctuation">.</span>payments <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token comment">// Fan out orders requests in parallel</span>
+  <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+    users<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">user</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token keyword">try</span> <span class="token punctuation">{</span>
+        <span class="token keyword">const</span> ordersRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API_BASE</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/orders/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>user<span class="token punctuation">.</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// &lt;--HERE</span>
+        <span class="token keyword">const</span> orders <span class="token operator">=</span> <span class="token keyword">await</span> ordersRes<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        state<span class="token punctuation">.</span>orders<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> orders<span class="token punctuation">;</span>
+        <span class="token comment">// Fan out payments requests in parallel for each user's orders</span>
+        <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>
+          orders<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">order</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+            <span class="token keyword">try</span> <span class="token punctuation">{</span>
+              <span class="token keyword">const</span> paymentRes <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token constant">API_BASE</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/payments/</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>order<span class="token punctuation">.</span>id<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// &lt;--HERE</span>
+              <span class="token keyword">const</span> payment <span class="token operator">=</span> <span class="token keyword">await</span> paymentRes<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+              <span class="token punctuation">(</span>state<span class="token punctuation">.</span>payments<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">??=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">[</span>order<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> payment<span class="token punctuation">;</span>
+            <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+              <span class="token punctuation">(</span>state<span class="token punctuation">.</span>payments<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">??=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">[</span>order<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token keyword">null</span><span class="token punctuation">;</span>
+            <span class="token punctuation">}</span>
+          <span class="token punctuation">}</span><span class="token punctuation">)</span>
+        <span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        state<span class="token punctuation">.</span>orders<span class="token punctuation">[</span>user<span class="token punctuation">.</span>id<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Now, when you run the pipeline script again, when the orders or payments endpoints start failing, the circuit breaker will open after 3 consecutive failures. While the breaker is open, any further requests to that endpoint will fail immediately without actually sending a request. This reduces the load on the failing service and gives it time to recover. (Well it won't recover in our case, but in a real-world scenario, it might eventually.)</p>
+<p>To observe the circuit breaker in action, you can add some logging to the <code>renderTable</code> function to show the status of each endpoint:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">const</span> api <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">timeout</span><span class="token operator">:</span> <span class="token number">5000</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">retries</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">circuit</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">threshold</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token literal-property property">reset</span><span class="token operator">:</span> <span class="token number">5000</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">hooks</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token function-variable function">onCircuitOpen</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token function-variable function">onCircuitClose</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token operator">...</span>
+
+<span class="token keyword">function</span> <span class="token function">renderTable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">clear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  
+  <span class="token keyword">const</span> breakerStatus <span class="token operator">=</span> api<span class="token punctuation">.</span>circuitOpen <span class="token operator">?</span> <span class="token string">"OPEN"</span> <span class="token operator">:</span> <span class="token string">"CLOSED"</span><span class="token punctuation">;</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">"Circuit Breaker Status:"</span><span class="token punctuation">,</span> breakerStatus<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token operator">...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>When we create the client, we add hooks for when the circuit opens and closes, so we can re-render the table to show the updated status. In the <code>renderTable</code> function, we log whether the circuit breaker is currently open or closed.</p>
+<p>Now, when you run the pipeline script, you should see the circuit breaker status in the console output. When the orders or payments endpoints start failing, after 3 consecutive failures, the circuit breaker will open, and you'll see &quot;Circuit Breaker Status: OPEN&quot;. While the breaker is open, any further requests to that endpoint will fail immediately without actually sending a request. After 5 seconds, the breaker will close again, and normal traffic will resume.</p>
+<p>The server logs will look something like this:</p>
+<pre class="language-"><code class="language-">Mock backend running on http<span class="token operator">:</span><span class="token operator">/</span><span class="token operator">/</span>localhost<span class="token operator">:</span><span class="token number">3000</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">24</span><span class="token punctuation">.</span>338Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>users → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">24</span><span class="token punctuation">.</span>352Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">1</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">24</span><span class="token punctuation">.</span>353Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">2</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">24</span><span class="token punctuation">.</span>353Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">3</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token punctuation">.</span>378Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>users → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token punctuation">.</span>383Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">1</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token punctuation">.</span>384Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">2</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token punctuation">.</span>384Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>orders<span class="token operator">/</span><span class="token number">3</span> → <span class="token number">200</span> <span class="token punctuation">(</span>success<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token punctuation">.</span>385Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">101</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token punctuation">[</span><span class="token number">2025</span><span class="token operator">-</span><span class="token number">09</span><span class="token operator">-</span>17T21<span class="token operator">:</span><span class="token number">14</span><span class="token operator">:</span><span class="token number">30</span><span class="token punctuation">.</span>392Z<span class="token punctuation">]</span> <span class="token constant">GET</span> <span class="token operator">/</span>payments<span class="token operator">/</span><span class="token number">102</span> → <span class="token number">500</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span>
+<span class="token operator">...</span>
+</code></pre>
+<p>You'll notice that after a few failures, the circuit breaker opens, and subsequent requests to the failing endpoint are skipped, as indicated in the console output. When the circuit breaker is open, no request is being sent to the server, so you won't see any corresponding log entries for those skipped requests. In the example logs above, when the circuit breaker is open for 5 seconds, no request is made to the server for the next cycle, so actually 6 seconds pass between the two polls.</p>
+<p>Now how much difference does the circuit breaker make? It depends on the failure rates and the thresholds you set. In our example, with a 30% failure rate for orders and a 100% failure rate for payments, the circuit breaker will open frequently for payments, preventing a flood of failed requests. For orders, it may open occasionally, depending on the random failures.</p>
+<p>Feel free to experiment with different failure rates and circuit breaker settings to see how they affect the behavior of the pipeline. You can adjust the <code>ORDERS_FAILURE_RATE</code> and <code>PAYMENTS_FAILURE_RATE</code> environment variables when starting the server, as well as the <code>threshold</code> and <code>reset</code> options when creating the <code>ffetch</code> client.</p>
+<h2 id="next-steps%3A-beyond-open%2Fclosed-breakers" tabindex="-1"><a class="header-anchor" href="#next-steps%3A-beyond-open%2Fclosed-breakers">Next Steps: Beyond Open/Closed Breakers</a></h2>
+<p>The simple open/closed breaker is already a big improvement over blindly hammering a failing service. But in larger, distributed systems, engineers often adopt a more nuanced variant: the <em>half-open circuit breaker</em>. This adds a third state to the breaker, allowing a few trial requests through after the cooldown period to test if the service has recovered.</p>
+<p>Think of the three states like this:</p>
+<ul>
+<li><strong>Closed</strong>: requests flow normally. Failures are counted, but traffic continues.</li>
+<li><strong>Open</strong>: too many failures have occurred, the breaker trips and all requests are blocked immediately. Instead of even trying the call, you fail fast.</li>
+<li><strong>Half-Open</strong>: after a cooldown period, the breaker &quot;peeks&quot; to see if the service has recovered. A small number of test requests are allowed through:
+<ul>
+<li>If they succeed, the breaker closes and normal traffic resumes.</li>
+<li>If they fail, the breaker reopens, protecting the system again.</li>
+</ul>
+</li>
+</ul>
+<p>This middle state prevents the &quot;thundering herd&quot; problem where all requests flood back into a service the instant its cooldown expires. Instead, recovery is gradual and controlled.</p>
+<p>Half-open breakers shine in environments where:</p>
+<ul>
+<li>Multiple nodes or instances may be calling the same service. If each of them retries at once, the failing service may be overwhelmed just as it's trying to recover.</li>
+<li>Intermittent outages occur. A backend might fail for 20 seconds, then come back. With open/closed only, you risk hammering it every time the breaker resets, causing a failure spiral.</li>
+<li>Performance degradation is as harmful as outright failure. A half-open breaker can keep load low until the service proves it's truly healthy.</li>
+</ul>
+<p>In short: the half-open state improves stability and speeds up recovery while minimizing the risk of re-overloading fragile systems.</p>
+<p><code>ffetch</code> intentionally keeps its breaker simple: open/closed only. That makes sense for local scripts, pipelines, and client-side code where you don't want a lot of state management. If you do want half-open behavior, you can layer it on top of ffetch, but the implementation (especially in distributed systems where it actually matters) can be quite complex and beyond the scope of this article - maybe a future one.</p>
+<h3 id="takeaway" tabindex="-1"><a class="header-anchor" href="#takeaway">Takeaway</a></h3>
+<ul>
+<li>Open/closed breakers (<code>ffetch</code>'s default) are simple and effective for most local applications, CLI tools, and small services.</li>
+<li>Half-open breakers are a valuable extension in distributed, high-traffic systems where recovery has to be carefully controlled.</li>
+<li>You don't need to rewrite <code>ffetch</code> - just wrap it. Think of <code>ffetch</code> as the foundation (resilient requests) and your custom half-open logic as the policy layer (when to allow traffic back in).</li>
+</ul>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>In this article, we took the circuit breaker pattern out of the abstract and put it into practice. Starting from a small mock backend with multiple endpoints, we built a pipeline that showed how failures ripple through a system and how circuit breakers can change the picture.</p>
+<p>We saw that once an endpoint starts failing consistently, the breaker opens, requests are blocked immediately, and the rest of the system avoids wasting time and resources on calls that are unlikely to succeed. With retries, delays, and logging layered in, the breaker becomes a lightweight but powerful tool for keeping pipelines stable under pressure.</p>
+<p>Circuit breakers are not a cure-all. They won't fix broken services or replace careful error handling. In simple cases, a retry strategy might be enough - in others, adding a breaker prevents cascading failures and buys breathing room for recovery. The right choice depends on how critical the dependency is, how often it fails, and what impact failures have downstream.</p>
+<p>The takeaway is this: circuit breakers are a practical resilience pattern. They're not mandatory everywhere, but when external services are part of the picture, they often make the difference between a system that collapses under stress and one that degrades predictably. In multi-endpoint pipelines like the one we built, circuit breakers help prevent one failing service from dragging the rest of the system down. For other techniques to improve resilience, see also <a href="https://blog.gaborkoos.com/posts/2025-09-13-Making-Your-Fetch-Requests-Production-Ready-With-Ffetch/">Making Your Fetch Requests Production-Ready with ffetch</a>.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

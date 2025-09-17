@@ -305,5 +305,14 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V3.1 is out.</description>
       </item>
     
+      <item>
+        <title>Stop Hammering Broken APIs - the Circuit Breaker Pattern</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-17-Stop-Hammering-Broken-APIs-the-Circuit-Breaker-Pattern/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-17-Stop-Hammering-Broken-APIs-the-Circuit-Breaker-Pattern/</guid>
+        <pubDate>Wed, 17 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>How to make your fetch requests production-ready by implementing the circuit breaker pattern to handle failing APIs gracefully.</description>
+      </item>
+    
   </channel>
 </rss>
