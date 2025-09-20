@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Database Zoo: Time Series Databases</title>
+  <meta name="description" content="An in-depth look at Time-Series Databases (TSDBs), their architecture, use cases, and how they differ from traditional databases.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Database Zoo: Time Series Databases">
+  <meta property="og:description" content="An in-depth look at Time-Series Databases (TSDBs), their architecture, use cases, and how they differ from traditional databases.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="The Database Zoo: Time Series Databases">
+  <meta name="twitter:description" content="An in-depth look at Time-Series Databases (TSDBs), their architecture, use cases, and how they differ from traditional databases.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">The Database Zoo: Time Series Databases</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-09-20T00:00:00.000Z">Sat Sep 20 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">database zoo</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">databases</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>This post is part of</em> The Database Zoo: Exotic Data Storage Engines <em>, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.</em></p>
+<h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
+<p>Time-series data is everywhere in modern systems. Unlike traditional transactional data, which tends to be structured and relatively static, time-series data is continuous, high-volume, and temporal. Common examples include:</p>
+<ul>
+<li>Metrics from computing systems: CPU usage, memory consumption, disk I/O, network latency, and error rates, often collected at sub-second intervals from thousands of servers or containers.</li>
+<li>IoT sensor readings: Temperature, humidity, pressure, motion, or energy consumption from sensors embedded in devices, vehicles, or industrial equipment. These streams can be massive, especially in large-scale deployments.</li>
+<li>Financial tick data: High-frequency trades, stock prices, currency exchange rates, and market orders, which are inherently time-dependent and must be processed in near real-time.</li>
+<li>Event logs and telemetry: Application logs, user interactions, system events, and audit trails that are continuously generated, often across distributed services.</li>
+</ul>
+<p>These workloads share several key characteristics that distinguish them from traditional relational or NoSQL use cases:</p>
+<ul>
+<li>High ingestion rates: Millions of data points can arrive per second, requiring the database to handle rapid writes efficiently.</li>
+<li>Time-ordered access patterns: Queries often request ranges of data over a period (e.g., last 24 hours), which benefits from sequential storage layouts and specialized indexing.</li>
+<li>Retention and downsampling: Systems frequently need to retain detailed recent data while summarizing or discarding older data, demanding automated retention policies and rollups.</li>
+<li>Compression needs: Storing high-volume time-series data without optimization can consume vast amounts of disk space, making compression essential for efficiency.</li>
+</ul>
+<p>While general-purpose SQL and NoSQL databases are flexible and reliable for many workloads, they struggle with these characteristics. Relational databases often become write-bound when handling millions of inserts per second, and range queries over time can be slow. Many NoSQL engines, while horizontally scalable, lack native support for time-centric queries, retention policies, or specialized compression schemes.</p>
+<p>The goal of this post is to explain why Time-Series Databases exist, how they solve the unique challenges of temporal data, and what trade-offs they make. We will explore:</p>
+<ul>
+<li>The architectural principles that enable high-throughput ingestion, efficient storage, and fast querying.</li>
+<li>Core storage formats, indexing strategies, and compression techniques used in TSDBs.</li>
+<li>Common query patterns and optimizations that make analysis of time-series data feasible at scale.</li>
+<li>Real-world examples and use cases, showing how popular engines implement these ideas.</li>
+</ul>
+<p>By the end of this post, you will understand not only the technical foundations of TSDBs but also when and why to choose a specialized engine for time-dependent workloads, rather than relying on general-purpose databases.</p>
+<h2 id="why-general-purpose-databases-struggle" tabindex="-1"><a class="header-anchor" href="#why-general-purpose-databases-struggle">Why General-Purpose Databases Struggle</a></h2>
+<p>Even the most robust relational and NoSQL databases face challenges when dealing with time-series workloads. The patterns and scale of temporal data create performance bottlenecks, storage inefficiencies, and operational complexity that general-purpose engines were not designed to handle.</p>
+<h3 id="high-ingestion-rates" tabindex="-1"><a class="header-anchor" href="#high-ingestion-rates">High Ingestion Rates</a></h3>
+<p>Time-series data is inherently write-heavy. Monitoring thousands of servers or IoT devices can generate millions of measurements per second. In a traditional RDBMS, each insert involves:</p>
+<ul>
+<li>Writing to a table with a fixed schema</li>
+<li>Maintaining indexes for query acceleration</li>
+<li>Logging the transaction for durability (WAL or similar mechanisms)</li>
+<li>Ensuring ACID guarantees</li>
+</ul>
+<p>This sequence can become a bottleneck, limiting write throughput and increasing latency. Many NoSQL stores handle high write volumes better but still require careful sharding and partitioning to avoid hotspots, and lack native support for efficient temporal queries.</p>
+<h3 id="range-queries-over-time" tabindex="-1"><a class="header-anchor" href="#range-queries-over-time">Range Queries Over Time</a></h3>
+<p>Time-series workloads are dominated by <em>range queries</em>: fetching all values of a metric over a time interval. Relational databases excel at point lookups or joins but scanning millions or billions of rows for a time range can be slow, even with indexes. Similarly, key-value or document stores may require multiple queries or application-side filtering to reconstruct a time range, adding overhead and complexity.</p>
+<h3 id="retention-and-downsampling" tabindex="-1"><a class="header-anchor" href="#retention-and-downsampling">Retention and Downsampling</a></h3>
+<p>Applications often need to retain detailed recent data for monitoring or analysis while summarizing or discarding older data. In general-purpose systems, this is cumbersome:</p>
+<ul>
+<li>Manual deletion scripts or batch jobs must be scheduled</li>
+<li>Downsampling (aggregating data into coarser intervals) requires complex queries</li>
+<li>Storage costs increase rapidly without automated policies</li>
+</ul>
+<p>Time-series databases automate retention and downsampling, reducing operational burden and storage footprint.</p>
+<h3 id="compression-needs" tabindex="-1"><a class="header-anchor" href="#compression-needs">Compression Needs</a></h3>
+<p>High-volume time-series data can quickly overwhelm storage. Traditional row-oriented databases store each data point with full metadata and padding, wasting space. Without specialized compression:</p>
+<ul>
+<li>Disk usage balloons with millions of metrics per day</li>
+<li>Cache efficiency suffers, impacting query performance</li>
+<li>Backups and replication become more resource-intensive</li>
+</ul>
+<p>Specialized TSDBs implement delta encoding, run-length encoding, Gorilla-style compression, and columnar layouts to store data efficiently while preserving query performance.</p>
+<h3 id="summary" tabindex="-1"><a class="header-anchor" href="#summary">Summary</a></h3>
+<p>General-purpose SQL and NoSQL databases are flexible and reliable for a wide range of workloads, but time-series data presents unique challenges:</p>
+<ul>
+<li>Massive, continuous write streams</li>
+<li>Predominantly sequential, time-based queries</li>
+<li>Retention and aggregation requirements</li>
+<li>Storage efficiency at scale</li>
+</ul>
+<p>These challenges set the stage for Time-Series Databases, purpose-built engines that optimize for the characteristics of temporal data. By designing around these specific workloads, TSDBs achieve high write throughput, fast queries, and efficient storage that general-purpose systems cannot match.</p>
+<h2 id="core-architecture" tabindex="-1"><a class="header-anchor" href="#core-architecture">Core Architecture</a></h2>
+<p>Time-Series Databases are designed from the ground up to handle high-volume, time-ordered data efficiently. Unlike general-purpose databases, TSDBs make deliberate design choices that optimize ingestion speed, storage efficiency, and temporal query performance. Let's break down the key architectural elements.</p>
+<h3 id="storage-layouts" tabindex="-1"><a class="header-anchor" href="#storage-layouts">Storage Layouts</a></h3>
+<p>TSDBs typically adopt storage layouts that exploit the sequential nature of time-series data:</p>
+<ul>
+<li>Append-only log structure: Data points are written sequentially to disk or memory. This approach simplifies writes, reduces lock contention, and allows high throughput.</li>
+<li>Time-partitioned chunks: Data is grouped into fixed intervals (e.g., hourly or daily segments). Partitioning enables efficient range scans, retention, and compaction.</li>
+<li>Columnar layouts: Some TSDBs store each field (timestamp, value, tags) in separate columns. Columnar storage improves compression and accelerates aggregations over large ranges.</li>
+<li>Hybrid in-memory and on-disk storage: Recent data may reside in memory for low-latency access, while older chunks are persisted on disk for durability and cost-efficiency.</li>
+</ul>
+<p>This storage design allows TSDBs to ingest millions of points per second, while keeping historical data queryable with minimal overhead.</p>
+<h3 id="indexing-strategies" tabindex="-1"><a class="header-anchor" href="#indexing-strategies">Indexing Strategies</a></h3>
+<p>Efficient indexing is critical for fast range queries and tag-based filtering:</p>
+<ul>
+<li>Time-first primary keys: Each data point is keyed by series ID (metric + tags) and timestamp, allowing sequential retrieval of time ranges.</li>
+<li>Secondary indexes on dimensions: Tags such as host, region, or sensor type enable filtering and grouping without scanning all data.</li>
+<li>In-memory indexes for hot data: Recent or frequently accessed data may be indexed in memory for sub-millisecond query response.</li>
+<li>Disk-based indexes for historical data: On-disk structures allow efficient access to older chunks without consuming excessive memory.</li>
+</ul>
+<p>Some TSDBs, like InfluxDB, implement <em>series-to-chunk maps</em> to efficiently track which data partitions contain specific series, enabling faster query execution.</p>
+<h3 id="compression-techniques" tabindex="-1"><a class="header-anchor" href="#compression-techniques">Compression Techniques</a></h3>
+<p>Time-series data exhibits temporal and numeric patterns that TSDBs exploit to reduce storage:</p>
+<ul>
+<li>Delta encoding: Stores differences between consecutive timestamps or values rather than absolute numbers. This is effective since time intervals are often regular and values change gradually.</li>
+<li>Run-length encoding (RLE): Efficiently stores repeated or constant values over time. RLE is a simple, lossless data compression technique that replaces sequences of identical, consecutive data values (called &quot;runs&quot;) with a single data value and a count of its occurrences.</li>
+<li>Gorilla-style compression: Optimized for floating-point time-series, encoding both timestamps and values using minimal bits while preserving precision. Instead of storing absolute timestamps, the system stores the difference between consecutive timestamps, and then the difference of those differences (delta-of-delta). This is efficient because time-series data often has small time intervals between data points. Floating-point numbers (like sensor readings) are often stored using a common and efficient bitwise operation called XOR. This method takes advantage of the similarity in many successive floating-point values in time-series data to compress them effectively. Gorilla compression uses a combination of these two techniques (ie, delta-of-delta for timestamps and XOR for values) to achieve high compression ratios while allowing fast decompression during queries.</li>
+<li>Columnar block compression: Compresses each field independently, allowing fast scans and aggregation without full decompression.</li>
+</ul>
+<p>These techniques can reduce storage requirements by an order of magnitude compared to naïve row-oriented storage, while maintaining fast query performance.</p>
+<h3 id="retention-and-downsampling-1" tabindex="-1"><a class="header-anchor" href="#retention-and-downsampling-1">Retention and Downsampling</a></h3>
+<p>A core feature of TSDBs is automated retention and rollup:</p>
+<ul>
+<li>Retention policies: Automatically expire or drop old data after a configurable interval.</li>
+<li>Downsampling: Aggregates older data into coarser intervals (e.g., average CPU usage per hour), keeping storage growth manageable while retaining historical trends.</li>
+<li>Continuous queries: Precompute aggregates or transformations in the background for frequently accessed time ranges.</li>
+</ul>
+<p>These features relieve engineers from manually managing data lifecycles, while ensuring that queries on recent or long-term data remain efficient.</p>
+<h3 id="summary-1" tabindex="-1"><a class="header-anchor" href="#summary-1">Summary</a></h3>
+<p>The core architecture of TSDBs revolves around four pillars:</p>
+<ul>
+<li>Sequential, append-only storage optimized for writes.</li>
+<li>Time- and dimension-based indexing for fast retrieval.</li>
+<li>Advanced compression schemes to minimize disk usage without sacrificing speed.</li>
+<li>Retention and downsampling mechanisms to manage storage and maintain query performance over time.</li>
+</ul>
+<p>Together, these architectural choices allow TSDBs to handle workloads that would overwhelm general-purpose databases, delivering high-throughput ingestion, efficient storage, and fast temporal queries.</p>
+<h2 id="query-execution-and-patterns" tabindex="-1"><a class="header-anchor" href="#query-execution-and-patterns">Query Execution and Patterns</a></h2>
+<p>Time-series workloads are dominated by temporal queries, aggregations, and filtering by dimensions or tags. TSDBs optimize both the query model and the execution engine to make these operations efficient, even over billions of data points.</p>
+<h3 id="common-query-types" tabindex="-1"><a class="header-anchor" href="#common-query-types">Common Query Types</a></h3>
+<p><strong>Range Queries</strong></p>
+<p>Fetch all data points for a metric or series over a specific time interval.</p>
+<p>Example: CPU usage for the last 24 hours.</p>
+<p>Optimized by: time-ordered storage, partition pruning, and sequential reads.</p>
+<p><strong>Aggregations</strong></p>
+<p>Compute min, max, average, sum, percentiles, or custom functions over a range of points.</p>
+<p>Example: average temperature per hour for a week.</p>
+<p>Optimized by: columnar storage and pre-aggregated chunks (downsampling).</p>
+<p><strong>Grouping by Tags / Dimensions</strong></p>
+<p>Organize metrics by metadata, e.g., host, region, device type.</p>
+<p>Example: average memory usage per host across a data center.</p>
+<p>Optimized by: secondary indexes and series-to-chunk maps.</p>
+<p><strong>Downsampling and Interval Aggregation</strong></p>
+<p>Aggregate data into coarser time intervals for long-term trends.</p>
+<p>Example: 1-minute averages rolled up into hourly summaries.</p>
+<p>Optimized by: continuous queries or materialized aggregates.</p>
+<p><strong>Alerting / Threshold Queries</strong></p>
+<p>Identify points exceeding thresholds or patterns requiring action.</p>
+<p>Example: trigger alert if latency &gt; 200ms for 5 consecutive minutes.</p>
+<p>Optimized by: in-memory indexing and efficient scan algorithms.</p>
+<h3 id="query-execution-strategies" tabindex="-1"><a class="header-anchor" href="#query-execution-strategies">Query Execution Strategies</a></h3>
+<p>TSDBs translate these queries into efficient execution plans tailored for temporal data:</p>
+<p><strong>Chunk/Segment Scanning</strong></p>
+<ul>
+<li>Queries access only relevant time-partitioned chunks.</li>
+<li>Reduces disk I/O and memory usage by skipping irrelevant data.</li>
+</ul>
+<p><strong>Compression-aware scanning</strong></p>
+<ul>
+<li>Many TSDBs can aggregate data directly on compressed blocks without decompressing fully.</li>
+<li>Minimizes CPU overhead and accelerates queries.</li>
+</ul>
+<p><strong>Merge of in-memory and on-disk data</strong></p>
+<ul>
+<li>Recent data in memory is combined with historical on-disk chunks seamlessly.</li>
+<li>Ensures low-latency access to the most recent measurements.</li>
+</ul>
+<p><strong>Parallel execution</strong></p>
+<ul>
+<li>Queries often run in parallel across multiple chunks, partitions, or nodes.</li>
+<li>Improves throughput for large-scale analytics over long time ranges.</li>
+</ul>
+<p><strong>Query pushdown</strong></p>
+<ul>
+<li>Filters and aggregates are pushed as close to the storage engine as possible.</li>
+<li>Minimizes data movement and leverages compression/indexing for efficiency.</li>
+</ul>
+<h3 id="example-query-patterns" tabindex="-1"><a class="header-anchor" href="#example-query-patterns">Example Query Patterns</a></h3>
+<ul>
+<li>Single series range query: Retrieve all CPU metrics for a server in the past 6 hours.</li>
+<li>Multi-series aggregation: Compute the 95th percentile of latency for each service across all data centers.</li>
+<li>Tag filtering: Find disk usage metrics only for servers in a specific region or cluster.</li>
+<li>Downsampling: Generate hourly averages from per-second metrics for dashboard visualization.</li>
+</ul>
+<h3 id="key-takeaways" tabindex="-1"><a class="header-anchor" href="#key-takeaways">Key Takeaways</a></h3>
+<p>Time-series queries are highly structured and predictable:</p>
+<ul>
+<li>Most queries are time-bound, scanning a contiguous subset of the dataset.</li>
+<li>Aggregation and grouping are common, rather than complex joins.</li>
+<li>Efficient execution relies on storage layout, indexing, and compression.</li>
+</ul>
+<p>By aligning storage and query execution with the temporal nature of the data, TSDBs achieve performance that general-purpose databases cannot match for these workloads.</p>
+<h2 id="popular-time-series-database-engines" tabindex="-1"><a class="header-anchor" href="#popular-time-series-database-engines">Popular Time-Series Database Engines</a></h2>
+<p>Several purpose-built Time-Series Databases have emerged over the past decade, each optimized for specific workloads, ingestion rates, and query patterns. Here, we highlight a few widely adopted engines:</p>
+<h3 id="influxdb" tabindex="-1"><a class="header-anchor" href="#influxdb"><a href="https://www.influxdata.com/time-series-platform/influxdb/">InfluxDB</a></a></h3>
+<p><strong>Overview:</strong></p>
+<p>InfluxDB is a high-performance, open-source TSDB designed for real-time metrics and analytics. It features a SQL-like query language (InfluxQL) and supports continuous queries, retention policies, and downsampling.</p>
+<p><strong>Architecture Highlights:</strong></p>
+<ul>
+<li>Storage engine: Time-partitioned, append-only storage with compression.</li>
+<li>Indexes: Series-keyed indexing allows fast retrieval by measurement and tag.</li>
+<li>Query execution: Supports aggregations, transformations, and joins within time windows.</li>
+<li>Retention &amp; downsampling: Built-in policies automate lifecycle management.</li>
+</ul>
+<p><strong>Trade-offs:</strong></p>
+<ul>
+<li>Excellent for real-time monitoring and high-throughput ingestion.</li>
+<li>Limited for multi-tenant, long-term analytics without careful planning.</li>
+<li>Query language less expressive than full SQL for complex joins.</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<p>Monitoring systems, IoT telemetry, financial tick data.</p>
+<h3 id="timescaledb" tabindex="-1"><a class="header-anchor" href="#timescaledb"><a href="https://www.timescale.com/">TimescaleDB</a></a></h3>
+<p><strong>Overview:</strong></p>
+<p>TimescaleDB is a PostgreSQL extension that adds time-series capabilities to a relational database. It leverages PostgreSQL’s ecosystem while optimizing storage and query execution for temporal data.</p>
+<p><strong>Architecture Highlights:</strong></p>
+<ul>
+<li>Hypertables: Abstract large time-series tables into time-partitioned chunks transparently.</li>
+<li>Indexes: Uses PostgreSQL indexing with optimizations for time + dimension queries.</li>
+<li>Query execution: Compatible with full SQL, enabling joins, window functions, and complex analytics.</li>
+<li>Compression &amp; retention: Native compression and policies reduce storage for historical data.</li>
+</ul>
+<p><strong>Trade-offs:</strong></p>
+<ul>
+<li>Offers strong relational capabilities alongside time-series optimization.</li>
+<li>Ingestion throughput may be lower than specialized TSDBs for extremely high-frequency metrics.</li>
+<li>Requires PostgreSQL knowledge for advanced configurations.</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<p>Infrastructure monitoring, business analytics, financial data, IoT applications requiring relational joins.</p>
+<h3 id="prometheus" tabindex="-1"><a class="header-anchor" href="#prometheus"><a href="https://prometheus.io/">Prometheus</a></a></h3>
+<p><strong>Overview:</strong></p>
+<p>Prometheus is an open-source TSDB focused on monitoring and alerting in cloud-native environments. It uses a pull-based metric collection model and provides a powerful query language, PromQL.</p>
+<p><strong>Architecture Highlights:</strong></p>
+<ul>
+<li>Storage engine: Append-only log with compression optimized for numeric metrics.</li>
+<li>Indexes: Time + series labels for fast lookups.</li>
+<li>Query execution: PromQL enables complex temporal queries, aggregations, and alert expressions.</li>
+<li>Retention &amp; downsampling: Configurable retention; integrates with remote storage for long-term data.</li>
+</ul>
+<p><strong>Trade-offs:</strong></p>
+<ul>
+<li>Designed for ephemeral metric storage and monitoring, not general analytics.</li>
+<li>Horizontal scaling is possible but requires federation or remote storage.</li>
+<li>Limited support for very high cardinality metrics (many unique label combinations).</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<p>Cloud infrastructure monitoring, service health dashboards, real-time alerting.</p>
+<h3 id="other-notable-engines" tabindex="-1"><a class="header-anchor" href="#other-notable-engines">Other Notable Engines</a></h3>
+<p><a href="http://opentsdb.net/">OpenTSDB</a>: Built on HBase, optimized for large-scale metric storage and aggregation.</p>
+<p><a href="https://graphiteapp.org/">Graphite</a>: Focused on simple metrics collection and visualization, widely used in DevOps monitoring.</p>
+<p><a href="https://victoriametrics.com/">VictoriaMetrics</a>: High-performance, cost-efficient TSDB with focus on large-scale deployments and long-term storage.</p>
+<h3 id="key-takeaways-1" tabindex="-1"><a class="header-anchor" href="#key-takeaways-1">Key Takeaways</a></h3>
+<p>While each TSDB has its own approach, they share common traits:</p>
+<ul>
+<li>Time-focused storage: All optimize for sequential writes and time-ordered reads.</li>
+<li>Compression and retention: Reducing storage overhead and maintaining query speed is a priority.</li>
+<li>Workload alignment: Each engine balances ingestion rate, query expressiveness, and scalability differently.</li>
+<li>Trade-offs: Choosing a TSDB involves considering ingestion speed, query complexity, retention requirements, and operational overhead.</li>
+</ul>
+<p>Understanding the distinctions between engines helps engineers select the right tool for their specific time-series workloads, rather than forcing a general-purpose database to do the job.</p>
+<h2 id="trade-offs-and-considerations" tabindex="-1"><a class="header-anchor" href="#trade-offs-and-considerations">Trade-offs and Considerations</a></h2>
+<p>Time-Series Databases excel at workloads that would challenge general-purpose systems, but their optimizations come with compromises. Understanding these trade-offs is essential when selecting or designing a TSDB for your application.</p>
+<h3 id="ingestion-vs.-query-complexity" tabindex="-1"><a class="header-anchor" href="#ingestion-vs.-query-complexity">Ingestion vs. Query Complexity</a></h3>
+<ul>
+<li>High-throughput ingestion is a primary goal for most TSDBs, often achieved through append-only storage, sequential writes, and minimal indexing on write paths.</li>
+<li>Complex queries, especially ad hoc joins or multi-metric correlations, may be slower because the storage layout and indexes are optimized for time-based scans rather than relational joins.</li>
+<li>Engineers must balance the need for fast writes with the types of queries required, sometimes precomputing aggregates or using hybrid systems (e.g., TimescaleDB) to handle complex queries efficiently.</li>
+</ul>
+<h3 id="storage-efficiency-vs.-latency" tabindex="-1"><a class="header-anchor" href="#storage-efficiency-vs.-latency">Storage Efficiency vs. Latency</a></h3>
+<ul>
+<li>Compression reduces disk usage dramatically but may introduce CPU overhead during queries.</li>
+<li>Some TSDBs allow querying directly on compressed blocks, while others require partial decompression.</li>
+<li>Decision points include how long data must be retained, query frequency, and acceptable latency for analysis versus monitoring dashboards.</li>
+</ul>
+<h3 id="retention-and-downsampling-trade-offs" tabindex="-1"><a class="header-anchor" href="#retention-and-downsampling-trade-offs">Retention and Downsampling Trade-offs</a></h3>
+<ul>
+<li>Automated retention policies and downsampling reduce storage costs and speed up queries on historical data.</li>
+<li>However, downsampling may lose granularity, limiting fine-grained historical analysis.</li>
+<li>Choosing retention and aggregation strategies depends on your business requirements, regulatory constraints, and storage budgets.</li>
+</ul>
+<h3 id="scalability-considerations" tabindex="-1"><a class="header-anchor" href="#scalability-considerations">Scalability Considerations</a></h3>
+<ul>
+<li>TSDBs often scale horizontally via sharding or partitioning by time intervals or series keys.</li>
+<li>Some engines (InfluxDB, Prometheus) may encounter challenges with high cardinality metrics (many unique tag combinations).</li>
+<li>Distributed TSDBs (TimescaleDB multi-node, VictoriaMetrics) handle scale better but introduce network overhead and operational complexity.</li>
+</ul>
+<h3 id="operational-complexity" tabindex="-1"><a class="header-anchor" href="#operational-complexity">Operational Complexity</a></h3>
+<ul>
+<li>Specialized TSDBs require domain knowledge for tuning retention, compression, and partitioning.</li>
+<li>Backup, replication, and disaster recovery procedures can differ significantly from general-purpose databases.</li>
+<li>Engineers must consider monitoring the database itself, especially for high-volume workloads, to avoid ingestion bottlenecks or query slowdowns.</li>
+</ul>
+<h3 id="ecosystem-and-tooling" tabindex="-1"><a class="header-anchor" href="#ecosystem-and-tooling">Ecosystem and Tooling</a></h3>
+<ul>
+<li>Consider the query language (InfluxQL, SQL, PromQL) and integration with visualization or alerting tools (Grafana, Chronograf, custom dashboards).</li>
+<li>Ecosystem maturity affects community support, libraries, and operational best practices, which are important for production deployments.</li>
+</ul>
+<h3 id="key-takeaways-2" tabindex="-1"><a class="header-anchor" href="#key-takeaways-2">Key Takeaways</a></h3>
+<ul>
+<li>Choosing a Time-Series Database is about matching workload characteristics to engine strengths:</li>
+<li>High-frequency metrics → prioritize ingestion-optimized engines like InfluxDB or VictoriaMetrics.</li>
+<li>Complex queries with relational joins → consider SQL-compatible extensions like TimescaleDB.</li>
+<li>Cloud-native monitoring → Prometheus offers a strong ecosystem and real-time alerting.</li>
+</ul>
+<p>No TSDB is perfect for every scenario. Understanding ingestion patterns, query complexity, storage constraints, and operational overhead is crucial for selecting the right tool. When designed and deployed carefully, a TSDB provides unparalleled performance and efficiency for temporal data, enabling insights that general-purpose databases cannot deliver.</p>
+<h2 id="use-cases-and-real-world-examples" tabindex="-1"><a class="header-anchor" href="#use-cases-and-real-world-examples">Use Cases and Real-World Examples</a></h2>
+<p>Time-Series Databases are not just academic exercises, they solve pressing, high-volume, temporal data problems across industries. Here are some concrete use cases that illustrate why TSDBs are indispensable.</p>
+<h3 id="infrastructure-and-application-monitoring" tabindex="-1"><a class="header-anchor" href="#infrastructure-and-application-monitoring">Infrastructure and Application Monitoring</a></h3>
+<p><strong>Scenario</strong>: Monitoring servers, containers, and applications in real-time.</p>
+<p><strong>Metrics</strong>: CPU, memory, disk I/O, network latency, request rates.</p>
+<p><strong>Challenges</strong>: Millions of metrics per second, low-latency queries, alerting on thresholds.</p>
+<p><strong>TSDB Benefits</strong>:</p>
+<ul>
+<li>InfluxDB, Prometheus, and VictoriaMetrics ingest high-frequency metrics efficiently.</li>
+<li>Downsampling and retention policies reduce storage while keeping recent data detailed.</li>
+<li>Real-time queries and aggregations enable dashboards and alerting pipelines.</li>
+</ul>
+<p><strong>Example</strong>: A major SaaS company uses Prometheus to monitor microservices, triggering alerts when latency exceeds thresholds, while storing long-term trends in TimescaleDB for capacity planning.</p>
+<h3 id="iot-sensor-data" tabindex="-1"><a class="header-anchor" href="#iot-sensor-data">IoT Sensor Data</a></h3>
+<p><strong>Scenario</strong>: Collecting readings from millions of connected devices (temperature, humidity, GPS).</p>
+<p><strong>Challenges</strong>: Continuous ingestion from devices, variable reporting intervals, and long-term storage.</p>
+<p><strong>TSDB Benefits</strong>:</p>
+<ul>
+<li>Sequential, append-only writes handle bursts of sensor data.</li>
+<li>Partitioning by time intervals simplifies retrieval and downsampling.</li>
+<li>Compression techniques reduce storage cost for massive datasets.</li>
+</ul>
+<p><strong>Example</strong>: A smart city project uses TimescaleDB to store traffic sensor and environmental data, aggregating it hourly for urban planning analytics.</p>
+<h3 id="financial-tick-data-and-trading-analytics" tabindex="-1"><a class="header-anchor" href="#financial-tick-data-and-trading-analytics">Financial Tick Data and Trading Analytics</a></h3>
+<p><strong>Scenario</strong>: High-frequency trading platforms storing price, volume, and order book data.</p>
+<p><strong>Challenges</strong>: Millisecond-level ingestion, historical analysis for backtesting, and low-latency queries.</p>
+<p><strong>TSDB Benefits</strong>:</p>
+<ul>
+<li>Ingestion-optimized engines handle millions of events per second.</li>
+<li>Range queries enable efficient retrieval of historical time windows.</li>
+</ul>
+<p><strong>Example</strong>: Hedge funds using InfluxDB for intraday market data and TimescaleDB for end-of-day historical analysis.</p>
+<h3 id="event-logging-and-telemetry" tabindex="-1"><a class="header-anchor" href="#event-logging-and-telemetry">Event Logging and Telemetry</a></h3>
+<p><strong>Scenario</strong>: Logging application events, API requests, or user interactions.</p>
+<p><strong>Challenges</strong>: Sequential write-heavy workloads, large volumes, and querying trends over time.</p>
+<p><strong>TSDB Benefits</strong>:</p>
+<ul>
+<li>Append-only structures and compression efficiently store vast log streams.</li>
+<li>Retention policies automatically purge stale data.</li>
+<li>Downsampling or aggregation enables long-term trend analysis without overwhelming storage.</li>
+</ul>
+<p><strong>Example</strong>: A SaaS company stores API logs in VictoriaMetrics, allowing engineers to analyze usage patterns and detect anomalies.</p>
+<h3 id="key-takeaways-3" tabindex="-1"><a class="header-anchor" href="#key-takeaways-3">Key Takeaways</a></h3>
+<p>Time-Series Databases shine when workloads involve high-frequency writes, sequential or range queries, and aggregation-heavy analysis. Across infrastructure monitoring, IoT, finance, and telemetry, TSDBs provide:</p>
+<ul>
+<li>High write throughput to handle real-time streams.</li>
+<li>Efficient storage and retention to keep historical data manageable.</li>
+<li>Fast temporal queries and aggregations for dashboards, alerts, and analytics.</li>
+</ul>
+<p>By choosing a purpose-built TSDB rather than forcing general-purpose databases to handle temporal workloads, engineers gain scalability, performance, and operational simplicity.</p>
+<h2 id="example-workflow%3A-ingesting-and-querying-cpu-usage-with-influxdb" tabindex="-1"><a class="header-anchor" href="#example-workflow%3A-ingesting-and-querying-cpu-usage-with-influxdb">Example Workflow: Ingesting and Querying CPU Usage with InfluxDB</a></h2>
+<p>This section provides a concrete end-to-end example of a time-series workflow, using InfluxDB to illustrate how data moves from ingestion to visualization, highlighting the architecture and optimizations discussed earlier.</p>
+<h3 id="scenario" tabindex="-1"><a class="header-anchor" href="#scenario">Scenario</a></h3>
+<p>We want to monitor CPU usage across a small cluster of three servers, collecting metrics every second. This example demonstrates the complete TSDB workflow:</p>
+<ol>
+<li>Data ingestion</li>
+<li>Storage layout and indexing</li>
+<li>Query execution</li>
+<li>Retention and downsampling</li>
+<li>Visualization</li>
+</ol>
+<p>By following this workflow, we can see how InfluxDB's architecture enables high-throughput writes, efficient storage, fast queries, and automated data lifecycle management.</p>
+<h3 id="step-1%3A-ingestion" tabindex="-1"><a class="header-anchor" href="#step-1%3A-ingestion">Step 1: Ingestion</a></h3>
+<p>Metrics are collected using Telegraf (InfluxDB's agent) or a custom script. Each data point includes:</p>
+<pre class="language-bash"><code class="language-bash">measurement: cpu
+tags: <span class="token assign-left variable">host</span><span class="token operator">=</span>server1
+fields: <span class="token assign-left variable">usage_user</span><span class="token operator">=</span><span class="token number">12.5</span>, <span class="token assign-left variable">usage_system</span><span class="token operator">=</span><span class="token number">3.2</span>
+timestamp: <span class="token number">2025</span>-09-18T10:15:00Z
+</code></pre>
+<p>Data is sent via HTTP API or written directly through InfluxDB's client libraries.</p>
+<p><strong>Key Concepts Illustrated:</strong></p>
+<ul>
+<li>Append-only writes: Data is appended sequentially, reducing lock contention.</li>
+<li>Sequential storage: Enables high-throughput ingestion.</li>
+<li>Minimal write overhead: Indexing and compression happen efficiently in the background.</li>
+</ul>
+<h3 id="step-2%3A-storage-and-indexing" tabindex="-1"><a class="header-anchor" href="#step-2%3A-storage-and-indexing">Step 2: Storage and Indexing</a></h3>
+<p>InfluxDB organizes data into time-partitioned chunks called TSM (Time-Structured Merge) files, and maintains indexes for fast retrieval.</p>
+<p><strong>Storage highlights:</strong></p>
+<ul>
+<li>In-memory WAL (Write-Ahead Log): Recent writes are stored in memory before flushing to disk.</li>
+<li>TSM chunks on disk: Store older data efficiently with compression.</li>
+<li>Tag-based indexing: Each metric can be filtered by tags like host, region, or service.</li>
+</ul>
+<p>This architecture enables efficient sequential writes and fast range queries, even on millions of data points.</p>
+<h3 id="step-3%3A-query-execution" tabindex="-1"><a class="header-anchor" href="#step-3%3A-query-execution">Step 3: Query Execution</a></h3>
+<p>Example query: &quot;Average CPU usage for server1 over the last 5 minutes.&quot;</p>
+<p>InfluxQL:</p>
+<pre class="language-sql"><code class="language-sql"><span class="token constant">SELECT</span> <span class="token function">mean</span><span class="token punctuation">(</span>usage_user<span class="token punctuation">)</span>
+<span class="token constant">FROM</span> cpu
+<span class="token constant">WHERE</span> host<span class="token operator">=</span><span class="token string">'server1'</span> <span class="token constant">AND</span> time <span class="token operator">></span> <span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> 5m
+</code></pre>
+<p><strong>Execution steps:</strong></p>
+<ol>
+<li>Identify chunks containing server1 using the tag index.</li>
+<li>Merge in-memory WAL and on-disk TSM chunks.</li>
+<li>Read only the relevant time range.</li>
+<li>Apply compression-aware aggregation (mean) directly on compressed data when possible..</li>
+<li>Return the aggregated result.</li>
+</ol>
+<h3 id="step-4%3A-retention-and-downsampling" tabindex="-1"><a class="header-anchor" href="#step-4%3A-retention-and-downsampling">Step 4: Retention and Downsampling</a></h3>
+<p>Retention Policies:</p>
+<ul>
+<li>Keep 7 days of raw CPU metrics.</li>
+<li>Older data is automatically deleted.</li>
+</ul>
+<p>Downsampling via Continuous Queries:</p>
+<ul>
+<li>Compute hourly averages for historical data.</li>
+<li>Store aggregated data in a downsampled measurement to reduce storage and maintain query performance.</li>
+</ul>
+<p>This ensures recent data remains granular, while historical data is summarized efficiently.</p>
+<h3 id="step-5%3A-visualization" tabindex="-1"><a class="header-anchor" href="#step-5%3A-visualization">Step 5: Visualization</a></h3>
+<p>Query results can be fed into Grafana dashboards:</p>
+<ul>
+<li>Real-time metrics: Display per-second CPU usage for recent activity.</li>
+<li>Historical trends: Use hourly averages to visualize long-term patterns.</li>
+<li>Alerts: Trigger notifications if CPU usage exceeds thresholds for a specified duration.</li>
+</ul>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Time-Series Databases are purpose-built engines that address the unique challenges of temporal data: high-volume writes, time-ordered queries, automated retention, and efficient storage. Unlike general-purpose relational or NoSQL databases, TSDBs are designed from the ground up to handle continuous, sequential, and often high-frequency workloads with minimal operational overhead.</p>
+<p>Through our InfluxDB workflow example, we've seen how a TSDB handles the full lifecycle of time-series data: from ingesting per-second CPU metrics, organizing them in time-partitioned and indexed storage, executing compression-aware queries, managing retention and downsampling, to visualizing insights in real-time dashboards. This end-to-end perspective highlights the architectural optimizations—append-only writes, in-memory WAL, TSM storage, tag-based indexing, and automated rollups—that make TSDBs uniquely suited for temporal workloads.</p>
+<p>When choosing a time-series database, it's essential to balance ingestion throughput, query complexity, retention requirements, and operational considerations. Engines like InfluxDB, TimescaleDB, Prometheus, and VictoriaMetrics each make different trade-offs, reflecting the diversity of time-series use cases from infrastructure monitoring and IoT telemetry to financial tick data and event logging.</p>
+<p>Ultimately, understanding the core principles and trade-offs behind TSDBs empowers engineers to select the right tool for their workloads, ensuring that temporal data is captured efficiently, queried rapidly, and stored sustainably. By leveraging purpose-built time-series engines, teams can gain actionable insights from data streams that would overwhelm general-purpose databases, unlocking performance, scalability, and observability in systems that rely on real-time temporal information.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

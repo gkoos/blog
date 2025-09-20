@@ -314,5 +314,23 @@
         <description>How to make your fetch requests production-ready by implementing the circuit breaker pattern to handle failing APIs gracefully.</description>
       </item>
     
+      <item>
+        <title>The Database Zoo: Exotic Data Storage Engines</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-19-The-Database-Zoo-Exotic-Data-Storage-Engines/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-19-The-Database-Zoo-Exotic-Data-Storage-Engines/</guid>
+        <pubDate>Fri, 19 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>An overview of specialized databases designed for unique data types and workloads.</description>
+      </item>
+    
+      <item>
+        <title>The Database Zoo: Time Series Databases</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/</guid>
+        <pubDate>Sat, 20 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>An in-depth look at Time-Series Databases (TSDBs), their architecture, use cases, and how they differ from traditional databases.</description>
+      </item>
+    
   </channel>
 </rss>

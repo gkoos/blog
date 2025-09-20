@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Database Zoo: Exotic Data Storage Engines</title>
+  <meta name="description" content="An overview of specialized databases designed for unique data types and workloads.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Database Zoo: Exotic Data Storage Engines">
+  <meta property="og:description" content="An overview of specialized databases designed for unique data types and workloads.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="The Database Zoo: Exotic Data Storage Engines">
+  <meta name="twitter:description" content="An overview of specialized databases designed for unique data types and workloads.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">The Database Zoo: Exotic Data Storage Engines</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-09-19T00:00:00.000Z">Fri Sep 19 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">database zoo</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">databases</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <h2 id="introduction-%2F-context" tabindex="-1"><a class="header-anchor" href="#introduction-%2F-context">Introduction / Context</a></h2>
+<p>Over the past two decades, the landscape of data has changed dramatically. Traditional business records and transactional data have been joined by an explosion of new formats:</p>
+<ul>
+<li>Metrics and logs from monitoring systems and IoT devices.</li>
+<li>Embeddings and high-dimensional vectors powering modern machine learning and recommendation engines.</li>
+<li>Social graphs capturing billions of relationships between users, products, or events.</li>
+<li>Event streams representing continuous flows of transactions, sensor readings, and interactions.</li>
+<li>Geospatial data from GPS devices, maps, and location-aware applications.</li>
+</ul>
+<p>This diversity of data types has created new challenges for engineers. Not only are the volumes unprecedented, but the access patterns are highly varied. Some workloads demand low-latency writes at massive scale, others require complex relationship queries across interconnected records, while others rely on fast aggregations over billions of points.</p>
+<p>For decades, the default answer to data storage was a <em>relational database</em>. Later, the <em>NoSQL</em> movement expanded the options with document stores, key-value engines, and wide-column databases. These systems addressed important needs like horizontal scalability and flexible schemas. Yet, they remain general-purpose. They are optimized for a broad spectrum of problems but often fall short in niche scenarios where specialized performance or query models are required.</p>
+<p>This is where <em>specialized databases</em> come in. Built for a specific type of data and workload, these systems are not intended to replace general-purpose databases but to complement them. Each one makes deliberate design choices: storage formats, indexing strategies, compression techniques, and query execution models tuned for its domain.</p>
+<p>This series, <em>The Database Zoo: Exotic Data Storage Engines</em>, explores these specialized systems in depth. Each post will unpack:</p>
+<ul>
+<li>The problems a particular database type is designed to solve.</li>
+<li>The internals: storage structures, indexing methods, and algorithms that power it.</li>
+<li>The query models and optimizations that make it effective.</li>
+<li>Real-world use cases and examples where these systems shine.</li>
+</ul>
+<p>By the end of the series, you'll have a clearer picture of why these engines exist, how they work, and when they might be the right tool for your system.</p>
+<p>But before diving into the specialized databases, it's essential to understand the foundations laid by SQL and NoSQL systems. We'll start with a deep dive into their history, architecture, strengths, and limitations to set the stage for why the database zoo has grown so diverse.</p>
+<h2 id="sql-databases%3A-history%2C-architecture%2C-and-workloads" tabindex="-1"><a class="header-anchor" href="#sql-databases%3A-history%2C-architecture%2C-and-workloads">SQL Databases: History, Architecture, and Workloads</a></h2>
+<p>The relational database has been the backbone of data management for more than four decades. It's difficult to overstate its impact: most software engineers' first experience with persistent data is through SQL, and an overwhelming share of enterprise applications still run on relational systems today. To understand why specialized databases emerged, we first need to look at how the relational model was born, what problems it solved, and where its limitations lie.</p>
+<h3 id="the-origins-of-the-relational-model" tabindex="-1"><a class="header-anchor" href="#the-origins-of-the-relational-model">The Origins of the Relational Model</a></h3>
+<p>In 1970, IBM researcher E. F. Codd introduced the relational model of data in his seminal paper <em>A Relational Model of Data for Large Shared Data Banks</em>. His idea was simple yet transformative: instead of exposing low-level storage details like files or hierarchical records, databases should represent data in a logical form based on mathematics: relations (tables), defined by rows (tuples) and columns (attributes).</p>
+<p>This abstraction separated the <em>what</em> of data from the <em>how</em> of storage. Users could express queries in a high-level, declarative language (later standardized as SQL), while the database engine handled the underlying details: indexes, access methods, storage layouts, concurrency, and recovery.</p>
+<p>Relational databases quickly rose to dominance because they solved a major problem of the time: data independence. Applications no longer needed to change every time the physical structure of data changed. This freed engineers to focus on business logic, while the database took care of durability, consistency, and efficient access.</p>
+<h3 id="key-features-of-sql-databases" tabindex="-1"><a class="header-anchor" href="#key-features-of-sql-databases">Key Features of SQL Databases</a></h3>
+<p>Relational databases share a set of foundational characteristics:</p>
+<ul>
+<li><strong>Structured schema</strong>: Tables with predefined columns and types enforce data integrity.</li>
+<li><strong>SQL query language</strong>: A standardized, declarative way to retrieve and manipulate data.</li>
+<li><strong>Indexes</strong>: B-trees and related structures accelerate lookups and joins.</li>
+<li>Transactions with <strong>ACID</strong> guarantees:
+<ul>
+<li><strong>Atomicity</strong>: all-or-nothing operations.</li>
+<li><strong>Consistency</strong>: database constraints are preserved.</li>
+<li><strong>Isolation</strong>: concurrent transactions behave as if executed sequentially.</li>
+<li><strong>Durability</strong>: committed changes survive crashes.</li>
+</ul>
+</li>
+<li><strong>Concurrency control</strong>: Locks, MVCC (multiversion concurrency control), and related techniques allow many users to safely read and write simultaneously.</li>
+<li><strong>Recovery mechanisms</strong>: Write-ahead logs (WAL) ensure the database can recover after failures.</li>
+</ul>
+<p>These features made relational systems a trustworthy general-purpose platform. Businesses could rely on them for correctness, resilience, and long-term data management.</p>
+<p>Under the hood, relational databases use a variety of storage layouts (row-oriented, columnar), indexing strategies (B-trees, hash indexes), and query optimization techniques (cost-based planners, execution engines) to deliver performance. However, these implementations vary widely between different database engines. Here is a diagram illustrating a simplified storage layout and query path in a typical SQL database:</p>
+<p><img src="https://i.imgur.com/ToIX8m6.png" alt="RDBMS"></p>
+<ul>
+<li>Query Parser: parses and builds logical plan</li>
+<li>Optimizer: chooses indexes, join order, etc.</li>
+<li>Executor: runs the physical plan</li>
+<li>Storage Engine: manages tables, indexes, pages</li>
+</ul>
+<h3 id="the-rise-of-commercial-and-open-source-engines" tabindex="-1"><a class="header-anchor" href="#the-rise-of-commercial-and-open-source-engines">The Rise of Commercial and Open-Source Engines</a></h3>
+<p>In the 1980s and 1990s, commercial relational databases like <strong>Oracle</strong>, <strong>IBM DB2</strong>, and <strong>Microsoft SQL Server</strong> became the foundation of enterprise IT. They were expensive, feature-rich, and tuned for large organizations with demanding workloads.</p>
+<p>At the same time, open-source projects like <strong>MySQL</strong> and later <strong>PostgreSQL</strong> democratized access to relational technology. MySQL gained widespread adoption in the web era thanks to its simplicity and speed for read-heavy applications, while PostgreSQL distinguished itself with a rich feature set, extensibility, and strict standards compliance.</p>
+<p>By the early 2000s, nearly every web application or enterprise system used a relational database somewhere in its architecture. The combination of SQL, transactions, and reliability made them the default choice.</p>
+<h3 id="typical-workloads" tabindex="-1"><a class="header-anchor" href="#typical-workloads">Typical Workloads</a></h3>
+<p>Relational databases excel at workloads where:</p>
+<ul>
+<li>Data is structured and predictable.</li>
+<li>Transactions are critical (banking, accounting, order management).</li>
+<li>Complex queries require filtering, joining, grouping, or aggregating.</li>
+<li>Consistency matters more than raw throughput.</li>
+</ul>
+<p>Examples include:</p>
+<ul>
+<li>Banking and finance: ledgers, transactions, audit logs.</li>
+<li>ERP systems: inventory, purchasing, HR records.</li>
+<li>Web applications: user accounts, session data, content storage.</li>
+<li>Analytics (early stage): reports and dashboards built on SQL queries.</li>
+</ul>
+<h3 id="strengths-of-sql-databases" tabindex="-1"><a class="header-anchor" href="#strengths-of-sql-databases">Strengths of SQL Databases</a></h3>
+<p>Relational systems remain popular because they offer:</p>
+<ul>
+<li>Mature ecosystems: decades of tooling, documentation, and operational knowledge.</li>
+<li>Declarative queries: SQL enables powerful data manipulation without low-level programming.</li>
+<li>Strong consistency and correctness: essential for mission-critical applications.</li>
+<li>Portability: SQL skills transfer between systems, lowering training costs.</li>
+<li>Extensibility: modern engines like PostgreSQL allow custom functions, indexes, and datatypes.</li>
+</ul>
+<h3 id="limitations" tabindex="-1"><a class="header-anchor" href="#limitations">Limitations</a></h3>
+<p>Despite their strengths, relational databases have inherent constraints:</p>
+<ul>
+<li>Scaling writes horizontally is difficult. Traditional RDBMS (Relational Database Management Systems) are designed for vertical scaling (bigger machines), and while replication and sharding exist, they are complex to implement.</li>
+<li>Rigid schemas slow development in rapidly changing domains. Schema migrations can be painful for large datasets.</li>
+<li>High ingestion workloads (e.g., logs, IoT metrics) can overwhelm traditional engines. Inserts and updates become bottlenecks.</li>
+<li>Unstructured or semi-structured data (JSON, blobs, multimedia) are not a natural fit. While modern RDBMS can store them, query performance and flexibility are limited.</li>
+<li>Analytical workloads at scale require columnar storage and specialized optimizations. Row-oriented storage is inefficient for aggregating billions of records.</li>
+</ul>
+<p>These limitations were not major in the early decades of relational databases, when workloads were smaller and more predictable. But as the web and distributed systems evolved, cracks began to show.</p>
+<h3 id="the-turning-point" tabindex="-1"><a class="header-anchor" href="#the-turning-point">The Turning Point</a></h3>
+<p>By the late 2000s, companies like Google, Amazon, and Facebook faced unprecedented data challenges: web-scale traffic, massive user bases, and real-time services that relational systems struggled to support. This environment gave rise to a new generation of databases, collectively called <em>NoSQL</em>, designed to relax some guarantees in exchange for scalability, flexibility, or performance in specific areas.</p>
+<p>Relational databases didn't disappear - in fact, they're still everywhere. But they were no longer the only viable option. The industry began to realize that different data problems sometimes require different tools.</p>
+<h2 id="nosql-databases%3A-history%2C-architecture%2C-and-workloads" tabindex="-1"><a class="header-anchor" href="#nosql-databases%3A-history%2C-architecture%2C-and-workloads">NoSQL Databases: History, Architecture, and Workloads</a></h2>
+<p>Traditional relational databases - reliable and feature-rich as they were - couldn't keep up with massive traffic, high write volumes, and rapidly evolving data schemas. Tech giants needed systems that could scale horizontally across thousands of commodity servers, ingest millions of writes per second, and serve low-latency queries to millions of users. This need gave rise to the NoSQL movement.</p>
+<h3 id="the-emergence-of-nosql" tabindex="-1"><a class="header-anchor" href="#the-emergence-of-nosql">The Emergence of NoSQL</a></h3>
+<p>&quot;NoSQL&quot; is an umbrella term that refers to non-relational, distributed database systems optimized for particular types of workloads. The term gained popularity in 2009, though the principles had been in development for years in large-scale systems like Google Bigtable, Amazon Dynamo, and Facebook Cassandra. These systems relaxed some of the constraints imposed by relational databases - especially strict consistency and rigid schemas - to achieve high availability, horizontal scalability, and fast write throughput.</p>
+<p>Unlike relational databases, which enforce ACID transactions and structured schemas, NoSQL systems often prioritize speed, partition tolerance, and flexibility, trading off some consistency guarantees. This trade-off is formalized in the <em>CAP theorem</em>, which states that a distributed system can guarantee only two of three properties simultaneously: Consistency, Availability, and Partition tolerance.</p>
+<h3 id="nosql-categories" tabindex="-1"><a class="header-anchor" href="#nosql-categories">NoSQL Categories</a></h3>
+<p>NoSQL databases are diverse, but they generally fall into four main categories:</p>
+<p><strong>Key-Value Stores</strong></p>
+<ul>
+<li>Data is stored as simple key-value pairs.</li>
+<li>Extremely fast for lookups and inserts.</li>
+<li>Examples: Redis, DynamoDB, Riak.</li>
+<li>Use cases: caching, session storage, configuration management.</li>
+</ul>
+<p><strong>Document Stores</strong></p>
+<ul>
+<li>Data is stored as documents (typically JSON or BSON) with flexible schemas.</li>
+<li>Enables nested data structures and ad-hoc queries on document fields.</li>
+<li>Examples: MongoDB, CouchDB.</li>
+<li>Use cases: content management systems, user profiles, semi-structured data.</li>
+</ul>
+<p><strong>Wide-Column Stores</strong></p>
+<ul>
+<li>Data is stored in tables with flexible columns, allowing each row to have different columns.</li>
+<li>Optimized for high write throughput and distributed storage.</li>
+<li>Examples: Cassandra, HBase, ScyllaDB.</li>
+<li>Use cases: time-series logs, IoT ingestion, large-scale analytics.</li>
+</ul>
+<p><strong>Graph Databases</strong></p>
+<ul>
+<li>Focused on relationships between entities, storing nodes and edges.</li>
+<li>Efficient for traversing complex networks and querying paths.</li>
+<li>Examples: Neo4j, Dgraph, TigerGraph.</li>
+<li>Use cases: social networks, recommendation engines, fraud detection.</li>
+</ul>
+<h3 id="architecture-and-design-principles" tabindex="-1"><a class="header-anchor" href="#architecture-and-design-principles">Architecture and Design Principles</a></h3>
+<p>NoSQL databases share several architectural patterns that distinguish them from RDBMS:</p>
+<ul>
+<li>Horizontal Scalability: Data is sharded across multiple nodes, allowing the system to grow by adding machines rather than upgrading a single server.</li>
+<li>Flexible Schema: No strict table schemas; applications can evolve data structures without downtime.</li>
+<li>Replication and Fault Tolerance: Data is often replicated across nodes or data centers to improve availability and durability.</li>
+<li>Eventual Consistency: Many NoSQL systems relax strong consistency in favor of availability and partition tolerance. Clients may read slightly stale data until replicas converge.</li>
+<li>Optimized Storage Engines: Key-value and wide-column stores often use log-structured merge trees (LSM-trees) or append-only logs to achieve high write throughput. Document stores may implement indexes on document fields for efficient querying.</li>
+</ul>
+<p>Here is a simplified diagram illustrating the architecture of a typical NoSQL database:
+<img src="https://i.imgur.com/40g0F17.png" alt="NoSQL"></p>
+<ul>
+<li>Query Processor: interprets the API request (can be key-value get/set, document query, graph traversal, etc.).</li>
+<li>Execution Engine: performs operations without a rigid query planner; may optimize for speed over strict ACID.</li>
+<li>Storage Engine: stores data in a flexible format (key-value pairs, documents, wide-columns, or graph nodes/edges).</li>
+<li>Disk / FS: the underlying storage; may be sharded or replicated for scalability.</li>
+</ul>
+<h3 id="strengths" tabindex="-1"><a class="header-anchor" href="#strengths">Strengths</a></h3>
+<p>NoSQL databases are optimized for specific workloads and offer advantages over traditional relational systems in these areas:</p>
+<ul>
+<li>High throughput and low latency for large-scale writes and reads.</li>
+<li>Flexible schemas that allow rapid development and evolving data models.</li>
+<li>Horizontal scalability across distributed clusters without complex sharding logic.</li>
+<li>Specialized optimizations for particular query patterns, e.g., graph traversals or time-series ingestion.</li>
+</ul>
+<h3 id="weaknesses" tabindex="-1"><a class="header-anchor" href="#weaknesses">Weaknesses</a></h3>
+<p>These advantages come with trade-offs:</p>
+<ul>
+<li>Limited general-purpose query power: Ad hoc joins and complex aggregations are often slower or unsupported.</li>
+<li>Eventual consistency: Applications must handle potential data staleness.</li>
+<li>Narrow optimization: Each NoSQL type excels in a particular domain but is less effective outside it. For example, key-value stores are fast for lookups but not suitable for relational queries.</li>
+<li>Operational complexity: Distributed systems require careful management of replication, partitioning, and failure recovery.</li>
+</ul>
+<h3 id="use-cases" tabindex="-1"><a class="header-anchor" href="#use-cases">Use Cases</a></h3>
+<p>NoSQL databases have found adoption in high-scale, modern applications where relational databases struggle:</p>
+<ul>
+<li>Large-scale web apps: Facebook, LinkedIn, and Twitter rely on NoSQL engines to handle massive user interactions.</li>
+<li>Caching and ephemeral storage: Redis and Memcached provide fast access to frequently used data.</li>
+<li>Content management and flexible data: MongoDB is widely used to store documents, media, and user-generated content.</li>
+<li>Graph analytics and recommendations: Neo4j powers recommendation engines, fraud detection, and social network analysis.</li>
+<li>Time-series ingestion: Wide-column stores and log-structured engines ingest millions of sensor readings per second.</li>
+</ul>
+<h3 id="summary" tabindex="-1"><a class="header-anchor" href="#summary">Summary</a></h3>
+<p>NoSQL databases arose from necessity: modern applications required systems that could scale horizontally, handle flexible data, and support specialized workloads. They complement relational databases rather than replace them, providing engineers with purpose-built tools for specific problems.</p>
+<p>In the next sections of this series, we will explore the specialized database types that go even further, including time-series, vector, and graph engines, each optimized for workloads that challenge even NoSQL systems.</p>
+<h2 id="limitations-of-general-purpose-databases" tabindex="-1"><a class="header-anchor" href="#limitations-of-general-purpose-databases">Limitations of General-Purpose Databases</a></h2>
+<p>While SQL and NoSQL databases have proven indispensable, modern workloads reveal gaps that neither can fully address. As systems scale and diversify, engineers encounter performance bottlenecks, storage inefficiencies, and query limitations that highlight the need for purpose-built solutions.</p>
+<h3 id="time-series-metrics" tabindex="-1"><a class="header-anchor" href="#time-series-metrics">Time-Series Metrics</a></h3>
+<p>Monitoring systems, IoT devices, and financial tick data generate vast streams of timestamped information. Traditional relational databases struggle to handle millions of writes per second, and even some NoSQL stores face challenges with compression and efficient range queries over time. Querying metrics across long intervals can become slow and resource-intensive without specialized time-series optimizations.</p>
+<h3 id="high-dimensional-vector-search" tabindex="-1"><a class="header-anchor" href="#high-dimensional-vector-search">High-Dimensional Vector Search</a></h3>
+<p>Machine learning and recommendation systems frequently rely on embeddings and vectors with hundreds or thousands of dimensions. Neither SQL nor typical NoSQL stores are optimized for similarity search in high-dimensional spaces. Indexing and nearest-neighbor queries at scale require algorithms like HNSW (Hierarchical Navigable Small Worlds) or approximate nearest neighbor search, which general-purpose engines do not provide.</p>
+<h3 id="massive-analytical-queries" tabindex="-1"><a class="header-anchor" href="#massive-analytical-queries">Massive Analytical Queries</a></h3>
+<p>Analytical workloads over billions of rows, such as aggregations, joins, and scans, expose the limitations of row-oriented storage. Columnar storage, compression, and query execution strategies optimized for analytics are rarely present in standard RDBMS or NoSQL systems, making OLAP-style queries inefficient at scale.</p>
+<h3 id="event-sourcing-%2F-append-only-streams" tabindex="-1"><a class="header-anchor" href="#event-sourcing-%2F-append-only-streams">Event Sourcing / Append-Only Streams</a></h3>
+<p>Applications using event sourcing or logs rely on append-only storage and sequential reads. While key-value or wide-column stores can store events, they are not always optimized for time-ordered retrieval, retention policies, or efficient compaction, leading to performance degradation as data grows.</p>
+<h3 id="spatial-queries" tabindex="-1"><a class="header-anchor" href="#spatial-queries">Spatial Queries</a></h3>
+<p>Geospatial applications - mapping, routing, or location-based services - require specialized indexes and query algorithms. General-purpose databases support basic geospatial operations, but large-scale spatial queries benefit from R-trees, quad-trees, or geohash-based indexing, which are uncommon in standard SQL or NoSQL engines.</p>
+<h3 id="enter-specialized-databases" tabindex="-1"><a class="header-anchor" href="#enter-specialized-databases">Enter Specialized Databases</a></h3>
+<p>These limitations set the stage for specialized databases. Each engine is designed around a particular problem domain, employing custom storage formats, indexing strategies, compression methods, and query execution algorithms to handle workloads that challenge general-purpose systems. By focusing on a niche, specialized databases achieve performance, scalability, and efficiency that relational and NoSQL stores cannot match, while complementing the broader data infrastructure.</p>
+<h2 id="what's-next" tabindex="-1"><a class="header-anchor" href="#what's-next">What's Next</a></h2>
+<p>This series, The Database Zoo: Exotic Data Storage Engines, will explore these engines in depth. Each post will cover:</p>
+<ul>
+<li>The problem domain: why a general-purpose database falls short.</li>
+<li>Core internals: storage structures, indexing strategies, and key algorithms.</li>
+<li>Query models and optimizations: techniques that enable high performance at scale.</li>
+<li>Real-world examples: popular engines and their use cases.</li>
+</ul>
+<p>The first post will focus on Time-Series Databases, examining how they efficiently store, compress, and query billions of timestamped metrics, a workload that pushes general-purpose databases to their limits.</p>
+<p>Stay tuned as we venture into the diverse and fascinating world of specialized databases, each a unique creature in the ever-expanding database zoo!</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
