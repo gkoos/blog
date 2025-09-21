@@ -332,5 +332,14 @@
         <description>An in-depth look at Time-Series Databases (TSDBs), their architecture, use cases, and how they differ from traditional databases.</description>
       </item>
     
+      <item>
+        <title>Breaking Your Own App (on Purpose) with Chaos Proxy</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-21-Breaking-Your-Own-App-on-Purpose-with-Chaos-Proxy/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-21-Breaking-Your-Own-App-on-Purpose-with-Chaos-Proxy/</guid>
+        <pubDate>Sun, 21 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>How to use Chaos Proxy to simulate a slow network and test UI loading states in a Next.js app.</description>
+      </item>
+    
   </channel>
 </rss>
