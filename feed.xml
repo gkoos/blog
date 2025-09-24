@@ -341,5 +341,14 @@
         <description>How to use Chaos Proxy to simulate a slow network and test UI loading states in a Next.js app.</description>
       </item>
     
+      <item>
+        <title>ffetch, chaos-proxy, and chaos-fetch are now part of fetch-kit!</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-24-ffetch,-chaos-proxy-and-chaos-fetch-are-now-part-of-fetch-kit/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-24-ffetch,-chaos-proxy-and-chaos-fetch-are-now-part-of-fetch-kit/</guid>
+        <pubDate>Wed, 24 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>ffetch, chaos-proxy, and the upcoming chaos-fetch are now in the new fetch-kit GitHub org.</description>
+      </item>
+    
   </channel>
 </rss>
