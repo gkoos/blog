@@ -16,7 +16,7 @@ In this article, I dive into dependency injection in Go: why it matters, how to 
 
 Read it here: [How to Implement Dependency Injection in Go](https://www.freecodecamp.org/news/how-to-use-dependency-injection-in-go/)
 
-I'd love to hear your thoughts - feel free to discuss it on [GitHub](https://github.com/gkoos) or reach out on [X/Twitter](https://x.com/gkoos430).  
+I'd love to hear your thoughts - feel free to discuss it on [Hashnode](https://pocketgopher.hashnode.dev/how-to-use-dependency-injection-in-go) or reach out on [X/Twitter](https://x.com/gkoos430).  
 
 
 ![](https://cdn.hashnode.com/res/hashnode/image/upload/v1758741125008/e796d218-2cf6-43ed-87a5-dfc772e121f8.png)
