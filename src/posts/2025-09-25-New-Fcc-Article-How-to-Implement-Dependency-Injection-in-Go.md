@@ -2,15 +2,15 @@
 layout: layouts/post.njk
 title: "New FCC Article: How to Implement Dependency Injection in Go"
 date: 2025-09-25
-description: Go standard library helpers to work with collections, published on freeCodeCamp.
-excerpt: My second article as a freeCodeCamp News author just got published!
+description: Go dependency injection tutorial, published on freeCodeCamp.
+excerpt: My new article as a freeCodeCamp News author just got published!
 tags:
 - posts
 - freecodecamp
 - golang
 - tutorials
 ---
-My 3rd FreeCodeCamp article is live
+My new FreeCodeCamp article is live
 
 In this article, I dive into dependency injection in Go: why it matters, how to implement it, and practical examples for writing cleaner, more testable code.  
 
