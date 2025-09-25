@@ -12,10 +12,6 @@ tags:
 ---
 My 3rd FreeCodeCamp article is live
 
-## New Article: How to Implement Dependency Injection in Go
-
-My 3rd FreeCodeCamp article is live!  
-
 In this article, I dive into dependency injection in Go: why it matters, how to implement it, and practical examples for writing cleaner, more testable code.  
 
 Read it here: [How to Implement Dependency Injection in Go](https://www.freecodecamp.org/news/how-to-use-dependency-injection-in-go/)
