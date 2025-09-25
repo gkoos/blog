@@ -3,7 +3,7 @@ layout: layouts/post.njk
 title: ffetch Migrates to @fetchkit/ffetch & fetch-kit/ffetch
 date: 2025-09-26
 description: FFetch is now @fetchkit/ffetch on npm, with improved support in the FetchKit ecosystem.
-excerpt: "FFetch is now published as `@fetchkit/ffetch` on npm! The GitHub repo has also moved from gkoos/ffetch to fetch-kit/ffetch."
+excerpt: "FFetch is now published as @fetchkit/ffetch on npm! The GitHub repo has also moved from gkoos/ffetch to fetch-kit/ffetch."
 tags:
 - posts
 - announcements
