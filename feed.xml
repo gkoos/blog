@@ -359,5 +359,23 @@
         <description>Go standard library helpers to work with collections, published on freeCodeCamp.</description>
       </item>
     
+      <item>
+        <title>ffetch Migrates to @fetchkit/ffetch &amp; fetch-kit/ffetch</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-26-ffetch-migrates-to-fetchkit-ffetch-and-fetch-kit-ffetch/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-26-ffetch-migrates-to-fetchkit-ffetch-and-fetch-kit-ffetch/</guid>
+        <pubDate>Fri, 26 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>FFetch is now @fetchkit/ffetch on npm, with improved support in the FetchKit ecosystem.</description>
+      </item>
+    
+      <item>
+        <title>Chaos Proxy Migrates to @fetchkit/chaos-proxy &amp; fetch-kit/chaos-proxy (Now at 1.0.3)</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-26-Chaos-Proxy-Migrates-to-fetchkit-chaos-proxy/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-26-Chaos-Proxy-Migrates-to-fetchkit-chaos-proxy/</guid>
+        <pubDate>Fri, 26 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>Chaos Proxy is now @fetchkit/chaos-proxy on npm, with new features and improved support in the FetchKit ecosystem.</description>
+      </item>
+    
   </channel>
 </rss>
