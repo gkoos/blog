@@ -350,5 +350,14 @@
         <description>ffetch, chaos-proxy, and the upcoming chaos-fetch are now in the new fetch-kit GitHub org.</description>
       </item>
     
+      <item>
+        <title>New FCC Article: How to Implement Dependency Injection in Go</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-25-New-Fcc-Article-How-to-Implement-Dependency-Injection-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-25-New-Fcc-Article-How-to-Implement-Dependency-Injection-in-Go/</guid>
+        <pubDate>Thu, 25 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>Go standard library helpers to work with collections, published on freeCodeCamp.</description>
+      </item>
+    
   </channel>
 </rss>
