@@ -377,5 +377,14 @@
         <description>Chaos Proxy is now @fetchkit/chaos-proxy on npm, with new features and improved support in the FetchKit ecosystem.</description>
       </item>
     
+      <item>
+        <title>Introducing chaos-fetch: Network Chaos Injection for Fetch Requests</title>
+        <link>https://blog.gaborkoos.com/posts/2025-09-27-Introducing-chaos-fetch-network-chaos-injection-for-fetch-requests/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-09-27-Introducing-chaos-fetch-network-chaos-injection-for-fetch-requests/</guid>
+        <pubDate>Sat, 27 Sep 2025 00:00:00 GMT</pubDate>
+
+        <description>chaos-fetch is a TypeScript library for injecting network chaos - latency, failures, drops - into fetch requests. Easily simulate adverse network conditions in client-side code for robust testing and resilience. Now available as @fetchkit/chaos-fetch on npm.</description>
+      </item>
+    
   </channel>
 </rss>
