@@ -9,6 +9,7 @@ tags:
 - announcements
 - javascript
 - typescript
+- testing
 ---
 Introducing [chaos-fetch](https://www.npmjs.com/package/@fetchkit/chaos-fetch): a TypeScript/ESM library for injecting network chaos (latency, failures, drops, etc.) into fetch requests. Designed for programmatic use, `chaos-fetch` provides a flexible middleware system for simulating adverse network conditions in client-side code.
 
