@@ -9,6 +9,7 @@ tags:
 - tutorials
 - javascript
 - typescript
+- testing
 ---
 Chaos Engineering is a practice where you introduce controlled failures into your system to test its resilience and improve its reliability. It's a fun concept that can help you identify weaknesses in your application and infrastructure, but probably not something that you do every day - not everyone has the luxury of a Netflix-scale engineering team to manage a Netflix-scale infrastructure. But the concept is valid and useful even for small teams and projects.
 
