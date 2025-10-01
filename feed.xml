@@ -386,5 +386,14 @@
         <description>chaos-fetch is a TypeScript library for injecting network chaos - latency, failures, drops - into fetch requests. Easily simulate adverse network conditions in client-side code for robust testing and resilience. Now available as @fetchkit/chaos-fetch on npm.</description>
       </item>
     
+      <item>
+        <title>Small-Scale Chaos Testing: The Missing Step Before Production</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-01-Small-Scale-Chaos-Testing-The-Missing-Step-Before-Production/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-01-Small-Scale-Chaos-Testing-The-Missing-Step-Before-Production/</guid>
+        <pubDate>Wed, 01 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>Using chaos-fetch and chaos-proxy for lightweight chaos testing in dev/staging to improve app resilience and UX.</description>
+      </item>
+    
   </channel>
 </rss>

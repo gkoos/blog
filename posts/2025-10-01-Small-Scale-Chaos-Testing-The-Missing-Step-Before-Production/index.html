@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Chaos Proxy Migrates to @fetchkit/chaos-proxy &amp; fetch-kit/chaos-proxy (Now at 1.0.3)</title>
-  <meta name="description" content="Chaos Proxy is now @fetchkit/chaos-proxy on npm, with new features and improved support in the FetchKit ecosystem.">
+  <title>Small-Scale Chaos Testing: The Missing Step Before Production</title>
+  <meta name="description" content="Using chaos-fetch and chaos-proxy for lightweight chaos testing in dev/staging to improve app resilience and UX.">
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Chaos Proxy Migrates to @fetchkit/chaos-proxy &amp; fetch-kit/chaos-proxy (Now at 1.0.3)">
-  <meta property="og:description" content="Chaos Proxy is now @fetchkit/chaos-proxy on npm, with new features and improved support in the FetchKit ecosystem.">
+  <meta property="og:title" content="Small-Scale Chaos Testing: The Missing Step Before Production">
+  <meta property="og:description" content="Using chaos-fetch and chaos-proxy for lightweight chaos testing in dev/staging to improve app resilience and UX.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="Chaos Proxy Migrates to @fetchkit/chaos-proxy &amp; fetch-kit/chaos-proxy (Now at 1.0.3)">
-  <meta name="twitter:description" content="Chaos Proxy is now @fetchkit/chaos-proxy on npm, with new features and improved support in the FetchKit ecosystem.">
+  <meta name="twitter:title" content="Small-Scale Chaos Testing: The Missing Step Before Production">
+  <meta name="twitter:description" content="Using chaos-fetch and chaos-proxy for lightweight chaos testing in dev/staging to improve app resilience and UX.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
@@ -69,19 +69,13 @@
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
 <article>
-  <h1 class="text-3xl font-bold mb-4">Chaos Proxy Migrates to @fetchkit/chaos-proxy &amp; fetch-kit/chaos-proxy (Now at 1.0.3)</h1>
+  <h1 class="text-3xl font-bold mb-4">Small-Scale Chaos Testing: The Missing Step Before Production</h1>
   <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-    <time datetime="2025-09-26T00:00:00.000Z">Fri Sep 26 2025</time>
+    <time datetime="2025-10-01T00:00:00.000Z">Wed Oct 01 2025</time>
     
     
       <span class="text-gray-300">•</span>
       <div class="flex flex-wrap gap-2">
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">announcements</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
         
           <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">testing</div>
         
@@ -89,32 +83,64 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p>After a lot of work and some migration struggles, Chaos Proxy is now published as <code>@fetchkit/chaos-proxy</code> on npm and has reached version 1.0.3!</p>
-<h2 id="repository-migration%3A" tabindex="-1"><a class="header-anchor" href="#repository-migration%3A">Repository migration:</a></h2>
-<p>The GitHub repo has also moved from <code>gkoos/chaos-proxy</code> to <a href="https://github.com/fetch-kit/chaos-proxy"><code>fetch-kit/chaos-proxy</code></a>.</p>
-<h2 id="what's-new%3F" tabindex="-1"><a class="header-anchor" href="#what's-new%3F">What's new?</a></h2>
-<p>The package is now under the FetchKit organization: <code>@fetchkit/chaos-proxy</code><br>
-Latest version: 1.0.3</p>
-<h3 id="new-features%3A" tabindex="-1"><a class="header-anchor" href="#new-features%3A">New features:</a></h3>
+    <p>Chaos testing usually brings Netflix or Amazon to mind: production services deliberately stressed to find weaknesses. For smaller teams, or solo developers, that kind of chaos feels extreme or impractical.</p>
+<p>But controlled chaos tests in dev or staging can catch problems earlier, improve resilience, and prevent production surprises - all without tearing down your infrastructure.</p>
+<h2 id="what-real-developers-are-doing" tabindex="-1"><a class="header-anchor" href="#what-real-developers-are-doing">What Real Developers Are Doing</a></h2>
+<p>I recently asked developers on Reddit about chaos testing in everyday dev/QA environments. Key takeaways:</p>
 <ul>
-<li><code>throttle</code> middleware for bandwidth control</li>
-<li><code>bodyTransform</code> middleware for custom body logic</li>
-<li>Improved routing logic for flexible chaos injection</li>
+<li>Many teams don't run chaos tests at all.</li>
+<li>Teams that do often limit them to production with large-scale infrastructure tools.</li>
+<li>Lightweight chaos in dev or staging environments is rare.</li>
+<li>Some teams use chaos creatively: for onboarding, troubleshooting, or uncovering hidden assumptions, rather than strictly for production reliability.</li>
 </ul>
-<h2 id="migration%3A" tabindex="-1"><a class="header-anchor" href="#migration%3A">Migration:</a></h2>
-<p>The old chaos-proxy package is deprecated.</p>
-<p>To upgrade:</p>
-<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> uninstall chaos-proxy
-<span class="token function">npm</span> <span class="token function">install</span> @fetchkit/chaos-proxy
-</code></pre>
-<p>Update your GitHub links to the new repo: <a href="https://github.com/fetch-kit/chaos-proxy">https://github.com/fetch-kit/chaos-proxy</a></p>
-<h2 id="why-the-change%3F" tabindex="-1"><a class="header-anchor" href="#why-the-change%3F">Why the change?</a></h2>
-<p>This migration brings Chaos Proxy into the FetchKit ecosystem for better support, discoverability, and future development.</p>
-<h2 id="deprecation-notice%3A" tabindex="-1"><a class="header-anchor" href="#deprecation-notice%3A">Deprecation notice:</a></h2>
-<p>All updates and support will be focused on <code>@fetchkit/chaos-proxy</code> and the new GitHub repo.</p>
-<p>Please migrate to stay up to date.</p>
-<p>Thanks for sticking around through the migration!</p>
-<p>Questions or feedback? <a href="https://github.com/fetch-kit/chaos-proxy/issues">GitHub Issues</a></p>
+<p>There seems to be a gap here: <strong>small-scope chaos in dev/stage is largely unexplored</strong>. Are we missing opportunities to catch UX and resilience issues before production? From my own experience, small-scale chaos can reveal frontend and API issues that would otherwise slip through.</p>
+<h2 id="why-lightweight-chaos-matters" tabindex="-1"><a class="header-anchor" href="#why-lightweight-chaos-matters">Why Lightweight Chaos Matters</a></h2>
+<p>Simple failure scenarios can have big impacts:</p>
+<ul>
+<li>Slow or failing backend APIs can break frontends.</li>
+<li>Uncaught exceptions may cascade under edge-case conditions.</li>
+<li>UX issues often appear before production-scale failures.</li>
+</ul>
+<p>Could testing one API or frontend component in dev reveal fragile spots in your system? How would your app behave if a key service suddenly slowed down or returned errors? As a developer, you should want to know this before your users do.</p>
+<h2 id="where-you-can-inject-chaos" tabindex="-1"><a class="header-anchor" href="#where-you-can-inject-chaos">Where You Can Inject Chaos</a></h2>
+<p>Chaos doesn't require Netflix-level infrastructure. You can experiment in a few areas:</p>
+<ul>
+<li>Backend: simulate slow responses, inject random errors, or fail requests.</li>
+<li>Frontend: delay or fail API responses before they reach your app.</li>
+<li>Proxy/Network Layer: throttle requests, drop connections, or add latency.</li>
+</ul>
+<p>What happens if your frontend suddenly experiences random latency or dropped requests? Which parts of your system hold up, and which break?</p>
+<h2 id="tools-and-experimentation" tabindex="-1"><a class="header-anchor" href="#tools-and-experimentation">Tools and Experimentation</a></h2>
+<p>Most standard testing frameworks focus on correctness and coverage, not resilience under failure. That means chaos testing often requires additional tools or custom scripts. Options include:</p>
+<h3 id="the-big-guns" tabindex="-1"><a class="header-anchor" href="#the-big-guns">The Big Guns</a></h3>
+<ul>
+<li><a href="https://github.com/Shopify/toxiproxy">Toxiproxy</a>: A proxy to simulate network conditions.</li>
+<li><a href="https://github.com/Netflix/chaosmonkey">Chaos Monkey</a>: A classic tool for randomly terminating instances in production.</li>
+<li><a href="https://www.gremlin.com/">Gremlin</a>: A more user-friendly chaos engineering platform that allows for a variety of failure modes.</li>
+<li><a href="https://locust.io/">Locust</a>: While primarily a load testing tool, it can be used to simulate user behavior under stress.</li>
+</ul>
+<h3 id="handmade-frontend-solutions" tabindex="-1"><a class="header-anchor" href="#handmade-frontend-solutions">Handmade Frontend Solutions</a></h3>
+<ul>
+<li><a href="https://mswjs.io/">Mock Service Worker</a>: MSW can mock API responses, including delays and errors.</li>
+<li><a href="https://expressjs.com/en/guide/using-middleware.html">Custom Middleware</a>: You can create custom middleware to introduce delays or failures in API calls.</li>
+</ul>
+<h3 id="in-between" tabindex="-1"><a class="header-anchor" href="#in-between">In Between</a></h3>
+<p>And there seems to be a large gap between the production-scale, infrastructure-heavy tools and the DIY frontend solutions. This is why I built a small set of libraries to fill that void:</p>
+<ul>
+<li><a href="https://github.com/fetch-kit/chaos-fetch">chaos-fetch</a>: A lightweight TypeScript library to inject chaos (latency, failures, drops) into fetch requests. Ideal for frontend or backend code using fetch.</li>
+<li><a href="https://github.com/fetch-kit/chaos-proxy">chaos-proxy</a>: A simple HTTP proxy to simulate network chaos across all HTTP traffic. Useful for testing how your app behaves under adverse network conditions.</li>
+</ul>
+<h3 id="non-js-ecosystem" tabindex="-1"><a class="header-anchor" href="#non-js-ecosystem">Non-JS Ecosystem</a></h3>
+<p>Of course not every app is a simple JS frontend to a Node backend. Other ecosystems may need their own tools, or proxies, but the principles remain the same: inject controlled chaos in dev/staging to catch issues early.</p>
+<h2 id="closing-thoughts" tabindex="-1"><a class="header-anchor" href="#closing-thoughts">Closing Thoughts</a></h2>
+<p>Now obviously, this &quot;chaos light&quot; approach isn't a substitute for full-scale chaos engineering in production. But it can be a practical step for smaller teams to improve resilience without massive overhead.</p>
+<p>Chaos testing doesn't have to be a Netflix-scale operation. Many teams skip it entirely or only apply it in production. Running controlled chaos experiments in dev and staging can help you:</p>
+<ul>
+<li>Improve UX and resilience.</li>
+<li>Reduce surprises in production.</li>
+<li>Give your team confidence handling failures.</li>
+</ul>
+<p>Could a few targeted chaos tests in your dev/staging environment make your system more robust tomorrow? How might you start exploring it this week?</p>
 
   </div>
 </article>
