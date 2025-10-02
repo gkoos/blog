@@ -395,5 +395,14 @@
         <description>Using chaos-fetch and chaos-proxy for lightweight chaos testing in dev/staging to improve app resilience and UX.</description>
       </item>
     
+      <item>
+        <title>The Database Zoo: Probabilistic / Approximate Databases</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-02-The-Database-Zoo-Probabilistic-Approximate-Databases/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-02-The-Database-Zoo-Probabilistic-Approximate-Databases/</guid>
+        <pubDate>Thu, 02 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>An in-depth look at Probabilistic / Approximate Databases, their architecture, use cases, and how they differ from traditional databases.</description>
+      </item>
+    
   </channel>
 </rss>

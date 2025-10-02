@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Database Zoo: Probabilistic / Approximate Databases</title>
+  <meta name="description" content="An in-depth look at Probabilistic / Approximate Databases, their architecture, use cases, and how they differ from traditional databases.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Database Zoo: Probabilistic / Approximate Databases">
+  <meta property="og:description" content="An in-depth look at Probabilistic / Approximate Databases, their architecture, use cases, and how they differ from traditional databases.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="The Database Zoo: Probabilistic / Approximate Databases">
+  <meta name="twitter:description" content="An in-depth look at Probabilistic / Approximate Databases, their architecture, use cases, and how they differ from traditional databases.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">The Database Zoo: Probabilistic / Approximate Databases</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-10-02T00:00:00.000Z">Thu Oct 02 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">database zoo</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">databases</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>This post is part of</em> The Database Zoo: Exotic Data Storage Engines <em>, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.</em></p>
+<h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
+<p>Modern systems often generate vast streams of high-volume, high-cardinality, or continuously changing data. Performing exact queries - like counting unique users on a website, tracking event frequencies, or checking membership in massive sets - can be slow, memory-intensive, or even infeasible on traditional relational or NoSQL databases.</p>
+<p>Probabilistic and approximate databases solve this problem by using compact data summaries, such as <em>Bloom filters</em>, <em>HyperLogLog</em>, and <em>sketches</em>, to provide fast, memory-efficient answers. Instead of storing every individual data point, these engines maintain summaries that can be updated incrementally, merged across partitions, and queried efficiently. By accepting a small, controlled error, they achieve real-time analytics at scale.</p>
+<p>Common workloads where these databases excel include:</p>
+<ul>
+<li><strong>Web and marketing analytics</strong>: Estimating the number of unique visitors per hour or day without storing every single user ID.</li>
+<li><strong>Streaming event aggregation</strong>: Summarizing billions of events in near real-time for dashboards or alerting pipelines.</li>
+<li><strong>High-cardinality telemetry</strong>: Counting distinct devices, sensors, or metrics in IoT systems where full retention is impractical.</li>
+</ul>
+<p>General-purpose databases can perform these queries, but at scale, they require large amounts of memory, compute, and careful sharding. Probabilistic engines trade a tiny fraction of accuracy for huge gains in speed, memory efficiency, and scalability.</p>
+<p>In this post, we will explore how these systems work under the hood, focusing on their core architecture, the data structures they employ, typical query patterns, and real-world use cases. By the end, you will understand when and why to use probabilistic databases, and how engines like Druid and Materialize implement approximate computation efficiently.</p>
+<h2 id="why-general-purpose-databases-struggle" tabindex="-1"><a class="header-anchor" href="#why-general-purpose-databases-struggle">Why General-Purpose Databases Struggle</a></h2>
+<p>Even the most robust relational and NoSQL databases face challenges when dealing with high-volume or high-cardinality datasets. Exact computation over these workloads can quickly overwhelm memory, CPU, and storage, creating bottlenecks that probabilistic databases are designed to avoid.</p>
+<h3 id="high-cardinality-aggregations" tabindex="-1"><a class="header-anchor" href="#high-cardinality-aggregations">High-Cardinality Aggregations</a></h3>
+<p>Counting distinct elements, such as users, devices, or events, can be prohibitively expensive:</p>
+<ul>
+<li><strong>Memory usage</strong>: Storing every unique key may require gigabytes or terabytes of memory for large datasets.</li>
+<li><strong>Computation overhead</strong>: Aggregating billions of records per second can exceed the processing capacity of conventional databases.</li>
+<li><strong>Latency</strong>: Queries may take minutes or longer, making real-time analytics infeasible.</li>
+</ul>
+<p>Probabilistic data structures, like <em>HyperLogLog</em>, provide approximate distinct counts using small, fixed-size summaries, dramatically reducing memory and compute requirements while keeping errors within predictable bounds.</p>
+<h3 id="real-time-streaming-queries" tabindex="-1"><a class="header-anchor" href="#real-time-streaming-queries">Real-Time Streaming Queries</a></h3>
+<p>Many workloads require near-instant answers over continuously arriving data:</p>
+<ul>
+<li><strong>High ingestion rates</strong>: Millions of events per second may arrive, overwhelming traditional batch-oriented systems.</li>
+<li><strong>Query freshness</strong>: Dashboards and alerting pipelines need low-latency responses, which are difficult to achieve when aggregating raw data.</li>
+<li><strong>Incremental updates</strong>: Maintaining exact aggregates in real time requires complex locking, transaction management, and memory management.</li>
+</ul>
+<p>Probabilistic databases maintain incremental summaries of the data stream, allowing low-latency queries without materializing the full dataset.</p>
+<h3 id="set-membership-and-filtering" tabindex="-1"><a class="header-anchor" href="#set-membership-and-filtering">Set Membership and Filtering</a></h3>
+<p>Checking whether an item belongs to a large set can be impractical:</p>
+<ul>
+<li><strong>Storage requirements</strong>: Exact membership structures require storing all elements, which is costly for billions of keys.</li>
+<li><strong>Query performance</strong>: Sequential scans or joins over massive tables are slow and inefficient.</li>
+<li><strong>Operational complexity</strong>: Maintaining indexes or partitions for high-cardinality sets increases administrative overhead.</li>
+</ul>
+<p><em>Bloom filters</em> provide a compact representation that guarantees no false negatives and a controllable false positive rate, enabling fast membership checks without storing all raw data. This makes them ideal for scenarios where space is at a premium and occasional false positives are acceptable.</p>
+<h3 id="summary" tabindex="-1"><a class="header-anchor" href="#summary">Summary</a></h3>
+<p>General-purpose databases can technically handle large-scale aggregation and streaming workloads, but at significant cost:</p>
+<ul>
+<li>High memory and storage requirements</li>
+<li>Slower query performance for real-time analytics</li>
+<li>Increased operational complexity for indexing and sharding</li>
+</ul>
+<p>Probabilistic databases are purpose-built to address these challenges. By maintaining compact, approximate summaries, they provide fast, memory-efficient answers over high-volume or high-cardinality datasets—workloads that would overwhelm traditional engines.</p>
+<h2 id="core-architecture" tabindex="-1"><a class="header-anchor" href="#core-architecture">Core Architecture</a></h2>
+<p>Probabilistic and approximate databases are designed to provide efficient analytics over massive, high-cardinality, or streaming datasets. Rather than storing every data point, these systems rely on compact probabilistic summaries that can be updated incrementally and queried efficiently. The architecture revolves around key principles: memory efficiency, incremental updates, mergeable summaries, and controllable approximation.</p>
+<h3 id="probabilistic-data-structures" tabindex="-1"><a class="header-anchor" href="#probabilistic-data-structures">Probabilistic Data Structures</a></h3>
+<p>These databases rely on specialized data structures to summarize large datasets with minimal memory:</p>
+<ul>
+<li><strong>Bloom Filters</strong>: Fast, space-efficient membership tests. Guarantees no false negatives and a tunable false positive rate. They use multiple hash functions to set bits in a bit array, allowing quick checks for element presence. Insertions and queries are O(k), where k is the number of hash functions. The challenge is finding k different hash functions that are fast and uniformly distribute inputs.</li>
+<li><strong>HyperLogLog (HLL)</strong>: Provides approximate counts of distinct elements using fixed memory. Error rates are predictable and low (typically 1–2%). They use hash functions to map elements to bit patterns, estimating cardinality based on the position of the leftmost 1 bit. HLL is highly mergeable, making it ideal for distributed systems.</li>
+<li><strong>Count-Min Sketch</strong>: Estimates frequencies of elements in a data stream with bounded errors. Useful for identifying heavy hitters. It uses multiple hash functions to map elements to a 2D array, allowing frequency estimates with O(1) query time and O(log(1/δ)/ε) space, where ε is the error margin and δ is the confidence level.</li>
+<li><strong>Quantile Sketches</strong>: Approximate quantiles (e.g., median, percentiles) in streaming data. They maintain a summary of the data distribution, allowing efficient quantile queries with controlled error bounds.</li>
+<li><strong>Top-K Sketches</strong>: Tracks the most frequent items efficiently without storing all elements. It uses a combination of hash functions and priority queues to maintain the top K items in a compact form.</li>
+</ul>
+<p>These structures allow queries to be executed on summaries rather than raw data, significantly reducing memory and compute overhead. As we can see, hash functions are a critical component of these data structures, enabling efficient mapping and retrieval of information.</p>
+<h3 id="streaming-and-incremental-aggregation" tabindex="-1"><a class="header-anchor" href="#streaming-and-incremental-aggregation">Streaming and Incremental Aggregation</a></h3>
+<p>High-throughput streams require incremental computation rather than batch processing:</p>
+<ul>
+<li><strong>Update-on-arrival</strong>: Each incoming event updates the relevant sketch or filter immediately. This allows the system to maintain up-to-date summaries without reprocessing the entire dataset. Updates are typically O(1) or O(k) depending on the data structure.</li>
+<li><strong>Low-latency queries</strong>: Since summaries are compact and pre-aggregated, queries can be answered in milliseconds, enabling real-time analytics.</li>
+<li><strong>Mergeable summaries</strong>: Summaries from multiple partitions or nodes can be combined efficiently, supporting horizontal scaling. This is particularly important in distributed systems where data is partitioned across multiple nodes. For example, HyperLogLog sketches can be merged by performing a bitwise OR operation on their bit arrays, allowing for efficient aggregation of distinct counts across partitions.</li>
+<li><strong>Windowed computation</strong>: Sliding or tumbling windows allow approximate aggregates over recent data without storing full history. This is crucial for real-time analytics where only the most recent data is relevant. It can be implemented for example by maintaining separate sketches for each window and merging them as needed.</li>
+</ul>
+<p>This approach enables real-time dashboards, alerting, and analytics over streams with minimal latency.</p>
+<h3 id="storage-model" tabindex="-1"><a class="header-anchor" href="#storage-model">Storage Model</a></h3>
+<p>Unlike traditional databases that store raw rows, probabilistic systems focus on storing summaries:</p>
+<ul>
+<li><strong>Compact, fixed-size structures</strong>: Memory usage is predictable, regardless of input size. For example, a HyperLogLog sketch typically uses only a few kilobytes of memory, regardless of whether it is summarizing thousands or millions of distinct elements.</li>
+<li><strong>Optional raw data retention</strong>: Some systems store raw events for verification or auditing, but queries primarily rely on summaries.</li>
+<li><strong>Append-only logs</strong>: If incoming events are stored, they are often written to an append-only log for durability, while summaries are updated in memory. This ensures that data is not lost in case of failures and allows for replaying events if needed.</li>
+<li><strong>Efficient serialization</strong>: Summaries can be serialized and transmitted across the network with minimal overhead, facilitating distributed processing. This is particularly important in distributed systems where summaries need to be shared between nodes for merging or querying.</li>
+<li><strong>Hierarchical storage</strong>: Recent data may be kept in memory for low-latency access, while older summaries are archived on disk or in object storage.</li>
+<li><strong>Versioning and snapshots</strong>: Some systems support versioned summaries to enable time-travel queries or historical analysis.</li>
+<li><strong>Partitioning</strong>: Summaries can be partitioned by time, user, or other dimensions for parallel processing and incremental merging.</li>
+</ul>
+<p>This design maximizes throughput and minimizes storage costs while supporting large-scale analytics.</p>
+<h3 id="accuracy-and-error-control" tabindex="-1"><a class="header-anchor" href="#accuracy-and-error-control">Accuracy and Error Control</a></h3>
+<p>Approximation comes with trade-offs, but these systems provide predictable guarantees:</p>
+<ul>
+<li><strong>Configurable error bounds</strong>: Users can tune the size of sketches or filters to balance accuracy and memory usage.</li>
+<li><strong>Probabilistic guarantees</strong>: Errors are bounded and typically follow well-understood statistical distributions. For example, a HyperLogLog sketch with a standard error of 1.04/√m (where m is the number of registers) provides a predictable accuracy level.</li>
+<li><strong>Graceful degradation</strong>: As data volume increases, accuracy may decrease slightly, but remains within acceptable limits.</li>
+<li><strong>Monitoring and validation</strong>: Systems often provide tools to measure error rates and validate approximations against sample data.</li>
+</ul>
+<p>By controlling accuracy, engineers can make informed decisions about acceptable trade-offs for their workload.</p>
+<h3 id="summary-1" tabindex="-1"><a class="header-anchor" href="#summary-1">Summary</a></h3>
+<p>The core architecture of probabilistic databases revolves around four pillars:</p>
+<ul>
+<li>Efficient, compact summaries instead of raw storage</li>
+<li>Incremental and mergeable updates for real-time analytics</li>
+<li>Streaming-oriented storage and partitioning for horizontal scalability</li>
+<li>Predictable accuracy and error bounds for controlled approximations</li>
+</ul>
+<p>These architectural decisions enable fast, memory-efficient queries over datasets that would overwhelm general-purpose databases, making probabilistic engines uniquely suited for high-volume, high-cardinality, or streaming workloads.</p>
+<h2 id="query-execution-and-patterns" tabindex="-1"><a class="header-anchor" href="#query-execution-and-patterns">Query Execution and Patterns</a></h2>
+<p>Probabilistic databases expose familiar, often SQL-like query interfaces - but the execution engine operates on summaries instead of raw data. This shifts how queries are planned, optimized, and answered. While results may be approximate, the trade-off is consistent performance at scale.</p>
+<h3 id="approximate-aggregations" tabindex="-1"><a class="header-anchor" href="#approximate-aggregations">Approximate Aggregations</a></h3>
+<p>Common aggregate queries are executed against compact data structures:</p>
+<ul>
+<li><strong>COUNT(DISTINCT …)</strong>: Uses HyperLogLog to estimate cardinality with low error. The query planner recognizes the use of COUNT(DISTINCT) and routes it to the HyperLogLog summary, which provides an approximate count in constant time.</li>
+<li><strong>SUM, AVG, MIN, MAX</strong>: SUM and AVG can be computed exactly if the raw data is available, or approximated using sketches. MIN and MAX can be approximated using specialized sketches that maintain the minimum or maximum values seen so far.</li>
+<li><strong>FREQUENCY ESTIMATION</strong>: Employs Count-Min Sketch or Top-K structures to return approximate counts of items.</li>
+<li><strong>SET MEMBERSHIP</strong>: Bloom filters quickly answer EXISTS or IN checks without scanning full tables.</li>
+</ul>
+<p>These approximations enable interactive analytics on massive datasets where exact queries would be infeasible.</p>
+<h3 id="streaming-queries" tabindex="-1"><a class="header-anchor" href="#streaming-queries">Streaming Queries</a></h3>
+<p>Probabilistic engines are especially well-suited for continuous queries over streams:</p>
+<ul>
+<li><strong>Sliding windows</strong>: Compute rolling distinct counts or frequencies without retaining all raw events.</li>
+<li><strong>Real-time dashboards</strong>: Aggregate millions of events per second with sub-second latency. Dashboards can be updated in real-time by continuously querying the incremental summaries, providing up-to-date insights without the need for full data scans.</li>
+<li><strong>Alerting pipelines</strong>: Trigger conditions based on approximate metrics (e.g., &quot;unique users in the last 5 minutes &gt; 100k&quot;).</li>
+</ul>
+<p>The incremental nature of summaries ensures that query performance remains stable as streams grow.</p>
+<h3 id="merge-and-parallel-execution" tabindex="-1"><a class="header-anchor" href="#merge-and-parallel-execution">Merge and Parallel Execution</a></h3>
+<p>Because summaries are mergeable, queries can be distributed across nodes:</p>
+<ul>
+<li>Each partition maintains its own Bloom filter, sketch, or HLL.</li>
+<li>Results are merged during query execution to form a global summary.</li>
+<li>Parallelism ensures scalability across clusters without the complexity of global state synchronization.</li>
+</ul>
+<p>This makes probabilistic databases naturally compatible with distributed and cloud-native environments.</p>
+<h3 id="accuracy-considerations" tabindex="-1"><a class="header-anchor" href="#accuracy-considerations">Accuracy Considerations</a></h3>
+<p>While results are approximate, queries provide bounded guarantees:</p>
+<ul>
+<li>Errors are predictable (e.g., ±1% on a cardinality estimate).</li>
+<li>Users can increase memory allocation to improve accuracy.</li>
+<li>Some systems allow hybrid queries: using exact answers for small subsets, and approximate summaries for large aggregations.</li>
+</ul>
+<p>This balance of control and performance makes probabilistic queries practical in real-world analytics.</p>
+<h3 id="summary-2" tabindex="-1"><a class="header-anchor" href="#summary-2">Summary</a></h3>
+<p>Typical query patterns in probabilistic databases include:</p>
+<ul>
+<li>Distinct counts, frequency estimation, and membership checks executed via sketches and filters</li>
+<li>Streaming queries that operate on incremental, windowed data</li>
+<li>Mergeable, distributed execution across clusters</li>
+<li>Configurable accuracy trade-offs for predictable results</li>
+</ul>
+<p>Instead of trying to answer every query exactly, these systems provide fast, approximate answers that scale to workloads traditional databases cannot handle in real time.</p>
+<h2 id="use-cases" tabindex="-1"><a class="header-anchor" href="#use-cases">Use Cases</a></h2>
+<p>Probabilistic databases are not general-purpose replacements, but they excel in scenarios where <strong>scale and speed matter more than exactness</strong>. By trading perfect accuracy for efficiency, they enable applications that would otherwise be impractical.</p>
+<h3 id="web-and-marketing-analytics" tabindex="-1"><a class="header-anchor" href="#web-and-marketing-analytics">Web and Marketing Analytics</a></h3>
+<p>Tracking unique users, clicks, or sessions across billions of events is a classic high-cardinality problem:</p>
+<ul>
+<li><strong>Problem</strong>: Counting distinct visitors requires storing every unique user ID.</li>
+<li><strong>Solution</strong>: HyperLogLog summaries maintain approximate counts with fixed memory.</li>
+<li><strong>Outcome</strong>: Real-time dashboards can display active users or conversions without waiting for heavy batch jobs.</li>
+</ul>
+<h3 id="fraud-detection-and-security" tabindex="-1"><a class="header-anchor" href="#fraud-detection-and-security">Fraud Detection and Security</a></h3>
+<p>Membership and frequency queries help identify suspicious behavior:</p>
+<ul>
+<li><strong>Problem</strong>: Detecting repeated login attempts or anomalies in transaction streams.</li>
+<li><strong>Solution</strong>: Bloom filters and Count-Min Sketches track unusual activity with low overhead.</li>
+<li><strong>Outcome</strong>: Alerts can be triggered in near real time, even on massive event streams.</li>
+</ul>
+<h3 id="iot-and-telemetry" tabindex="-1"><a class="header-anchor" href="#iot-and-telemetry">IoT and Telemetry</a></h3>
+<p>Billions of devices emit continuous metrics, often with high cardinality:</p>
+<ul>
+<li><strong>Problem</strong>: Storing and analyzing raw telemetry data is prohibitively expensive.</li>
+<li><strong>Solution</strong>: Sketches provide approximate counts and frequency estimates across streams.</li>
+<li><strong>Outcome</strong>: Operators can monitor fleets of devices efficiently without exploding storage costs.</li>
+</ul>
+<h3 id="log-analysis-and-observability" tabindex="-1"><a class="header-anchor" href="#log-analysis-and-observability">Log Analysis and Observability</a></h3>
+<p>Monitoring infrastructure generates high-volume logs with diverse keys (IPs, sessions, endpoints):</p>
+<ul>
+<li><strong>Problem</strong>: Queries like “how many unique IPs hit this endpoint in the last hour?” are too costly for exact answers.</li>
+<li><strong>Solution</strong>: Probabilistic summaries deliver fast estimates for observability platforms.</li>
+<li><strong>Outcome</strong>: Engineers get timely insights into system health without waiting for batch aggregations.</li>
+</ul>
+<h3 id="recommendation-systems" tabindex="-1"><a class="header-anchor" href="#recommendation-systems">Recommendation Systems</a></h3>
+<p>Large-scale personalization engines require efficient user-event aggregation:</p>
+<ul>
+<li><strong>Problem</strong>: Tracking item popularity across millions of users in real time.</li>
+<li><strong>Solution</strong>: Top-K sketches identify trending items without storing every interaction.</li>
+<li><strong>Outcome</strong>: Recommendations can be updated dynamically and cheaply.</li>
+</ul>
+<h3 id="summary-3" tabindex="-1"><a class="header-anchor" href="#summary-3">Summary</a></h3>
+<p>Key workloads where probabilistic databases shine:</p>
+<ul>
+<li><strong>Analytics</strong>: Counting users, sessions, clicks, or events at web scale</li>
+<li><strong>Security</strong>: Detecting suspicious or anomalous behaviors in large streams</li>
+<li><strong>Telemetry</strong>: Aggregating IoT metrics with minimal storage overhead</li>
+<li><strong>Observability</strong>: Fast, approximate log and metric queries</li>
+<li><strong>Recommendations</strong>: Identifying trends and frequent items in massive datasets</li>
+</ul>
+<p>In all of these cases, <strong>approximate answers are good enough</strong>, provided they are fast, scalable, and memory efficient.</p>
+<p>Note that there are overlaps with other specialized databases. For example, time-series databases like InfluxDB or TimescaleDB can handle high-throughput telemetry, but may struggle with high-cardinality distinct counts at scale. Similarly, stream processing frameworks like Apache Flink or Kafka Streams can perform aggregations, but often require more operational complexity and resources than a purpose-built probabilistic database.</p>
+<h2 id="examples-of-probabilistic-databases" tabindex="-1"><a class="header-anchor" href="#examples-of-probabilistic-databases">Examples of Probabilistic Databases</a></h2>
+<p>Several modern data systems incorporate probabilistic techniques to achieve scale and performance. While they are not always branded as &quot;probabilistic databases&quot;, their query engines rely heavily on approximate data structures and execution strategies.</p>
+<h3 id="apache-druid" tabindex="-1"><a class="header-anchor" href="#apache-druid"><a href="https://druid.apache.org/">Apache Druid</a></a></h3>
+<p><strong>Overview</strong>:</p>
+<p>A real-time analytics database designed for high-ingestion event streams and interactive queries.</p>
+<p><strong>Probabilistic Features</strong>:</p>
+<ul>
+<li>HyperLogLog for approximate distinct counts</li>
+<li>Theta Sketches for set operations (union, intersection, difference)</li>
+<li>Quantile sketches for percentile estimation</li>
+</ul>
+<p><strong>Architecture Highlights:</strong></p>
+<ul>
+<li><strong>Columnar Storage</strong>: Optimized for analytical queries, allowing for efficient compression and fast scans.</li>
+<li><strong>Distributed Execution</strong>: Leverages a cluster of nodes to parallelize query processing and data ingestion.</li>
+<li><strong>Real-time Ingestion</strong>: Supports high-throughput data streams with low-latency query capabilities.</li>
+</ul>
+<p><strong>Trade-offs</strong>:</p>
+<p>Just like every approximate database, Druid's use of probabilistic data structures allows it to handle large-scale data with low latency, but it may sacrifice some accuracy in the process. Users must be aware of these trade-offs when designing their data models and queries.</p>
+<p><strong>Use Cases</strong>:</p>
+<p>Interactive dashboards, clickstream analysis, fraud detection, and monitoring large-scale event data.</p>
+<p>Druid combines columnar storage, distributed execution, and probabilistic summaries to deliver sub-second query performance on billions of rows.</p>
+<h3 id="materialize" tabindex="-1"><a class="header-anchor" href="#materialize"><a href="https://materialize.com/">Materialize</a></a></h3>
+<p><strong>Overview</strong>:</p>
+<p>A streaming SQL database that continuously maintains query results as new data arrives.</p>
+<p><strong>Probabilistic Features</strong>:</p>
+<ul>
+<li>Approximate aggregations via sketches</li>
+<li>Incremental updates for real-time distinct counts and frequency estimates</li>
+<li>Integration with streaming pipelines (Kafka, Debezium) for low-latency analytics</li>
+</ul>
+<p><strong>Architecture Highlights:</strong></p>
+<ul>
+<li><strong>Streaming-first</strong>: Designed to process continuous data streams with low latency.</li>
+<li><strong>Incremental View Maintenance</strong>: Updates query results incrementally as new data arrives, avoiding full recomputation.</li>
+<li><strong>SQL Interface</strong>: Provides a familiar SQL interface for defining and querying data.</li>
+<li><strong>Distributed Execution</strong>: Can scale horizontally by distributing data and computation across multiple nodes.</li>
+</ul>
+<p><strong>Trade-offs</strong>:</p>
+<p>Materialize prioritizes low-latency updates and real-time analytics, which may lead to approximate results for certain queries. Users can configure the level of approximation based on their requirements, so like with most approximate systems, users must make informed decisions about the trade-offs between accuracy and performance.</p>
+<p><strong>Use Cases</strong>:</p>
+<p>Real-time dashboards, anomaly detection, and operational monitoring.</p>
+<p>Materialize focuses on keeping results fresh rather than re-computing from scratch, making probabilistic approaches essential for performance.</p>
+<h3 id="clickhouse" tabindex="-1"><a class="header-anchor" href="#clickhouse"><a href="https://clickhouse.com/">ClickHouse</a></a></h3>
+<p><strong>Overview</strong>:</p>
+<p>A columnar OLAP database optimized for analytical queries on very large datasets.</p>
+<p><strong>Probabilistic Features</strong>:</p>
+<ul>
+<li>Functions like <code>uniqHLL12</code> for approximate distinct counts</li>
+<li>Aggregation sketches for quantiles and set operations</li>
+</ul>
+<p><strong>Architecture Highlights:</strong></p>
+<ul>
+<li><strong>Columnar Storage</strong>: Enables efficient data compression and fast read performance for analytical workloads.</li>
+<li><strong>Vectorized Execution</strong>: Processes data in batches to maximize CPU efficiency.</li>
+<li><strong>Distributed Processing</strong>: Supports sharding and replication for high availability and scalability.</li>
+<li><strong>MergeTree Engine</strong>: A powerful storage engine that supports efficient data insertion and querying.</li>
+<li><strong>Materialized Views</strong>: Allows pre-aggregation of data for faster query responses.</li>
+</ul>
+<p><strong>Trade-offs</strong>:</p>
+<p>As with other probabilistic databases, understanding the trade-offs between speed, memory usage, and accuracy is crucial when designing queries and data models.</p>
+<p><strong>Use Cases</strong>:</p>
+<p>Web analytics, telemetry, log analysis, and metrics dashboards.</p>
+<p>Though not a &quot;pure&quot; probabilistic database, ClickHouse provides built-in approximate functions widely used in production analytics.</p>
+<h2 id="redisbloom" tabindex="-1"><a class="header-anchor" href="#redisbloom"><a href="https://redis.io/probabilistic/">RedisBloom</a></a></h2>
+<p><strong>Overview</strong>:</p>
+<p>A Redis module providing probabilistic data structures as first-class citizens.</p>
+<p><strong>Probabilistic Features</strong>:</p>
+<ul>
+<li>Bloom filters</li>
+<li>Count-Min Sketch, Cuckoo filters, and Top-K sketches</li>
+<li>Cuckoo filters (an alternative to Bloom filters with additional support for deletion of elements from a set)</li>
+<li>Top-K sketches</li>
+</ul>
+<p><strong>Trade-offs</strong>:</p>
+<p>Users must make the same informed decisions about the trade-offs between accuracy and performance as with other approximate systems.</p>
+<p><strong>Use Cases</strong>:</p>
+<p>Real-time membership checks, fraud detection, caching optimization, and telemetry aggregation.</p>
+<p>RedisBloom demonstrates how probabilistic techniques can be embedded into existing systems for specialized workloads.</p>
+<h2 id="trade-offs" tabindex="-1"><a class="header-anchor" href="#trade-offs">Trade-Offs</a></h2>
+<p>The defining trade-off of probabilistic databases is simple:</p>
+<ul>
+<li><strong>Accuracy is sacrificed</strong> in exchange for massive gains in performance, scalability, and efficiency.</li>
+</ul>
+<p>Unlike other database families, there are few other compromises:</p>
+<ul>
+<li><strong>Storage and memory efficiency</strong> are usually better than in general-purpose systems.</li>
+<li><strong>Query latency</strong> is lower, since summaries are compact and mergeable.</li>
+<li><strong>Scalability</strong> is easier, as summaries distribute naturally across nodes.</li>
+</ul>
+<p>The cost is that results are approximate, though error bounds are well understood and tunable. For many real-world use cases—analytics, observability, telemetry—this trade-off is acceptable, as exact answers are rarely worth the additional cost.</p>
+<h2 id="real-world-examples" tabindex="-1"><a class="header-anchor" href="#real-world-examples">Real-World Examples</a></h2>
+<p>To see how these systems work in practice, let's look at scenarios where probabilistic approaches deliver value:</p>
+<h3 id="netflix-%E2%80%93-streaming-analytics-with-druid" tabindex="-1"><a class="header-anchor" href="#netflix-%E2%80%93-streaming-analytics-with-druid">Netflix – Streaming Analytics with Druid</a></h3>
+<p>Netflix uses Apache Druid to power real-time dashboards for user activity and content engagement. Druid's use of HyperLogLog and sketches allows engineers to track distinct users, session counts, and engagement metrics across millions of concurrent streams with sub-second latency.</p>
+<h3 id="yelp-%E2%80%93-user-behavior-analytics" tabindex="-1"><a class="header-anchor" href="#yelp-%E2%80%93-user-behavior-analytics">Yelp – User Behavior Analytics</a></h3>
+<p>Yelp relies on Druid for interactive analytics on clickstream and business engagement data. With approximate queries, they can aggregate billions of daily events to understand user behavior and ad performance without resorting to costly batch jobs.</p>
+<h3 id="shopify-%E2%80%93-operational-monitoring-with-materialize" tabindex="-1"><a class="header-anchor" href="#shopify-%E2%80%93-operational-monitoring-with-materialize">Shopify – Operational Monitoring with Materialize</a></h3>
+<p>Shopify adopted Materialize to process streaming data from Kafka in real time. Approximate aggregations help them monitor high-volume event streams (such as checkout attempts or API calls) continuously, keeping operational dashboards fresh without overloading storage.</p>
+<h3 id="cloudflare-%E2%80%93-edge-analytics" tabindex="-1"><a class="header-anchor" href="#cloudflare-%E2%80%93-edge-analytics">Cloudflare – Edge Analytics</a></h3>
+<p>Cloudflare uses ClickHouse for network and security analytics across trillions of HTTP requests per day. Built-in approximate functions (<code>uniqHLL12</code>, quantile sketches) allow engineers to quickly answer questions like “how many unique IPs attacked this endpoint in the last 10 minutes?” across global data.</p>
+<h3 id="redisbloom-in-fraud-detection" tabindex="-1"><a class="header-anchor" href="#redisbloom-in-fraud-detection">RedisBloom in Fraud Detection</a></h3>
+<p>Several fintech companies embed RedisBloom in fraud detection pipelines. Bloom filters and Count-Min Sketches let them flag suspicious transaction patterns (for example, repeated failed login attempts across accounts) without storing all raw transaction data in memory.</p>
+<h2 id="closing-thoughts" tabindex="-1"><a class="header-anchor" href="#closing-thoughts">Closing Thoughts</a></h2>
+<p>Probabilistic and approximate databases occupy a unique space in the database ecosystem. They are not designed for transactional workloads, nor do they aim for perfect accuracy. Instead, they embrace the reality that at web scale, &quot;fast and close enough&quot; beats &quot;slow and exact&quot;.</p>
+<p>By relying on Bloom filters, HyperLogLog, sketches, and similar techniques, these systems unlock analytics that would otherwise be impossible in real time. The trade-off - giving up a fraction of accuracy - is minor compared to the benefits in performance, scalability, and cost efficiency.</p>
+<p>From Netflix and Shopify to Cloudflare and fintech platforms, some of the largest data-driven companies in the world already rely on probabilistic techniques in production. For organizations dealing with massive, fast-moving, or high-cardinality datasets, this database family offers a practical, battle-tested way to keep analytics interactive and affordable.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
