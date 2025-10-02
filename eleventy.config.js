@@ -30,6 +30,13 @@ export default function (eleventyConfig) {
     }
     return val;
   });
+  // Add a filter to output ISO8601 date strings (for sitemap.xml)
+  eleventyConfig.addNunjucksFilter('toISO', function(val) {
+    if (!val) return '';
+    const d = new Date(val);
+    if (isNaN(d)) return '';
+    return d.toISOString();
+  });
   //compile tailwind before eleventy processes the files
 
   eleventyConfig.on('eleventy.before', async () => {
