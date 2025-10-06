@@ -404,5 +404,14 @@
         <description>An in-depth look at Probabilistic / Approximate Databases, their architecture, use cases, and how they differ from traditional databases.</description>
       </item>
     
+      <item>
+        <title>New FCC Article: Learn How to Use Pointers in Go</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-06-New-Fcc-Article-Learn-How-to-Use-Pointers-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-06-New-Fcc-Article-Learn-How-to-Use-Pointers-in-Go/</guid>
+        <pubDate>Mon, 06 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>Go pointers tutorial, published on freeCodeCamp.</description>
+      </item>
+    
   </channel>
 </rss>
