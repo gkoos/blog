@@ -413,5 +413,14 @@
         <description>Go pointers tutorial, published on freeCodeCamp.</description>
       </item>
     
+      <item>
+        <title>Chaos-Driven Testing for Full Stack Apps: Integration Tests That Break (and Heal)</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-07-Chaos-Driven-Testing-for-Full-Stack-Apps/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-07-Chaos-Driven-Testing-for-Full-Stack-Apps/</guid>
+        <pubDate>Tue, 07 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>Learn how to use chaos-driven testing in full stack apps with integration tests that simulate network failures and latency. Discover practical techniques with chaos-fetch to build more resilient JavaScript and TypeScript applications.</description>
+      </item>
+    
   </channel>
 </rss>

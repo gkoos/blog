@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chaos-Driven Testing for Full Stack Apps: Integration Tests That Break (and Heal)</title>
+  <meta name="description" content="Learn how to use chaos-driven testing in full stack apps with integration tests that simulate network failures and latency. Discover practical techniques with chaos-fetch to build more resilient JavaScript and TypeScript applications.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Chaos-Driven Testing for Full Stack Apps: Integration Tests That Break (and Heal)">
+  <meta property="og:description" content="Learn how to use chaos-driven testing in full stack apps with integration tests that simulate network failures and latency. Discover practical techniques with chaos-fetch to build more resilient JavaScript and TypeScript applications.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Chaos-Driven Testing for Full Stack Apps: Integration Tests That Break (and Heal)">
+  <meta name="twitter:description" content="Learn how to use chaos-driven testing in full stack apps with integration tests that simulate network failures and latency. Discover practical techniques with chaos-fetch to build more resilient JavaScript and TypeScript applications.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Chaos-Driven Testing for Full Stack Apps: Integration Tests That Break (and Heal)</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-10-07T00:00:00.000Z">Tue Oct 07 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">testing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Testing is a tricky business. Testing full stack apps is even trickier. You have to deal with frontend, backend, database, network, and more. First, of course, you unit test your components, functions, and modules in isolation. Then you write integration tests to ensure they play nicely together. You might even add a few end-to-end tests for the entire application to simulate real user interactions.</p>
+<p>But then there's the chaos factor: what happens when things go wrong? What happens when the network is slow or unreliable? What happens when the backend is down? An application that works perfectly on the happy path can still easily break when something unexpected happens. It is impossible to predict all the ways in which a system can fail, especially when multiple components interact in complex ways, but we can prepare for failure by testing how our application behaves under adverse conditions.</p>
+<p>Chaos-driven testing is an approach that embraces this uncertainty by intentionally introducing failures into your tests. In this article, we'll explore how to implement chaos-driven testing in a Next.js application using integration tests that intentionally break things.</p>
+<h2 id="the-app" tabindex="-1"><a class="header-anchor" href="#the-app">The App</a></h2>
+<p>Well, first we'll need an app to test. To keep the article focused, I've created a minimal fullstack Next.js app so you don't have to.</p>
+<p>The app is a simple recipe app where you can browse a list of recipes, view recipe details, and like them. It uses Tailwind CSS for styling and TypeScript for type safety.</p>
+<p>When you like a recipe, the like count updates optimistically on the frontend while the backend processes the request. If the backend call fails, the like count reverts to its previous state. If it succeeds, it returns the new like count, but the frontend doesn't update it again to avoid jumping numbers, if the recipe was liked by another user in the meantime. This is a common pattern in web apps to provide a snappy user experience, when consistency is not critical.</p>
+<p>The code is available on <a href="https://github.com/gkoos/article-chaos-fetch">GitHub</a></p>
+<p>Check out the repo, install dependencies, and you can run it locally with:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> clone
+<span class="token builtin class-name">cd</span> article-chaos-fetch
+<span class="token function">npm</span> <span class="token function">install</span>
+<span class="token function">npm</span> run dev
+</code></pre>
+<p>Open <a href="http://localhost:3000">http://localhost:3000</a> in your browser.</p>
+<p>You will see something like this:</p>
+<p><img src="https://i.imgur.com/Iw2NQac.gif" alt="Recipe List"></p>
+<p>The backend has three API routes:</p>
+<ul>
+<li><code>GET /api/posts</code> — list all recipes</li>
+<li><code>GET /api/posts/[id]</code> — get recipe details</li>
+<li><code>POST /api/posts/[id]/like</code> — increment likes - returns the new like count</li>
+</ul>
+<p>Note that the likes are stored in-memory and reset on server restart. This is just for demonstration purposes, in a real app, you'd use a database.</p>
+<p>The like button is implemented in <code>src/components/LikeButton.tsx</code> using React's <code>useState</code> and <code>useEffect</code> hooks. It handles the optimistic update, error handling, and reversion logic. Probably not how either you or I would implement it in a real app, but it will do for this demo.</p>
+<h2 id="unit-tests-with-mock-service-worker-(msw)" tabindex="-1"><a class="header-anchor" href="#unit-tests-with-mock-service-worker-(msw)">Unit Tests with Mock Service Worker (MSW)</a></h2>
+<p>If you want to unit test your component, there are multiple ways to do that, but one of the smartest way is to use <a href="https://mswjs.io/">Mock Service Worker (MSW)</a> to mock the backend API calls. This way, you can test the component in isolation without relying on the actual backend.</p>
+<p>In the <code>main</code> branch, we set up <a href="https://vitest.dev/">Vitest</a> as the test runner and <a href="https://testing-library.com/docs/react-testing-library/intro/">React Testing Library</a> for rendering the component and simulating user interactions. We also set up MSW to intercept the network requests and return mock responses.</p>
+<p><code>src/components/LikeButton.test.tsx</code> contains the unit tests for the <code>LikeButton</code> component. It tests the following scenarios:</p>
+<ul>
+<li>The like button disables during the request and updates to the backend value on success.</li>
+<li>The like button disables during the request and rolls back on backend error.</li>
+</ul>
+<p>You can run the tests with:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> run <span class="token builtin class-name">test</span>
+</code></pre>
+<p>If we have a look at the test code, we can see how we use MSW to mock the backend responses. For example, in the first test, we override the mock to return a successful response with a new like count of 42:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// test("like button disables during request and updates to backend value"</span>
+<span class="token operator">...</span>
+server<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>
+  http<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/api/posts/:id/like"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token builtin">Promise</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span> likes<span class="token operator">:</span> <span class="token number">42</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token operator">...</span>
+</code></pre>
+<p>In the second test, we override the mock to return an error response:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"like button disables during request and rolls back on backend error"</span>
+<span class="token operator">...</span>
+server<span class="token punctuation">.</span><span class="token function">use</span><span class="token punctuation">(</span>
+  http<span class="token punctuation">.</span><span class="token function">post</span><span class="token punctuation">(</span><span class="token string">"/api/posts/:id/like"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token builtin">Promise</span></span><span class="token punctuation">(</span><span class="token punctuation">(</span>resolve<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>resolve<span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">500</span> <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token operator">...</span>
+</code></pre>
+<p>What MSW does is intercept the network requests made by the <code>LikeButton</code> component and returns the mock responses we defined in the tests. This way, we can test how the component behaves under different backend conditions without relying on the actual backend. However, no real backend is involved, so we can't test the full integration between frontend and backend!</p>
+<h2 id="integration-tests" tabindex="-1"><a class="header-anchor" href="#integration-tests">Integration Tests</a></h2>
+<p>So what can we do to test the full integration between frontend and backend? Technically we could change MSW to forward the requests to the actual backend, but that would be a bit hacky and not really what MSW is designed for. Another viable option is to use a real browser environment like <a href="https://playwright.dev/">Playwright</a> or <a href="https://www.cypress.io/">Cypress</a> to run end-to-end tests and use a standalone proxy like <a href="https://github.com/Shopify/toxiproxy">toxiproxy</a> or something simpler like <a href="https://github.com/fetch-kit/chaos-proxy">chaos-proxy</a> to simulate network conditions - but that would be a bit overkill for this simple app.</p>
+<p>This is where <a href="https://github.com/fetch-kit/chaos-fetch">chaos-fetch</a> comes in. It is a lightweight library that wraps the native <code>fetch</code> API and allows you to introduce chaos into your network requests. You can simulate latency, errors, rate limiting, throttling, and even random failures with just a few lines of code.</p>
+<p>Let's use <code>chaos-fetch</code> to create some integration tests. If we want to test the full integration between frontend and backend, we need to run the tests in a real browser environment. We can use Vitest's <code>jsdom</code> environment for this, which simulates a browser-like environment in Node.js.</p>
+<pre class="language-bash"><code class="language-bash">
+To use <span class="token variable"><span class="token variable">`</span>chaos-fetch<span class="token variable">`</span></span>, we first need to <span class="token function">install</span> it:
+
+```bash
+<span class="token function">npm</span> <span class="token function">install</span> @fetchkit/chaos-fetch --save-dev
+</code></pre>
+<p>The first thing we can do, for illustration purposes, is to swap MSW with <code>chaos-fetch</code> in our unit tests. It's not really what the library is designed for, but it works. In <code>LikeButton.test,tsx</code>, we replace the MSW setup with <code>chaos-fetch</code>:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token comment">// src/components/LikeButton.test.tsx</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span>
+  createClient<span class="token punctuation">,</span>
+  replaceGlobalFetch<span class="token punctuation">,</span>
+  restoreGlobalFetch<span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@fetchkit/chaos-fetch"</span><span class="token punctuation">;</span>
+<span class="token operator">...</span>
+<span class="token function">describe</span><span class="token punctuation">(</span><span class="token string">"LikeButton"</span><span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token function">afterEach</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token function">restoreGlobalFetch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"like button disables during request and updates to backend value"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Mock fetch to return success</span>
+    <span class="token keyword">const</span> client <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span>
+      <span class="token punctuation">{</span>
+        global<span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">{</span> latency<span class="token operator">:</span> <span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">300</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        routes<span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token string-property property">"POST /api/posts/:id/like"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> latency<span class="token operator">:</span> <span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">300</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> mock<span class="token operator">:</span> <span class="token punctuation">{</span> body<span class="token operator">:</span> <span class="token string">'{ "likes": 43 }'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      window<span class="token punctuation">.</span>fetch
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Replace global fetch with mock client</span>
+    <span class="token function">replaceGlobalFetch</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// From here on, the test code remains the same</span>
+  <span class="token operator">...</span>
+</code></pre>
+<p>As you can see, we create a <code>chaos-fetch</code> client that instead of fetching, returns some mock data and replaces the global <code>fetch</code> function with it. In the <code>afterEach</code> hook, we restore the original <code>fetch</code> function. The rest of the test code remains the same.</p>
+<p>Note we also added some latency to simulate a real network request. This is important because the <code>LikeButton</code> component disables the button during the request, and we want to test that behavior. Without it the test would fail because the request would complete too quickly. (And this leads us to the brittle, unreliable world of time-based testing, but that's a topic for another article.)</p>
+<p>The code for the second test is similar, we just change the mock to return an error:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"like button disables during request and rolls back on backend error"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Mock fetch to return success</span>
+    <span class="token keyword">const</span> client <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span>
+      <span class="token punctuation">{</span>
+        global<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+        routes<span class="token operator">:</span> <span class="token punctuation">{</span>
+          <span class="token string-property property">"POST /api/posts/:id/like"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> latency<span class="token operator">:</span> <span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">300</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> mock<span class="token operator">:</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">500</span><span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token string">'{ "error": "Internal Server Error" }'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+          <span class="token punctuation">]</span><span class="token punctuation">,</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      window<span class="token punctuation">.</span>fetch
+    <span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// Replace global fetch with mock client</span>
+    <span class="token function">replaceGlobalFetch</span><span class="token punctuation">(</span>client<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token operator">...</span>
+</code></pre>
+<p>The code is on the <code>tests-with-chaos-fetch</code> branch of the repo. You can check it out with <code>git checkout tests-with-chaos-fetch</code>.</p>
+<p>Now we can run the tests with:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> run <span class="token builtin class-name">test</span>
+</code></pre>
+<p>Now MSW is still a better fit for unit tests, because it is designed for that purpose. But it's definitely possible to use <code>chaos-fetch</code> for that as well.</p>
+<h2 id="chaos-driven-integration-tests" tabindex="-1"><a class="header-anchor" href="#chaos-driven-integration-tests">Chaos-Driven Integration Tests</a></h2>
+<p>If we want to move beyond unit tests and test the full integration between frontend and backend, we can use <code>chaos-fetch</code> to introduce chaos into our network requests. This way, we can test how the application behaves under adverse conditions.</p>
+<p>First, for the integration tests, we have to do a small refactor: we cannot directly render an async server component in our tests. Instead, we create a <code>PostPage</code> component that contains the <code>LikeButton</code> and the recipe details. This way, we can test <code>LikeButton</code> in our integration tests. The code for <code>PostView</code> is in <code>src/components/PostView.tsx</code>.</p>
+<p>Next, we have to make sure the backend is running before we run the tests. In our case, it's the whole app, which makes the setup funny, cause we will test a component against the app it is part of, but you can set up integration tests the same way if the backend is a separate service.</p>
+<p>The same tests we had in <code>LikeButton.test.tsx</code> are rewritten in <code>PostView.integration.test.tsx</code> to test the full integration between frontend and backend. The code is similar, but instead of mocking the backend responses, we let the requests go through to the actual backend. We still use <code>chaos-fetch</code> to introduce errors into the requests.</p>
+<p>An important detail is that we have to set <code>globalThis.location</code> to a URL object, so that <code>chaos-fetch</code> can resolve relative URLs correctly. In this setup, JSDOM with the native fetch, wouldn't even work for relative urls! <code>chaos-fetch</code> patches JSDOM's <code>location</code> to make it work.</p>
+<p>So first we set <code>globalThis.location</code>:</p>
+<pre class="language-typescript"><code class="language-typescript">globalThis<span class="token punctuation">.</span>location <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name"><span class="token constant">URL</span></span><span class="token punctuation">(</span><span class="token string">"http://localhost:3000/posts/1"</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Then we create <code>chaos-fetch</code> clients in the tests that override the native fetch and we can inject latency, errors, and more.</p>
+<p>For the first test we don't even have to modify <code>fetch</code>, we only override it so it works with relative urls:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"integration: like button disables during request and re-enables after fetch (real backend)"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token function">replaceGlobalFetch</span><span class="token punctuation">(</span><span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">render</span><span class="token punctuation">(</span><span class="token operator">&lt;</span>PostView postId<span class="token operator">=</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">}</span> <span class="token operator">/</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+
+  <span class="token comment">// Wait for post to load (like count should be present)</span>
+  <span class="token keyword">const</span> likeCountText <span class="token operator">=</span> <span class="token keyword">await</span> screen<span class="token punctuation">.</span><span class="token function">findByText</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">\d+\s*likes</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> initialCount <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>likeCountText<span class="token punctuation">.</span>textContent<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">(\d+)</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">??</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> button <span class="token operator">=</span> <span class="token keyword">await</span> screen<span class="token punctuation">.</span><span class="token function">findByRole</span><span class="token punctuation">(</span><span class="token string">"button"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">like</span><span class="token regex-delimiter">/</span><span class="token regex-flags">i</span></span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> user <span class="token operator">=</span> userEvent<span class="token punctuation">.</span><span class="token function">setup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> user<span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span>button<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Button should be disabled during request</span>
+  <span class="token function">expect</span><span class="token punctuation">(</span>button<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeDisabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Wait for fetch to complete and UI to update</span>
+  <span class="token keyword">await</span> <span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">expect</span><span class="token punctuation">(</span>button<span class="token punctuation">)</span><span class="token punctuation">.</span>not<span class="token punctuation">.</span><span class="token function">toBeDisabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check updated like count</span>
+  <span class="token keyword">await</span> <span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> updatedLikeCountText <span class="token operator">=</span> screen<span class="token punctuation">.</span><span class="token function">getByText</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">\d+\s*likes</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> updatedCount <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>updatedLikeCountText<span class="token punctuation">.</span>textContent<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">(\d+)</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">??</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>updatedCount<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span>initialCount <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">restoreGlobalFetch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>For the second test, we create a client that simulates a backend error for the like request:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token function">test</span><span class="token punctuation">(</span><span class="token string">"integration: like button disables during request and rolls back on backend error (fail middleware)"</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token comment">// Configure chaos-fetch to fail the like endpoint</span>
+  <span class="token function">replaceGlobalFetch</span><span class="token punctuation">(</span><span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    routes<span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token string-property property">"POST /api/posts/:id/like"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">{</span> latency<span class="token operator">:</span> <span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">300</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        <span class="token punctuation">{</span> fail<span class="token operator">:</span> <span class="token punctuation">{</span> status<span class="token operator">:</span> <span class="token number">500</span><span class="token punctuation">,</span> body<span class="token operator">:</span> <span class="token string">'{ "error": "fail middleware" }'</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">render</span><span class="token punctuation">(</span><span class="token operator">&lt;</span>PostView postId<span class="token operator">=</span><span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">}</span> <span class="token operator">/</span><span class="token operator">></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Wait for post to load (like count should be present)</span>
+  <span class="token keyword">const</span> likeCountText <span class="token operator">=</span> <span class="token keyword">await</span> screen<span class="token punctuation">.</span><span class="token function">findByText</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">\d+\s*likes</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> initialCount <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>likeCountText<span class="token punctuation">.</span>textContent<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">(\d+)</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">??</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> button <span class="token operator">=</span> <span class="token keyword">await</span> screen<span class="token punctuation">.</span><span class="token function">findByRole</span><span class="token punctuation">(</span><span class="token string">"button"</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> name<span class="token operator">:</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">like</span><span class="token regex-delimiter">/</span><span class="token regex-flags">i</span></span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> user <span class="token operator">=</span> userEvent<span class="token punctuation">.</span><span class="token function">setup</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">await</span> user<span class="token punctuation">.</span><span class="token function">click</span><span class="token punctuation">(</span>button<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Button should be disabled during request</span>
+  <span class="token function">expect</span><span class="token punctuation">(</span>button<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeDisabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Wait for fetch to complete and UI to update</span>
+  <span class="token keyword">await</span> <span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">expect</span><span class="token punctuation">(</span>button<span class="token punctuation">)</span><span class="token punctuation">.</span>not<span class="token punctuation">.</span><span class="token function">toBeDisabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token comment">// Check that like count rolls back to original value</span>
+  <span class="token keyword">await</span> <span class="token function">waitFor</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> rolledBackLikeCountText <span class="token operator">=</span> screen<span class="token punctuation">.</span><span class="token function">getByText</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">\d+\s*likes</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> rolledBackCount <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>rolledBackLikeCountText<span class="token punctuation">.</span>textContent<span class="token punctuation">.</span><span class="token function">match</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">(\d+)</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token operator">?.</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">??</span> <span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token function">expect</span><span class="token punctuation">(</span>rolledBackCount<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span>initialCount<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token function">restoreGlobalFetch</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Now technically in the second test, we don't call the backend at all, because <code>chaos-fetch</code> intercepts the request and returns an error. But it gives a unified interface to handle successful and failing requests alike.</p>
+<p>Where this approach really shines is when you want to simulate more complex network conditions. For example, you can simulate slow networks with the <code>throttle</code> middleware. Or you can try what happens if your backend is rate limiting you with the <code>rateLimit</code> middleware.</p>
+<p>Another thing that's hard to test is if a delayed loading spinner is shown while the request is in flight. You can use the <code>latency</code> middleware to simulate a slow network and test that your loading state is shown correctly.</p>
+<p>If you don't care about determinism, you can even add some random failures to see how your app behaves under unpredictable conditions. You can also write and register your own custom middleware to simulate specific scenarios.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Chaos testing is often associated with large-scale distributed systems, but it's equally important for smaller applications. In this article, we explored lightweight chaos-driven testing for full stack apps using integration tests that intentionally break things. We saw how to use <code>chaos-fetch</code> to introduce chaos into our network requests and test how our application behaves under adverse conditions.</p>
+<p><code>@fetchkit/chaos-fetch</code> is not a better (or worse) replacement for MSW or end-to-end testing frameworks like Playwright or Cypress. It is a complementary tool that can be set up and used alongside them (and <code>@fetchkit/chaos-proxy</code>) to enhance your testing strategy. By embracing chaos and testing how your application behaves under failure conditions, you can build more resilient and robust applications.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
