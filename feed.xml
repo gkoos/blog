@@ -422,5 +422,14 @@
         <description>Learn how to use chaos-driven testing in full stack apps with integration tests that simulate network failures and latency. Discover practical techniques with chaos-fetch to build more resilient JavaScript and TypeScript applications.</description>
       </item>
     
+      <item>
+        <title>Node.js vs Go in Practice: Performance Comparison of chaos-proxy and chaos-proxy-go</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-11-Nodejs-vs-Go-in_Practice-Performance-Comparison-of-chaos-proxy-And-chaos-proxy-go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-11-Nodejs-vs-Go-in_Practice-Performance-Comparison-of-chaos-proxy-And-chaos-proxy-go/</guid>
+        <pubDate>Sat, 11 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.</description>
+      </item>
+    
   </channel>
 </rss>
