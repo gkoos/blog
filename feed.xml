@@ -440,5 +440,14 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V4.1.0 is out.</description>
       </item>
     
+      <item>
+        <title>Modern JavaScript Concurrency</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-25-Modern-Javascript-Concurrency/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-25-Modern-Javascript-Concurrency/</guid>
+        <pubDate>Sat, 25 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>Explore the concurrency model of modern JavaScript, including the event loop, async/await, and more.</description>
+      </item>
+    
   </channel>
 </rss>
