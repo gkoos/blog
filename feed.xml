@@ -449,5 +449,14 @@
         <description>Explore the concurrency model of modern JavaScript, including the event loop, async/await, and more.</description>
       </item>
     
+      <item>
+        <title>New FCC Article: How to Use Closures in Go</title>
+        <link>https://blog.gaborkoos.com/posts/2025-10-28-New-Fcc-Article-How-to-Use-Closures-In-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-10-28-New-Fcc-Article-How-to-Use-Closures-In-Go/</guid>
+        <pubDate>Tue, 28 Oct 2025 00:00:00 GMT</pubDate>
+
+        <description>Go closures tutorial, published on freeCodeCamp.</description>
+      </item>
+    
   </channel>
 </rss>

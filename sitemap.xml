@@ -242,18 +242,23 @@
   </url>
   
   <url>
+    <loc>https://blog.gaborkoos.com/posts/2025-10-28-New-Fcc-Article-How-to-Use-Closures-In-Go/</loc>
+    <lastmod>2025-10-28T00:00:00.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.gaborkoos.com/categories/</loc>
-    <lastmod>2025-10-25T20:33:34.414Z</lastmod>
+    <lastmod>2025-10-28T16:02:07.391Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/feed.xml</loc>
-    <lastmod>2025-10-25T20:33:34.414Z</lastmod>
+    <lastmod>2025-10-28T16:02:07.391Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/</loc>
-    <lastmod>2025-10-25T20:33:34.414Z</lastmod>
+    <lastmod>2025-10-28T16:02:07.391Z</lastmod>
   </url>
   
 </urlset>
