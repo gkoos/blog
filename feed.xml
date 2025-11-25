@@ -458,5 +458,14 @@
         <description>Go closures tutorial, published on freeCodeCamp.</description>
       </item>
     
+      <item>
+        <title>The Database Zoo: Vector Databases and High-Dimensional Search</title>
+        <link>https://blog.gaborkoos.com/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/</guid>
+        <pubDate>Tue, 25 Nov 2025 00:00:00 GMT</pubDate>
+
+        <description>An in-depth look at Vector Databases, their architecture, use cases, and how they differ from traditional databases.</description>
+      </item>
+    
   </channel>
 </rss>
