@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cancellation In JavaScript: Why It&#39;s Harder Than It Looks</title>
+  <meta name="description" content="Explore why true cancellation is challenging in JavaScript. Learn the differences between cancellation, timeouts, and failures, and understand the limitations of Promises, async/await, and AbortController in handling async operations.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cancellation In JavaScript: Why It&#39;s Harder Than It Looks">
+  <meta property="og:description" content="Explore why true cancellation is challenging in JavaScript. Learn the differences between cancellation, timeouts, and failures, and understand the limitations of Promises, async/await, and AbortController in handling async operations.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Cancellation In JavaScript: Why It&#39;s Harder Than It Looks">
+  <meta name="twitter:description" content="Explore why true cancellation is challenging in JavaScript. Learn the differences between cancellation, timeouts, and failures, and understand the limitations of Promises, async/await, and AbortController in handling async operations.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav class="flex items-center justify-between">
+        <div>
+          <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors mr-4 sm:mr-0">
+            a developer blog
+          </a>
+        </div>
+        <div class="flex items-center space-x-6">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">About</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">RSS</a>
+          <!-- Theme Switcher Button -->
+          <button id="theme-toggle" aria-label="Toggle dark mode" class="ml-4 p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+            <span id="theme-toggle-light" style="display:none">🌞</span>
+            <span id="theme-toggle-dark" style="display:none">🌙</span>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Cancellation In JavaScript: Why It&#39;s Harder Than It Looks</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2025-12-23T00:00:00.000Z">Tue Dec 23 2025</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>At some point, every JavaScript developer asks the same question: <em>why can't I just cancel this async operation?</em></p>
+<p>A user navigates away, a component unmounts, a newer request supersedes an older one - surely there must be a way to stop work that's no longer needed!</p>
+<p>In practice, we reach for familiar patterns: <code>Promise.race()</code> with a timeout, ignoring the result when it eventually arrives, or wiring up an <code>AbortController</code> and assuming the problem is solved. Often this appears to work, until the application starts leaking resources, performing late side effects, or behaving inconsistently under load.</p>
+<p>The underlying, fundamental issue is: <strong>JavaScript does not provide task cancellation as a primitive</strong>. Once asynchronous work has been scheduled, there is no general mechanism to forcibly stop it. Promises, callbacks, and async functions represent results and continuations, not ownership of the underlying execution.</p>
+<p>This creates a mismatch between intent and reality: developers think in terms of &quot;stopping work&quot;, but the language operates in terms of letting work run to completion and optionally reacting to its outcome. As a result, many so-called cancellation techniques merely stop waiting for a result rather than stopping the work itself.</p>
+<p>Understanding this gap is essential, because it explains much of JavaScript's async behavior: why promises can't be cancelled, why timeouts don't halt execution, and why <code>AbortController</code> is designed as a signaling mechanism instead of a kill switch. Once that model is clear, the limitations around cancellation stop feeling accidental - they follow directly from how JavaScript executes code.</p>
+<h2 id="cancellation-vs-timeout-vs-failure" tabindex="-1"><a class="header-anchor" href="#cancellation-vs-timeout-vs-failure">Cancellation vs Timeout vs Failure</a></h2>
+<p>One reason cancellation is so often misunderstood in JavaScript is that it gets conflated with two very different concepts: timeouts and failures. All three may result in &quot;this operation didn't produce a value&quot;, but they describe fundamentally different situations.</p>
+<h3 id="cancellation%3A-%22i-no-longer-want-this%22" tabindex="-1"><a class="header-anchor" href="#cancellation%3A-%22i-no-longer-want-this%22">Cancellation: &quot;I no longer want this&quot;</a></h3>
+<p>Cancellation is an external decision. The operation itself may be perfectly healthy and capable of completing, but something outside of it - user input, application state, navigation, or a newer request - has made the result irrelevant.</p>
+<p>Importantly, cancellation says nothing about correctness. The operation did not fail. It was simply asked to stop because its result is no longer needed.</p>
+<p>In well-designed systems, cancellation is expected and routine, not exceptional.</p>
+<h3 id="timeout%3A-%22i-stopped-waiting%22" tabindex="-1"><a class="header-anchor" href="#timeout%3A-%22i-stopped-waiting%22">Timeout: &quot;I stopped waiting&quot;</a></h3>
+<p>A timeout does not cancel work. It only limits how long a caller is willing to wait for a result.</p>
+<p>In JavaScript, timeouts are commonly implemented using <code>Promise.race()</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+  <span class="token function">doWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">1000</span><span class="token punctuation">)</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>When the timeout wins the race, the awaiting code resumes, but <strong><code>doWork()</code> continues running</strong>. Any side effects it performs will still happen. Any resources it holds will remain allocated until it finishes or cleans up on its own.</p>
+<p>Today, most modern APIs accept an <code>AbortSignal</code> instead. This improves resource cleanup and intent signaling, but it does not change the fundamental model: aborting is still cooperative, and only affects code that opts in.</p>
+<p>This distinction is easy to miss because the caller regains control, creating the illusion that the work has stopped. In reality, the timeout merely stopped observing the result.</p>
+<h3 id="failure%3A-%22something-went-wrong%22" tabindex="-1"><a class="header-anchor" href="#failure%3A-%22something-went-wrong%22">Failure: &quot;Something went wrong&quot;</a></h3>
+<p>Failures describe internal problems: network errors, invalid input, logic bugs, unavailable resources. They are usually represented as rejected promises or thrown errors.</p>
+<p>Unlike cancellation, failures are not intentional. They indicate that the operation could not complete successfully even if its result was still desired.</p>
+<p>Treating cancellation as a failure often leads to awkward error handling. Code starts catching “errors” that are not errors at all, or suppressing failures because they might just be cancellations. Over time, real failures become harder to distinguish from normal control flow.</p>
+<h3 id="why-this-distinction-matters" tabindex="-1"><a class="header-anchor" href="#why-this-distinction-matters">Why this distinction matters</a></h3>
+<p>In JavaScript APIs, timeouts and failures are frequently overloaded to stand in for cancellation. This works superficially, but it obscures intent and pushes responsibility onto the caller to guess what actually happened.</p>
+<p>Once you separate these concepts, a pattern emerges: JavaScript is good at expressing waiting and failure, but it has no built-in notion of stopping work. Everything that looks like cancellation is either a timeout, an ignored result, or a cooperative protocol layered on top.</p>
+<h2 id="why-promises-can't-be-cancelled" tabindex="-1"><a class="header-anchor" href="#why-promises-can't-be-cancelled">Why Promises Can't Be Cancelled</a></h2>
+<p>When developers ask why cancellation is hard in JavaScript, what they usually mean is: <em>why can't I cancel a Promise?</em> After all, promises are the foundation of async/await, and most asynchronous work is expressed in terms of them. If promises represented &quot;tasks&quot;, cancellation would seem straightforward.</p>
+<p>But promises were never designed to model tasks.</p>
+<h3 id="promises-represent-results%2C-not-execution" tabindex="-1"><a class="header-anchor" href="#promises-represent-results%2C-not-execution">Promises represent results, not execution</a></h3>
+<p>A promise is a placeholder for a value that will be available in the future. It says nothing about how that value is produced, or even whether there is ongoing work associated with it. By the time you have a promise, the underlying operation may already be finished, in progress, or shared with other consumers.</p>
+<p>This distinction is subtle but crucial: <strong>a promise does not own the work that led to it</strong>.</p>
+<p>Once created, a promise must eventually settle - either fulfilled or rejected. There is no third state for &quot;abandoned&quot; or &quot;cancelled&quot;, because that would break the core guarantee that promises make: if you have a reference to one, you can reliably attach handlers and eventually observe an outcome.</p>
+<h3 id="the-%22cancel-a-promise%22-fallacy" tabindex="-1"><a class="header-anchor" href="#the-%22cancel-a-promise%22-fallacy">The &quot;cancel a promise&quot; fallacy</a></h3>
+<p>Imagine a hypothetical <code>.cancel()</code> method on promises. What would it actually do?</p>
+<p>Consider this:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> p <span class="token operator">=</span> <span class="token function">fetchData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+p<span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>render<span class="token punctuation">)</span><span class="token punctuation">;</span>
+p<span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span>cacheResult<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>If one consumer calls <code>p.cancel()</code>, what happens to the others? Should their handlers stop running? Should the promise reject? With what error? And what if a third consumer attaches a <code>.then()</code> <em>after</em> cancellation?</p>
+<p>These questions don't have consistent answers without introducing global side effects. Promises are intentionally shareable and composable, cancellation would make their behavior depend on who else is observing them.</p>
+<p>This is why cancellation doesn't fit as a method on the promise itself. Cancellation is about <em>controlling work</em>, while promises are about <em>observing outcomes</em>.</p>
+<h3 id="what-would-break-if-promises-were-cancellable" tabindex="-1"><a class="header-anchor" href="#what-would-break-if-promises-were-cancellable">What would break if promises were cancellable</a></h3>
+<p>Making promises cancellable would ripple through the entire async ecosystem:</p>
+<ul>
+<li>Shared promises would become fragile, since any consumer could affect others.</li>
+<li>Memoization and caching would be unsafe - cached promises could be cancelled by accident.</li>
+<li><code>async/await</code> would lose its simple mental model, because awaiting a promise would no longer guarantee eventual completion.</li>
+</ul>
+<p>In other words, cancellation would introduce hidden coupling between otherwise independent pieces of code.</p>
+<h3 id="why-cancellation-had-to-live-elsewhere" tabindex="-1"><a class="header-anchor" href="#why-cancellation-had-to-live-elsewhere">Why cancellation had to live elsewhere</a></h3>
+<p>Earlier libraries experimented with cancellable promises, and the idea even surfaced during early standardization discussions. The conclusion was consistent: cancellation is not a property of the promise, but a <em>protocol between the caller and the callee</em>.</p>
+<p>That protocol needs a separate channel: something that can be passed around, observed, and acted upon - without undermining the semantics of promises themselves. This is why modern JavaScript models cancellation as a signal, not as an operation on the promise.</p>
+<p>Once you see promises as immutable views over future values rather than handles to running tasks, their lack of cancellation stops looking like an omission. It's a <strong>boundary that keeps asynchronous code predictable and composable</strong>.</p>
+<h2 id="what-abortcontroller-really-is" tabindex="-1"><a class="header-anchor" href="#what-abortcontroller-really-is">What AbortController Really Is</a></h2>
+<p>If promises can't be cancelled, how do we actually stop or control asynchronous work in JavaScript? That's where <code>AbortController</code> comes in. Understanding what it really does - and what it cannot do - is key to designing cancellation-aware code.</p>
+<h3 id="abortcontroller-as-a-signaling-mechanism" tabindex="-1"><a class="header-anchor" href="#abortcontroller-as-a-signaling-mechanism">AbortController as a signaling mechanism</a></h3>
+<p><code>AbortController</code> is essentially a messenger. It allows one piece of code to notify others that a task should no longer continue. It does this via an <code>AbortSignal</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+<span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">response</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Fetched!'</span><span class="token punctuation">,</span> response<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Fetch was aborted'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Later, trigger abort</span>
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Here, <code>controller.abort()</code> doesn't magically stop every line of JavaScript. Instead, it informs any cooperating API - in this case, <code>fetch</code> - that the work is no longer desired. <code>fetch</code> responds by rejecting its promise with an <code>AbortError</code> and closing the underlying network connection. That's all that happens automatically.</p>
+<h3 id="what-abortcontroller-can-do" tabindex="-1"><a class="header-anchor" href="#what-abortcontroller-can-do">What AbortController can do</a></h3>
+<ul>
+<li><strong>Signal intent</strong>: Any consumer that observes the signal can react.</li>
+<li><strong>Enable resource cleanup</strong>: APIs like fetch or streams can close connections, release handles, or stop producing data.</li>
+<li><strong>Propagate cancellation</strong>: Signals can be passed down through multiple layers of an API call chain, allowing higher-level code to request termination of lower-level operations.</li>
+</ul>
+<p>Essentially, AbortController provides a <strong>cooperative cancellation protocol</strong>. Consumers must opt in and decide how to respond.</p>
+<h3 id="what-abortcontroller-cannot-do" tabindex="-1"><a class="header-anchor" href="#what-abortcontroller-cannot-do">What AbortController cannot do</a></h3>
+<ul>
+<li><strong>Stop arbitrary JavaScript execution</strong>: CPU-bound loops, synchronous functions, or other work will continue running until completion unless they explicitly check the signal.</li>
+<li><strong>Enforce cleanup automatically</strong>: Only the code that responds to the signal can free resources or terminate tasks.</li>
+<li><strong>Cancel promises generically</strong>: It does not magically cancel the underlying promise, it only signals intent to abort.</li>
+</ul>
+<h3 id="abort-is-cooperative-by-design" tabindex="-1"><a class="header-anchor" href="#abort-is-cooperative-by-design">Abort is cooperative by design</a></h3>
+<p>The cooperative nature of AbortController is intentional:</p>
+<ul>
+<li>It avoids breaking shared state or running code unexpectedly.</li>
+<li>It preserves the run-to-completion semantics of JavaScript.</li>
+<li>It gives API authors flexibility in how they respond to abort signals, rather than imposing one-size-fits-all behavior.</li>
+</ul>
+<p>For example, consider a long-running computation:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">compute</span><span class="token punctuation">(</span><span class="token parameter">signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token keyword">while</span> <span class="token punctuation">(</span>i <span class="token operator">&lt;</span> <span class="token number">1e9</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>signal<span class="token punctuation">.</span>aborted<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Computation aborted'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    i<span class="token operator">++</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> i<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Without explicitly checking <code>signal.aborted</code>, there's no way to stop this computation. The signal doesn't “kill” the function, it merely provides a way for the function to notice it should exit early.</p>
+<h2 id="resource-cleanup-vs-task-termination" tabindex="-1"><a class="header-anchor" href="#resource-cleanup-vs-task-termination">Resource Cleanup vs Task Termination</a></h2>
+<p>A common misconception in JavaScript cancellation is thinking that signalling a task to abort automatically stops all work. In reality, there's a crucial distinction between stopping a task and cleaning up resources, and understanding it is essential to writing robust asynchronous code.</p>
+<h3 id="stopping-work-vs-cleaning-up" tabindex="-1"><a class="header-anchor" href="#stopping-work-vs-cleaning-up">Stopping work vs cleaning up</a></h3>
+<p>When you call <code>controller.abort()</code> on an <code>AbortController</code>, the APIs that observe the signal typically release resources:</p>
+<ul>
+<li><code>fetch</code> closes the underlying network connection.</li>
+<li>Streams stop producing data and can free buffers.</li>
+<li>Database or file handles may be closed if the API supports abort signals.</li>
+</ul>
+<p>This is what &quot;resource cleanup&quot; means: the system ensures that things like sockets, memory buffers, or file descriptors are not left dangling. Cleanup is essential to prevent memory leaks, connection exhaustion, or other subtle bugs.</p>
+<p>However, <strong>resource cleanup does not automatically stop all ongoing work</strong>. Any CPU-bound computation, synchronous logic, or code outside cooperative APIs continues running until it naturally completes.</p>
+<h3 id="why-javascript-focuses-on-cleanup%2C-not-termination" tabindex="-1"><a class="header-anchor" href="#why-javascript-focuses-on-cleanup%2C-not-termination">Why JavaScript focuses on cleanup, not termination</a></h3>
+<p>JavaScript's execution model enforces <strong>run-to-completion</strong>: once a function begins, it will run to the end of its current synchronous block. The event loop does not allow preemptive interruption. As a result:</p>
+<ul>
+<li>Forcefully killing a function mid-execution would risk leaving shared state inconsistent.</li>
+<li>Partial side effects (like partially updated DOM or partially written files) could corrupt the system.</li>
+<li>Memory safety and predictable execution would be compromised.</li>
+</ul>
+<p>Instead, JavaScript emphasizes <strong>cooperative patterns</strong>, where code voluntarily checks for cancellation and exits cleanly. <code>AbortController</code> fits this model: it signals intent, and APIs or functions decide how to respond.</p>
+<h3 id="abortcontroller-as-a-cleanup-trigger" tabindex="-1"><a class="header-anchor" href="#abortcontroller-as-a-cleanup-trigger">AbortController as a cleanup trigger</a></h3>
+<p>Most modern APIs that support <code>AbortSignal</code> focus on clean termination of resources:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> stream <span class="token operator">=</span> <span class="token function">someStreamAPI</span><span class="token punctuation">(</span><span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// triggers cleanup</span>
+</code></pre>
+<p>Here, <code>stream</code> may stop producing data, close internal buffers, and release file descriptors. Any consuming code can then notice the abort and stop processing further. The work is not forcibly terminated: instead, the API and the caller cooperate to exit safely.</p>
+<p>To stop CPU-intensive tasks or custom computations, developers must check <code>signal.aborted</code> periodically, see the earlier example in the <em>Abort is cooperative by design</em> section.</p>
+<p>This combination of <strong>cleanup + cooperative exit</strong> is the pattern JavaScript provides for cancellation. It preserves safety while allowing developers to reclaim resources and stop long-running operations gracefully.</p>
+<h2 id="why-javascript-cannot-forcefully-stop-code" tabindex="-1"><a class="header-anchor" href="#why-javascript-cannot-forcefully-stop-code">Why JavaScript Cannot Forcefully Stop Code</a></h2>
+<p>One of the reasons cancellation in JavaScript works differently than in other languages is how the language executes code. Understanding this is key to realizing why <code>AbortController</code> cannot magically &quot;kill&quot; a function or promise.</p>
+<h3 id="no-preemption-in-javascript" tabindex="-1"><a class="header-anchor" href="#no-preemption-in-javascript">No preemption in JavaScript</a></h3>
+<p>JavaScript runs on a single-threaded event loop. Each function runs to completion before the next task is executed:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">busyLoop</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">1e9</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// CPU-bound work</span>
+  <span class="token punctuation">}</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Done!'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">busyLoop</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'This runs only after busyLoop finishes'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>While <code>busyLoop()</code> is running, the event loop cannot interrupt it. <strong>There is no mechanism to inject code that forcibly stops execution mid-block</strong>. This design makes JavaScript predictable, but it also means <strong>cancellation must be cooperative</strong>.</p>
+<h3 id="why-forceful-termination-would-be-unsafe" tabindex="-1"><a class="header-anchor" href="#why-forceful-termination-would-be-unsafe">Why forceful termination would be unsafe</a></h3>
+<p>Imagine if JavaScript allowed arbitrary termination:</p>
+<p><strong>Shared mutable state could be left inconsistent:</strong></p>
+<pre class="language-js"><code class="language-js">obj<span class="token punctuation">.</span>count<span class="token operator">++</span><span class="token punctuation">;</span>
+<span class="token comment">// terminated here -> obj.count never incremented properly</span>
+</code></pre>
+<p><strong>Partial updates could corrupt data:</strong></p>
+<pre class="language-js"><code class="language-js">arr<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>newItem<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token comment">// terminated here -> arr in inconsistent state</span>
+</code></pre>
+<p><strong>Promises could never be reliably observed:</strong></p>
+<p>Consumers expecting a value might never get notified if the underlying task disappears mid-execution.</p>
+<p>Because JavaScript encourages shared objects and composable async code, <strong>preemptive termination is inherently unsafe</strong>.</p>
+<h3 id="why-web-workers-don't-fundamentally-change-this" tabindex="-1"><a class="header-anchor" href="#why-web-workers-don't-fundamentally-change-this">Why Web Workers don't fundamentally change this</a></h3>
+<p>Some developers think: &quot;I can just run CPU work in a Web Worker and terminate it.&quot; Technically, you can:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> worker <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Worker</span><span class="token punctuation">(</span><span class="token string">'worker.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+worker<span class="token punctuation">.</span><span class="token function">terminate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// kills the worker thread</span>
+</code></pre>
+<p>But this is process-level termination, not task-level cancellation:</p>
+<ul>
+<li><code>terminate()</code> stops all code in the worker, regardless of what it's doing.</li>
+<li>There is no granular control over individual tasks or promises inside the worker.</li>
+<li>Messages in transit may be lost, leaving partially processed data.</li>
+</ul>
+<p>Web Workers provide a way to isolate tasks that might need to be forcibly killed, but inside the main thread, JavaScript still cannot preempt code safely. This is why cooperative signals like <code>AbortController</code> are the preferred pattern: they let code exit voluntarily while cleaning up resources.</p>
+<h2 id="how-other-languages-model-cancellation" tabindex="-1"><a class="header-anchor" href="#how-other-languages-model-cancellation">How Other Languages Model Cancellation</a></h2>
+<p>JavaScript's cooperative cancellation model can feel limiting, but looking at other languages helps explain why. Different environments make different trade-offs between safety, control, and composability.</p>
+<h3 id="cooperative-cancellation-(go%2C-rust-async)" tabindex="-1"><a class="header-anchor" href="#cooperative-cancellation-(go%2C-rust-async)">Cooperative cancellation (Go, Rust async)</a></h3>
+<p>Languages like <strong>Go</strong> and <strong>Rust</strong> provide explicit mechanisms for cooperative cancellation:</p>
+<p><strong>Go: context propagation</strong></p>
+<pre class="language-go"><code class="language-go">ctx<span class="token punctuation">,</span> <span class="token literal-property property">cancel</span> <span class="token operator">:</span><span class="token operator">=</span> context<span class="token punctuation">.</span><span class="token function">WithTimeout</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span><span class="token function">Background</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> time<span class="token punctuation">.</span>Second<span class="token punctuation">)</span>
+defer <span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+select <span class="token punctuation">{</span>
+<span class="token keyword">case</span> <span class="token operator">&lt;</span><span class="token operator">-</span><span class="token function">doWork</span><span class="token punctuation">(</span>ctx<span class="token punctuation">)</span><span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Completed"</span><span class="token punctuation">)</span>
+<span class="token keyword">case</span> <span class="token operator">&lt;</span><span class="token operator">-</span>ctx<span class="token punctuation">.</span><span class="token function">Done</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span>
+    fmt<span class="token punctuation">.</span><span class="token function">Println</span><span class="token punctuation">(</span><span class="token string">"Cancelled"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li><code>ctx</code> is passed explicitly to all functions that might need to cancel.</li>
+<li>The work itself checks the context and exits early.</li>
+<li>Resources can be cleaned up in a structured way.</li>
+<li>This is conceptually similar to <code>AbortController</code> in JS: a signal passed down the call chain, requiring cooperation.</li>
+</ul>
+<p><strong>Rust: async cancellation</strong></p>
+<ul>
+<li>Futures in Rust can be polled with a cancellation signal.</li>
+<li>Tasks yield control points where the runtime can stop work if the signal indicates cancellation.</li>
+<li>Again, the task itself must check the signal, it cannot be killed mid-instruction.</li>
+</ul>
+<p>The key idea is <strong>cooperative cancellation</strong>: the runtime provides a signal, and the code decides how and when to exit.</p>
+<p><strong>Structured concurrency (Kotlin, Swift)</strong></p>
+<p>Modern languages like <strong>Kotlin</strong> (coroutines) and <strong>Swift</strong> (async/await) take this further with structured concurrency:</p>
+<ul>
+<li>Tasks are tied to a parent scope.</li>
+<li>When a parent cancels, all child tasks receive a cancellation signal.</li>
+<li>This ensures that async work is bounded, predictable, and easy to clean up.</li>
+</ul>
+<p>Example in Kotlin:</p>
+<pre class="language-kotlin"><code class="language-kotlin">val job <span class="token operator">=</span> launch <span class="token punctuation">{</span>
+    val child <span class="token operator">=</span> launch <span class="token punctuation">{</span>
+        <span class="token function">repeat</span><span class="token punctuation">(</span><span class="token parameter"><span class="token number">1000</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span> i <span class="token operator">-</span><span class="token operator">></span>
+            <span class="token function">println</span><span class="token punctuation">(</span><span class="token string">"Working $i"</span><span class="token punctuation">)</span>
+            <span class="token function">delay</span><span class="token punctuation">(</span><span class="token number">100</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    <span class="token function">delay</span><span class="token punctuation">(</span><span class="token number">500</span><span class="token punctuation">)</span>
+    child<span class="token punctuation">.</span><span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// cooperative cancellation</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The pattern enforces lifecycle and cancellation rules without unsafe preemption.</p>
+<p><strong>Preemptive cancellation (threads)</strong></p>
+<p>Other environments, like <strong>Java</strong> or <strong>C#</strong>, offer preemptive cancellation via threads: a thread can be interrupted or aborted mid-execution. But this introduces complex safety issues:</p>
+<ul>
+<li>Shared mutable state may be left inconsistent.</li>
+<li>Locks or resources may never be released.</li>
+<li>Libraries often discourage forced thread termination for safety reasons.</li>
+</ul>
+<p>JavaScript avoids this entirely on the main thread, because the language relies on shared memory and single-threaded execution. Forceful termination would compromise stability and predictability.</p>
+<h3 id="takeaways-for-javascript" tabindex="-1"><a class="header-anchor" href="#takeaways-for-javascript">Takeaways for JavaScript</a></h3>
+<ul>
+<li>Cooperative signals, like <code>AbortController</code>, are the closest equivalent to cancellation in Go, Rust, or Kotlin.</li>
+<li>JavaScript deliberately avoids preemption to maintain safety and simplicity.</li>
+<li>Many &quot;gotchas&quot; in JS cancellation are the same trade-offs other languages have to manage when they choose safety over brute-force control.</li>
+</ul>
+<h2 id="practical-patterns-for-cancellation-in-js-today" tabindex="-1"><a class="header-anchor" href="#practical-patterns-for-cancellation-in-js-today">Practical Patterns for Cancellation in JS Today</a></h2>
+<p>Understanding the constraints of cancellation is one thing, applying them effectively is another. Modern JavaScript provides tools and patterns to handle cancellation safely and predictably, mostly built around <code>AbortController</code> and cooperative design.</p>
+<h3 id="passing-abortsignal-everywhere" tabindex="-1"><a class="header-anchor" href="#passing-abortsignal-everywhere">Passing AbortSignal everywhere</a></h3>
+<p>A good practice is to design APIs to accept an <code>AbortSignal</code> as a first-class parameter:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchWithSignal</span><span class="token punctuation">(</span><span class="token parameter">url<span class="token punctuation">,</span> signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> data<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Callers can then create a controller and abort if needed:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+<span class="token function">fetchWithSignal</span><span class="token punctuation">(</span><span class="token string">'/api/data'</span><span class="token punctuation">,</span> signal<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">data</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Request cancelled'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">else</span> console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span>err<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// Later</span>
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This pattern allows cancellation to <strong>propagate through multiple layers</strong> of API calls and ensures resource cleanup where supported.</p>
+<h3 id="making-long-running-work-abortable" tabindex="-1"><a class="header-anchor" href="#making-long-running-work-abortable">Making long-running work abortable</a></h3>
+<p>For CPU-bound tasks or loops, you need to check the signal explicitly. Splitting work into chunks with occasional checks allows cooperative cancellation:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">heavyComputation</span><span class="token punctuation">(</span><span class="token parameter">signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">let</span> result <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">1e9</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>signal<span class="token punctuation">.</span>aborted<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Computation aborted'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+    result <span class="token operator">+=</span> i<span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>i <span class="token operator">%</span> <span class="token number">1e6</span> <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">resolve</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// yield to event loop</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> result<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<ul>
+<li>Checking <code>signal.aborted</code> lets the function exit early.</li>
+<li>Yielding occasionally prevents blocking the event loop for too long.</li>
+</ul>
+<p>This approach <strong>mirrors structured concurrency</strong> in other languages: tasks cooperate with cancellation and remain responsive.</p>
+<h4 id="designing-cancellation-aware-apis" tabindex="-1"><a class="header-anchor" href="#designing-cancellation-aware-apis">Designing cancellation-aware APIs</a></h4>
+<p>When building libraries or components:</p>
+<ul>
+<li>Accept an <code>AbortSignal</code> instead of inventing custom cancellation flags.</li>
+<li>Document what cancellation does:
+<ul>
+<li>Does it stop network requests?</li>
+<li>Does it free memory or file handles?</li>
+<li>Does it stop computation?</li>
+</ul>
+</li>
+<li>Avoid hidden background work:
+<ul>
+<li>Ensure that cancelled tasks do not continue modifying shared state.</li>
+</ul>
+</li>
+<li>Propagate signals through all dependent operations:
+<ul>
+<li>If a high-level operation is aborted, all sub-operations should observe the same signal.</li>
+</ul>
+</li>
+</ul>
+<p>Example:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">processBatch</span><span class="token punctuation">(</span><span class="token parameter">batch<span class="token punctuation">,</span> signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> results <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> item <span class="token keyword">of</span> batch<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>signal<span class="token punctuation">.</span>aborted<span class="token punctuation">)</span> <span class="token keyword">break</span><span class="token punctuation">;</span>
+    results<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token function">processItem</span><span class="token punctuation">(</span>item<span class="token punctuation">,</span> signal<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">return</span> results<span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This guarantees <strong>predictable cancellation</strong> without leaving partial operations or resources dangling.</p>
+<h3 id="combining-with-react-or-node.js" tabindex="-1"><a class="header-anchor" href="#combining-with-react-or-node.js">Combining with React or Node.js</a></h3>
+<ul>
+<li>React: Pass <code>AbortSignal</code> to <code>fetch</code> or long-running operations inside <code>useEffect</code>, and abort in cleanup functions.</li>
+<li>Node.js: Many APIs like <code>fs.promises</code> streams or <code>fetch</code> (via <code>node-fetch</code> or native support) accept signals. Use them to prevent lingering resource usage during server shutdowns or request cancellation.</li>
+</ul>
+<p>By consistently using cooperative patterns, signals, and well-designed APIs, you can implement robust cancellation in JavaScript without breaking promises, leaking resources, or creating unsafe preemption.</p>
+<h3 id="conclusion%3A-stop-trying-to-%E2%80%9Ckill%E2%80%9D-promises" tabindex="-1"><a class="header-anchor" href="#conclusion%3A-stop-trying-to-%E2%80%9Ckill%E2%80%9D-promises">Conclusion: Stop Trying to “Kill” Promises</a></h3>
+<p>Cancellation in JavaScript is fundamentally different from what developers coming from other languages might expect. Promises are <strong>immutable placeholders for future values</strong>, not handles to running tasks. There is no built-in mechanism to forcibly stop work, and trying to treat them that way leads to fragile, unpredictable code.</p>
+<p>Instead, JavaScript provides <strong>cooperative cancellation</strong> via <code>AbortController</code> and <code>AbortSignal</code>. These tools allow code to:</p>
+<ul>
+<li>Signal that work is no longer needed</li>
+<li>Clean up resources like network connections, streams, or file handles</li>
+<li>Enable tasks to exit early if they opt in</li>
+</ul>
+<p>The key takeaway is that cancellation is <strong>intent, not enforcement</strong>. Work only stops when the code performing it checks the signal and responds. CPU-bound loops, synchronous computations, or code outside cooperative APIs continue running until they voluntarily exit.</p>
+<p>By embracing this model:</p>
+<ul>
+<li>APIs become more predictable and composable</li>
+<li>Resource leaks and side effects are minimized</li>
+<li>Async code can handle user-driven interruptions cleanly</li>
+</ul>
+<p>Ultimately, cancellation in JavaScript is less about killing promises and more about <strong>designing your tasks to be responsive and cooperative</strong>. Understanding this distinction allows developers to write robust, maintainable asynchronous code without fighting the language's execution model.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+    if (root.classList.contains('dark')) {
+      setTheme('light');
+    } else {
+      setTheme('dark');
+    }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

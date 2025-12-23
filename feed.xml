@@ -467,5 +467,14 @@
         <description>An in-depth look at Vector Databases, their architecture, use cases, and how they differ from traditional databases.</description>
       </item>
     
+      <item>
+        <title>Cancellation In JavaScript: Why It&#39;s Harder Than It Looks</title>
+        <link>https://blog.gaborkoos.com/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/</link>
+        <guid>https://blog.gaborkoos.com/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/</guid>
+        <pubDate>Tue, 23 Dec 2025 00:00:00 GMT</pubDate>
+
+        <description>Explore why true cancellation is challenging in JavaScript. Learn the differences between cancellation, timeouts, and failures, and understand the limitations of Promises, async/await, and AbortController in handling async operations.</description>
+      </item>
+    
   </channel>
 </rss>
