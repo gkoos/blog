@@ -478,11 +478,20 @@
     
       <item>
         <title>Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code</title>
-        <link>https://blog.gaborkoos.com/posts/20206-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/</link>
-        <guid>https://blog.gaborkoos.com/posts/20206-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/</guid>
+        <link>https://blog.gaborkoos.com/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/</guid>
         <pubDate>Tue, 06 Jan 2026 00:00:00 GMT</pubDate>
 
         <description>Master backpressure in JavaScript: how streams, fetch, and async code control data flow. Prevent memory spikes, latency collapse, and crashes in Node.js and the browser.</description>
+      </item>
+    
+      <item>
+        <title>The Go Build System: Optimised for Humans and Machines</title>
+        <link>https://blog.gaborkoos.com/posts/2026-01-08-The-Go-Build-System-Optimised-for-Humans-and-Machines/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-01-08-The-Go-Build-System-Optimised-for-Humans-and-Machines/</guid>
+        <pubDate>Thu, 08 Jan 2026 00:00:00 GMT</pubDate>
+
+        <description>Go&#39;s build system optimized for humans and machines: faster reproducible builds, smart caching, seamless CI/CD, and practical guidance to streamline modern developer workflows.</description>
       </item>
     
   </channel>
