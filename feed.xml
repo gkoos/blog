@@ -494,5 +494,14 @@
         <description>Go&#39;s build system optimized for humans and machines: faster reproducible builds, smart caching, seamless CI/CD, and practical guidance to streamline modern developer workflows.</description>
       </item>
     
+      <item>
+        <title>New FCC Article: Unit Testing in Go</title>
+        <link>https://blog.gaborkoos.com/posts/2026-01-14-New-Fcc-Article-Unit-Testing-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-01-14-New-Fcc-Article-Unit-Testing-in-Go/</guid>
+        <pubDate>Wed, 14 Jan 2026 00:00:00 GMT</pubDate>
+
+        <description>Unit Testing in Go tutorial, published on freeCodeCamp.</description>
+      </item>
+    
   </channel>
 </rss>

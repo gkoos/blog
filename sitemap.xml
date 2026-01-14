@@ -267,18 +267,23 @@
   </url>
   
   <url>
+    <loc>https://blog.gaborkoos.com/posts/2026-01-14-New-Fcc-Article-Unit-Testing-in-Go/</loc>
+    <lastmod>2026-01-14T00:00:00.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.gaborkoos.com/categories/</loc>
-    <lastmod>2026-01-08T22:32:05.564Z</lastmod>
+    <lastmod>2026-01-14T20:42:45.538Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/feed.xml</loc>
-    <lastmod>2026-01-08T22:32:05.564Z</lastmod>
+    <lastmod>2026-01-14T20:42:45.538Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/</loc>
-    <lastmod>2026-01-08T22:32:05.564Z</lastmod>
+    <lastmod>2026-01-14T20:42:45.538Z</lastmod>
   </url>
   
 </urlset>
