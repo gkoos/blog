@@ -503,5 +503,14 @@
         <description>Unit Testing in Go tutorial, published on freeCodeCamp.</description>
       </item>
     
+      <item>
+        <title>New InfoQ Article: One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects</title>
+        <link>https://blog.gaborkoos.com/posts/2026-01-28-New-InfoQ-Article-One-Cache-to-Rule-Them-All-Handling-Responses-and-In-Flight-Requests-with-Durable-Objects/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-01-28-New-InfoQ-Article-One-Cache-to-Rule-Them-All-Handling-Responses-and-In-Flight-Requests-with-Durable-Objects/</guid>
+        <pubDate>Wed, 28 Jan 2026 00:00:00 GMT</pubDate>
+
+        <description>Learn how to eliminate redundant cache computations in distributed systems using Cloudflare Durable Objects.</description>
+      </item>
+    
   </channel>
 </rss>
