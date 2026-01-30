@@ -512,5 +512,14 @@
         <description>Learn how to eliminate redundant cache computations in distributed systems using Cloudflare Durable Objects.</description>
       </item>
     
+      <item>
+        <title>Advanced Asynchronous Patterns in JavaScript</title>
+        <link>https://blog.gaborkoos.com/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/</guid>
+        <pubDate>Fri, 30 Jan 2026 00:00:00 GMT</pubDate>
+
+        <description>Advanced async in JavaScript: cancellation, timeouts, bounded concurrency, AbortSignal, and error handling for resilient Node.js and browser apps.</description>
+      </item>
+    
   </channel>
 </rss>

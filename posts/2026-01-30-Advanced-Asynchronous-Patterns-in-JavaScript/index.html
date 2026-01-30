@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Advanced Asynchronous Patterns in JavaScript</title>
+  <meta name="description" content="Advanced async in JavaScript: cancellation, timeouts, bounded concurrency, AbortSignal, and error handling for resilient Node.js and browser apps.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Advanced Asynchronous Patterns in JavaScript">
+  <meta property="og:description" content="Advanced async in JavaScript: cancellation, timeouts, bounded concurrency, AbortSignal, and error handling for resilient Node.js and browser apps.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Advanced Asynchronous Patterns in JavaScript">
+  <meta name="twitter:description" content="Advanced async in JavaScript: cancellation, timeouts, bounded concurrency, AbortSignal, and error handling for resilient Node.js and browser apps.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Advanced Asynchronous Patterns in JavaScript</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-01-30T00:00:00.000Z">Fri Jan 30 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><code>async/await</code> made asynchronous JavaScript far more readable, but readability isn't the same as control. Once async operations span multiple tasks, layers, or services, managing their coordination becomes the real challenge.
+Patterns like cancellation propagation, timeouts, bounded concurrency, and controlled error handling repeatedly surface in production systems, yet they rarely get grouped together in a single, practical discussion.
+This article explores these patterns, showing how they interact and the subtle but nasty pitfalls that often go unnoticed when building real-world asynchronous systems in JavaScript.</p>
+<h2 id="cancellation-is-the-missing-primitive" tabindex="-1"><a class="header-anchor" href="#cancellation-is-the-missing-primitive">Cancellation Is the Missing Primitive</a></h2>
+<p>Once you move beyond <code>async/await</code>, cancellation quickly becomes a core concern. Promises represent <em>results</em>, not running work, so they cannot be forcibly stopped once started. This can lead to resource leaks or orphaned operations - a challenge explored in another <a href="https://blog.gaborkoos.com/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/">article</a> on this blog.</p>
+<p><code>AbortController</code> addresses this by providing a cooperative signal: it doesn't preempt execution, but APIs that observe the signal can stop work, clean up resources, or reject appropriately. This fits naturally with patterns from modern JavaScript concurrency, where explicit coordination is necessary to avoid unpredictable behavior.</p>
+<p>Cancellation is distinct from other common async concerns:</p>
+<ul>
+<li><strong>Timeouts</strong> stop waiting, but not the underlying operation.</li>
+<li><strong>Failures</strong> indicate errors, not a cancellation decision.</li>
+<li><strong>Cancellation</strong> communicates that a result is no longer needed.</li>
+</ul>
+<p>A practical example:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+<span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">response</span> <span class="token operator">=></span> <span class="token punctuation">{</span> <span class="token comment">/* … */</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Fetch was aborted'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// later</span>
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Here, the fetch operation can be aborted, and the promise will reject with an <code>AbortError</code>. This allows the caller to handle cancellation explicitly.</p>
+<p>The key is cooperation: only operations that check the signal will respond. Long-running loops or promises that ignore it continue running.</p>
+<p>Effective patterns include:</p>
+<ul>
+<li>Accepting an AbortSignal consistently at all layers.</li>
+<li>Propagating it through call chains.</li>
+<li>Periodically checking signal.aborted in compute-heavy tasks.</li>
+</ul>
+<p>These approaches form a foundation for predictable asynchronous systems and connect naturally to coordination and flow-control patterns.</p>
+<h2 id="timeouts-are-a-form-of-cancellation" tabindex="-1"><a class="header-anchor" href="#timeouts-are-a-form-of-cancellation">Timeouts Are a Form of Cancellation</a></h2>
+<p>In asynchronous systems, a timeout is essentially a signal that the result is no longer needed. Unlike synchronous code, where a function returns immediately, async operations continue running unless explicitly told to stop. Historically, developers used <code>Promise.race()</code> to enforce timeouts, but modern JavaScript provides first-class signal-based primitives that are more composable and predictable.</p>
+<h3 id="historical-approach%3A-promise.race()" tabindex="-1"><a class="header-anchor" href="#historical-approach%3A-promise.race()">Historical Approach: <code>Promise.race()</code></a></h3>
+<p>Before modern signal combinators, developers often used <code>Promise.race()</code> to enforce timeouts:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">fetchWithTimeout</span><span class="token punctuation">(</span><span class="token parameter">url<span class="token punctuation">,</span> ms</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+  <span class="token keyword">const</span> timeout <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> reject</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+    <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+      <span class="token function">reject</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'Timeout exceeded'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span> ms<span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    timeout
+  <span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This pattern works, but it quickly becomes verbose when multiple layers of asynchronous operations need timeouts. Each layer must handle the race, duplicating logic and introducing potential inconsistencies.</p>
+<h3 id="modern-approach%3A-abortsignal.timeout()" tabindex="-1"><a class="header-anchor" href="#modern-approach%3A-abortsignal.timeout()">Modern Approach: <code>AbortSignal.timeout()</code></a></h3>
+<p>With AbortSignal.timeout(), timeouts can be expressed declaratively:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> timeoutSignal <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// signal that aborts after 5 seconds</span>
+
+<span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> timeoutSignal <span class="token punctuation">}</span><span class="token punctuation">)</span> <span class="token comment">// adds timeout behavior</span>
+  <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">res</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Success'</span><span class="token punctuation">,</span> res<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Cancelled or timed out'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Here, the timeout is a <strong>signal that automatically aborts after the given time</strong>. This pattern scales better across layers. Each function can accept an <code>AbortSignal</code>, and timeouts can be composed naturally without duplicating logic. No extra <code>Promise.race()</code>, no manual timers: the timeout is a signal that aborts automatically. Each function can accept an <code>AbortSignal</code>, making timeouts composable across layers without duplicating logic.</p>
+<h3 id="composing-multiple-signals%3A-abortsignal.any()" tabindex="-1"><a class="header-anchor" href="#composing-multiple-signals%3A-abortsignal.any()">Composing Multiple Signals: <code>AbortSignal.any()</code></a></h3>
+<p>Often, multiple cancellation sources exist simultaneously: user aborts, parent signals, or timeouts. <code>AbortSignal.any()</code> lets you combine them into a single signal:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> userController <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// user-initiated abort</span>
+<span class="token keyword">const</span> timeoutSignal  <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// timeout abort</span>
+
+<span class="token keyword">const</span> combinedSignal <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">any</span><span class="token punctuation">(</span><span class="token punctuation">[</span> <span class="token comment">// combines both signals</span>
+  userController<span class="token punctuation">.</span>signal<span class="token punctuation">,</span>
+  timeoutSignal
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> combinedSignal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Cancelled by user or timeout'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>The fetch operation above will abort if any of the constituent signals fire. This declarative approach makes complex workflows predictable and composable.</p>
+<p>The evolution from <code>Promise.race()</code> to <code>AbortSignal.timeout()</code> and <code>AbortSignal.any()</code> illustrates a key principle: <strong>timeouts and cancellation should be expressed declaratively, not imperatively</strong>. Modern APIs treat signals as first-class primitives that are composable, predictable, and safe to propagate across multiple async operations.</p>
+<h2 id="composing-async-work-without-losing-control" tabindex="-1"><a class="header-anchor" href="#composing-async-work-without-losing-control">Composing Async Work Without Losing Control</a></h2>
+<p>Once cancellation and timeouts are handled, the next challenge is composing multiple asynchronous operations in a way that remains predictable and controllable. In production systems, tasks rarely run in isolation: you may need to fetch multiple resources concurrently, process streams in parallel, or coordinate nested services. Without a principled approach, these operations quickly become brittle, leaking resources or leaving partially completed work.</p>
+<h3 id="theory%3A-why-composition-is-hard" tabindex="-1"><a class="header-anchor" href="#theory%3A-why-composition-is-hard">Theory: Why Composition Is Hard</a></h3>
+<p>The difficulty arises because each async operation can fail, cancel, or timeout independently. Naively combining promises with <code>Promise.all</code> or nested await calls often leads to:</p>
+<ul>
+<li>Unhandled rejections if one task fails.</li>
+<li>Stranded operations if one task is cancelled but others keep running.</li>
+<li>Hard-to-maintain coordination logic as the number of tasks grows.</li>
+</ul>
+<p>A robust solution treats each operation as a cancellable unit, and propagates cancellation, timeouts, and errors through a <a href="https://en.wikipedia.org/wiki/Structured_concurrency">structured concurrency</a> model. Conceptually, this is similar to having a &quot;parent scope&quot; that owns all child tasks: abort the parent, and all children stop automatically.</p>
+<h3 id="running-multiple-tasks-concurrently" tabindex="-1"><a class="header-anchor" href="#running-multiple-tasks-concurrently">Running Multiple Tasks Concurrently</a></h3>
+<p>With modern signal-based patterns, you can combine multiple tasks while preserving cancellation:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchAll</span><span class="token punctuation">(</span><span class="token parameter">urls<span class="token punctuation">,</span> signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> tasks <span class="token operator">=</span> urls<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">url</span> <span class="token operator">=></span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>tasks<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// aborting signal stops all fetches</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> urls <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'/data1'</span><span class="token punctuation">,</span> <span class="token string">'/data2'</span><span class="token punctuation">,</span> <span class="token string">'/data3'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+
+<span class="token function">fetchAll</span><span class="token punctuation">(</span>urls<span class="token punctuation">,</span> signal<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">results</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'All fetched'</span><span class="token punctuation">,</span> results<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Operation cancelled'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token comment">// later</span>
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// stops all ongoing fetches</span>
+</code></pre>
+<p>Here, <code>fetchAll</code> accepts an <code>AbortSignal</code> that propagates to all fetch operations. If the signal is aborted, all fetches stop cleanly.</p>
+<p>This pattern keeps the composition declarative: each function only observes a single signal, and higher-level logic defines how signals combine.</p>
+<h3 id="handling-partial-failures" tabindex="-1"><a class="header-anchor" href="#handling-partial-failures">Handling Partial Failures</a></h3>
+<p>Sometimes, you want to continue other tasks even if one fails. You can wrap individual tasks to handle their errors independently:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> tasks <span class="token operator">=</span> urls<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">url</span> <span class="token operator">=></span>
+  <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> combinedSignal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">error</span><span class="token operator">:</span> err<span class="token punctuation">,</span> url <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> results <span class="token operator">=</span> <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>tasks<span class="token punctuation">)</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Results with individual error handling'</span><span class="token punctuation">,</span> results<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>In this example, each fetch handles its own errors, allowing the overall operation to complete even if some tasks fail. The results array contains either successful responses or error objects, enabling fine-grained handling.</p>
+<p>This approach separates <strong>task coordination</strong> from <strong>task error handling</strong>, making complex asynchronous flows easier to reason about.</p>
+<h3 id="patterns-for-predictable-composition" tabindex="-1"><a class="header-anchor" href="#patterns-for-predictable-composition">Patterns for Predictable Composition</a></h3>
+<p>To summarize, effective asynchronous composition in JavaScript relies on a handful of key patterns:</p>
+<ul>
+<li>Treat all tasks as cancellable units.</li>
+<li>Propagate signals from parent to children.</li>
+<li>Combine signals declaratively (<code>AbortSignal.any</code>) for multiple abort sources.</li>
+<li>Separate failure handling from orchestration when partial completion is acceptable.</li>
+<li>Use structured concurrency principles: a parent scope owns all child operations.</li>
+</ul>
+<p>By following these patterns, asynchronous operations remain predictable, composable, and maintainable — even in deep call stacks or large-scale applications.</p>
+<h2 id="bounded-concurrency" tabindex="-1"><a class="header-anchor" href="#bounded-concurrency">Bounded Concurrency</a></h2>
+<p>In large-scale asynchronous systems, running all tasks at once can be as dangerous as running none. Fetching hundreds of URLs, processing large streams, or spawning compute-heavy operations simultaneously can overwhelm network, memory, or CPU resources. <strong>Bounded concurrency</strong> enforces a limit on the number of tasks running in parallel, allowing systems to remain responsive and predictable.</p>
+<h3 id="theory%3A-why-concurrency-needs-bounds" tabindex="-1"><a class="header-anchor" href="#theory%3A-why-concurrency-needs-bounds">Theory: Why Concurrency Needs Bounds</a></h3>
+<p>Resources are always finite. Without limits, uncontrolled concurrency can lead to:</p>
+<ul>
+<li>Memory usage can spike, network bandwidth can be saturated, or connection pools can be exhausted.</li>
+<li>Downstream services may become overloaded.</li>
+<li>Errors and cancellations can cascade unpredictably.</li>
+</ul>
+<p>Bounded concurrency treats tasks as a pool: only a fixed number run at any given time. Additional tasks wait for a slot to free up. When combined with cancellation signals, this model allows controlled, safe, and abortable parallelism.</p>
+<h3 id="implementing-bounded-concurrency" tabindex="-1"><a class="header-anchor" href="#implementing-bounded-concurrency">Implementing Bounded Concurrency</a></h3>
+<p>A simple pattern uses a queue and <code>Promise.all</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">runWithConcurrency</span><span class="token punctuation">(</span><span class="token parameter">tasks<span class="token punctuation">,</span> limit<span class="token punctuation">,</span> signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> results <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+  <span class="token keyword">const</span> executing <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> task <span class="token keyword">of</span> tasks<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Wait for a slot if limit is reached</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>executing<span class="token punctuation">.</span>size <span class="token operator">>=</span> limit<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span>executing<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Start task</span>
+    <span class="token keyword">const</span> p <span class="token operator">=</span> <span class="token function">task</span><span class="token punctuation">(</span>signal<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">finally</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> executing<span class="token punctuation">.</span><span class="token function">delete</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    executing<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    results<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>p<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>results<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Here, <code>runWithConcurrency</code> accepts an array of task functions, a concurrency limit, and an <code>AbortSignal</code>. It ensures that only <code>limit</code> tasks run simultaneously. When a task completes, it frees up a slot for the next task.</p>
+<p>Each task receives a signal, allowing cancellation or timeouts to propagate. The concurrency limit ensures that only <code>limit</code> tasks are active simultaneously, preventing resource overload.</p>
+<h3 id="example%3A-fetching-multiple-urls-with-limits" tabindex="-1"><a class="header-anchor" href="#example%3A-fetching-multiple-urls-with-limits">Example: Fetching Multiple URLs with Limits</a></h3>
+<p>Let's see how to use <code>runWithConcurrency</code> to fetch multiple URLs with a concurrency limit:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> urls <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'/data1'</span><span class="token punctuation">,</span> <span class="token string">'/data2'</span><span class="token punctuation">,</span> <span class="token string">'/data3'</span><span class="token punctuation">,</span> <span class="token string">'/data4'</span><span class="token punctuation">,</span> <span class="token string">'/data5'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> signal <span class="token operator">=</span> controller<span class="token punctuation">.</span>signal<span class="token punctuation">;</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">fetchTask</span><span class="token punctuation">(</span><span class="token parameter">url<span class="token punctuation">,</span> signal</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> signal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">r</span> <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">runWithConcurrency</span><span class="token punctuation">(</span>
+  urls<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">url</span> <span class="token operator">=></span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">signal</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">fetchTask</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> signal<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token number">2</span><span class="token punctuation">,</span> <span class="token comment">// max 2 concurrent fetches</span>
+  signal
+<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">results</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Fetched all with concurrency limit'</span><span class="token punctuation">,</span> results<span class="token punctuation">)</span><span class="token punctuation">)</span>
+ <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+   <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Operation cancelled'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+ <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>In this example, only two fetches run at a time. Cancelling the signal aborts all ongoing tasks immediately, and queued tasks never start.</p>
+<h3 id="integrating-timeouts-and-user-cancellation" tabindex="-1"><a class="header-anchor" href="#integrating-timeouts-and-user-cancellation">Integrating Timeouts and User Cancellation</a></h3>
+<p>The concurrency pool integrates seamlessly with signal combinators:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> timeoutSignal <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> userController <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> combinedSignal <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">any</span><span class="token punctuation">(</span><span class="token punctuation">[</span>timeoutSignal<span class="token punctuation">,</span> userController<span class="token punctuation">.</span>signal<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token function">runWithConcurrency</span><span class="token punctuation">(</span>
+  urls<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">url</span> <span class="token operator">=></span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">signal</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">fetchTask</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> combinedSignal<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token number">2</span><span class="token punctuation">,</span>
+  combinedSignal
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Now the pool respects both user-initiated aborts and timeouts without additional wiring. Each task observes a single, combined signal, keeping the orchestration declarative.</p>
+<h3 id="key-patterns" tabindex="-1"><a class="header-anchor" href="#key-patterns">Key Patterns</a></h3>
+<ul>
+<li>Limit active tasks to prevent resource overload.</li>
+<li>Pass cancellation signals to every task for cooperative termination.</li>
+<li>Combine multiple abort sources with <code>AbortSignal.any()</code>.</li>
+<li>Queue excess tasks for later execution rather than failing them.</li>
+</ul>
+<p>Bounded concurrency turns an otherwise chaotic async workflow into a controlled, predictable system, and when combined with cancellation and timeouts, it gives developers precise control over both execution and resource usage.</p>
+<h2 id="controlled-error-handling" tabindex="-1"><a class="header-anchor" href="#controlled-error-handling">Controlled Error Handling</a></h2>
+<p>In real-world asynchronous systems, errors are inevitable. Tasks may fail due to network issues, timeouts, user cancellations, or unexpected exceptions. The challenge is to handle these failures without undermining the coordination patterns established in previous sections: cancellation, timeouts, and bounded concurrency.</p>
+<h3 id="theory%3A-separation-of-concerns" tabindex="-1"><a class="header-anchor" href="#theory%3A-separation-of-concerns">Theory: Separation of Concerns</a></h3>
+<p>A key principle is <strong>separating error handling from orchestration</strong>. Orchestration controls how tasks run and interact, while error handling decides what to do when they fail. Mixing these concerns can lead to brittle systems:</p>
+<ul>
+<li>Cancelling a parent task should stop children without forcing global failures.</li>
+<li>Individual failures should not automatically crash the entire workflow if partial results are acceptable.</li>
+<li>Errors should propagate predictably and consistently.</li>
+</ul>
+<p>Treating orchestration and error handling as separate layers makes it easier to reason about large-scale async systems.</p>
+<h3 id="handling-partial-failures-1" tabindex="-1"><a class="header-anchor" href="#handling-partial-failures-1">Handling Partial Failures</a></h3>
+<p>Often, it is acceptable for some tasks to fail while others succeed. You can wrap individual tasks to capture errors without breaking the overall orchestration. Here's how to handle cases where partial success is acceptable:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> tasks <span class="token operator">=</span> urls<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">url</span> <span class="token operator">=></span>
+  <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> combinedSignal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">res</span> <span class="token operator">=></span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token punctuation">.</span><span class="token function">catch</span><span class="token punctuation">(</span><span class="token parameter">err</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">error</span><span class="token operator">:</span> err<span class="token punctuation">,</span> url <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> results <span class="token operator">=</span> <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>tasks<span class="token punctuation">)</span><span class="token punctuation">;</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Results with partial error handling'</span><span class="token punctuation">,</span> results<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Each task handles its own errors, while the orchestration layer (<code>Promise.all</code>) continues to wait for all tasks. This preserves the bounded concurrency and cancellation guarantees while avoiding premature failure propagation.</p>
+<h3 id="propagating-critical-failures" tabindex="-1"><a class="header-anchor" href="#propagating-critical-failures">Propagating Critical Failures</a></h3>
+<p>Some errors, however, are unrecoverable or require aborting the entire operation. You can propagate these selectively:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> tasks <span class="token operator">=</span> urls<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">url</span> <span class="token operator">=></span>
+  <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> combinedSignal <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>res<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Critical failure fetching </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>url<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+<span class="token keyword">try</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> results <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">runWithConcurrency</span><span class="token punctuation">(</span>tasks<span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> combinedSignal<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'All tasks completed'</span><span class="token punctuation">,</span> results<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'Critical failure, operation aborted:'</span><span class="token punctuation">,</span> err<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// signal propagation ensures other tasks are aborted</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Here, the orchestration respects cancellation signals, so aborting due to a critical failure stops all remaining tasks cleanly.</p>
+<h3 id="patterns-for-predictable-error-handling" tabindex="-1"><a class="header-anchor" href="#patterns-for-predictable-error-handling">Patterns for Predictable Error Handling</a></h3>
+<p>As a summary, effective error handling in asynchronous workflows involves:</p>
+<ul>
+<li>Wrap individual tasks to capture recoverable errors without stopping the workflow.</li>
+<li>Use signals consistently so that cancellations propagate even in error scenarios.</li>
+<li>Distinguish recoverable vs critical failures; abort the parent signal only when necessary.</li>
+<li>Keep orchestration logic separate from task-level error handling to avoid coupling and duplication.</li>
+<li>Compose with bounded concurrency and timeouts to maintain control even under partial failure.</li>
+</ul>
+<p>By following these patterns, asynchronous workflows remain robust, composable, and predictable. Errors, cancellations, and timeouts coexist cleanly, giving developers full control over execution and failure modes in complex JavaScript systems.</p>
+<h2 id="practical-observations" tabindex="-1"><a class="header-anchor" href="#practical-observations">Practical Observations</a></h2>
+<p>The patterns we've explored - cancellation, timeouts, bounded concurrency, and error handling - provide the building blocks for predictable asynchronous workflows. In practice, however, applying them correctly is often more subtle than just following the APIs. Let's highlight a few lessons learned from real systems, including common pitfalls, trade-offs, and heuristics that can make the difference between robust async code and fragile, hard-to-debug workflows.</p>
+<h3 id="early-cancellation-is-only-half-the-battle" tabindex="-1"><a class="header-anchor" href="#early-cancellation-is-only-half-the-battle">Early Cancellation Is Only Half the Battle</a></h3>
+<p>Passing an <code>AbortSignal</code> to your function is necessary, but not sufficient. Tasks can still continue running if they hold internal state, perform long loops, or retry operations without checking the signal. In production, failing to check <code>signal.aborted</code> regularly or clean up resources can lead to &quot;orphaned tasks&quot; that quietly consume memory, network connections, or CPU, sometimes surfacing as mysterious failures hours later.</p>
+<h3 id="concurrency-limits-are-contextual" tabindex="-1"><a class="header-anchor" href="#concurrency-limits-are-contextual">Concurrency Limits Are Contextual</a></h3>
+<p>A limit that works for one workload can fail for another. CPU-bound tasks may need a smaller limit than network-bound tasks. <a href="https://blog.gaborkoos.com/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/">Backpressure</a> (the concept of controlling the flow of data to prevent overwhelming a system) isn't just for streams - it matters whenever many promises compete for resources. Developers often set arbitrary limits without profiling, which leads to subtle latency spikes or cascading timeouts under load.</p>
+<h3 id="timeouts-are-negotiation-points" tabindex="-1"><a class="header-anchor" href="#timeouts-are-negotiation-points">Timeouts Are Negotiation Points</a></h3>
+<p>Timeouts aren't just an implementation detail, they reflect <strong>expectations between system layers</strong>. Too short, and you create false failures; too long, and tasks tie up resources. In layered architectures, each layer must respect global policies. Ignoring this often leads to confusing bugs where some layers time out while others keep running indefinitely.</p>
+<h3 id="errors-are-multi-dimensional" tabindex="-1"><a class="header-anchor" href="#errors-are-multi-dimensional">Errors Are Multi-Dimensional</a></h3>
+<p>Partial failures, retries, and network flakiness mean that <strong>error handling must be decoupled from orchestration</strong>. In practice, developers mix these concerns, leading to workflows where retries are applied inconsistently, cancellations are ignored, or critical errors propagate incorrectly. Observing patterns in production shows that <strong>failure semantics need to be explicit and layered</strong>. Always ask: &quot;Is this error recoverable? Should it abort the whole operation? Can other tasks continue?&quot;</p>
+<h3 id="composability-breaks-without-discipline" tabindex="-1"><a class="header-anchor" href="#composability-breaks-without-discipline">Composability Breaks Without Discipline</a></h3>
+<p>It's tempting to hard-code concurrency or cancellation inside functions for simplicity. The real-world cost appears when tasks are reused in multiple workflows: suddenly signals clash, timeouts multiply, and debugging becomes hard. Composable APIs require <strong>consistent signal propagation, clean separation of orchestration, and predictable side effects</strong>. Skipping this discipline makes scaling async systems painful.</p>
+<h3 id="cleanup-is-always-trickier-than-you-think" tabindex="-1"><a class="header-anchor" href="#cleanup-is-always-trickier-than-you-think">Cleanup Is Always Trickier Than You Think</a></h3>
+<p>Timers, network handles, database cursors all are easy to forget when aborting a task. In simple scripts it's harmless, but in long-running services it accumulates as memory leaks or stalled connections. Observing production systems shows that <strong>tying cleanup to the signal itself</strong> is the only reliable approach.</p>
+<h3 id="observability-matters" tabindex="-1"><a class="header-anchor" href="#observability-matters">Observability Matters</a></h3>
+<p>Async patterns are tricky: cancellations, timeouts, and partial failures can silently affect results. Logging or metrics that expose which tasks were aborted, which timed out, and which failed partially make debugging tractable. Without this, even correct patterns become almost impossible to reason about when things go wrong.</p>
+<h3 id="patterns-are-tools%2C-not-rules" tabindex="-1"><a class="header-anchor" href="#patterns-are-tools%2C-not-rules">Patterns Are Tools, Not Rules</a></h3>
+<p>Finally, <strong>none of these patterns are universal laws</strong>. The right choice depends on task criticality, resource constraints, and workflow semantics. Observing systems in production shows that developers who rigidly apply patterns without considering context often introduce complexity without benefit.</p>
+<h2 id="composing-complex-pipelines" tabindex="-1"><a class="header-anchor" href="#composing-complex-pipelines">Composing Complex Pipelines</a></h2>
+<p>Real-world asynchronous workflows rarely consist of a single task. Often, multiple operations must run concurrently, sequentially, or in a mix, with cancellation, timeouts, concurrency limits, and error handling coordinated across stages. Understanding how these primitives interact is crucial for building robust pipelines.</p>
+<h3 id="design-patterns-for-pipelines" tabindex="-1"><a class="header-anchor" href="#design-patterns-for-pipelines">Design Patterns for Pipelines</a></h3>
+<ul>
+<li><strong>Parent-Child Ownership</strong>: Treat the pipeline itself as the &quot;parent&quot; task. Child operations inherit signals and timeouts. Aborting the parent stops all children consistently, preventing orphaned tasks - just like we saw earlier.</li>
+<li><strong>Stage Isolation</strong>: Separate logically distinct stages (e.g., fetching, processing, saving) to apply different concurrency limits or error-handling policies. This avoids one stage monopolizing resources or propagating failures unnecessarily.</li>
+<li><strong>Error Scope Management</strong>: Decide per stage whether errors should propagate or be contained. Some stages can tolerate partial failures, others must enforce strict all-or-nothing semantics.</li>
+<li><strong>Backpressure Awareness</strong>: Design the pipeline so downstream stages can signal upstream tasks to slow down. Pull-based iteration or explicit queues help maintain system stability under load.</li>
+</ul>
+<h3 id="common-pitfalls" tabindex="-1"><a class="header-anchor" href="#common-pitfalls">Common Pitfalls</a></h3>
+<ul>
+<li><strong>Overlapping concurrency pools that exceed system capacity</strong>: each stage must respect global limits.</li>
+<li><strong>Nested or hidden cancellations that lead to silent task leaks</strong>: watch out for tasks that never complete because their signals were aborted without proper handling.</li>
+<li><strong>Layered timeouts that conflict, causing confusing early failures or runaway tasks.</strong>: the timeout strategy must be coherent across the pipeline.</li>
+<li><strong>Coupled orchestration and error handling that make the pipeline fragile or hard to reason about.</strong>: careful separation of concerns is essential to maintain clarity and correctness.</li>
+</ul>
+<p>By thinking in terms of pipeline structure, stage policies, and signal propagation, developers can design workflows that remain predictable and maintainable, even as complexity grows.</p>
+<h2 id="frameworks-%26-libraries" tabindex="-1"><a class="header-anchor" href="#frameworks-%26-libraries">Frameworks &amp; Libraries</a></h2>
+<p>Many libraries and frameworks implement or wrap some of these asynchronous patterns. These tools implement common patterns effectively, but mastering the underlying primitives ensures you can use them safely and predictably.</p>
+<h3 id="concurrency-%26-queuing-libraries" tabindex="-1"><a class="header-anchor" href="#concurrency-%26-queuing-libraries">Concurrency &amp; Queuing Libraries</a></h3>
+<p><strong>p-limit / p-queue</strong>: Lightweight tools for bounding concurrency in promise-based workflows. They let you enforce parallelism limits per stage or globally.</p>
+<p>Observation: These libraries handle execution limits but don’t propagate cancellation signals automatically, so you still need to integrate AbortSignal manually for clean task abortion.</p>
+<h3 id="reactive-%26-stream-based-libraries" tabindex="-1"><a class="header-anchor" href="#reactive-%26-stream-based-libraries">Reactive &amp; Stream-Based Libraries</a></h3>
+<p><strong>RxJS, most.js, Highland.js</strong>: Functional reactive libraries that represent async operations as streams or observables. They provide composable pipelines, backpressure support, and declarative error handling.</p>
+<p>Observation: They excel at structuring complex flows, but cancellation semantics may differ from native <code>AbortSignal</code>, and timeouts often need explicit operators. Understanding the underlying primitives helps bridge these gaps.</p>
+<h3 id="framework-level-apis" tabindex="-1"><a class="header-anchor" href="#framework-level-apis">Framework-Level APIs</a></h3>
+<p>Node.js APIs (like <code>undici</code>, <code>stream.pipeline</code>, or <code>EventEmitter</code> patterns) increasingly support <code>AbortSignal</code> for cooperative cancellation.</p>
+<p>Observation: Using these APIs effectively requires propagating signals consistently across layers. Libraries make common patterns easier but do not eliminate the need for orchestration discipline.</p>
+<h3 id="takeaways" tabindex="-1"><a class="header-anchor" href="#takeaways">Takeaways</a></h3>
+<ul>
+<li>Libraries can reduce boilerplate, enforce concurrency, or structure pipelines declaratively.</li>
+<li>None automatically solve all aspects of async coordination: cancellation, error propagation, backpressure, and timeouts still require developer attention.</li>
+<li>Understanding the primitive patterns ensures that library usage remains safe and predictable in production.</li>
+</ul>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Building robust asynchronous systems in JavaScript requires more than just <code>async/await</code>. Cancellation, timeouts, bounded concurrency, and controlled error handling are essential patterns that interact in subtle ways. By treating cancellation as a first-class primitive, expressing timeouts declaratively, composing tasks with clear ownership, and separating error handling from orchestration, developers can create predictable, maintainable workflows. These patterns are not just theoretical: they reflect real-world challenges observed in production systems. Mastering them helps developers to build scalable, resilient applications that handle the complexities of modern asynchronous programming.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
