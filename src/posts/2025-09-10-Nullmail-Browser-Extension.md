@@ -7,6 +7,9 @@ excerpt: Nullmail is a simple, privacy-first disposable email service. Instantly
 tags:
 - posts
 - announcements
+- nullmail
+- email privacy
+- disposable email
 ---
 Back in August I introduced [Nullmail](https://nullmail.cc) - a simple, privacy-first disposable email service. The idea was straightforward: generate a temporary address, receive mail for a short time, and move on without giving up your real email.
 
