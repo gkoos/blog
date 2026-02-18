@@ -10,8 +10,6 @@ tags:
 - email privacy
 - disposable email
 ---
-# Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc
-
 A few days ago, I got an unexpected email from Cloudflare: my domain, `maildock.store`, had stopped using their nameservers and was at risk of being deleted. This was unexpected, as I hadn't made any changes to the DNS settings. After some investigation, I discovered that the domain had been flagged for abuse, likely due to its association with disposable email services.
 
 For context, `maildock.store` powers [nullmail.cc](https://nullmail.cc), a privacy-first disposable email service. Users can create addresses, receive emails, and have them automatically deleted after expiration - all without signing up, tracking, or sending any outgoing mail. The frontend is a [SvelteKit](https://kit.svelte.dev/) app on [Vercel](https://vercel.com/), emails are forwarded via [forwardemail.net](https://forwardemail.net/) into a [Supabase](https://supabase.com/) database, and the system automatically cleans up expired content. It's minimal by design, but robust enough to provide a fully functional disposable inbox - mostly in free tiers of various services.
