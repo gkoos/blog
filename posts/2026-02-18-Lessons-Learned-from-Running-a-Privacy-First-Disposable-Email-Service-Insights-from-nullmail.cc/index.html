@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc</title>
+  <meta name="description" content="Running a privacy-first disposable email service: Lessons from handling domain abuse flags, ServerHold suspension, and registry issues with nullmail.cc.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc">
+  <meta property="og:description" content="Running a privacy-first disposable email service: Lessons from handling domain abuse flags, ServerHold suspension, and registry issues with nullmail.cc.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc">
+  <meta name="twitter:description" content="Running a privacy-first disposable email service: Lessons from handling domain abuse flags, ServerHold suspension, and registry issues with nullmail.cc.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-02-18T00:00:00.000Z">Wed Feb 18 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">nullmail</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">email privacy</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">disposable email</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <h1 id="lessons-learned-from-running-a-privacy-first-disposable-email-service%3A-insights-from-nullmail.cc" tabindex="-1"><a class="header-anchor" href="#lessons-learned-from-running-a-privacy-first-disposable-email-service%3A-insights-from-nullmail.cc">Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc</a></h1>
+<p>A few days ago, I got an unexpected email from Cloudflare: my domain, <code>maildock.store</code>, had stopped using their nameservers and was at risk of being deleted. This was unexpected, as I hadn't made any changes to the DNS settings. After some investigation, I discovered that the domain had been flagged for abuse, likely due to its association with disposable email services.</p>
+<p>For context, <code>maildock.store</code> powers <a href="https://nullmail.cc">nullmail.cc</a>, a privacy-first disposable email service. Users can create addresses, receive emails, and have them automatically deleted after expiration - all without signing up, tracking, or sending any outgoing mail. The frontend is a <a href="https://kit.svelte.dev/">SvelteKit</a> app on <a href="https://vercel.com/">Vercel</a>, emails are forwarded via <a href="https://forwardemail.net/">forwardemail.net</a> into a <a href="https://supabase.com/">Supabase</a> database, and the system automatically cleans up expired content. It's minimal by design, but robust enough to provide a fully functional disposable inbox - mostly in free tiers of various services.</p>
+<p>Despite this simplicity, domains like <code>maildock.store</code> can trigger automated abuse flags. What followed was a whirlwind of DNS checks, WHOIS lookups, blacklist verification, and conversations with the <code>.store</code> registry, <a href="https://radix.website">Radix</a>. In this post, I'll walk through the story, how (I think) I resolved the issue, and the architectural choices that made it possible to recover safely, while keeping the service privacy-first.</p>
+<h2 id="design-philosophy" tabindex="-1"><a class="header-anchor" href="#design-philosophy">Design Philosophy</a></h2>
+<p>At its core, Nullmail is built around <strong>privacy, simplicity, and minimalism</strong>. The goal is straightforward: users should be able to receive emails without giving away personal information, signing up for accounts, or being tracked. There's no analytics, no logging beyond what's necessary to deliver emails, and no outgoing SMTP - the service is strictly receive-only.</p>
+<p>Every design choice reflects this philosophy. Addresses are ephemeral and automatically expire, keeping the system lean and reducing the risk of abuse. The database only stores what's necessary: the address itself and the emails sent to it. No unnecessary metadata, no IP logs, no behavioral tracking. Even the UI is stripped down to essentials, giving users just enough functionality to check their inbox and manage addresses.</p>
+<p>This minimal, privacy-first approach has a practical benefit as well: it reduces the attack surface and limits what can go wrong. There's no complicated backend for sending mail, no rate-limiting infrastructure, and no analytics that could trigger false positives with anti-spam systems.</p>
+<h2 id="architecture-overview" tabindex="-1"><a class="header-anchor" href="#architecture-overview">Architecture Overview</a></h2>
+<p>The simplicity of Nullmail's design is mirrored in its architecture. The service combines a few lightweight, well-chosen components to deliver a fully functional disposable email system while staying mostly in free tiers:</p>
+<ul>
+<li><strong>Frontend</strong>: A SvelteKit app hosted on Vercel. It handles the user interface for reading emails and managing addresses, with minimal JavaScript and no tracking.</li>
+<li><strong>Backend/API</strong>: The same SvelteKit app provides serverless API routes on Vercel for core operations: creating new addresses, listing inboxes, fetching email bodies, and extending expiry timestamps.</li>
+<li><strong>Database</strong>: A Supabase Postgres instance stores addresses and emails. The database schema is minimal, consisting of:
+<ul>
+<li><strong>addresses table</strong>: stores the address and its expiry timestamp.</li>
+<li><strong>emails table</strong>: stores sender, recipient, subject, body, and delivery timestamp. Each email references an address, and expired addresses (and their emails) are automatically deleted via a scheduled cron job every five minutes.</li>
+</ul>
+</li>
+<li><strong>Email ingestion</strong>: All incoming emails are routed through <code>forwardemail.net</code>. ForwardEmail posts inbound mail to a Vercel API endpoint, which inserts it into the Supabase database.</li>
+<li><strong>Domains &amp; DNS</strong>: The service operates under the domains <code>maildock.store</code> and <code>nullmail.cc</code>. DNS is managed through <a href="https://www.cloudflare.com/">Cloudflare</a>, which provides:
+<ul>
+<li>Nameserver hosting</li>
+<li>MX, SPF, DMARC, TLSRPT, and _security TXT records</li>
+<li>Proxying for web traffic (though Nullmail is mostly static)</li>
+<li>Protection against accidental misconfiguration or abuse flags</li>
+</ul>
+</li>
+<li><strong>Optional UX</strong>: Browser extensions for <a href="https://chromewebstore.google.com/detail/nullmail-extension/ogbnjlpdlihcbfmdffhkklhikjlmkfnm?pli=1">Chrome</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/nullmail-extension/">Firefox</a> open the site with a <code>fromExtension=1</code> flag for minor interface tweaks.</li>
+</ul>
+<p>The codebase can be found on GitHub: <a href="https://github.com/gkoos/nullmail/">gkoos/nullmail</a>.</p>
+<p>This architecture is lightweight but resilient, perfectly aligned with the privacy-first philosophy: no outgoing SMTP, minimal logging, and automated cleanup. It also meant that when the domain was flagged by Radix, most of the infrastructure was unaffected: the problem was isolated to DNS and registry-level issues.</p>
+<h2 id="the-incident" tabindex="-1"><a class="header-anchor" href="#the-incident">The Incident</a></h2>
+<p>Even with a minimal, receive-only setup, disposable email domains can attract attention from automated abuse systems. As I mentioned earlier, I got an email from Cloudflare warning that maildock.store had stopped using their nameservers and was at risk of being deleted. At first, it felt like a false alarm — I hadn't touched any DNS settings.</p>
+<p>Digging deeper, I discovered that the domain had been placed on <code>ServerHold</code> by Radix, the registry that manages .store domains. <code>ServerHold</code> is usually reserved for domains flagged for abuse, spam, or other policy violations. In my case, the likely trigger was the domain's association with my disposable email service, even though Nullmail is strictly receive-only and doesn't send outbound mail.</p>
+<p>To investigate, I ran <code>WHOIS</code> checks, <code>TXT</code> and <code>MX</code> lookups, and verified DNS settings through Cloudflare. I also checked common spam/blacklist sources like SURBL: initially, the domain appeared flagged, though later it was cleared. While the frontend and database remained fully functional, the suspension meant that any new email delivery could fail and the domain risked being removed entirely.</p>
+<p>This incident highlighted the harsh reality: even a minimal, privacy-first service with just a few users can run into registry-level issues. Fortunately, the architecture - isolated frontend, serverless backend, and Cloudflare-managed DNS - meant that the problem was largely contained to the domain itself, and recovery would be possible with the right steps.</p>
+<h2 id="the-resolution" tabindex="-1"><a class="header-anchor" href="#the-resolution">The Resolution</a></h2>
+<p>Once I confirmed that maildock.store was on <code>ServerHold</code>, the next step was to contact Radix directly via their <a href="https://abuse.radix.website/unsuspension">unsuspension form</a>. I explained the service, emphasized it's receive-only nature, and detailed the privacy-first safeguards in place.</p>
+<p>Radix responded positively and removed the <code>ServerHold</code>, reinstating the domain. To further prevent future issues and provide a point of contact for abuse reports, I created a dedicated abuse mailbox (abuse@maildock.store). This mailbox is stored in the Supabase database, has no public access, and is checked only via the Supabase UI as needed.</p>
+<p>Next, I verified and cleaned up the DNS records in Cloudflare:</p>
+<ul>
+<li>Removed old registrar NS entries that were no longer needed.</li>
+<li>Deleted test or placeholder A records that could confuse DNS checks.</li>
+<li>Confirmed MX records pointing to forwardemail.net were correct.</li>
+<li>Ensured SPF, DMARC, TLSRPT, and <code>_security</code> TXT records were properly configured, with the abuse mailbox as the contact.</li>
+</ul>
+<p>After these steps, the domain was fully operational again: emails were being received reliably, and the system continued to enforce automatic cleanup of expired content.</p>
+<p>This experience reinforced the importance of clear abuse contact channels, proper DNS hygiene, and documenting a simple, minimal architecture that isolates potential issues. Even a small, receive-only service can be flagged, but thoughtful design makes recovery straightforward.</p>
+<p>Honestly, I should have anticipated this sooner. Luckily, the solution was simple, and the service is back up without any lasting damage. The incident also provided valuable insights into how registry-level abuse flags work and how to design a service that can recover gracefully from them.</p>
+<h2 id="lessons-learned" tabindex="-1"><a class="header-anchor" href="#lessons-learned">Lessons Learned</a></h2>
+<p>The ServerHold incident with maildock.store offered several insights about running a minimal disposable email service:</p>
+<ul>
+<li>Despite being receive-only, with no outgoing mail, maildock.store was still flagged for potential abuse. utomated systems at the registry level tend to be cautious and sometimes overly conservative. Also, because no logs are kept, there's no way to tell what triggered the flag, which is a risk of a privacy-first approach.</li>
+<li>DNS and registry configurations matter more than expected.</li>
+<li>Inconsistencies in nameservers or leftover records may trigger alerts. While the system itself was unaffected, the domain's reachability depends on clear, correct DNS entries.</li>
+<li>Direct communication with the registry is crucial - and they were responsive and helpful in resolving the issue once I provided context about the service and its safeguards.</li>
+<li>Automated abuse flags are often resolvable with context. Having a clear explanation and a point of contact (abuse@maildock.store) allowed me to restore the domain quickly.</li>
+<li>Minimalism has trade-offs: a simple architecture isolates most operations from failures like this, but no logging and lack of outbound monitoring means we rely on external feedback to detect issues.</li>
+<li>The &quot;why&quot; remains uncertain: we still don't know exactly what triggered the abuse flag. This leaves open questions about how disposable domains are evaluated, and whether additional safeguards could reduce false positives. And also makes me wonder if the domain was targeted by a malicious actor who reported it, or tried to exploit the service, or if it was just an automated flag based on the domain's history or traffic patterns.</li>
+</ul>
+<p>Overall, the experience reinforced that running a privacy-first service comes with uncertainties and edge cases. While minimalism and privacy help in some areas, external systems (registries, DNS providers, abuse monitors) can still impact availability in ways that are outside the service's direct control. In a larger context, this highlights the need to do your due diligence and understand the challenges of running a service that interacts with the broader internet ecosystem, even if it's designed to be as simple and private as possible. Also, value your users, but don't trust them to not try to abuse the service, and design with that in mind.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

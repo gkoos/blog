@@ -521,5 +521,14 @@
         <description>Advanced async in JavaScript: cancellation, timeouts, bounded concurrency, AbortSignal, and error handling for resilient Node.js and browser apps.</description>
       </item>
     
+      <item>
+        <title>Lessons Learned from Running a Privacy-First Disposable Email Service: Insights from nullmail.cc</title>
+        <link>https://blog.gaborkoos.com/posts/2026-02-18-Lessons-Learned-from-Running-a-Privacy-First-Disposable-Email-Service-Insights-from-nullmail.cc/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-02-18-Lessons-Learned-from-Running-a-Privacy-First-Disposable-Email-Service-Insights-from-nullmail.cc/</guid>
+        <pubDate>Wed, 18 Feb 2026 00:00:00 GMT</pubDate>
+
+        <description>Running a privacy-first disposable email service: Lessons from handling domain abuse flags, ServerHold suspension, and registry issues with nullmail.cc.</description>
+      </item>
+    
   </channel>
 </rss>
