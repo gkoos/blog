@@ -530,5 +530,14 @@
         <description>Running a privacy-first disposable email service: Lessons from handling domain abuse flags, ServerHold suspension, and registry issues with nullmail.cc.</description>
       </item>
     
+      <item>
+        <title>Using Pagination to Improve GraphQL Performance</title>
+        <link>https://blog.gaborkoos.com/posts/2026-02-19-Using-Pagination-to-Improve-GraphQL-Performance/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-02-19-Using-Pagination-to-Improve-GraphQL-Performance/</guid>
+        <pubDate>Thu, 19 Feb 2026 00:00:00 GMT</pubDate>
+
+        <description>Exploring how pagination strategies can impact GraphQL performance in Node.js applications.</description>
+      </item>
+    
   </channel>
 </rss>

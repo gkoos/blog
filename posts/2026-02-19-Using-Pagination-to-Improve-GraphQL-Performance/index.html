@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Using Pagination to Improve GraphQL Performance</title>
+  <meta name="description" content="Exploring how pagination strategies can impact GraphQL performance in Node.js applications.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Using Pagination to Improve GraphQL Performance">
+  <meta property="og:description" content="Exploring how pagination strategies can impact GraphQL performance in Node.js applications.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Using Pagination to Improve GraphQL Performance">
+  <meta name="twitter:description" content="Exploring how pagination strategies can impact GraphQL performance in Node.js applications.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Using Pagination to Improve GraphQL Performance</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-02-19T00:00:00.000Z">Thu Feb 19 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">nullmail</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">graphql</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>GraphQL makes it easy to request exactly the data you need, but that flexibility can quickly turn into a performance problem when queries return large result sets. A single field that returns &quot;all items&quot; may work fine during development, yet silently degrade into slow responses, high memory usage, or even process crashes as data volume grows.</p>
+<p>This is especially relevant in <strong>Node.js</strong> backends, where resolvers often materialize entire result sets in memory before returning a response. Fetching a large number of records in a single GraphQL query doesn't just increase response time, it can put sustained pressure on the event loop, garbage collector, and overall process stability.</p>
+<p>Pagination is the standard solution to this problem, but not all pagination strategies behave the same under load.</p>
+<p>In this article, we'll look at three common approaches to pagination in a Node.js GraphQL API: fetching everything at once, <em>offset-based pagination</em>, and <em>cursor-based pagination</em>. Rather than treating pagination as a purely theoretical concern, we'll instrument each approach and observe how it affects response times and memory usage.</p>
+<p>We'll build a minimal GraphQL API using <strong>Express</strong> and <strong>Apollo Server</strong>, backed by a SQLite database seeded with 500,000 products. You'll see how naive queries show up as slow requests and memory spikes, how offset-based pagination improves things but still has hidden costs, and why cursor-based pagination is - spoiler alert! - the recommended pattern for stable, scalable GraphQL APIs.</p>
+<h2 id="setting-up-the-project" tabindex="-1"><a class="header-anchor" href="#setting-up-the-project">Setting Up the Project</a></h2>
+<p>To keep things simple, the article is accompanied by a runnable <a href="...">demo repository</a>. The project is a small Node.js GraphQL API, with a SQLite backend populated with 500,000 products.</p>
+<h2 id="prerequisites" tabindex="-1"><a class="header-anchor" href="#prerequisites">Prerequisites</a></h2>
+<p>To follow along, you'll only need:</p>
+<ul>
+<li>Node.js 18+</li>
+<li>npm</li>
+<li>A basic understanding of GraphQL and Node.js development</li>
+</ul>
+<h2 id="installation" tabindex="-1"><a class="header-anchor" href="#installation">Installation</a></h2>
+<p>Start by cloning the repository and installing dependencies:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> clone https://github.com/gkoos/article-graphql-pagination
+<span class="token builtin class-name">cd</span> article-graphql-pagination
+<span class="token function">npm</span> <span class="token function">install</span>
+</code></pre>
+<p>The project uses Prisma with SQLite and includes a seed script that creates 500,000 product records to demonstrate performance differences between pagination strategies.</p>
+<p>Run the following commands to initialize and seed the database:</p>
+<pre class="language-bash"><code class="language-bash">npx prisma generate
+<span class="token function">npm</span> run prisma:migrate
+<span class="token function">npm</span> run prisma:seed
+</code></pre>
+<p>This will create the database schema and populate it with realistic-looking product data.</p>
+<h2 id="running-the-server" tabindex="-1"><a class="header-anchor" href="#running-the-server">Running the Server</a></h2>
+<p>Once setup is complete, start the server:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> start
+</code></pre>
+<p>The GraphQL API will be available at <code>http://localhost:4000</code>, where you can explore the schema and run queries using the Apollo Sandbox.</p>
+<h2 id="the-problem%3A-fetching-all-data-at-once" tabindex="-1"><a class="header-anchor" href="#the-problem%3A-fetching-all-data-at-once">The Problem: Fetching All Data at Once</a></h2>
+<p>Before introducing pagination, let's start with the simplest approach: returning <em>all</em> records from a GraphQL field in a single request.</p>
+<p>In our app, the <code>allProducts</code> query does exactly that. It loads all 500,000 products from the database and returns them as a single response. This kind of query is easy to write, easy to understand, and surprisingly common in early GraphQL schemas.</p>
+<p>Here's the resolver behind it:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// src/resolvers.js</span>
+<span class="token operator">...</span>
+<span class="token function-variable function">allProducts</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">time</span><span class="token punctuation">(</span><span class="token string">'allProducts'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> products <span class="token operator">=</span> <span class="token keyword">await</span> prisma<span class="token punctuation">.</span>product<span class="token punctuation">.</span><span class="token function">findMany</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">orderBy</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token string">'asc'</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">timeEnd</span><span class="token punctuation">(</span><span class="token string">'allProducts'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Fetched </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>products<span class="token punctuation">.</span>length<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> products (ALL)</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> products<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre>
+<p>There's nothing technically wrong with this resolver. It does exactly what it promises. The problem is <em>scale</em>.</p>
+<h3 id="running-the-fetch-all-query" tabindex="-1"><a class="header-anchor" href="#running-the-fetch-all-query">Running the Fetch-All Query</a></h3>
+<p>Open the GraphQL Sandbox at <code>http://localhost:4000</code> and run the following query:</p>
+<pre class="language-graphql"><code class="language-graphql">query allProducts <span class="token punctuation">{</span>
+  allProducts <span class="token punctuation">{</span>
+    id
+    name
+    price
+    category
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Depending on your machine, the query may take several seconds to complete. You'll also notice that the response payload is very large: hundreds of thousands of objects serialized into JSON and sent over the wire in one go.</p>
+<p>In your terminal, you should see a log message like this:</p>
+<pre class="language-"><code class="language-"><span class="token literal-property property">allProducts</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">.</span>817s
+Fetched <span class="token number">500000</span> <span class="token function">products</span> <span class="token punctuation">(</span><span class="token constant">ALL</span><span class="token punctuation">)</span>
+</code></pre>
+<p>A single request:</p>
+<ul>
+<li>Executes a large database query</li>
+<li>Allocates memory for all 500,000 rows</li>
+<li>Serializes the entire result set before responding</li>
+</ul>
+<p>In a real production API, this kind of request can quickly become problematic under concurrent load.</p>
+<h3 id="why-this-pattern-breaks-down" tabindex="-1"><a class="header-anchor" href="#why-this-pattern-breaks-down">Why This Pattern Breaks Down</a></h3>
+<p>Even in this local setup, you can observe:</p>
+<ul>
+<li>High response times (often several seconds)</li>
+<li>Significant memory usage spikes during request processing</li>
+</ul>
+<p>Because the resolver loads the entire dataset eagerly, the cost of this query <strong>scales linearly with the number of rows in the table</strong>. As the dataset grows, so does response time, memory pressure, and GC activity in the Node.js process.</p>
+<p>This is one of those things that often goes unnoticed during development, but becomes very visible once real data and real traffic hit the system.</p>
+<p>Fetching all data at once has a few fundamental problems:</p>
+<ul>
+<li><strong>Unbounded results</strong>: There's no upper limit on how much data a client can request.</li>
+<li><strong>Poor memory characteristics</strong>: Large result sets must be held in memory until the response is sent.</li>
+<li><strong>Unpredictable performance</strong>: Response time grows with dataset size, not request intent.</li>
+<li><strong>Easy to abuse</strong>: A single client can unintentionally (or intentionally) stress the backend.</li>
+</ul>
+<p><strong>Pagination</strong> exists to put boundaries around this behavior.</p>
+<h2 id="naive-offset-based-pagination" tabindex="-1"><a class="header-anchor" href="#naive-offset-based-pagination">Naive Offset-Based Pagination</a></h2>
+<p>A natural first step after realizing that fetching everything at once doesn't scale is to introduce <em>offset-based pagination</em>. This approach limits the number of records returned per request and allows clients to &quot;page through&quot; results using a combination of limit and offset.</p>
+<p>Offset-based pagination is simple to implement and easy to reason about, which makes it a common choice in REST APIs and an equally common first attempt in GraphQL.</p>
+<h3 id="implementing-offset-pagination" tabindex="-1"><a class="header-anchor" href="#implementing-offset-pagination">Implementing Offset Pagination</a></h3>
+<p>In our demo project, the <code>productsOffset</code> query exposes this pattern:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// src/resolvers.js</span>
+<span class="token operator">...</span>
+<span class="token function-variable function">productsOffset</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> <span class="token punctuation">{</span> limit<span class="token punctuation">,</span> offset <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">time</span><span class="token punctuation">(</span><span class="token string">'productsOffset'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>limit <span class="token operator">></span> <span class="token number">100</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        limit <span class="token operator">=</span> <span class="token number">100</span><span class="token punctuation">;</span> <span class="token comment">// enforce a maximum limit to prevent abuse</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">const</span> products <span class="token operator">=</span> <span class="token keyword">await</span> prisma<span class="token punctuation">.</span>product<span class="token punctuation">.</span><span class="token function">findMany</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">take</span><span class="token operator">:</span> limit<span class="token punctuation">,</span>
+    <span class="token literal-property property">skip</span><span class="token operator">:</span> offset<span class="token punctuation">,</span>
+    <span class="token literal-property property">orderBy</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token string">'asc'</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">timeEnd</span><span class="token punctuation">(</span><span class="token string">'productsOffset'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Fetched </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>products<span class="token punctuation">.</span>length<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> products (offset: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>offset<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">, limit: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>limit<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">)</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> products<span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre>
+<p>One thing that's important to note here is if we don't limit the number of records returned, we could still end up fetching everything at once. <strong>Always implement a server-side maximum limit to prevent abuse</strong>.</p>
+<p>The resolver uses Prisma's <code>take</code> and <code>skip</code> options to implement limit and offset behavior. Clients can specify how many records they want (<code>limit</code>) and where to start (<code>offset</code>).</p>
+<p>The corresponding GraphQL query looks like this:</p>
+<pre class="language-graphql"><code class="language-graphql">query productsOffset <span class="token punctuation">{</span>
+  <span class="token function">productsOffset</span><span class="token punctuation">(</span><span class="token parameter"><span class="token literal-property property">limit</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token literal-property property">offset</span><span class="token operator">:</span> <span class="token number">0</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    id
+    name
+    price
+    category
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Instead of returning all 500,000 products, this query fetches just a small window of results. Clients can request subsequent pages by increasing the offset value.</p>
+<h3 id="observing-the-improvement" tabindex="-1"><a class="header-anchor" href="#observing-the-improvement">Observing the Improvement</a></h3>
+<p>Run the offset-based query a few times from the GraphQL Sandbox, changing the offset to simulate paging through the dataset.</p>
+<p>In your terminal, you should see logs like this:</p>
+<pre class="language-"><code class="language-"><span class="token literal-property property">productsOffset</span><span class="token operator">:</span> <span class="token number">17</span><span class="token punctuation">.</span>44ms
+Fetched <span class="token number">20</span> <span class="token function">products</span> <span class="token punctuation">(</span>offset<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">limit</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Compared to the fetch-all approach, you should immediately notice:</p>
+<ul>
+<li>Much faster response times</li>
+<li>Shorter database query time</li>
+<li>Lower overall memory usage per request</li>
+</ul>
+<p>By limiting how many records are loaded and serialized, offset-based pagination dramatically reduces the per-request cost. Even under load, this approach is far more stable than returning everything at once.</p>
+<h3 id="the-hidden-cost-of-offsets" tabindex="-1"><a class="header-anchor" href="#the-hidden-cost-of-offsets">The Hidden Cost of Offsets</a></h3>
+<p>While offset-based pagination is a clear improvement, it comes with a less obvious downside.</p>
+<p>As the offset value increases, <strong>the database still needs to scan past the skipped rows to reach the requested page</strong>. For small offsets this isn't a problem, but deeper pages can become increasingly expensive, especially on large tables.</p>
+<p>Let's query the last page of products:</p>
+<pre class="language-graphql"><code class="language-graphql">query productsOffset <span class="token punctuation">{</span>
+  <span class="token function">productsOffset</span><span class="token punctuation">(</span><span class="token parameter"><span class="token literal-property property">limit</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token literal-property property">offset</span><span class="token operator">:</span> <span class="token number">499980</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    id
+    name
+    price
+    category
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Run this query and observe the terminal logs:</p>
+<pre class="language-"><code class="language-"><span class="token literal-property property">productsOffset</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">.</span>055s
+Fetched <span class="token number">20</span> <span class="token function">products</span> <span class="token punctuation">(</span>offset<span class="token operator">:</span> <span class="token number">499980</span><span class="token punctuation">,</span> <span class="token literal-property property">limit</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">)</span>
+</code></pre>
+<p>In this particular case, the first query took 17ms, while the last page took more than a second!</p>
+<p>From the client's perspective, this query looks almost identical to fetching the first page, but from the database's perspective, it may involve scanning hundreds of thousands of rows before returning just 20.</p>
+<h3 id="why-this-matters-in-graphql-apis" tabindex="-1"><a class="header-anchor" href="#why-this-matters-in-graphql-apis">Why This Matters in GraphQL APIs</a></h3>
+<p>Offset-based pagination also has semantic issues in GraphQL:</p>
+<ul>
+<li><strong>Unstable pagination</strong>: Inserts or deletes can shift offsets, causing clients to skip or duplicate items.</li>
+<li><strong>No natural continuation</strong>: Clients must manage offsets manually.</li>
+<li><strong>Poor fit for infinite scrolling</strong>: Large offsets become increasingly inefficient.</li>
+</ul>
+<p>These limitations are why offset-based pagination is generally considered a transitional solution in GraphQL APIs.</p>
+<h2 id="cursor-based-pagination" tabindex="-1"><a class="header-anchor" href="#cursor-based-pagination">Cursor-Based Pagination</a></h2>
+<p>Offset-based pagination improves performance by limiting result size, but it still becomes less efficient as clients paginate deeper into a dataset. In GraphQL APIs, the recommended alternative is <strong>cursor-based pagination</strong>, where each page starts from a known position instead of skipping an arbitrary number of rows.</p>
+<p>Cursor-based pagination is a better fit for large datasets because its <strong>performance depends on page size, not page number</strong>.</p>
+<h3 id="implementing-cursor-based-pagination" tabindex="-1"><a class="header-anchor" href="#implementing-cursor-based-pagination">Implementing Cursor-Based Pagination</a></h3>
+<p>In this project, cursor-based pagination is implemented using Prisma’s native cursor support. Each product's <code>id</code> is encoded into an opaque cursor, which the client passes back when requesting the next page.</p>
+<p>At a high level, the resolver:</p>
+<ol>
+<li>Decodes the after cursor (if present)</li>
+<li>Uses it as a database cursor</li>
+<li>Fetches first + 1 records to determine if another page exists</li>
+<li>Builds a connection-style response with edges and pageInfo</li>
+</ol>
+<p>Here is the resolver implementation:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// src/resolvers.js</span>
+<span class="token comment">// Helper function to encode cursor</span>
+<span class="token keyword">function</span> <span class="token function">encodeCursor</span><span class="token punctuation">(</span><span class="token parameter">id</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> Buffer<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span>id<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'base64'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Helper function to decode cursor</span>
+<span class="token keyword">function</span> <span class="token function">decodeCursor</span><span class="token punctuation">(</span><span class="token parameter">cursor</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">parseInt</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span>cursor<span class="token punctuation">,</span> <span class="token string">'base64'</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token string">'ascii'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token operator">...</span>
+
+<span class="token function-variable function">productsCursor</span><span class="token operator">:</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> <span class="token punctuation">{</span> first <span class="token operator">=</span> <span class="token number">20</span><span class="token punctuation">,</span> after <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">time</span><span class="token punctuation">(</span><span class="token string">'productsCursor'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">const</span> cursor <span class="token operator">=</span> after <span class="token operator">?</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token function">decodeCursor</span><span class="token punctuation">(</span>after<span class="token punctuation">)</span> <span class="token punctuation">}</span> <span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+    
+    <span class="token comment">// Fetch one extra to determine if there's a next page</span>
+    <span class="token keyword">const</span> products <span class="token operator">=</span> <span class="token keyword">await</span> prisma<span class="token punctuation">.</span>product<span class="token punctuation">.</span><span class="token function">findMany</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">take</span><span class="token operator">:</span> first <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token operator">...</span><span class="token punctuation">(</span>cursor <span class="token operator">&amp;&amp;</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">skip</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token comment">// Skip the cursor itself</span>
+        <span class="token literal-property property">cursor</span><span class="token operator">:</span> cursor
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">orderBy</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token string">'asc'</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> hasNextPage <span class="token operator">=</span> products<span class="token punctuation">.</span>length <span class="token operator">></span> first<span class="token punctuation">;</span>
+    <span class="token keyword">const</span> edges <span class="token operator">=</span> products<span class="token punctuation">.</span><span class="token function">slice</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> first<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span><span class="token parameter">product</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">cursor</span><span class="token operator">:</span> <span class="token function">encodeCursor</span><span class="token punctuation">(</span>product<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">node</span><span class="token operator">:</span> product
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> pageInfo <span class="token operator">=</span> <span class="token punctuation">{</span>
+    hasNextPage<span class="token punctuation">,</span>
+    <span class="token literal-property property">hasPreviousPage</span><span class="token operator">:</span> <span class="token operator">!</span><span class="token operator">!</span>after<span class="token punctuation">,</span>
+    <span class="token literal-property property">startCursor</span><span class="token operator">:</span> edges<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> edges<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">.</span>cursor <span class="token operator">:</span> <span class="token keyword">null</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">endCursor</span><span class="token operator">:</span> edges<span class="token punctuation">.</span>length <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">?</span> edges<span class="token punctuation">[</span>edges<span class="token punctuation">.</span>length <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">.</span>cursor <span class="token operator">:</span> <span class="token keyword">null</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">const</span> totalCount <span class="token operator">=</span> <span class="token keyword">await</span> prisma<span class="token punctuation">.</span>product<span class="token punctuation">.</span><span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    console<span class="token punctuation">.</span><span class="token function">timeEnd</span><span class="token punctuation">(</span><span class="token string">'productsCursor'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Fetched </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>edges<span class="token punctuation">.</span>length<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string"> products (cursor-based, after: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>after <span class="token operator">||</span> <span class="token string">'start'</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">)</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+    edges<span class="token punctuation">,</span>
+    pageInfo<span class="token punctuation">,</span>
+    totalCount
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre>
+<p>This approach ensures that each query resumes from a precise position in the dataset rather than scanning past thousands of rows.</p>
+<h3 id="querying-with-cursors" tabindex="-1"><a class="header-anchor" href="#querying-with-cursors">Querying with Cursors</a></h3>
+<p>To fetch the first page of products:</p>
+<pre class="language-graphql"><code class="language-graphql">query cursorProductsFirst <span class="token punctuation">{</span>
+  <span class="token function">productsCursor</span><span class="token punctuation">(</span><span class="token parameter"><span class="token literal-property property">first</span><span class="token operator">:</span> <span class="token number">20</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    edges <span class="token punctuation">{</span>
+      cursor
+      node <span class="token punctuation">{</span>
+        id
+        name
+        price
+        category
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    pageInfo <span class="token punctuation">{</span>
+      hasNextPage
+      hasPreviousPage
+      startCursor
+      endCursor
+    <span class="token punctuation">}</span>
+    totalCount
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>In the terminal, you'll see something like:</p>
+<pre class="language-"><code class="language-"><span class="token literal-property property">productsCursor</span><span class="token operator">:</span> <span class="token number">39</span><span class="token punctuation">.</span>993ms
+Fetched <span class="token number">20</span> <span class="token function">products</span> <span class="token punctuation">(</span>cursor<span class="token operator">-</span>based<span class="token punctuation">,</span> <span class="token literal-property property">after</span><span class="token operator">:</span> start<span class="token punctuation">)</span>
+</code></pre>
+<p>And the response will be:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"data"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"productsCursor"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"edges"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">{</span>
+          <span class="token property">"cursor"</span><span class="token operator">:</span> <span class="token string">"MQ=="</span><span class="token punctuation">,</span>
+          <span class="token property">"node"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+            <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Product 1"</span><span class="token punctuation">,</span>
+            <span class="token property">"price"</span><span class="token operator">:</span> <span class="token number">581.7240166646505</span><span class="token punctuation">,</span>
+            <span class="token property">"category"</span><span class="token operator">:</span> <span class="token string">"Clothing"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        ...
+        <span class="token punctuation">{</span>
+          <span class="token property">"cursor"</span><span class="token operator">:</span> <span class="token string">"MjA="</span><span class="token punctuation">,</span>
+          <span class="token property">"node"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+            <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Product 20"</span><span class="token punctuation">,</span>
+            <span class="token property">"price"</span><span class="token operator">:</span> <span class="token number">979.7302196981608</span><span class="token punctuation">,</span>
+            <span class="token property">"category"</span><span class="token operator">:</span> <span class="token string">"Sports"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token property">"pageInfo"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">"hasNextPage"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+        <span class="token property">"hasPreviousPage"</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+        <span class="token property">"startCursor"</span><span class="token operator">:</span> <span class="token string">"MQ=="</span><span class="token punctuation">,</span>
+        <span class="token property">"endCursor"</span><span class="token operator">:</span> <span class="token string">"MjA="</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token property">"totalCount"</span><span class="token operator">:</span> <span class="token number">500000</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The format is slightly different from our offset-based implementation, but all 20 products are returned as expected, plus some useful pagination metadata. To fetch the next page, the client simply uses the <code>endCursor</code> from the previous response:</p>
+<pre class="language-graphql"><code class="language-graphql">query cursorProductsNext <span class="token punctuation">{</span>
+  <span class="token function">productsCursor</span><span class="token punctuation">(</span>first<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token literal-property property">after</span><span class="token operator">:</span> <span class="token string">"MjA="</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    edges <span class="token punctuation">{</span>
+      cursor
+      node <span class="token punctuation">{</span>
+        id
+        name
+        price
+        category
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    pageInfo <span class="token punctuation">{</span>
+      hasNextPage
+      endCursor
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>And the response will contain products 21-40:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"data"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"productsCursor"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"edges"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+        <span class="token punctuation">{</span>
+          <span class="token property">"cursor"</span><span class="token operator">:</span> <span class="token string">"MjE="</span><span class="token punctuation">,</span>
+          <span class="token property">"node"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">21</span><span class="token punctuation">,</span>
+            <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Product 21"</span><span class="token punctuation">,</span>
+            <span class="token property">"price"</span><span class="token operator">:</span> <span class="token number">194.5758511706771</span><span class="token punctuation">,</span>
+            <span class="token property">"category"</span><span class="token operator">:</span> <span class="token string">"Toys"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span><span class="token punctuation">,</span>
+        ...
+        <span class="token punctuation">{</span>
+          <span class="token property">"cursor"</span><span class="token operator">:</span> <span class="token string">"NDA="</span><span class="token punctuation">,</span>
+          <span class="token property">"node"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token property">"id"</span><span class="token operator">:</span> <span class="token number">40</span><span class="token punctuation">,</span>
+            <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"Product 40"</span><span class="token punctuation">,</span>
+            <span class="token property">"price"</span><span class="token operator">:</span> <span class="token number">527.7330156641641</span><span class="token punctuation">,</span>
+            <span class="token property">"category"</span><span class="token operator">:</span> <span class="token string">"Electronics"</span>
+          <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+      <span class="token punctuation">]</span><span class="token punctuation">,</span>
+      <span class="token property">"pageInfo"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token property">"hasNextPage"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+        <span class="token property">"hasPreviousPage"</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+        <span class="token property">"startCursor"</span><span class="token operator">:</span> <span class="token string">"MjE="</span><span class="token punctuation">,</span>
+        <span class="token property">"endCursor"</span><span class="token operator">:</span> <span class="token string">"NDA="</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+      <span class="token property">"totalCount"</span><span class="token operator">:</span> <span class="token number">500000</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>And for the next page, we would use the new <code>endCursor</code> value of <code>&quot;NDA=&quot;</code> and so on.</p>
+<p>The cursor itself is opaque to the client and should be treated as an implementation detail. If the client can &quot;guess&quot; cursor values, it may lead to unintended behavior.</p>
+<p>Now let's try to fetch the last page using the cursor! To do this on the client-side, we should keep following the <code>endCursor</code> values until we reach the end. However, for demonstration purposes, we will cheat a little and directly encode the 499980th product's ID and create a cursor for it. In <code>resolvers.js</code>, the <code>encodeCursor()</code> function does this. What we need is <code>Buffer.from(&quot;499980&quot;).toString(&quot;base64&quot;)</code>, which results in <code>NDk5OTgw</code>, therefore our query to fetch the last page looks like this:</p>
+<pre class="language-graphql"><code class="language-graphql">query cursorProductsNext <span class="token punctuation">{</span>
+  <span class="token function">productsCursor</span><span class="token punctuation">(</span>first<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token literal-property property">after</span><span class="token operator">:</span> <span class="token string">"NDk5OTgw"</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    edges <span class="token punctuation">{</span>
+      cursor
+      node <span class="token punctuation">{</span>
+        id
+        name
+        price
+        category
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+    pageInfo <span class="token punctuation">{</span>
+      hasNextPage
+      endCursor
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Check your terminal logs again:</p>
+<pre class="language-"><code class="language-"><span class="token literal-property property">productsCursor</span><span class="token operator">:</span> <span class="token number">35</span><span class="token punctuation">.</span>197ms
+Fetched <span class="token number">20</span> <span class="token function">products</span> <span class="token punctuation">(</span>cursor<span class="token operator">-</span>based<span class="token punctuation">,</span> <span class="token literal-property property">after</span><span class="token operator">:</span> NDk5OTgw<span class="token punctuation">)</span>
+</code></pre>
+<p>As you can see, the response times remain consistent regardless of how deep we paginate into the dataset!</p>
+<p>Compared to offset-based pagination, you should observe:</p>
+<ul>
+<li>Consistent database execution time, even for later pages</li>
+<li>Uniform request duration across pages</li>
+<li>Stable memory usage per request</li>
+</ul>
+<p>Because each query starts from a known position, the database does not need to scan past large numbers of rows.</p>
+<h3 id="why-cursor-based-pagination-scales-better" tabindex="-1"><a class="header-anchor" href="#why-cursor-based-pagination-scales-better">Why Cursor-Based Pagination Scales Better</a></h3>
+<p>Cursor-based pagination avoids the main pitfalls of offset-based pagination:</p>
+<ul>
+<li>Performance does not degrade as clients paginate deeper</li>
+<li>Pagination remains stable when records are inserted or deleted</li>
+<li>Works naturally with infinite scrolling or stream-like UIs</li>
+<li>Produces predictable, easy-to-compare timings/measurements in observability tools</li>
+</ul>
+<p>Although cursor-based pagination requires slightly more setup than offset-based pagination, it provides far more reliable performance characteristics and is the preferred pattern for production GraphQL APIs.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Pagination is often treated as a schema design detail in GraphQL, but as shown earlier, it has a direct and measurable impact on performance, memory usage, and system stability.</p>
+<p>Fetching all data at once may be convenient, but it quickly becomes a liability as datasets grow. Offset-based pagination improves the situation by limiting result size, yet still introduces hidden costs that surface as users paginate deeper. Cursor-based pagination, on the other hand, provides consistent performance characteristics regardless of dataset size, making it the most reliable choice for production GraphQL APIs.</p>
+<p>More importantly, this article highlights the value of observability-driven decisions. Without instrumentation, all three approaches can appear to &quot;work&quot;. But with proper profiling in place, the differences become clear, allowing you to make informed choices about how to design your API for real-world usage patterns.</p>
+<p>If you're building or maintaining a GraphQL API in Node.js, <strong>cursor-based pagination should be your default</strong> (unless your dataset is small and unlikely to grow). And whatever approach you choose, instrument it early. Pagination is not just about shaping responses: it's about shaping how your system behaves under real-world load.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
