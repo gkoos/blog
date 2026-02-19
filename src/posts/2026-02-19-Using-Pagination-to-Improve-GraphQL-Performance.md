@@ -6,7 +6,6 @@ description: "Exploring how pagination strategies can impact GraphQL performance
 excerpt: "GraphQL makes it easy to request exactly the data you need, but that flexibility can quickly turn into a performance problem when queries return large result sets. A single field that returns all items may work fine during development, yet silently degrade into slow responses, high memory usage, or even process crashes as data volume grows."
 tags:
 - posts
-- nullmail
 - javascript
 - graphql
 ---
