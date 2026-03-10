@@ -26,7 +26,32 @@ const allPosts = {{ posts | dump | safe }};
 const allCats = {{ cats | dump | safe }};
 const articleList = document.getElementById('article-list');
 const catBtns = Array.from(document.querySelectorAll('.cat-btn'));
-let activeTags = new Set(); // All categories OFF by default
+const knownTagsByLower = new Map(allCats.map(cat => [String(cat.tag).toLowerCase(), cat.tag]));
+
+function getInitialActiveTags() {
+  const selected = new Set();
+  const params = new URLSearchParams(window.location.search);
+  const requested = [];
+
+  for (const value of params.getAll('tag')) {
+    requested.push(...String(value).split(','));
+  }
+
+  if (requested.length === 0 && window.location.hash.length > 1) {
+    requested.push(...decodeURIComponent(window.location.hash.slice(1)).split(','));
+  }
+
+  for (const rawTag of requested) {
+    const normalized = rawTag.trim().toLowerCase();
+    if (!normalized) continue;
+    const canonicalTag = knownTagsByLower.get(normalized);
+    if (canonicalTag) selected.add(canonicalTag);
+  }
+
+  return selected;
+}
+
+let activeTags = getInitialActiveTags();
 
 
 function renderArticles() {
@@ -63,7 +88,12 @@ function renderArticles() {
 
 
 catBtns.forEach(btn => {
-  btn.classList.add('opacity-50'); // All start as inactive
+  const tag = btn.getAttribute('data-tag');
+  if (activeTags.has(tag)) {
+    btn.classList.remove('opacity-50');
+  } else {
+    btn.classList.add('opacity-50');
+  }
   btn.addEventListener('click', function() {
     const tag = btn.getAttribute('data-tag');
     if (activeTags.has(tag)) {
