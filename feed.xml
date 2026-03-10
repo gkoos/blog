@@ -539,5 +539,14 @@
         <description>Exploring how pagination strategies can impact GraphQL performance in Node.js applications.</description>
       </item>
     
+      <item>
+        <title>From the Database Zoo to the Database Safari</title>
+        <link>https://blog.gaborkoos.com/posts/2026-03-10-From-the-Database-Zoo-to-the-Database-Safari/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-03-10-From-the-Database-Zoo-to-the-Database-Safari/</guid>
+        <pubDate>Tue, 10 Mar 2026 00:00:00 GMT</pubDate>
+
+        <description>Exploring the growing ecosystem of modern databases and the journey from the Database Zoo series to the upcoming book, The Database Safari.</description>
+      </item>
+    
   </channel>
 </rss>
