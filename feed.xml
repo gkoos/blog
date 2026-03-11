@@ -548,5 +548,14 @@
         <description>Exploring the growing ecosystem of modern databases and the journey from the Database Zoo series to the upcoming book, The Database Safari.</description>
       </item>
     
+      <item>
+        <title>How to Find the Top-K Items: Heap and Streaming Approaches in Go</title>
+        <link>https://blog.gaborkoos.com/posts/2026-03-11-New-FCC-Article-How-to-Find-the-Top-K-Items-Heap-and-Streaming-Approaches-in-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-03-11-New-FCC-Article-How-to-Find-the-Top-K-Items-Heap-and-Streaming-Approaches-in-Go/</guid>
+        <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
+
+        <description>How to find the top-K items in Go using heap and streaming approaches.</description>
+      </item>
+    
   </channel>
 </rss>
