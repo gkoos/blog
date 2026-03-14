@@ -557,5 +557,14 @@
         <description>How to find the top-K items in Go using heap and streaming approaches.</description>
       </item>
     
+      <item>
+        <title>Ffetch v5.0.0 Is Out!</title>
+        <link>https://blog.gaborkoos.com/posts/2026-03-14-ffetch-5.0.0.Is-Out/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-03-14-ffetch-5.0.0.Is-Out/</guid>
+        <pubDate>Sat, 14 Mar 2026 00:00:00 GMT</pubDate>
+
+        <description>A production-ready TypeScript-first drop-in replacement for native fetch. V5.0.0 is out.</description>
+      </item>
+    
   </channel>
 </rss>
