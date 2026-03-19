@@ -566,5 +566,14 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V5.0.0 is out.</description>
       </item>
     
+      <item>
+        <title>Developing and Benchmarking the Same Feature in Node and Go</title>
+        <link>https://blog.gaborkoos.com/posts/2026-03-19-Developing-and-Benchmarking-the-Same-Feature-in-Node-and-Go/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-03-19-Developing-and-Benchmarking-the-Same-Feature-in-Node-and-Go/</guid>
+        <pubDate>Thu, 19 Mar 2026 00:00:00 GMT</pubDate>
+
+        <description>Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.</description>
+      </item>
+    
   </channel>
 </rss>

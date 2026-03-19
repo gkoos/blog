@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Developing and Benchmarking the Same Feature in Node and Go</title>
+  <meta name="description" content="Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Developing and Benchmarking the Same Feature in Node and Go">
+  <meta property="og:description" content="Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Developing and Benchmarking the Same Feature in Node and Go">
+  <meta name="twitter:description" content="Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Developing and Benchmarking the Same Feature in Node and Go</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-03-19T00:00:00.000Z">Thu Mar 19 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">testing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>When I started building chaos-proxy, the initial goal was simple: make API chaos testing practical for JavaScript and TypeScript teams. I wanted something that could sit between an app and its upstream API and introduce realistic turbulence on demand: latency spikes, intermittent failures, and other behavior that makes integration tests feel closer to production.</p>
+<p>Node.js was the obvious first runtime for that because the ecosystem, tooling, and middleware ergonomics are excellent for rapid iteration. It is hard to overstate how productive that setup is when the main audience is already living in npm, TypeScript, and JavaScript test runners.</p>
+<p>Later, I rewrote the same proxy in Go to push raw proxy performance further and support higher throughput under load. The intent was not to replace one with the other philosophically, but to explore a different optimization frontier with the same product idea.</p>
+<p>This post documents what happened when I implemented the same non-trivial feature in both runtimes: hot config reload. Then I reran the benchmark from my previous article to see how the newer versions compare.</p>
+<p>The interesting part is not only the final numbers. It is also how two mature runtimes guide you toward different internal designs, even when you are enforcing the same external behavior contract.</p>
+<p>Old benchmark post:
+<a href="https://blog.gaborkoos.com/posts/2025-10-11-Nodejs-vs-Go-in_Practice-Performance-Comparison-of-chaos-proxy-And-chaos-proxy-go/">https://blog.gaborkoos.com/posts/2025-10-11-Nodejs-vs-Go-in_Practice-Performance-Comparison-of-chaos-proxy-And-chaos-proxy-go/</a></p>
+<p>Repositories:</p>
+<ul>
+<li>Node implementation: <a href="https://github.com/fetch-kit/chaos-proxy">https://github.com/fetch-kit/chaos-proxy</a></li>
+<li>Go implementation: <a href="https://github.com/fetch-kit/chaos-proxy-go">https://github.com/fetch-kit/chaos-proxy-go</a></li>
+</ul>
+<h2 id="implementing-hot-config-reload-in-two-runtimes" tabindex="-1"><a class="header-anchor" href="#implementing-hot-config-reload-in-two-runtimes">Implementing Hot Config Reload in Two Runtimes</a></h2>
+<p>The goal of hot config reload was to allow users to update the proxy's behavior without downtime. This means that when a new config is posted to the /reload endpoint, the proxy should parse, validate, and apply the new configuration atomically, without interrupting in-flight requests. This enables advanced testing scenarios where you can change the chaos behavior on the fly to model dynamic production conditions like feature rollouts, traffic shifts, or evolving failure modes.</p>
+<p>Both implementations follow the same external contract:</p>
+<ul>
+<li>POST /reload accepts a full config snapshot</li>
+<li>Parse -&gt; validate -&gt; build -&gt; swap, all-or-nothing</li>
+<li>Deterministic in-flight behavior (request-start snapshot semantics)</li>
+<li>Reject concurrent reload requests</li>
+<li>Consistent status model (400, 409, 415, success returns version and reload duration)</li>
+</ul>
+<p>So the user-facing behavior is aligned. Clients see the same API and guarantees. The internal shape is where Node and Go felt very different.</p>
+<h3 id="runtime-model" tabindex="-1"><a class="header-anchor" href="#runtime-model">Runtime model</a></h3>
+<p><strong>Node</strong> leaned toward a dynamic runtime object: rebuild middleware/router chain, then swap the active runtime. That style maps naturally to the way Node applications are often composed. Rebuilds are straightforward to express, and the overall control flow stays compact.</p>
+<p><strong>Go</strong> leaned toward immutable runtime snapshots: config + router + version behind an atomic pointer. In practice, this makes the runtime feel more explicit. You can point to exactly what a request observed and exactly when a new version became active.</p>
+<h3 id="concurrency-model" tabindex="-1"><a class="header-anchor" href="#concurrency-model">Concurrency model</a></h3>
+<p>In <strong>Node</strong>, most complexity is around making reload writes serialized and safe while requests continue flowing.</p>
+<p>In <strong>Go</strong>, the read/write split is explicit: request path loads one snapshot at request start, reload path builds fresh state under lock, then atomically swaps.</p>
+<p>Behaviorally both approaches are equivalent from a user perspective. The difference is mostly in how obvious the invariants are when you revisit the code weeks later.</p>
+<h3 id="in-flight-guarantees" tabindex="-1"><a class="header-anchor" href="#in-flight-guarantees">In-flight guarantees</a></h3>
+<p>Both versions guarantee request-start snapshot semantics.</p>
+<p>In <strong>Node</strong>, this is easier to accidentally violate if mutable shared state leaks into request handling.</p>
+<p>In <strong>Go</strong>, the pointer-load-at-entry pattern makes this guarantee structurally harder to violate.</p>
+<p>That was one of the strongest practical contrasts for me: same requirement, different default safety profile.</p>
+<h3 id="router-lifecycle-and-rebuild-mechanics" tabindex="-1"><a class="header-anchor" href="#router-lifecycle-and-rebuild-mechanics">Router lifecycle and rebuild mechanics</a></h3>
+<p><strong>Node</strong> composition is lightweight and ergonomic for rebuilds.</p>
+<p><strong>Go</strong> rebuilds a fresh router and re-registers middleware/routes on each reload. Behavior is explicit and predictable at the snapshot level, with middleware execution order deterministic only when config uses ordered list elements (not multiple keys in one map). It can look verbose at first, but this explicitness pays off when debugging edge cases around reload timing.</p>
+<h3 id="validation-and-rollback-boundaries" tabindex="-1"><a class="header-anchor" href="#validation-and-rollback-boundaries">Validation and rollback boundaries</a></h3>
+<p>Both use the same pipeline: parse -&gt; validate -&gt; build -&gt; swap.</p>
+<p><strong>Node</strong> gives more dynamic flexibility but needs stricter guard discipline.</p>
+<p><strong>Go</strong>'s type-driven pipeline made failure paths and rollback behavior cleaner to reason about.</p>
+<p>In both runtimes, treating build and swap as separate phases was the key to keeping rollback semantics simple.</p>
+<h3 id="stateful-middleware-behavior" tabindex="-1"><a class="header-anchor" href="#stateful-middleware-behavior">Stateful middleware behavior</a></h3>
+<p>Both implementations rebuild middleware instances on reload. That means in-memory middleware state (for example counters or local token buckets) resets by design after a successful reload. This is intentional and worth calling out to users because it is product behavior, not an implementation accident.</p>
+<h2 id="benchmark-rerun" tabindex="-1"><a class="header-anchor" href="#benchmark-rerun">Benchmark Rerun</a></h2>
+<p>After adding hot config reload support, I reran the old benchmark setup.</p>
+<p>The goal here was not to produce an absolute, universal number for every environment. The goal was to keep methodology stable enough to compare the old and new versions and see whether the relative shape changed.</p>
+<h3 id="system-and-test-environment-(same-machine-as-the-old-article)" tabindex="-1"><a class="header-anchor" href="#system-and-test-environment-(same-machine-as-the-old-article)">System and Test Environment (Same Machine as the Old Article)</a></h3>
+<p>This rerun was executed on the same machine as the benchmark in the previous article, with the same local topology (Caddy backend on localhost, proxy on localhost, load generated by hey on the same host).</p>
+<p>Machine characteristics:</p>
+<ul>
+<li>CPU: AMD Ryzen 7 5800H with Radeon Graphics</li>
+<li>Cores/Threads: 8 cores / 16 threads</li>
+<li>Base clock: 3.2 GHz</li>
+<li>RAM: 16 GB DDR4</li>
+<li>OS: Windows 10 Home 22H2 64-bit</li>
+</ul>
+<p>Benchmark setup characteristics:</p>
+<ul>
+<li>Backend: Caddy serving /api/hello on localhost:8080</li>
+<li>Proxy target: localhost:5000</li>
+<li>Load generator: hey</li>
+<li>Command pattern: hey -n 1000 -c 50 http://localhost:<port>/api/hello</li>
+<li>Runs per scenario: 3 (median reported)</li>
+</ul>
+<p>Reproducibility command block (same pattern used for this article):</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># 1) Start Caddy backend</span>
+./caddy.exe run <span class="token parameter variable">--config</span> Caddyfile
+
+<span class="token comment"># 2) Baseline (direct Caddy)</span>
+<span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token keyword">do</span> ./hey <span class="token parameter variable">-n</span> <span class="token number">1000</span> <span class="token parameter variable">-c</span> <span class="token number">50</span> http://localhost:8080/api/hello <span class="token operator">|</span> <span class="token function">tee</span> <span class="token parameter variable">-a</span> baseline-caddy-runs.txt<span class="token punctuation">;</span> <span class="token keyword">done</span>
+
+<span class="token comment"># 3) Node proxy benchmark (in another terminal, start proxy first)</span>
+npx chaos-proxy <span class="token parameter variable">--config</span> chaos.yaml
+<span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token keyword">do</span> ./hey <span class="token parameter variable">-n</span> <span class="token number">1000</span> <span class="token parameter variable">-c</span> <span class="token number">50</span> http://localhost:5000/api/hello <span class="token operator">|</span> <span class="token function">tee</span> <span class="token parameter variable">-a</span> node-3.0.1-runs.txt<span class="token punctuation">;</span> <span class="token keyword">done</span>
+
+<span class="token comment"># Stop the Node proxy process before running the Go proxy benchmark (both use port 5000)</span>
+
+<span class="token comment"># 4) Go proxy benchmark (in another terminal, start proxy first)</span>
+./chaos-proxy-go.exe <span class="token parameter variable">--config</span> chaos.yaml
+<span class="token keyword">for</span> <span class="token for-or-select variable">i</span> <span class="token keyword">in</span> <span class="token number">1</span> <span class="token number">2</span> <span class="token number">3</span><span class="token punctuation">;</span> <span class="token keyword">do</span> ./hey <span class="token parameter variable">-n</span> <span class="token number">1000</span> <span class="token parameter variable">-c</span> <span class="token number">50</span> http://localhost:5000/api/hello <span class="token operator">|</span> <span class="token function">tee</span> <span class="token parameter variable">-a</span> go-0.2.1-runs.txt<span class="token punctuation">;</span> <span class="token keyword">done</span>
+</code></pre>
+<p>Versions in this rerun:</p>
+<ul>
+<li>chaos-proxy (Node): 3.0.1</li>
+<li>chaos-proxy-go (Go): 0.2.1</li>
+</ul>
+<p>I also verified response-size parity for fairness:</p>
+<ul>
+<li>Caddy: 94 bytes/request</li>
+<li>Node 3.0.1: 94 bytes/request</li>
+<li>Go 0.2.1: 94 bytes/request</li>
+</ul>
+<p>This check mattered because an earlier Node run returned compacted JSON (smaller payload), which could bias throughput. The final numbers below use matched response sizes.</p>
+<h3 id="current-rerun-(median-of-3)" tabindex="-1"><a class="header-anchor" href="#current-rerun-(median-of-3)">Current Rerun (Median of 3)</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align:right">Requests/sec</th>
+<th style="text-align:right">Avg Latency (s)</th>
+<th style="text-align:right">P99 Latency (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direct Caddy</td>
+<td style="text-align:right">24,912.1845</td>
+<td style="text-align:right">0.0018</td>
+<td style="text-align:right">0.0156</td>
+</tr>
+<tr>
+<td>chaos-proxy Node 3.0.1</td>
+<td style="text-align:right">3,788.0065</td>
+<td style="text-align:right">0.0129</td>
+<td style="text-align:right">0.0318</td>
+</tr>
+<tr>
+<td>chaos-proxy-go 0.2.1</td>
+<td style="text-align:right">7,286.8293</td>
+<td style="text-align:right">0.0062</td>
+<td style="text-align:right">0.0248</td>
+</tr>
+</tbody>
+</table>
+<h3 id="old-benchmark-reference-(from-previous-post)" tabindex="-1"><a class="header-anchor" href="#old-benchmark-reference-(from-previous-post)">Old Benchmark Reference (from previous post)</a></h3>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th style="text-align:right">Requests/sec</th>
+<th style="text-align:right">Avg Latency (s)</th>
+<th style="text-align:right">P99 Latency (s)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Direct Caddy</td>
+<td style="text-align:right">28,383.8519</td>
+<td style="text-align:right">0.0016</td>
+<td style="text-align:right">0.0116</td>
+</tr>
+<tr>
+<td>chaos-proxy Node 2.0.0</td>
+<td style="text-align:right">4,262.3420</td>
+<td style="text-align:right">0.0115</td>
+<td style="text-align:right">0.0417</td>
+</tr>
+<tr>
+<td>chaos-proxy-go 0.0.5</td>
+<td style="text-align:right">8,828.0577</td>
+<td style="text-align:right">0.0053</td>
+<td style="text-align:right">0.0140</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-changed%3F" tabindex="-1"><a class="header-anchor" href="#what-changed%3F">What changed?</a></h3>
+<ol>
+<li>Go vs Node in current versions</li>
+</ol>
+<ul>
+<li>Go is still clearly ahead.</li>
+<li>Throughput: Go is about 1.92x higher than Node (7286.8 vs 3788.0 req/sec).</li>
+<li>Average latency: Node is about 2.08x slower than Go (0.0129s vs 0.0062s).</li>
+</ul>
+<ol start="2">
+<li>Go old vs Go new</li>
+</ol>
+<ul>
+<li>Throughput decreased from 8828.1 to 7286.8 req/sec (~17.5% lower).</li>
+<li>Average latency increased from 0.0053s to 0.0062s (~17.0% higher).</li>
+<li>P99 increased from 0.0140s to 0.0248s.</li>
+</ul>
+<ol start="3">
+<li>Node old vs Node new</li>
+</ol>
+<ul>
+<li>Throughput decreased from 4262.3 to 3788.0 req/sec (~11.1% lower).</li>
+<li>Average latency increased from 0.0115s to 0.0129s (~12.2% higher).</li>
+<li>P99 improved from 0.0417s to 0.0318s.</li>
+</ul>
+<p>Adding hot-reload-safe runtime mechanics introduces measurable overhead even in steady-state forwarding paths, which is why both implementations are slower than their previous versions in this benchmark shape.</p>
+<p>I did not trigger reloads during benchmark traffic, so this should be interpreted as structural overhead from the runtime architecture needed to guarantee safe reload semantics, not reload execution cost itself.</p>
+<h3 id="why-there-is-overhead-even-without-calling-%2Freload" tabindex="-1"><a class="header-anchor" href="#why-there-is-overhead-even-without-calling-%2Freload">Why There Is Overhead Even Without Calling /reload</a></h3>
+<p>Even if reload is never triggered during the benchmark request stream, the hot reload feature still changes the steady-state architecture:</p>
+<ul>
+<li>Requests now run through runtime indirection designed for safe snapshot semantics.</li>
+<li>Runtime objects and routing/middleware composition are organized around swap-ready boundaries.</li>
+<li>Concurrency guards and state-boundary discipline are now part of the normal request path design.</li>
+</ul>
+<p>In other words, the cost is not from running /reload repeatedly during the test. The cost comes from maintaining reload-safe invariants all the time.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Implementing the same feature in Node and Go was one of the most useful engineering exercises I have done in a while.</p>
+<p>The final behavior contract can be identical across runtimes, but the implementation pressure points are very different:</p>
+<ul>
+<li>Node emphasizes dynamic composition and careful mutation control.</li>
+<li>Go emphasizes snapshot immutability and explicit concurrency boundaries.</li>
+</ul>
+<p>Performance-wise, the high-level outcome still holds: the Go proxy remains roughly 2x faster than the Node proxy in this benchmark shape. At the same time, both implementations are now better specified in terms of live reconfiguration semantics, which was the actual feature goal. The implementations are likely not fully performance-tuned yet. For now, that trade-off is acceptable for the feature guarantees we wanted.</p>
+<p>And yes, it was genuinely fun to build.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
