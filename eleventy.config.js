@@ -57,6 +57,24 @@ export default function (eleventyConfig) {
     }
     copyRecursive(srcAssets, distAssets);
 
+    // Copy post-local static assets (images, files) and skip markdown sources.
+    const srcPosts = path.resolve('./src/posts');
+    const distPosts = path.resolve('./dist/posts');
+    function copyPostAssetsRecursive(src, dest) {
+      if (!fs.existsSync(src)) return;
+      const stat = fs.statSync(src);
+      if (stat.isDirectory()) {
+        if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+        for (const file of fs.readdirSync(src)) {
+          copyPostAssetsRecursive(path.join(src, file), path.join(dest, file));
+        }
+      } else {
+        if (path.extname(src).toLowerCase() === '.md') return;
+        fs.copyFileSync(src, dest);
+      }
+    }
+    copyPostAssetsRecursive(srcPosts, distPosts);
+
     // Now build Tailwind CSS to overwrite the copied styles.css with the freshly built one
     const tailwindInputPath = path.resolve('./src/assets/css/styles.css');
     const tailwindOutputPath = './dist/assets/css/styles.css';
@@ -78,7 +96,7 @@ export default function (eleventyConfig) {
 
   // Ensure posts are sorted by date descending
   eleventyConfig.addCollection("posts", function(collectionApi) {
-    return collectionApi.getFilteredByGlob("src/posts/*.md").sort((a, b) => {
+    return collectionApi.getFilteredByGlob("src/posts/**/article.md").sort((a, b) => {
       return new Date(b.data.date) - new Date(a.data.date);
     });
   });
