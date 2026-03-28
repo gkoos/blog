@@ -9,7 +9,7 @@ tags:
 - tutorials
 - javascript
 ---
-Debounce is one of those patterns every frontend developer learns early and keeps using forever.
+[Debounce](https://www.geeksforgeeks.org/javascript/debouncing-in-javascript/) is one of those patterns every frontend developer learns early and keeps using forever.
 
 At its core, debouncing does one thing well: it coalesces a burst of calls into one invocation after a quiet window. That is a great fit for noisy UI signals.
 
