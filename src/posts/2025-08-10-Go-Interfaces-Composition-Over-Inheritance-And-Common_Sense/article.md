@@ -6,7 +6,7 @@ description: A post about golanfg interfaces
 excerpt: Coming from a language like C# or JavaScript, interfaces in Go can feel like a cruel joke. They’re not what you expect, and they don’t play by the rules you’re used to. This post is your survival guide to Go interfaces.
 tags:
   - posts
-  - tutorial
+  - tutorials
   - golang
 ---
 Coming from a language like C# or JavaScript, interfaces in Go can feel like a cruel joke. They’re not what you expect, and they don’t play by the rules you’re used to. This post is your survival guide to Go interfaces.
