@@ -8,7 +8,7 @@ In a previous <a href='https://blog.gaborkoos.com/posts/2025-08-10-Go-Interfaces
 "
 tags:
   - posts
-  - tutorial
+  - tutorials
   - golang
 ---
 In a previous [article]([https://...](https://blog.gaborkoos.com/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/)), we covered the basics of Go interfaces. It's time to take a deeper dive into how interfaces work under the hood, common pitfalls, and advanced best practices. Understanding these concepts can help you, well, understand these concepts. And write more efficient, maintainable, and bug-free Go code.
