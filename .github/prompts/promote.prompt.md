@@ -13,11 +13,13 @@ The article file is attached as context. The platforms to generate copy for are:
    - `title`
    - `description` or `excerpt`
    - `tags`
-   - The canonical URL, which is derived from the filename as: `https://blog.gaborkoos.com/posts/{filename-without-.md}`
 
-2. Read the article body to understand the main topic, key points, and any notable findings (benchmarks, conclusions, opinions).
+2. Derive the canonical URL from the post folder name (the parent folder of `article.md`) as:
+   - `https://blog.gaborkoos.com/posts/{post-folder-name}/`
 
-3. For each platform listed in the platforms input, generate the copy below. Skip platforms not listed.
+3. Read the article body to understand the main topic, key points, and any notable findings (benchmarks, conclusions, opinions).
+
+4. For each platform listed in the platforms input, generate the copy below. Skip platforms not listed.
 
 ---
 
@@ -26,9 +28,11 @@ The article file is attached as context. The platforms to generate copy for are:
 Provide 2 tweet options. Rules:
 - Max 280 characters each including the URL
 - Punchy, no hype words like "excited" or "thrilled"
-- No hashtags unless they add real value
+- Include 1-2 relevant technical hashtags in every tweet (for example #JavaScript, #WebDev)
+- Keep hashtags within the 280-character limit
 - Include the canonical URL
 - Technical audience, do not oversell
+- Ensure each tweet is <= 280 characters after adding hashtags and URL
 
 ---
 
