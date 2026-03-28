@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Debounce Is Lying to You</title>
+  <meta name="description" content="Debounce smooths UI events but does not fix request lifecycle bugs. Learn how to prevent stale responses using AbortController, retries, and resilient fetch patterns.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your Debounce Is Lying to You">
+  <meta property="og:description" content="Debounce smooths UI events but does not fix request lifecycle bugs. Learn how to prevent stale responses using AbortController, retries, and resilient fetch patterns.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Your Debounce Is Lying to You">
+  <meta name="twitter:description" content="Debounce smooths UI events but does not fix request lifecycle bugs. Learn how to prevent stale responses using AbortController, retries, and resilient fetch patterns.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Your Debounce Is Lying to You</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-03-28T00:00:00.000Z">Sat Mar 28 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Debounce is one of those patterns every frontend developer learns early and keeps using forever.</p>
+<p>At its core, debouncing does one thing well: it coalesces a burst of calls into one invocation after a quiet window. That is a great fit for noisy UI signals.</p>
+<p>Its most familiar use case is autocomplete, but the same pattern applies to resize handlers, scroll listeners, live validation, filter controls, and telemetry hooks.</p>
+<p>A typical implementation looks like this:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">debounce</span><span class="token punctuation">(</span><span class="token parameter">fn<span class="token punctuation">,</span> delay</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">let</span> timer<span class="token punctuation">;</span>
+	<span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token parameter"><span class="token operator">...</span>args</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+		<span class="token function">clearTimeout</span><span class="token punctuation">(</span>timer<span class="token punctuation">)</span><span class="token punctuation">;</span>
+		timer <span class="token operator">=</span> <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">fn</span><span class="token punctuation">(</span><span class="token operator">...</span>args<span class="token punctuation">)</span><span class="token punctuation">,</span> delay<span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token punctuation">}</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> search <span class="token operator">=</span> <span class="token function">debounce</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">q</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+	<span class="token keyword">const</span> res <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/api/search?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>q<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> res<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+	<span class="token function">render</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">300</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>It looks disciplined. It feels efficient. It ships fast.</p>
+<p>And this is where the title comes from.</p>
+<p>The issue is not debounce itself. The issue is this vanilla debounce + <code>fetch</code> pattern once real network behavior enters the picture.</p>
+<p>It gives the feeling that requests are &quot;under control,&quot; but it does not control request lifecycle: response ordering, cancellation of stale work, or failure behavior.</p>
+<p>That is why it feels like debounce is &quot;lying&quot; in production: the UI looks smoothed, while the network layer is still fragile.</p>
+<p>In this article, we will keep debounce for what it is good at (UI smoothing), then harden the request path with cancellation, retries, and better error handling.</p>
+<h2 id="the-illusion-of-%22fixed%22-behavior" tabindex="-1"><a class="header-anchor" href="#the-illusion-of-%22fixed%22-behavior">The Illusion of &quot;Fixed&quot; Behavior</a></h2>
+<p>Debounce is convincing: you type quickly, the UI triggers fewer calls, and the network tab looks quieter. It <em>feels</em> like the system is now stable. But in production, under real network conditions, many things can go wrong. You will experience stale data, wasted requests, silent failures and other unexpected behaviors.</p>
+<p>This is true for any network request, but debounce adds another layer of complexity: it makes the UI look smooth while the network can still be unpredictable. This mismatch can create a false sense of security.</p>
+<p>Debounce itself only guarantees one thing:</p>
+<blockquote>
+<p>&quot;I won't call this function too often.&quot;</p>
+</blockquote>
+<p>Debounce smooths input frequency, not request lifecycle. It does <strong>not</strong> guarantee:</p>
+<ul>
+<li>Responses arrive in order.</li>
+<li>Stale requests stop running.</li>
+<li>Failures are handled consistently.</li>
+</ul>
+<p>In other words: it is <strong>a UI pattern, not a network pattern</strong>. So you have to make sure the underlying network layer is robust enough to handle real-world conditions. Before we examine what can go wrong, let's set the stage!</p>
+<h2 id="the-companion-code" tabindex="-1"><a class="header-anchor" href="#the-companion-code">The Companion Code</a></h2>
+<p>To make these problems visible, we have a companion demo app with a single text input where every keystroke triggers a debounced request to <code>/api/echo?q=&lt;input&gt;</code>. The backend is an Express server that returns <code>{ query, timestamp }</code>, and the frontend appends each response to a div as <code>query@timestamp</code>. The stack is minimal: Node.js + Express on the backend, and plain HTML/CSS/JavaScript in the browser.</p>
+<p>Clone the repo and install dependencies:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> clone https://github.com/gkoos/article-debouncing.git
+<span class="token builtin class-name">cd</span> article-debouncing
+<span class="token function">npm</span> <span class="token function">install</span>
+</code></pre>
+<p>Then start the app:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> start
+</code></pre>
+<p>And navigate to http://localhost:3000 in your browser. You will see something like this:</p>
+<p><img src="./screenshot1.png" alt=""></p>
+<p>Now, as you type in the input field, you will see the responses coming back in the list below:</p>
+<p><img src="./screenshot2.png" alt=""></p>
+<p>The UI also shows toast notifications for request success and failure, which will become relevant in later sections.</p>
+<p>This is our baseline setup, it demonstrates the basic pattern. There is a 300ms debounce on the input, and the backend immediately responds with the query and a timestamp. The UI appends each response to the list.</p>
+<h2 id="problem-1%3A-race-conditions-(aka-stale-ui)" tabindex="-1"><a class="header-anchor" href="#problem-1%3A-race-conditions-(aka-stale-ui)">Problem 1: Race Conditions (aka Stale UI)</a></h2>
+<p>On your local machine, everything is fast and smooth. But in production, network conditions are unpredictable. Requests can take varying amounts of time to complete, so there is no guarantee that responses will arrive in the same order they were sent. Let's see what happens if we add random delays to the server response to simulate real network conditions.</p>
+<p>Check out the <code>01-stale-requests</code> branch and restart the server:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> checkout 01-stale-requests
+<span class="token function">npm</span> start
+</code></pre>
+<p>We added a middleware that introduces a random delay of 0–1000ms for each request. Now, when you type quickly, you might see responses arriving out of order:</p>
+<p><img src="./screenshot3.png" alt=""></p>
+<p>We typed <code>12345678</code>, but the UI shows <code>1234567</code>! The response for <code>7</code> came back <em>after</em> <code>8</code>, so the UI is now stale. This is a classic race condition, and debounce itself does not prevent it. The UI is showing results for an older query, which can lead to confusion and errors in a real application.</p>
+<p>How to fix this? We need to ensure that only the latest request's response is processed, and any previous requests are either cancelled or ignored. We could implement a simple version of this by keeping track of the latest query and ignoring responses that don't match it. But that would still allow all requests to run, which is inefficient. A better approach is to use the <a href="https://developer.mozilla.org/en-US/docs/Web/API/AbortController"><code>AbortController</code></a> API to cancel stale requests, so they don't consume resources or trigger side effects when they complete.</p>
+<p><code>AbortController</code> is a browser-native API. You create a controller, pass its <code>signal</code> to <code>fetch</code>, and call <code>abort()</code> whenever you want to cancel the request. The fetch will throw an <code>AbortError</code>, which you can catch and ignore since it's expected.</p>
+<p>Here is the updated debounce callback with cancellation:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">let</span> controller<span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> debouncedFetch <span class="token operator">=</span> <span class="token function">debounce</span><span class="token punctuation">(</span><span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token parameter">q</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>q<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>controller<span class="token punctuation">)</span> controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/api/echo?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">encodeURIComponent</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal
+    <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// render data...</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>err<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>err<span class="token punctuation">.</span>name <span class="token operator">===</span> <span class="token string">'AbortError'</span><span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+    <span class="token comment">// handle real errors...</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">300</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Two things changed:</p>
+<ul>
+<li>Before each request, we abort any in-flight request from the previous call and create a fresh controller.</li>
+<li>After catching an error, we check if it's an <code>AbortError</code> and return early: these are expected and not real failures.</li>
+</ul>
+<p>The result: in normal flow, only the last request in a typing burst ever completes. Previous ones are cancelled at the network level, not just ignored after the fact. (For absolute safety, you can also guard the render step with a request ID check. This covers the tiny edge window where a response resolves right before a newer request aborts the previous one.)</p>
+<h2 id="problem-2%3A-network-failures" tabindex="-1"><a class="header-anchor" href="#problem-2%3A-network-failures">Problem 2: Network Failures</a></h2>
+<p>The network is not only unpredictable in terms of latency, but also in terms of reliability. Sometimes a request can fail that would have succeeded if retried. This can be due to transient server issues like network congestion, temporary spikes in load, or database timeouts. If we want a more robust user experience, we need to handle these failures gracefully.</p>
+<p>Let's simulate random failures in our backend. Check out the <code>02-failures</code> branch and restart the server:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> checkout 02-failures
+<span class="token function">npm</span> start
+</code></pre>
+<p>This version of the server adds a random failure mechanism: each request has a 40% chance to fail with a 500 error. Now this may be too aggressive, but it will help us see the problem clearly. When you type in the input field, you will see some requests fail:</p>
+<p><img src="./screenshot4.png" alt=""></p>
+<p>Well, that's not good. First, our UI shows <code>undefined@undefined</code> when a request fails. That happens because the server returns <code>{ error: 'Internal Server Error' }</code> on a 500, so <code>data.query</code> and <code>data.timestamp</code> are both <code>undefined</code>. Vanilla <code>fetch</code> doesn't throw on HTTP error status codes: it only rejects on network failures. So we need to check <code>response.ok</code> ourselves:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/api/echo?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">encodeURIComponent</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>response<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">HTTP </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>response<span class="token punctuation">.</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Now a 500 throws before we ever touch the body, the <code>catch</code> handles it, and the error toast shows instead of broken output.</p>
+<p>But that's just the start. In a real app, you would want to implement some retry logic for transient failures. For example, you could automatically retry a failed request up to 3 times with exponential backoff. This way, if a request fails due to a temporary issue, it has a chance to succeed without the user having to do anything.</p>
+<p>To implement this manually you'd need to write retry loops, track attempt counts, implement backoff timing, and make sure none of it fires after a cancellation. That's not trivial, and it's not the interesting part of your app, so let's use a library for that.</p>
+<p><code>@fetchkit/ffetch</code> is a thin wrapper around <code>fetch</code> that handles exactly this. We'll use it for the retry behavior in our demo.</p>
+<p>There are good alternatives in this space (for example <code>ky</code>, <code>axios</code>, or a custom wrapper). I chose <code>ffetch</code> here because it keeps a <code>fetch</code>-compatible API surface and handles abort-aware retries cleanly.</p>
+<p>Since this is a minimal demo with no build step, we load it directly from a CDN rather than installing it. In a real project you'd <code>npm install @fetchkit/ffetch</code> and import it normally, but here a single import line is enough:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createClient <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'https://esm.sh/@fetchkit/ffetch'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> api <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">retries</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token comment">// retry up to 3 times on failure</span>
+  <span class="token function-variable function">shouldRetry</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">ctx</span><span class="token punctuation">)</span> <span class="token operator">=></span> ctx<span class="token punctuation">.</span>response<span class="token operator">?.</span>status <span class="token operator">>=</span> <span class="token number">500</span><span class="token punctuation">,</span> <span class="token comment">// only retry on 5xx errors</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><code>api</code> has the exact same call signature as <code>fetch</code>: same arguments, same return type. You drop it in as a replacement:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/api/echo?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">encodeURIComponent</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>What this buys us in this specific scenario:</p>
+<ul>
+<li><strong><code>retries: 3</code></strong> — if the server returns a 500, ffetch retries up to 3 more times before giving up</li>
+<li><strong><code>shouldRetry</code></strong> — we only retry on 5xx; anything else (network error, abort) propagates immediately</li>
+<li><strong>abort-aware backoff</strong> — if <code>controller.abort()</code> fires during the delay between retries, the wait exits immediately and the abort propagates; no stale work keeps running in the background</li>
+</ul>
+<p>That last point is quite convenient here. Without it, aborting a request mid-retry would cut the active fetch but leave the backoff timer running, which would then fire another fetch attempt that instantly aborts. Now we handle this correctly.</p>
+<p>There's one more thing we can clean up. Because the native <code>fetch</code> does not throw on HTTP error status codes (one of the pain points of the API), we had to add a manual check:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>response<span class="token punctuation">.</span>ok<span class="token punctuation">)</span> <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">HTTP </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>response<span class="token punctuation">.</span>status<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><code>ffetch</code> can handle this too. With the <code>throwOnHttpError: true</code> config option, any HTTP error response throws automatically, no manual check needed.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> api <span class="token operator">=</span> <span class="token function">createClient</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">retries</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  <span class="token function-variable function">shouldRetry</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token parameter">ctx</span><span class="token punctuation">)</span> <span class="token operator">=></span> ctx<span class="token punctuation">.</span>response<span class="token operator">?.</span>status <span class="token operator">>=</span> <span class="token number">500</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">throwOnHttpError</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>Now the fetch call is just:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">api</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">/api/echo?q=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">encodeURIComponent</span><span class="token punctuation">(</span>q<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>The <code>catch</code> block still handles everything - HTTP errors, network failures, real errors - without any extra branching in the happy path.</p>
+<p>The final implementation can be found in the <code>03-fixed</code> branch:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">git</span> checkout 03-fixed
+<span class="token function">npm</span> start
+</code></pre>
+<p>For reference, the full code for the debounce callback with <code>ffetch</code> can be found <a href="https://github.com/gkoos/article-debouncing/blob/03-fixed/src/public/index.html">here</a>.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Debounce is not the problem. The problem is treating it as a complete solution for network control when it only handles one dimension of it: call frequency. It is a very useful pattern for smoothing out noisy UI signals, but it does not handle the complexities of real network behavior. To build a robust application, you need to complement debounce with proper request lifecycle management: cancellation of stale requests, retries with backoff for transient failures, and consistent error handling. This way, you can ensure that your UI remains not only responsive but also accurate even under unpredictable network conditions.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
