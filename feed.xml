@@ -584,5 +584,14 @@
         <description>Debounce smooths UI events but does not fix request lifecycle bugs. Learn how to prevent stale responses using AbortController, retries, and resilient fetch patterns.</description>
       </item>
     
+      <item>
+        <title>One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects</title>
+        <link>https://blog.gaborkoos.com/posts/2026-03-29-One-Cache-to-Rule-Them-All-Handling-Responses-and-In-Flight-Requests-with-Durable-Objects/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-03-29-One-Cache-to-Rule-Them-All-Handling-Responses-and-In-Flight-Requests-with-Durable-Objects/</guid>
+        <pubDate>Sun, 29 Mar 2026 00:00:00 GMT</pubDate>
+
+        <description>Unify response caching and in-flight request deduplication with Cloudflare Durable Objects to eliminate duplicate work during cache misses in distributed systems.</description>
+      </item>
+    
   </channel>
 </rss>

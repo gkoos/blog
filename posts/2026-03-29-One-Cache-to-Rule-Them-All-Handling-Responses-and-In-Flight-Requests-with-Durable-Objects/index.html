@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects</title>
+  <meta name="description" content="Unify response caching and in-flight request deduplication with Cloudflare Durable Objects to eliminate duplicate work during cache misses in distributed systems.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects">
+  <meta property="og:description" content="Unify response caching and in-flight request deduplication with Cloudflare Durable Objects to eliminate duplicate work during cache misses in distributed systems.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects">
+  <meta name="twitter:description" content="Unify response caching and in-flight request deduplication with Cloudflare Durable Objects to eliminate duplicate work during cache misses in distributed systems.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-03-29T00:00:00.000Z">Sun Mar 29 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed cache</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">Cloudflare</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>Originally published on <a href="https://www.infoq.com/articles/durable-objects-handle-inflight-requests/">InfoQ</a> on Jan 28, 2026</em></p>
+<p>Caching is one of the first tools engineers reach for when optimizing distributed systems. We cache completed responses - such as database query results or HTTP response bodies - to avoid repeating expensive work. What traditional caching does not address, however, is a different and often overlooked source of inefficiency: duplicate in-flight requests.</p>
+<p>When multiple clients request the same resource at roughly the same time, a cache miss can trigger several identical computations in parallel. In a single-process JavaScript application, this is commonly mitigated by storing the in-flight Promise in memory so that subsequent callers can await the same result. In other languages and runtimes, similar effects may be achieved through different concurrency primitives, but the underlying assumption is the same: shared memory and a single execution context.</p>
+<p>In distributed, serverless, or edge environments, this assumption no longer holds. Each instance has its own memory, and any form of in-flight deduplication is limited to the lifetime and scope of a single process.</p>
+<p>Engineers often respond by introducing a second mechanism alongside their cache: locks, markers, or coordination records to track work in progress. These approaches are difficult to reason about and frequently degrade into polling or coarse-grained synchronization.</p>
+<p>This article proposes a different model: treating completed responses and in-flight requests as two states of the same cache entry. Using Cloudflare Workers and Durable Objects, we can assign a single, authoritative owner to each cache key. That owner can safely hold an in-memory representation of ongoing work, allow concurrent callers to wait on it, and then transition the entry into a cached response once the work completes.</p>
+<p>Rather than introducing a separate coordination layer, this pattern unifies caching and in-flight deduplication behind a single abstraction. While it relies on runtime features that are not universally available, it provides a clean and practical approach for environments that support per-key singleton execution.</p>
+<h2 id="the-problem-in-depth" tabindex="-1"><a class="header-anchor" href="#the-problem-in-depth">The Problem in Depth</a></h2>
+<p>At a high level, the problem is not caching itself, but what happens before a cache entry exists.</p>
+<p>Consider an expensive operation: a database query, an external API call, or a CPU-heavy computation. In a distributed edge environment, multiple clients may request the same resource within a very short time window. If the cache does not yet contain a value for that key, each request independently triggers the same work.</p>
+<p>Because edge runtimes intentionally scale horizontally, these requests are often handled by <strong>different execution contexts</strong>. Each context observes the same cache miss and proceeds as if it were the first requester. The result is a burst of redundant work that caching was supposed to prevent, but cannot, because <em>the cache only helps after the first request completes</em>.</p>
+<p>In response, many systems introduce an additional mechanism to track work in progress. One cache is used for completed results, while another structure - sometimes an in-memory map, sometimes a distributed store - is used to mark requests as &quot;in-flight&quot;. This split quickly increases complexity. The lifecycle of a request must now be coordinated across two separate systems, with careful handling of race conditions, failures, and timeouts.</p>
+<p>Per-process in-memory deduplication partially mitigates this problem, but only within the scope of a single runtime instance. In serverless and edge environments, instances are short-lived and isolated by design. Two concurrent requests hitting different nodes cannot share in-flight state, even if they are logically identical. As traffic grows or becomes more geographically distributed, the effectiveness of this optimization rapidly diminishes.</p>
+<p>The result is a pattern that works well in monolithic or long-lived services, but breaks down precisely in the environments where horizontal scaling is most aggressive.</p>
+<p>This gap between the absence of a cached result and the completion of the first computation is where traditional caching strategies offer no help, and where <em>in-flight deduplication</em> (or request coalescing) becomes both necessary and surprisingly difficult in distributed runtimes.</p>
+<h2 id="why-durable-objects-are-suitable" tabindex="-1"><a class="header-anchor" href="#why-durable-objects-are-suitable">Why Durable Objects Are Suitable</a></h2>
+<p>The difficulty outlined in the previous section is a direct consequence of how modern serverless and edge platforms are designed. Isolated execution contexts, short-lived processes, and horizontal scaling are features, not flaws. Any solution to in-flight deduplication must therefore work with these constraints rather than attempting to work around them.</p>
+<p>Cloudflare <a href="https://developers.cloudflare.com/durable-objects/">Durable Objects</a> provide a small but crucial set of guarantees that make this possible.</p>
+<p>First, a Durable Object instance is a <strong>per-key singleton</strong>. For a given object identifier, all requests are routed to the same logical instance, regardless of where they originate. This immediately eliminates the ambiguity of ownership: there is exactly one place where in-flight state for a given cache key can live.</p>
+<p>Second, Durable Objects offer <strong>shared, mutable memory across requests</strong>. Unlike traditional Workers, where memory is scoped to a single invocation, a Durable Object can retain in-memory state between requests. This allows it to hold a representation of ongoing work, such as an in-flight computation without external coordination.</p>
+<p>Third, requests to a Durable Object are <strong>processed sequentially</strong>. This serialized execution model removes the need for explicit locking when inspecting or updating in-flight state. Checking whether a computation is already running, creating it if not, and attaching additional waiters can all happen deterministically within a single execution context.</p>
+<p>Taken together, these properties allow a Durable Object to act as the <strong>authoritative owner of both in-flight and completed cache entries</strong>. Instead of asking &quot;has this request already been started somewhere else?&quot;, callers simply forward the request to the object responsible for that key and await the result.</p>
+<h2 id="applicability-beyond-cloudflare" tabindex="-1"><a class="header-anchor" href="#applicability-beyond-cloudflare">Applicability Beyond Cloudflare</a></h2>
+<p>While the examples in this article use <a href="https://developers.cloudflare.com/workers/">Cloudflare Workers</a> and Durable Objects, the underlying pattern is not specific to Cloudflare. What matters is not the platform itself, but the abovementioned runtime guarantees.</p>
+<p>At a minimum, the runtime must provide:</p>
+<ul>
+<li>Per-key singleton execution: all requests for a given key are routed to the same logical instance.</li>
+<li>Shared in-memory state across requests for that instance.</li>
+<li>Serialized request handling, or equivalent guarantees that eliminate the need for explicit locking.</li>
+</ul>
+<p>Cloudflare Durable Objects satisfy these requirements explicitly, which makes them a convenient and well-defined example. Similar semantics can be found in other environments, although often under different names or with different trade-offs:</p>
+<ul>
+<li><em>Actor-based systems</em>, such as those built on <a href="https://akka.io/">Akka</a> or <a href="https://dotnet.github.io/orleans/">Orleans</a>, provide comparable guarantees through actor identity and message serialization. In these systems, an actor can naturally own both in-flight work and cached results for a given key.</li>
+<li><em>Stateful serverless platforms</em> and &quot;<em>durable execution</em>&quot; models are also beginning to emerge, though their APIs and guarantees vary significantly. What they share is the idea that not all serverless computation must be stateless, and that limited, well-scoped state can simplify certain coordination problems.</li>
+</ul>
+<p>By contrast, platforms that only offer stateless functions combined with eventually consistent key–value stores cannot implement this pattern cleanly. Without a single authoritative owner and shared in-memory execution context, in-flight deduplication inevitably devolves into polling or distributed locking.</p>
+<p>For this reason, the pattern described here should be understood as <strong>runtime-dependent</strong>. It is not a universal replacement for traditional caching, but a targeted technique that becomes viable when the execution model supports it.</p>
+<h2 id="a-minimal-implementation" tabindex="-1"><a class="header-anchor" href="#a-minimal-implementation">A Minimal Implementation</a></h2>
+<p>With the runtime guarantees established, the implementation itself becomes surprisingly small. The goal is not to build a general-purpose cache, but to demonstrate how a single abstraction can handle both in-flight deduplication and response caching.</p>
+<p>The example below shows a Durable Object responsible for a single cache key. All requests for that key are routed to the same object instance:</p>
+<pre class="language-javascript"><code class="language-javascript"><span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">CacheObject</span> <span class="token punctuation">{</span>
+  <span class="token keyword">private</span> inflight<span class="token operator">?</span><span class="token operator">:</span> Promise<span class="token operator">&lt;</span>Response<span class="token operator">></span><span class="token punctuation">;</span>
+  <span class="token keyword">private</span> cached<span class="token operator">?</span><span class="token operator">:</span> Response<span class="token punctuation">;</span>
+
+  <span class="token keyword">async</span> <span class="token function">fetch</span><span class="token punctuation">(</span>request<span class="token operator">:</span> Request<span class="token punctuation">)</span><span class="token operator">:</span> Promise<span class="token operator">&lt;</span>Response<span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Fast path: return cached response if it exists</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>cached<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>cached<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// If no computation is in-flight, start one</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token keyword">this</span><span class="token punctuation">.</span>inflight<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">this</span><span class="token punctuation">.</span>inflight <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">compute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">response</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        <span class="token comment">// Store completed response</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>cached <span class="token operator">=</span> response<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+        <span class="token comment">// Clear in-flight state</span>
+        <span class="token keyword">this</span><span class="token punctuation">.</span>inflight <span class="token operator">=</span> <span class="token keyword">undefined</span><span class="token punctuation">;</span>
+        <span class="token keyword">return</span> response<span class="token punctuation">;</span>
+      <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+
+    <span class="token comment">// Await the same in-flight computation</span>
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token keyword">await</span> <span class="token keyword">this</span><span class="token punctuation">.</span>inflight<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">private</span> <span class="token keyword">async</span> <span class="token function">compute</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span> Promise<span class="token operator">&lt;</span>Response<span class="token operator">></span> <span class="token punctuation">{</span>
+    <span class="token comment">// Placeholder for an expensive operation</span>
+    <span class="token comment">// e.g. database query or external API call</span>
+    <span class="token keyword">const</span> data <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">"https://example.com/expensive"</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token parameter">r</span> <span class="token operator">=></span> r<span class="token punctuation">.</span><span class="token function">text</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Response</span><span class="token punctuation">(</span>data<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">status</span><span class="token operator">:</span> <span class="token number">200</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This object maintains two pieces of state:</p>
+<ul>
+<li><code>inflight</code>, which represents an ongoing computation.</li>
+<li><code>cached</code>, which stores the completed response once available.</li>
+</ul>
+<p>When a request arrives, the object first checks for a cached response. If none exists, it checks whether a computation is already in progress. If so, the caller simply awaits the same promise. If not, the object initiates the computation and stores the resulting promise in memory.</p>
+<p>Because Durable Objects process requests sequentially, there is no need for explicit locks or atomic operations. The logic that checks and creates the in-flight promise executes deterministically within a single execution context.</p>
+<p>From the caller's perspective, this behaves like a regular cache. The difference is that concurrent callers do not trigger duplicate work, even if the cache is initially empty. Once the computation completes, all waiting callers receive the same result, and subsequent requests are served directly from the cached response.</p>
+<p>This example intentionally omits persistence, expiration, and error handling. Those concerns can be layered on later - optionally storing completed responses in a key–value store for durability - without changing the core idea. Crucially, the in-flight state never leaves memory, preserving the simplicity and correctness of the pattern.</p>
+<h2 id="why-this-approach-is-useful" tabindex="-1"><a class="header-anchor" href="#why-this-approach-is-useful">Why This Approach Is Useful</a></h2>
+<p>The primary benefit of this pattern is that it <strong>collapses two related concerns into a single abstraction</strong>. Instead of treating in-flight deduplication and response caching as separate problems, it models them as different states of the same cache entry.</p>
+<p>This has several practical advantages:</p>
+<ul>
+<li>First, it <strong>eliminates duplicate work at the point where caching alone cannot help</strong>. By allowing multiple concurrent callers to await the same in-flight computation, the system avoids bursts of redundant requests during cache misses: precisely the scenario where traditional caches are least effective.</li>
+<li>Second, the approach <strong>simplifies system design</strong>. There is no need for a secondary coordination layer, distributed locks, or &quot;in-progress&quot; markers stored separately from cached data. All logic related to request coalescing, execution, and result reuse lives in one place, owned by a single runtime entity.</li>
+<li>Third, it <strong>aligns naturally with how JavaScript applications are written</strong>. Awaiting a shared promise is an idiomatic and well-understood pattern, and Durable Objects make it possible to extend this model beyond a single process without changing the mental model. Callers interact with the cache as if it were local, even though the execution is distributed.</li>
+<li>Fourth, this pattern <strong>scales horizontally without losing correctness</strong>. As traffic increases or becomes geographically distributed, requests are still routed to the same authoritative owner per key. The behavior does not degrade as more edge nodes are added, which is often the case with per-process optimizations.</li>
+<li>Finally, the model is <strong>incrementally extensible</strong>. Expiration policies, persistence of completed responses, metrics, and retries can all be added without altering the core control flow. The essential idea: one owner, one in-flight computation, one cached result remains intact.</li>
+</ul>
+<p>These properties can make the pattern viable for workloads where the cost of duplicate work is high and request concurrency is unpredictable, such as edge APIs, aggregation endpoints, or expensive upstream integrations.</p>
+<h2 id="trade-offs-and-limitations" tabindex="-1"><a class="header-anchor" href="#trade-offs-and-limitations">Trade-offs and Limitations</a></h2>
+<p>Despite its elegance, this pattern is not universally applicable. Its usefulness depends heavily on the execution model of the underlying runtime, and it introduces trade-offs that should be considered carefully.</p>
+<ul>
+<li>The most significant limitation is <strong>runtime dependency</strong>. In-flight deduplication requires a single authoritative owner with shared in-memory state. Without per-key singleton execution the pattern cannot be implemented cleanly. Attempts to replicate it using eventually consistent key–value stores inevitably lead to polling, distributed locks, or other forms of coordination that undermine the original simplicity.</li>
+<li>The implementation itself can also be <strong>non-trivial</strong>. While the minimal example is small, production-ready versions must account for error propagation, retries, timeouts, eviction, and memory limits. Care must be taken to ensure that failed computations do not leave the system in a permanently &quot;in-flight&quot; state, and that cached responses are invalidated correctly.</li>
+</ul>
+<p>Another important consideration is <strong>relevance</strong>. In many well-architected systems, duplicate in-flight requests are already rare. Idempotent upstream APIs, natural request spreading, or coarse-grained caching may make in-flight deduplication unnecessary. Introducing this pattern in such cases may add complexity without delivering meaningful benefits.</p>
+<p>There is also a <strong>scaling trade-off</strong>. Routing all requests for a given key through a single owner introduces a natural serialization point. For workloads where a single key is extremely hot, this can become a bottleneck. In these cases, sharding strategies or alternative caching approaches may be more appropriate.</p>
+<p>Finally, this pattern <strong>does not replace traditional caching strategies</strong>. It complements them. Completed responses may still need to be persisted in a key–value store or HTTP cache to survive process eviction or cold starts. Crucially, however, persistence should only apply to completed results, moving in-flight state into external storage negates the benefits of the approach.</p>
+<p>For these reasons, the pattern should be seen as a <strong>targeted optimization, not a default architectural choice</strong>. When the runtime supports it and the workload justifies it, unifying response caching and in-flight deduplication can significantly reduce redundant work. When those conditions are not met, simpler designs are often preferable.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>This article has outlined a <strong>pattern for unifying response caching and in-flight request deduplication in distributed JavaScript runtimes</strong>: by relying on per-key singleton execution and shared in-memory state, it becomes possible to treat an ongoing computation and its eventual result as two states of the same cache entry, eliminating duplicate work without introducing polling or external coordination.</p>
+<p>It is important to emphasize that this pattern is <strong>primarily a design proposal, not a battle-tested recipe</strong>. While the underlying primitives (Durable Objects, promises, and serialized execution) are well understood, the combination described here has not yet been broadly validated in production systems. Questions around operational behavior, observability, and long-term performance characteristics remain open and warrant further exploration.</p>
+<p>That said, the value of the pattern may lie in how clearly it exposes the relationship between caching and execution. It demonstrates that the difficulty of in-flight deduplication is not inherent to distributed systems, but to the execution models we typically use. When a runtime provides a single authoritative owner per key, the problem simplifies dramatically.</p>
+<p>As serverless and edge platforms continue to evolve, stateful execution models are becoming more common. Patterns like this one suggest that revisiting long-standing assumptions, such as the strict separation between caching and coordination, may lead to simpler and more expressive designs. Whether this specific approach proves broadly useful or remains a niche optimization, it highlights an important direction for future runtime and application architectures.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
