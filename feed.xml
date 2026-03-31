@@ -593,5 +593,14 @@
         <description>Unify response caching and in-flight request deduplication with Cloudflare Durable Objects to eliminate duplicate work during cache misses in distributed systems.</description>
       </item>
     
+      <item>
+        <title>Your Throttling Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/</guid>
+        <pubDate>Tue, 31 Mar 2026 00:00:00 GMT</pubDate>
+
+        <description>Throttling reduces noisy UI events, but naive implementations can drop the final state. Learn how trailing throttle guarantees correctness for resize, scroll, and high-frequency interactions.</description>
+      </item>
+    
   </channel>
 </rss>
