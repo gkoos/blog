@@ -246,3 +246,5 @@ For reference, the full code for the debounce callback with `ffetch` can be foun
 ## Conclusion
 
 Debounce is not the problem. The problem is treating it as a complete solution for network control when it only handles one dimension of it: call frequency. It is a very useful pattern for smoothing out noisy UI signals, but it does not handle the complexities of real network behavior. To build a robust application, you need to complement debounce with proper request lifecycle management: cancellation of stale requests, retries with backoff for transient failures, and consistent error handling. This way, you can ensure that your UI remains not only responsive but also accurate even under unpredictable network conditions.
+
+By the way, debouncing is often discussed together with [throttling](https://www.geeksforgeeks.org/javascript/javascript-throttling/), and ironically, your throttling is also [lying to you](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/).
