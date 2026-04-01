@@ -254,6 +254,7 @@
 <p>For reference, the full code for the debounce callback with <code>ffetch</code> can be found <a href="https://github.com/gkoos/article-debouncing/blob/03-fixed/src/public/index.html">here</a>.</p>
 <h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>Debounce is not the problem. The problem is treating it as a complete solution for network control when it only handles one dimension of it: call frequency. It is a very useful pattern for smoothing out noisy UI signals, but it does not handle the complexities of real network behavior. To build a robust application, you need to complement debounce with proper request lifecycle management: cancellation of stale requests, retries with backoff for transient failures, and consistent error handling. This way, you can ensure that your UI remains not only responsive but also accurate even under unpredictable network conditions.</p>
+<p>By the way, debouncing is often discussed together with <a href="https://www.geeksforgeeks.org/javascript/javascript-throttling/">throttling</a>, and ironically, your throttling is also <a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">lying to you</a>.</p>
 
   </div>
 </article>
