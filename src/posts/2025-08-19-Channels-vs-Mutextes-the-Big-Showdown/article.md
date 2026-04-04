@@ -12,6 +12,8 @@ tags:
 ---
 Concurrency is Go's crown jewel - goroutines and channels make concurrent programming feel almost magical. But not every problem belongs in a channel. Many developers fall into the trap of overusing channels or misusing mutexes, resulting in slow, buggy, or unmaintainable code. In this article, we'll demystify **when to use channels and when to use mutexes**, and why blindly following "Go concurrency patterns" can backfire.
 
+**Prerequisite:** If you want to understand how channels work under the hood, see [Go Channels: A Runtime Internals Deep Dive](/posts/2025-08-26-Go-Channels-A-Runtime-Internals-Deep-Dive/) for the deep-dive context.
+
 ## The Misconception
 
 Go's philosophy of "do not communicate by sharing memory; share memory by communicating" is often taken literally. Some gophers try to replace every mutex with a channel, thinking channels are the "Go way" to synchronize everything.
@@ -373,3 +375,5 @@ Mutexes are perfect for protecting state. Channels shine when you need to coordi
 But many Go developers try to force channels into every concurrency problem because they feel more "idiomatic." In reality, channels are not inherently better than mutexes. They're tools for communication, not a silver bullet. It's also important to note that **channels and mutexes are not mutually exclusive** - sometimes you'll combine them (e.g., worker pool with channel + shared stats protected by mutex). Think of channels as "communication highways" and mutexes as "traffic lights" for shared memory - each has its place.
 
 Overusing channels is a common beginner trap and leads to code that is harder to read, slower to run, and more error-prone — the exact opposite of Go's philosophy of simplicity. Just don't overthink it: **mutexes for state, channels for communication**.
+
+Once you've decided on your concurrency approach, here's how to manage goroutines at scale: [Taming Goroutines - Efficient Concurrency with a Worker Pool in Go](/posts/2025-08-08-Taming-Goroutines/)

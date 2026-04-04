@@ -244,3 +244,5 @@ Our worker pool is very simple: a robust implementation would use a more sophist
 Concurrency is a vast topic, and there are many patterns and techniques to explore, we only started scratching the surface here.
 
 The worker pool pattern is a powerful tool for managing goroutines, but not the only one. The key takeaway is: controlled parallelism beats chaotic concurrency every time.
+
+**See this pattern applied at scale:** [Building a High-Performance Concurrent Live Leaderboard in Go](/posts/2025-09-05-Building-a-High-Performance-Concurrent-Live-Leaderboard-in-Go/) demonstrates worker pools, sharding, and synchronization in a production-like system.

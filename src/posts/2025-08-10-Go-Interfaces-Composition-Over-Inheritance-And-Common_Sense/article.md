@@ -504,3 +504,5 @@ Sometimes it can be a good thing. Decoupling your code from specific implementat
 But it can also lead to confusion and frustration. You might find yourself wondering why your type doesn't satisfy an interface, or why the compiler isn't complaining when you think it should. The lack of explicit contracts can make it hard to understand how types relate to each other, and the implicit nature of interface satisfaction can lead to unexpected behavior.
 
 Good thing is, you don't have to like it. Bad thing is, you have to understand them to use Go effectively. So embrace the weirdness, learn the patterns, and remember that Go interfaces are just another tool in your toolbox. They might not be what you're used to, but with a bit of practice, you will know how to tolerate them.
+
+Ready to go deeper? [Go Interfaces - Beyond the Basics](/posts/2025-08-13-Go-Interfaces-Beyond-the-Basics/) covers performance implications, interface boxing, and advanced patterns that become relevant once the fundamentals click.

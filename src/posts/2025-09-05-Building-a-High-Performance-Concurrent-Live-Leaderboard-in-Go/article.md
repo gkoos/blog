@@ -486,3 +486,10 @@ With this foundation, you can extend the leaderboard to support:
 - Additional metrics such as timestamps, ranks, or achievements.
 
 This practical, hands-on approach gives you an idea of how to handle real-world concurrent workloads efficiently. You now have the tools to implement, benchmark, and extend production-ready concurrent systems in Go.
+
+## Next Steps
+
+If you want to dive deeper into Go concurrency and related patterns, consider exploring these articles:
+- [Go Channels: A Runtime Internals Deep Dive](/posts/2025-08-26-Go-Channels-A-Runtime-Internals-Deep-Dive/) — covers how channels work under the hood and why they matter for concurrency
+- [Channels vs Mutexes In Go - the Big Showdown](/posts/2025-08-19-Channels-vs-Mutextes-the-Big-Showdown/) — helps you decide which synchronization primitive to use for your scenario
+- [Taming Goroutines - Efficient Concurrency with a Worker Pool in Go](/posts/2025-08-08-Taming-Goroutines/) — demonstrates patterns for managing goroutines at scale and avoiding chaos

@@ -11,6 +11,8 @@ tags:
 ---
 We all know JavaScript's asynchronous model. `async/await`, `Promises`, and streams give the illusion that code runs sequentially while magically handling heavy work in the background. But if you've ever processed a large file, streamed data from an API, or handled bursts of network requests, you've probably run into a familiar problem: memory usage spikes, CPU sits idle, or your server crashes under a sudden load. "Everything is async", so what is going on?
 
+> **Foundation:** This article builds on the event loop, async/await, and concurrency primitives covered in [Modern JavaScript Concurrency](/posts/2025-10-25-Modern-Javascript-Concurrency/). If those concepts are new to you, start there first.
+
 The answer lies in a concept many developers have never heard by name: *backpressure*. Backpressure is the system-level feedback mechanism that allows a consumer to slow down a producer when it's producing data faster than the consumer can handle. Without it, your asynchronous tasks wouldn't just run concurrently, they'd pile up, creating unbounded queues in memory and ultimately breaking your application.
 
 In JavaScript, backpressure exists in multiple places: Node.js streams, the Fetch API, Web Streams, and even async loops over large datasets. But it can be tricky. The language gives you the tools: `ReadableStream`, `WritableStream`, stream events like `drain` - but it doesn't enforce correct usage. And many developers end up ignoring these signals, mostly because the code "just works" on small datasets. Then the data grows, the load increases, and suddenly your app is struggling to keep up: crashes, OOMs, and latency spikes seem to come out of nowhere.
@@ -152,7 +154,7 @@ Node streams expose a built-in contract between producer and consumer. If you ig
 
 ## How `async/await` Can Accidentally Destroy Backpressure
 
-`async/await` is one of JavaScript's greatest abstractions for writing readable asynchronous code. But it can also mask backpressure problems, making you think your consumer is keeping up when it isn't. Understanding this is crucial for building reliable, memory-safe applications.
+`async/await` is one of JavaScript's greatest abstractions for writing readable asynchronous code. But it can also mask backpressure problems, making you think your consumer is keeping up when it isn't. Understanding this is crucial for building reliable, memory-safe applications. The root cause ties back to how the [event loop schedules work](/posts/2025-10-25-Modern-Javascript-Concurrency/) — `await` yields control, but doesn't inherently slow down the producer.
 
 ### The Illusion of Sequential Safety
 
@@ -430,3 +432,5 @@ The key lessons are:
 - Monitor and diagnose: watch memory, queue lengths, and latency to catch hidden backpressure problems before they impact production.
 
 By designing systems that respect the natural pace of their consumers, JavaScript developers can handle large datasets, high-throughput streams, or bursty network traffic safely and efficiently. Backpressure is not a limitation, it's a feature that enables robust, scalable, and maintainable asynchronous code.
+
+Ready to go further? [Advanced Asynchronous Patterns in JavaScript](/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/) builds on these foundations with production-grade techniques for coordination, composition, and error handling across complex async flows.

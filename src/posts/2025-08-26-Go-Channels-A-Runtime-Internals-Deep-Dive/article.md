@@ -580,3 +580,5 @@ However, this still introduces overhead compared to non-blocking operations. At 
 Go channels are deceptively simple. From the outside, they look like `<-` and `ch <- v`. Underneath lies a sophisticated orchestration of buffers, queues, parked goroutines, and scheduler hooks. Every pipeline, worker pool, or fan-in/fan-out pattern leverages this machinery to safely and efficiently move data between goroutines.
 
 As Go evolves, channels remain central to its concurrency model, so understanding their internals gives you the intuition to use them effectively - and the caution to avoid misuse in high-contention scenarios.
+
+Now that you understand how channels work internally, here's when to use them vs mutexes: [Channels vs Mutexes In Go - the Big Showdown](/posts/2025-08-19-Channels-vs-Mutextes-the-Big-Showdown/)

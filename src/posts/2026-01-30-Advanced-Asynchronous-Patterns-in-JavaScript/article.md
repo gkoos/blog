@@ -13,6 +13,11 @@ tags:
 Patterns like cancellation propagation, timeouts, bounded concurrency, and controlled error handling repeatedly surface in production systems, yet they rarely get grouped together in a single, practical discussion.
 This article explores these patterns, showing how they interact and the subtle but nasty pitfalls that often go unnoticed when building real-world asynchronous systems in JavaScript.
 
+> **Prerequisites:** This article is the capstone of the JavaScript concurrency series. For the best experience, read these first:
+> - [Modern JavaScript Concurrency](/posts/2025-10-25-Modern-Javascript-Concurrency/) — the event loop, async/await, workers, and shared memory
+> - [Cancellation In JavaScript: Why It's Harder Than It Looks](/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/) — why stopping async work is harder than it seems, and how `AbortController` fits in
+> - [Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code](/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/) — flow control between producers and consumers
+
 ## Cancellation Is the Missing Primitive
 
 Once you move beyond `async/await`, cancellation quickly becomes a core concern. Promises represent *results*, not running work, so they cannot be forcibly stopped once started. This can lead to resource leaks or orphaned operations - a challenge explored in another [article](https://blog.gaborkoos.com/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/) on this blog.

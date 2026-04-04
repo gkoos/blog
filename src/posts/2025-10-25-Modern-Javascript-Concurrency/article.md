@@ -313,3 +313,7 @@ JavaScript concurrency continues to evolve. New proposals, runtime improvements,
 Modern JavaScript concurrency is powerful but demands understanding. Between the event loop, workers, async iterators, shared memory, and emerging structured concurrency, developers have a rich toolkit, but must choose the right primitives for the right workload. The future promises safer, more ergonomic, and more predictable concurrency, making JavaScript a robust environment for both UI and backend parallelism.
 
 Explore structured concurrency proposals, try out worker patterns in your projects, and experiment with async iterators to get hands-on experience with modern JavaScript concurrency.
+
+Ready for advanced patterns? 
+- [Advanced Asynchronous Patterns in JavaScript](/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/) takes these foundations further with production-grade techniques for composition, error handling, and coordination.
+- [Cancellation In JavaScript: Why It's Harder Than It Looks](/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/) covers what happens when you need to *stop* async work reliably — a trickier problem than it sounds.
