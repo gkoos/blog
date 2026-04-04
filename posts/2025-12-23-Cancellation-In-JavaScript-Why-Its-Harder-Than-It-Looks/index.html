@@ -100,6 +100,9 @@
   <div class="prose dark:prose-invert max-w-none">
     <p>At some point, every JavaScript developer asks the same question: <em>why can't I just cancel this async operation?</em></p>
 <p>A user navigates away, a component unmounts, a newer request supersedes an older one - surely there must be a way to stop work that's no longer needed!</p>
+<blockquote>
+<p><strong>New to JavaScript async?</strong> If you're not yet comfortable with the event loop, promises, and async/await, start with <a href="/posts/2025-10-25-Modern-Javascript-Concurrency/">Modern JavaScript Concurrency</a> first — this article builds directly on those foundations.</p>
+</blockquote>
 <p>In practice, we reach for familiar patterns: <code>Promise.race()</code> with a timeout, ignoring the result when it eventually arrives, or wiring up an <code>AbortController</code> and assuming the problem is solved. Often this appears to work, until the application starts leaking resources, performing late side effects, or behaving inconsistently under load.</p>
 <p>The underlying, fundamental issue is: <strong>JavaScript does not provide task cancellation as a primitive</strong>. Once asynchronous work has been scheduled, there is no general mechanism to forcibly stop it. Promises, callbacks, and async functions represent results and continuations, not ownership of the underlying execution.</p>
 <p>This creates a mismatch between intent and reality: developers think in terms of &quot;stopping work&quot;, but the language operates in terms of letting work run to completion and optionally reacting to its outcome. As a result, many so-called cancellation techniques merely stop waiting for a result rather than stopping the work itself.</p>
@@ -446,6 +449,8 @@ controller<span class="token punctuation">.</span><span class="token function">a
 <li>Async code can handle user-driven interruptions cleanly</li>
 </ul>
 <p>Ultimately, cancellation in JavaScript is less about killing promises and more about <strong>designing your tasks to be responsive and cooperative</strong>. Understanding this distinction allows developers to write robust, maintainable asynchronous code without fighting the language's execution model.</p>
+<p>Cancellation patterns also matter at the UI level: if you're using debounce to avoid redundant work, proper signal propagation is what prevents stale callbacks from running. See <a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a> for how these concepts apply to event handler patterns.</p>
+<p>Ready to go further? <a href="/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/">Advanced Asynchronous Patterns in JavaScript</a> builds on cancellation as a foundation for production-grade async composition and coordination.</p>
 
   </div>
 </article>

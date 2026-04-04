@@ -99,6 +99,9 @@
   </div>
   <div class="prose dark:prose-invert max-w-none">
     <p>We all know JavaScript's asynchronous model. <code>async/await</code>, <code>Promises</code>, and streams give the illusion that code runs sequentially while magically handling heavy work in the background. But if you've ever processed a large file, streamed data from an API, or handled bursts of network requests, you've probably run into a familiar problem: memory usage spikes, CPU sits idle, or your server crashes under a sudden load. &quot;Everything is async&quot;, so what is going on?</p>
+<blockquote>
+<p><strong>Foundation:</strong> This article builds on the event loop, async/await, and concurrency primitives covered in <a href="/posts/2025-10-25-Modern-Javascript-Concurrency/">Modern JavaScript Concurrency</a>. If those concepts are new to you, start there first.</p>
+</blockquote>
 <p>The answer lies in a concept many developers have never heard by name: <em>backpressure</em>. Backpressure is the system-level feedback mechanism that allows a consumer to slow down a producer when it's producing data faster than the consumer can handle. Without it, your asynchronous tasks wouldn't just run concurrently, they'd pile up, creating unbounded queues in memory and ultimately breaking your application.</p>
 <p>In JavaScript, backpressure exists in multiple places: Node.js streams, the Fetch API, Web Streams, and even async loops over large datasets. But it can be tricky. The language gives you the tools: <code>ReadableStream</code>, <code>WritableStream</code>, stream events like <code>drain</code> - but it doesn't enforce correct usage. And many developers end up ignoring these signals, mostly because the code &quot;just works&quot; on small datasets. Then the data grows, the load increases, and suddenly your app is struggling to keep up: crashes, OOMs, and latency spikes seem to come out of nowhere.</p>
 <p>This article will unpack what backpressure really is, why it matters in JavaScript, and how to write async code that respects it. By the end, you'll see that backpressure isn't a limitation, it's a feature of well-behaved systems, and understanding it can save you from countless production headaches.</p>
@@ -191,7 +194,7 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 <p>Streams exist because they provide flow control by design. Learning to respect the signals (<code>write()</code> return value, <code>drain</code>, <code>pipe()</code>) is how you implement real backpressure in Node.js.</p>
 <p>Node streams expose a built-in contract between producer and consumer. If you ignore it, your memory grows - if you respect it, your application handles large or fast data sources safely.</p>
 <h2 id="how-async%2Fawait-can-accidentally-destroy-backpressure" tabindex="-1"><a class="header-anchor" href="#how-async%2Fawait-can-accidentally-destroy-backpressure">How <code>async/await</code> Can Accidentally Destroy Backpressure</a></h2>
-<p><code>async/await</code> is one of JavaScript's greatest abstractions for writing readable asynchronous code. But it can also mask backpressure problems, making you think your consumer is keeping up when it isn't. Understanding this is crucial for building reliable, memory-safe applications.</p>
+<p><code>async/await</code> is one of JavaScript's greatest abstractions for writing readable asynchronous code. But it can also mask backpressure problems, making you think your consumer is keeping up when it isn't. Understanding this is crucial for building reliable, memory-safe applications. The root cause ties back to how the <a href="/posts/2025-10-25-Modern-Javascript-Concurrency/">event loop schedules work</a> — <code>await</code> yields control, but doesn't inherently slow down the producer.</p>
 <h3 id="the-illusion-of-sequential-safety" tabindex="-1"><a class="header-anchor" href="#the-illusion-of-sequential-safety">The Illusion of Sequential Safety</a></h3>
 <p>It's easy to assume that wrapping work in await naturally enforces proper flow control:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">for</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunk <span class="token keyword">of</span> stream<span class="token punctuation">)</span> <span class="token punctuation">{</span>
@@ -391,6 +394,7 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 <li>Monitor and diagnose: watch memory, queue lengths, and latency to catch hidden backpressure problems before they impact production.</li>
 </ul>
 <p>By designing systems that respect the natural pace of their consumers, JavaScript developers can handle large datasets, high-throughput streams, or bursty network traffic safely and efficiently. Backpressure is not a limitation, it's a feature that enables robust, scalable, and maintainable asynchronous code.</p>
+<p>Ready to go further? <a href="/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/">Advanced Asynchronous Patterns in JavaScript</a> builds on these foundations with production-grade techniques for coordination, composition, and error handling across complex async flows.</p>
 
   </div>
 </article>

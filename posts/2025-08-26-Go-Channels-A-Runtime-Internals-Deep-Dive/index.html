@@ -633,6 +633,7 @@ However, this still introduces overhead compared to non-blocking operations. At 
 <h2 id="closing-thoughts" tabindex="-1"><a class="header-anchor" href="#closing-thoughts">Closing Thoughts</a></h2>
 <p>Go channels are deceptively simple. From the outside, they look like <code>&lt;-</code> and <code>ch &lt;- v</code>. Underneath lies a sophisticated orchestration of buffers, queues, parked goroutines, and scheduler hooks. Every pipeline, worker pool, or fan-in/fan-out pattern leverages this machinery to safely and efficiently move data between goroutines.</p>
 <p>As Go evolves, channels remain central to its concurrency model, so understanding their internals gives you the intuition to use them effectively - and the caution to avoid misuse in high-contention scenarios.</p>
+<p>Now that you understand how channels work internally, here's when to use them vs mutexes: <a href="/posts/2025-08-19-Channels-vs-Mutextes-the-Big-Showdown/">Channels vs Mutexes In Go - the Big Showdown</a></p>
 
   </div>
 </article>

@@ -292,6 +292,7 @@ Elapsed time<span class="token operator">:</span> <span class="token number">31<
 <p>Our worker pool is very simple: a robust implementation would use a more sophisticated task queue with job cancellation, timeouts via <code>context.Context</code> etc. We did not cover memory management patterns, such as using <code>sync.Pool</code> to reuse memory allocations for the left and right partitions. And the list goes on.</p>
 <p>Concurrency is a vast topic, and there are many patterns and techniques to explore, we only started scratching the surface here.</p>
 <p>The worker pool pattern is a powerful tool for managing goroutines, but not the only one. The key takeaway is: controlled parallelism beats chaotic concurrency every time.</p>
+<p><strong>See this pattern applied at scale:</strong> <a href="/posts/2025-09-05-Building-a-High-Performance-Concurrent-Live-Leaderboard-in-Go/">Building a High-Performance Concurrent Live Leaderboard in Go</a> demonstrates worker pools, sharding, and synchronization in a production-like system.</p>
 
   </div>
 </article>
