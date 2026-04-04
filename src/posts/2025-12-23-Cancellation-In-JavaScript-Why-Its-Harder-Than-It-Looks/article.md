@@ -13,6 +13,8 @@ At some point, every JavaScript developer asks the same question: *why can't I j
 
 A user navigates away, a component unmounts, a newer request supersedes an older one - surely there must be a way to stop work that's no longer needed!
 
+> **New to JavaScript async?** If you're not yet comfortable with the event loop, promises, and async/await, start with [Modern JavaScript Concurrency](/posts/2025-10-25-Modern-Javascript-Concurrency/) first — this article builds directly on those foundations.
+
 In practice, we reach for familiar patterns: `Promise.race()` with a timeout, ignoring the result when it eventually arrives, or wiring up an `AbortController` and assuming the problem is solved. Often this appears to work, until the application starts leaking resources, performing late side effects, or behaving inconsistently under load.
 
 The underlying, fundamental issue is: **JavaScript does not provide task cancellation as a primitive**. Once asynchronous work has been scheduled, there is no general mechanism to forcibly stop it. Promises, callbacks, and async functions represent results and continuations, not ownership of the underlying execution.
@@ -483,3 +485,7 @@ By embracing this model:
 - Async code can handle user-driven interruptions cleanly
 
 Ultimately, cancellation in JavaScript is less about killing promises and more about **designing your tasks to be responsive and cooperative**. Understanding this distinction allows developers to write robust, maintainable asynchronous code without fighting the language's execution model.
+
+Cancellation patterns also matter at the UI level: if you're using debounce to avoid redundant work, proper signal propagation is what prevents stale callbacks from running. See [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/) for how these concepts apply to event handler patterns.
+
+Ready to go further? [Advanced Asynchronous Patterns in JavaScript](/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/) builds on cancellation as a foundation for production-grade async composition and coordination.
