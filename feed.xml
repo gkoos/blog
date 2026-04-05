@@ -602,5 +602,14 @@
         <description>Throttling reduces noisy UI events, but naive implementations can drop the final state. Learn how trailing throttle guarantees correctness for resize, scroll, and high-frequency interactions.</description>
       </item>
     
+      <item>
+        <title>Introducing ffetch-demo: The Fetch Client Chaos Arena</title>
+        <link>https://blog.gaborkoos.com/posts/2026-04-05-Introducing-ffetch-demo-the-Fetch-Client-Chaos-Arena/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-04-05-Introducing-ffetch-demo-the-Fetch-Client-Chaos-Arena/</guid>
+        <pubDate>Sun, 05 Apr 2026 00:00:00 GMT</pubDate>
+
+        <description>ffetch-demo is a live browser arena for benchmarking JavaScript HTTP clients under controlled network chaos.</description>
+      </item>
+    
   </channel>
 </rss>
