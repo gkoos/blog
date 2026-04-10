@@ -611,5 +611,14 @@
         <description>ffetch-demo is a live browser arena for benchmarking JavaScript HTTP clients under controlled network chaos.</description>
       </item>
     
+      <item>
+        <title>Ffetch v5.1.0 Is Out!</title>
+        <link>https://blog.gaborkoos.com/posts/2026-04-10-ffetch-v5.1.0-Is-Out/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-04-10-ffetch-v5.1.0-Is-Out/</guid>
+        <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
+
+        <description>A production-ready TypeScript-first drop-in replacement for native fetch. V5.1.0 is out.</description>
+      </item>
+    
   </channel>
 </rss>
