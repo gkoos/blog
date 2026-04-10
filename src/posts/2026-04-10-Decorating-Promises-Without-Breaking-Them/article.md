@@ -17,7 +17,7 @@ This came up while building convenience plugins for [ffetch](https://github.com/
 
 Not because I needed it, strictly speaking. `await fetch('/api/todos/1')` followed by `await response.json()` works perfectly fine. But after the hundredth time writing that two-step dance across a codebase, you start reaching for something cleaner.
 
-The usual answer is a wrapper class or a custom Promise subclass. Both work, but both carry a hidden cost: you are now responsible for whatever happens when you swap out the native `Response` for your own abstraction. `instanceof` checks break. Framework integrations that inspect the response directly can behave unexpectedly. And the moment someone passes your custom object into something that expected a plain `Response`, you have a problem. Subclassing in particular is a trap that looks clean until some dependency does `response instanceof Response` and gets `false` — at which point you are debugging framework internals instead of your actual code.
+The usual answer is a wrapper class or a custom Promise subclass. Both work, but both carry a hidden cost: you are now responsible for whatever happens when you swap out the native `Response` for your own abstraction. `instanceof` checks break. Framework integrations that inspect the response directly can behave unexpectedly. And the moment someone passes your custom object into something that expected a plain `Response`, you have a problem. Subclassing in particular is a trap that looks clean until some dependency does `response instanceof Response` and gets `false` - at which point you are debugging framework internals instead of your actual code.
 
 I wanted a different answer. This is about that.
 
