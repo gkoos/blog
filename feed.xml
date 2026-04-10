@@ -620,5 +620,14 @@
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V5.1.0 is out.</description>
       </item>
     
+      <item>
+        <title>Decorating Promises Without Breaking Them</title>
+        <link>https://blog.gaborkoos.com/posts/2026-04-10-Decorating-Promises-Without-Breaking-Them/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-04-10-Decorating-Promises-Without-Breaking-Them/</guid>
+        <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
+
+        <description>How to add convenience methods to a native Promise object without subclassing, wrapping, or changing what await returns.</description>
+      </item>
+    
   </channel>
 </rss>
