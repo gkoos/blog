@@ -97,3 +97,35 @@ Include a final `Tracking Summary` section with:
 - `canonical_url`
 - `utm_campaign`
 - a flat list of all generated tracked URLs mapped to their placement labels.
+
+Include a final `Open Tabs` section with a single bash command (for Git Bash on Windows) that opens all compose/submit URLs in the default browser at once. Use this format:
+
+```bash
+start "" "https://..." && start "" "https://..." && ...
+```
+
+Build compose URLs per platform as follows:
+
+- **Reddit** (one per subreddit): prefilled compose URL
+  ```
+  https://www.reddit.com/r/{subreddit}/submit?title={url-encoded-title}&url={url-encoded-tracked-url}
+  ```
+
+- **Hacker News**:
+  ```
+  https://news.ycombinator.com/submitlink?u={url-encoded-tracked-url}&t={url-encoded-title}
+  ```
+
+- **X (Twitter)**:
+  ```
+  https://twitter.com/intent/tweet?text={url-encoded-tweet-text-including-tracked-url}
+  ```
+
+- **Bluesky**:
+  ```
+  https://bsky.app/intent/compose?text={url-encoded-post-text-including-tracked-url}
+  ```
+
+- **LinkedIn**: LinkedIn has no prefill compose URL. Omit from the bash command and note this in the Open Tabs section.
+
+URL-encode all interpolated values. Use the first tweet/post variant where multiple options were generated.
