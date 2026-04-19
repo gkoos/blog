@@ -1,0 +1,152 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="316" viewBox="0 0 860 316">
+  <defs>
+    <style>
+      text { font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif; }
+    </style>
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a121e" />
+      <stop offset="100%" stop-color="#22364d" />
+    </linearGradient>
+  </defs>
+
+  <!-- background -->
+  <rect width="860" height="316" rx="18" fill="url(#bg-grad)" />
+  <rect width="860" height="316" rx="18" fill="none" stroke="rgba(180,204,235,0.25)" stroke-width="1" />
+
+  <!-- header -->
+  <text x="16" y="28" font-size="16" font-weight="700" fill="#eef4ff">Fetch Reliability Arena</text>
+  <text x="16" y="44" font-size="10" fill="#8ea2c0">19/04/2026, 12:59:16</text>
+  <text x="844" y="28" font-size="10" fill="#00d1b2" text-anchor="end">ffetch-demo</text>
+
+  
+    <g transform="translate(16,52)">
+      <rect width="408" height="190" rx="10" fill="#16263a" opacity="0.9" />
+
+      <!-- header -->
+      <text x="16" y="22" font-size="13" font-weight="700" fill="#eef4ff">retry-no-429</text>
+      <text x="392" y="22" font-size="13" font-weight="700" fill="#ffb627" text-anchor="end">54<tspan font-size="10" font-weight="400" fill="#8ea2c0"> score</tspan></text>
+
+      <!-- mix bar -->
+      <g transform="translate(16, 32)">
+        <rect width="376" height="10" rx="5" fill="#22364d" />
+        <clipPath id="mix-clip-retryno429">
+          <rect width="376" height="10" rx="5" />
+        </clipPath>
+        <g clip-path="url(#mix-clip-retryno429)">
+          <rect x="0.0" y="0" width="225.6" height="10" fill="#53e087" /><rect x="225.6" y="0" width="150.4" height="10" fill="#a78bfa" />
+        </g>
+      </g>
+
+      <!-- success label -->
+      <text x="16" y="56" font-size="9" fill="#8ea2c0">90/150 OK</text>
+
+      <!-- metric cells -->
+      <g transform="translate(16, 64)">
+        
+    <g transform="translate(0, 0)">
+      
+      <rect x="0" y="0" width="121.33333333333333" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="60.666666666666664" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">p50</text>
+      <text x="60.666666666666664" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#eef4ff">155ms</text>
+    
+      
+      <rect x="125.33333333333333" y="0" width="121.33333333333333" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="186" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">p95</text>
+      <text x="186" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#b8c8df">585ms</text>
+    
+      
+      <rect x="250.66666666666666" y="0" width="121.33333333333333" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="311.3333333333333" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">p99</text>
+      <text x="311.3333333333333" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#8ea2c0">667ms</text>
+    
+    </g>
+  
+        
+    <g transform="translate(0, 54)">
+      
+      <rect x="0" y="0" width="184" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="92" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">error rate</text>
+      <text x="92" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#ff4f64">40.0%</text>
+    
+      
+      <rect x="188" y="0" width="184" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="280" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">throughput</text>
+      <text x="280" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#eef4ff">5.52 rps</text>
+    
+    </g>
+  
+      </g>
+    </g>
+  
+    <g transform="translate(436,52)">
+      <rect width="408" height="190" rx="10" fill="#16263a" opacity="0.9" />
+
+      <!-- header -->
+      <text x="16" y="22" font-size="13" font-weight="700" fill="#eef4ff">retry-after</text>
+      <text x="392" y="22" font-size="13" font-weight="700" fill="#53e087" text-anchor="end">90<tspan font-size="10" font-weight="400" fill="#8ea2c0"> score</tspan></text>
+
+      <!-- mix bar -->
+      <g transform="translate(16, 32)">
+        <rect width="376" height="10" rx="5" fill="#22364d" />
+        <clipPath id="mix-clip-retryafter">
+          <rect width="376" height="10" rx="5" />
+        </clipPath>
+        <g clip-path="url(#mix-clip-retryafter)">
+          <rect x="0.0" y="0" width="376.0" height="10" fill="#53e087" />
+        </g>
+      </g>
+
+      <!-- success label -->
+      <text x="16" y="56" font-size="9" fill="#8ea2c0">150/150 OK</text>
+
+      <!-- metric cells -->
+      <g transform="translate(16, 64)">
+        
+    <g transform="translate(0, 0)">
+      
+      <rect x="0" y="0" width="121.33333333333333" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="60.666666666666664" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">p50</text>
+      <text x="60.666666666666664" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#eef4ff">186ms</text>
+    
+      
+      <rect x="125.33333333333333" y="0" width="121.33333333333333" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="186" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">p95</text>
+      <text x="186" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#b8c8df">1428ms</text>
+    
+      
+      <rect x="250.66666666666666" y="0" width="121.33333333333333" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="311.3333333333333" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">p99</text>
+      <text x="311.3333333333333" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#8ea2c0">1474ms</text>
+    
+    </g>
+  
+        
+    <g transform="translate(0, 54)">
+      
+      <rect x="0" y="0" width="184" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="92" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">error rate</text>
+      <text x="92" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#eef4ff">0.0%</text>
+    
+      
+      <rect x="188" y="0" width="184" height="46" rx="6" fill="#0f1722" opacity="0.55" />
+      <text x="280" y="16" text-anchor="middle" font-size="10" fill="#8ea2c0">throughput</text>
+      <text x="280" y="36" text-anchor="middle" font-size="15" font-weight="700" fill="#eef4ff">2.09 rps</text>
+    
+    </g>
+  
+      </g>
+    </g>
+  
+  
+    <g transform="translate(16, 258)">
+      <text x="0" y="10" font-size="10" fill="#8ea2c0">Legend</text>
+      
+        <rect x="0" y="18" width="9" height="9" rx="2" fill="#53e087" />
+        <text x="15" y="26" font-size="10" fill="#b8c8df">OK</text>
+      
+        <rect x="414" y="18" width="9" height="9" rx="2" fill="#a78bfa" />
+        <text x="429" y="26" font-size="10" fill="#b8c8df">HTTP 429</text>
+      
+    </g>
+  
+</svg>
