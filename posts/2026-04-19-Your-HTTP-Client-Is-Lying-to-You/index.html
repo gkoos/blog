@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your HTTP Client Is Lying to You</title>
+  <meta name="description" content="You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your HTTP Client Is Lying to You">
+  <meta property="og:description" content="You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Your HTTP Client Is Lying to You">
+  <meta name="twitter:description" content="You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Your HTTP Client Is Lying to You</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-04-19T00:00:00.000Z">Sun Apr 19 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">networking</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>If you write frontend or Node.js code long enough, you eventually hit the same reliability wall: the network is fine in local testing, then production adds latency spikes, occasional 5xx responses, rate limits, and weird timing behavior that only appears under load.</p>
+<p>The usual response is to harden the client: add retries, tune timeouts. Maybe add a <a href="https://blog.gaborkoos.com/posts/2025-09-17-Stop-Hammering-Broken-APIs-the-Circuit-Breaker-Pattern/">circuit breaker</a> to prevent cascading failures. Or you might add <a href="https://mintlify.wiki/App-vNext/Polly/strategies/hedging">hedging</a> later, to improve p99 latency. On paper, every one of these is a best practice. A gentle introduction to these techniques can be found <a href="https://www.freecodecamp.org/news/how-to-go-from-toy-api-calls-to-production-ready-networking-in-javascript/">here</a>, which covers the core patterns, how to configure them, and when they help.</p>
+<p>But in practice, these patterns can interact in surprising ways. Sometimes they help. Sometimes they quietly make latency and reliability worse. To show this, we will run a few controlled experiments under realistic chaos conditions. The goal here is not a deep analysis, just a short, practical tour of a few counterintuitive outcomes I observed while running controlled chaos scenarios, plus a few recipes for deciding what to tune next.</p>
+<h2 id="welcome-to-the-arena" tabindex="-1"><a class="header-anchor" href="#welcome-to-the-arena">Welcome to the Arena</a></h2>
+<p>We will use <a href="https://fetch-kit.github.io/ffetch-demo/">ffetch-demo</a>, a browser-based chaos arena. Originally built to compare different HTTP clients under identical network conditions, it also makes a great sandbox for testing different resilience patterns and configurations against the same synthetic network chaos mix. We define the network behavior by adding chaos rules (latency, random failures, rate limits, etc.) to the transport layer, then run a repeatable workload against a test endpoint with a predefined set of http clients, and compare reliability scores, error patterns, and latency side-by-side. The chaos is deterministic and repeatable, but also randomized within configured bounds, so you can see how different patterns behave under the same conditions, but with some variability in the exact numbers. The goal is to show directional trends and tradeoffs, not exact values.</p>
+<p>The results show the distribution of response times, error rates, and reliability scores and a few key metrics like p95 latency and success count. We will run a few scenarios with different client configurations and chaos mixes, and see how the patterns interact in practice.</p>
+<p>The reliability score is a high-level health indicator that combines request success and latency quality into a single number, so higher usually means a client is both succeeding more often and behaving better under load.</p>
+<h2 id="scenario-a%3A-retry-can-worsen-tail-latency-under-tight-timeout" tabindex="-1"><a class="header-anchor" href="#scenario-a%3A-retry-can-worsen-tail-latency-under-tight-timeout">Scenario A: Retry can worsen tail latency under tight timeout</a></h2>
+<p>Let's see the <a href="http://fetch-kit.github.io/ffetch-demo/#url=https%3A%2F%2Fjsonplaceholder.typicode.com%2Fposts%2F1&amp;count=120&amp;conc=15&amp;chaos64=W3sidHlwZSI6ImxhdGVuY3lSYW5nZSIsIm1pbk1zIjoyMDAsIm1heE1zIjoyNTAwfSx7InR5cGUiOiJmYWlsUmFuZG9tbHkiLCJyYXRlIjowLjE1LCJzdGF0dXMiOjUwMCwiYm9keSI6IlNlcnZpY2UgZGVncmFkZWQifV0=&amp;clients64=W3siaWQiOiJmZmV0Y2gtYmFyZSIsInR5cGUiOiJmZmV0Y2giLCJsYWJlbCI6ImJhcmUiLCJjb25maWciOnsiZW5hYmxlZCI6dHJ1ZSwidGltZW91dE1zIjozMDAwLCJyZXRyaWVzIjowLCJyZXRyeURlbGF5TW9kZSI6ImZpeGVkIiwicmV0cnlEZWxheU1zIjoyMDAsInJldHJ5Sml0dGVyTXMiOjEwMCwicmV0cnlTdGF0dXNDb2RlcyI6WzQyOSw1MDAsMzAyLDUwMiw1MDMsNTA0XSwicmV0cnlBZnRlclN0YXR1c0NvZGVzIjpbNDEzLDQyOSw1MDNdLCJ0aHJvd09uSHR0cEVycm9yIjpmYWxzZSwidXNlRGVkdXBlUGx1Z2luIjpmYWxzZSwiZGVkdXBlVHRsTXMiOjMwMDAwLCJkZWR1cGVTd2VlcEludGVydmFsTXMiOjUwMDAsInVzZUNpcmN1aXRQbHVnaW4iOmZhbHNlLCJjaXJjdWl0VGhyZXNob2xkIjo1LCJjaXJjdWl0UmVzZXRNcyI6MTAwMDAsImNpcmN1aXRPcmRlciI6MjAsImRlZHVwZU9yZGVyIjoxMCwidXNlSGVkZ2VQbHVnaW4iOmZhbHNlLCJoZWRnZURlbGF5TXMiOjUwLCJoZWRnZU1heEhlZGdlcyI6MSwiaGVkZ2VPcmRlciI6MTV9fSx7ImlkIjoiZmZldGNoLXJldHJ5IiwidHlwZSI6ImZmZXRjaCIsImxhYmVsIjoicmV0cnktb25seSIsImNvbmZpZyI6eyJlbmFibGVkIjp0cnVlLCJ0aW1lb3V0TXMiOjMwMDAsInJldHJpZXMiOjIsInJldHJ5RGVsYXlNb2RlIjoiZXhwby1qaXR0ZXIiLCJyZXRyeURlbGF5TXMiOjIwMCwicmV0cnlKaXR0ZXJNcyI6MTAwLCJyZXRyeVN0YXR1c0NvZGVzIjpbNDI5LDUwMCw1MDIsNTAzLDUwNF0sInJldHJ5QWZ0ZXJTdGF0dXNDb2RlcyI6WzQxMyw0MjksNTAzXSwidGhyb3dPbkh0dHBFcnJvciI6ZmFsc2UsInVzZURlZHVwZVBsdWdpbiI6ZmFsc2UsImRlZHVwZVR0bE1zIjozMDAwMCwiZGVkdXBlU3dlZXBJbnRlcnZhbE1zIjo1MDAwLCJ1c2VDaXJjdWl0UGx1Z2luIjpmYWxzZSwiY2lyY3VpdFRocmVzaG9sZCI6NSwiY2lyY3VpdFJlc2V0TXMiOjEwMDAwLCJjaXJjdWl0T3JkZXIiOjIwLCJkZWR1cGVPcmRlciI6MTAsInVzZUhlZGdlUGx1Z2luIjpmYWxzZSwiaGVkZ2VEZWxheU1zIjo1MCwiaGVkZ2VNYXhIZWRnZXMiOjEsImhlZGdlT3JkZXIiOjE1fX1d">following setup</a>:</p>
+<p><img src="./screenshot.png" alt="Screenshot"></p>
+<p>If you click on the Chaos Rules card, you can see the configured chaos mix: variable latency between 200ms and 2500ms, and random 500 errors with a 15% chance. We defined two clients: a bare client with no retries, and a retry-only client with 2 retries, 200ms retry delay, and a 3000ms timeout budget (the retry-only client will attempt to retry failed requests up to 2 times, but if the total time exceeds 3000ms, it will give up and return an error). In this article we will use the <a href="https://www.npmjs.com/package/@fetchkit/ffetch"><code>ffetch</code></a> client, because it has all the features we discuss here built in (native <code>fetch</code> has none of these features, <a href="https://www.npmjs.com/package/axios"><code>axios</code></a> and <a href="https://www.npmjs.com/package/ky"><code>ky</code></a> have some, but not all).</p>
+<p>We configured the tool to send 120 requests with a concurrency of 15, which means it will try to keep 15 requests in flight at all times until it reaches a total of 120 requests. The arena applies the same chaos rules to both clients, so they are tested under identical conditions. Press the <strong>Run Arena</strong> button, and wait for the results to come in. Using the Download Card button, you can export the results in svg format:</p>
+<p><img src="./scenarioA.svg" alt="Scenario A Results"></p>
+<p>What this run shows is a classic reliability-versus-latency tradeoff: the retry-only client improved outcomes, but only modestly on failures, while the tail got much worse. In this run, success moved from 99/120 to 106/120, and error rate improved from 17.5% to 11.7%. At the same time, p95 jumped from 2429ms to 4462ms and p99 from 2482ms to 4855ms. In other words, a bit less requests failed, but the slowest requests became dramatically slower.</p>
+<p>Whether that is a win depends on the endpoint. For background processing, scheduled sync jobs, or internal tooling, this tradeoff is often reasonable because eventual success matters more than response speed. For user-facing paths such as checkout, search, or any fan-out workflow where one slow dependency delays the whole response, this can be unacceptable even if the error rate improves. The practical decision is endpoint-specific: do you value recovering those extra successful requests enough to pay the p95 and p99 latency cost?</p>
+<p>Retries are definitely not bad, but they are not a silver bullet either. If you have a tight timeout budget and your endpoint has high latency variance, retries can make tail latency worse without improving success much. In that case, you might want to tune the retry delay, reduce the number of retries, or consider other patterns like hedging instead.</p>
+<h2 id="scenario-b%3A-retry-after-beats-blind-retries-under-rate-limiting" tabindex="-1"><a class="header-anchor" href="#scenario-b%3A-retry-after-beats-blind-retries-under-rate-limiting">Scenario B: Retry-After beats blind retries under rate limiting</a></h2>
+<p>In our <a href="http://fetch-kit.github.io/ffetch-demo/#url=https%3A%2F%2Fjsonplaceholder.typicode.com%2Fposts%2F1&amp;count=150&amp;conc=10&amp;preset=api-instability&amp;chaos64=W3sidHlwZSI6ImxhdGVuY3lSYW5nZSIsIm1pbk1zIjo1MCwibWF4TXMiOjIwMH0seyJ0eXBlIjoicmF0ZUxpbWl0IiwibGltaXQiOjMwLCJ3aW5kb3dNcyI6MTAwMCwicmV0cnlBZnRlck1zIjo2MDB9XQ&amp;clients64=W3siaWQiOiJmZmV0Y2gtbm80MjkiLCJ0eXBlIjoiZmZldGNoIiwibGFiZWwiOiJyZXRyeS1uby00MjkiLCJjb25maWciOnsiZW5hYmxlZCI6dHJ1ZSwidGltZW91dE1zIjozMDAwLCJyZXRyaWVzIjozLCJyZXRyeURlbGF5TW9kZSI6ImV4cG8taml0dGVyIiwicmV0cnlEZWxheU1zIjoyMDAsInJldHJ5Sml0dGVyTXMiOjEwMCwicmV0cnlTdGF0dXNDb2RlcyI6WzUwMCw1MDIsNTAzLDUwNF0sInJldHJ5QWZ0ZXJTdGF0dXNDb2RlcyI6WzBdLCJ0aHJvd09uSHR0cEVycm9yIjpmYWxzZSwidXNlRGVkdXBlUGx1Z2luIjpmYWxzZSwiZGVkdXBlVHRsTXMiOjMwMDAwLCJkZWR1cGVTd2VlcEludGVydmFsTXMiOjUwMDAsInVzZUNpcmN1aXRQbHVnaW4iOmZhbHNlLCJjaXJjdWl0VGhyZXNob2xkIjo1LCJjaXJjdWl0UmVzZXRNcyI6MTAwMDAsImNpcmN1aXRPcmRlciI6MjAsImRlZHVwZU9yZGVyIjoxMCwidXNlSGVkZ2VQbHVnaW4iOmZhbHNlLCJoZWRnZURlbGF5TXMiOjUwLCJoZWRnZU1heEhlZGdlcyI6MSwiaGVkZ2VPcmRlciI6MTV9fSx7ImlkIjoiZmZldGNoLXJhIiwidHlwZSI6ImZmZXRjaCIsImxhYmVsIjoicmV0cnktYWZ0ZXIiLCJjb25maWciOnsiZW5hYmxlZCI6dHJ1ZSwidGltZW91dE1zIjozMDAwLCJyZXRyaWVzIjozLCJyZXRyeURlbGF5TW9kZSI6ImV4cG8taml0dGVyIiwicmV0cnlEZWxheU1zIjoyMDAsInJldHJ5Sml0dGVyTXMiOjEwMCwicmV0cnlTdGF0dXNDb2RlcyI6WzQyOSw1MDAsNTAyLDUwMyw1MDRdLCJyZXRyeUFmdGVyU3RhdHVzQ29kZXMiOls0MTMsNDI5LDUwM10sInRocm93T25IdHRwRXJyb3IiOmZhbHNlLCJ1c2VEZWR1cGVQbHVnaW4iOmZhbHNlLCJkZWR1cGVUdGxNcyI6MzAwMDAsImRlZHVwZVN3ZWVwSW50ZXJ2YWxNcyI6NTAwMCwidXNlQ2lyY3VpdFBsdWdpbiI6ZmFsc2UsImNpcmN1aXRUaHJlc2hvbGQiOjUsImNpcmN1aXRSZXNldE1zIjoxMDAwMCwiY2lyY3VpdE9yZGVyIjoyMCwiZGVkdXBlT3JkZXIiOjEwLCJ1c2VIZWRnZVBsdWdpbiI6ZmFsc2UsImhlZGdlRGVsYXlNcyI6NTAsImhlZGdlTWF4SGVkZ2VzIjoxLCJoZWRnZU9yZGVyIjoxNX19XQ">next setup</a> we are focusing on rate-limiting behavior. We configured a 150-request run with concurrency 10, a low-latency baseline (50-200ms), and a strict rate-limit rule (30 requests per second with a 1000ms window and Retry-After set to 600ms) so that 429 behavior dominates the failure profile. Both clients use the same timeout and retry shape (3000ms timeout, 3 retries, exponential jitter backoff), but <code>retry-no-429</code> retries only 5xx responses while <code>retry-after</code> also treats 429 as retryable and honors Retry-After hints, which isolates the value of explicit rate-limit handling.</p>
+<p>Running that setup produces the following result card:</p>
+<p><img src="./scenarioB.svg" alt="Scenario B Results"></p>
+<p>In this run, <code>retry-no-429</code> finished at 54 reliability with 90/150 successful requests and a 40.0% error rate, while <code>retry-after</code> reached 90 reliability with 150/150 successful requests and 0.0% error rate. That is the core outcome: honoring <code>Retry-After</code> removes the rate-limit failure mode almost entirely.</p>
+<p>The tradeoff is visible in latency and throughput. <code>retry-no-429</code> shows lower tail latency (p95 585ms, p99 667ms) and higher throughput (5.52 rps), but those numbers are misleading in this setup: they mostly reflect fast failures from repeated 429s, not better service quality. <code>retry-after</code> is intentionally slower at the tail (p95 1428ms, p99 1474ms) and lower throughput (2.09 rps), because it waits when instructed instead of hammering the limit window. For rate-limited APIs, this is usually the correct trade: accept controlled waiting to preserve completion and avoid self-inflicted request loss. For latency-critical user flows, you can then tune retry counts, delay, and timeout budgets to recover responsiveness without fighting the limiter.</p>
+<h2 id="scenario-c%3A-hedging-helps-tail-latency%2C-not-error-recovery" tabindex="-1"><a class="header-anchor" href="#scenario-c%3A-hedging-helps-tail-latency%2C-not-error-recovery">Scenario C: Hedging helps tail latency, not error recovery</a></h2>
+<p>In this <a href="http://fetch-kit.github.io/ffetch-demo/#url=https%3A%2F%2Fjsonplaceholder.typicode.com%2Fposts%2F1&amp;count=150&amp;conc=6&amp;chaos64=W3sidHlwZSI6ImxhdGVuY3lSYW5nZSIsIm1pbk1zIjo4MCwibWF4TXMiOjMwMDB9LHsidHlwZSI6ImZhaWxOdGgiLCJuIjoyMCwic3RhdHVzIjo1MDAsImJvZHkiOiJSYXJlIGJhY2tlbmQgZXJyb3IifV0=&amp;clients64=W3siaWQiOiJmZmV0Y2gtcmV0cnkiLCJ0eXBlIjoiZmZldGNoIiwibGFiZWwiOiJyZXRyeSIsImNvbmZpZyI6eyJlbmFibGVkIjp0cnVlLCJ0aW1lb3V0TXMiOjQwMDAsInJldHJpZXMiOjEsInJldHJ5RGVsYXlNb2RlIjoiZXhwby1qaXR0ZXIiLCJyZXRyeURlbGF5TXMiOjE1MCwicmV0cnlKaXR0ZXJNcyI6NzUsInJldHJ5U3RhdHVzQ29kZXMiOls0MjksNTAwLDUwMiw1MDMsNTA0XSwicmV0cnlBZnRlclN0YXR1c0NvZGVzIjpbNDEzLDQyOSw1MDNdLCJ0aHJvd09uSHR0cEVycm9yIjpmYWxzZSwidXNlRGVkdXBlUGx1Z2luIjpmYWxzZSwiZGVkdXBlVHRsTXMiOjMwMDAwLCJkZWR1cGVTd2VlcEludGVydmFsTXMiOjUwMDAsInVzZUNpcmN1aXRQbHVnaW4iOmZhbHNlLCJjaXJjdWl0VGhyZXNob2xkIjo1LCJjaXJjdWl0UmVzZXRNcyI6MTAwMDAsImNpcmN1aXRPcmRlciI6MjAsImRlZHVwZU9yZGVyIjoxMCwidXNlSGVkZ2VQbHVnaW4iOmZhbHNlLCJoZWRnZURlbGF5TXMiOjIwMCwiaGVkZ2VNYXhIZWRnZXMiOjEsImhlZGdlT3JkZXIiOjE1fX0seyJpZCI6ImZmZXRjaC1oZWRnZSIsInR5cGUiOiJmZmV0Y2giLCJsYWJlbCI6ImhlZGdlIiwiY29uZmlnIjp7ImVuYWJsZWQiOnRydWUsInRpbWVvdXRNcyI6NDAwMCwicmV0cmllcyI6MCwicmV0cnlEZWxheU1vZGUiOiJleHBvLWppdHRlciIsInJldHJ5RGVsYXlNcyI6MTUwLCJyZXRyeUppdHRlck1zIjo3NSwicmV0cnlTdGF0dXNDb2RlcyI6WzQyOSw1MDAsNTAyLDUwMyw1MDRdLCJyZXRyeUFmdGVyU3RhdHVzQ29kZXMiOls0MTMsNDI5LDUwM10sInRocm93T25IdHRwRXJyb3IiOmZhbHNlLCJ1c2VEZWR1cGVQbHVnaW4iOmZhbHNlLCJkZWR1cGVUdGxNcyI6MzAwMDAsImRlZHVwZVN3ZWVwSW50ZXJ2YWxNcyI6NTAwMCwidXNlQ2lyY3VpdFBsdWdpbiI6ZmFsc2UsImNpcmN1aXRUaHJlc2hvbGQiOjUsImNpcmN1aXRSZXNldE1zIjoxMDAwMCwiY2lyY3VpdE9yZGVyIjoyMCwiZGVkdXBlT3JkZXIiOjEwLCJ1c2VIZWRnZVBsdWdpbiI6dHJ1ZSwiaGVkZ2VEZWxheU1zIjoyMDAsImhlZGdlTWF4SGVkZ2VzIjoxLCJoZWRnZU9yZGVyIjoxNX19LHsiaWQiOiJmZmV0Y2gtYm90aCIsInR5cGUiOiJmZmV0Y2giLCJsYWJlbCI6InJldHJ5K2hlZGdlIiwiY29uZmlnIjp7ImVuYWJsZWQiOnRydWUsInRpbWVvdXRNcyI6NDAwMCwicmV0cmllcyI6MSwicmV0cnlEZWxheU1vZGUiOiJleHBvLWppdHRlciIsInJldHJ5RGVsYXlNcyI6MTUwLCJyZXRyeUppdHRlck1zIjo3NSwicmV0cnlTdGF0dXNDb2RlcyI6WzQyOSw1MDAsNTAyLDUwMyw1MDRdLCJyZXRyeUFmdGVyU3RhdHVzQ29kZXMiOls0MTMsNDI5LDUwM10sInRocm93T25IdHRwRXJyb3IiOmZhbHNlLCJ1c2VEZWR1cGVQbHVnaW4iOmZhbHNlLCJkZWR1cGVUdGxNcyI6MzAwMDAsImRlZHVwZVN3ZWVwSW50ZXJ2YWxNcyI6NTAwMCwidXNlQ2lyY3VpdFBsdWdpbiI6ZmFsc2UsImNpcmN1aXRUaHJlc2hvbGQiOjUsImNpcmN1aXRSZXNldE1zIjoxMDAwMCwiY2lyY3VpdE9yZGVyIjoyMCwiZGVkdXBlT3JkZXIiOjEwLCJ1c2VIZWRnZVBsdWdpbiI6dHJ1ZSwiaGVkZ2VEZWxheU1zIjoyMDAsImhlZGdlTWF4SGVkZ2VzIjoxLCJoZWRnZU9yZGVyIjoxNX19XQ==">scenario</a>, we examine tail-latency behavior under mixed delay plus rare hard failures. We configured 150 requests at concurrency 6, with one latency envelope (80-3000ms) and an additional periodic server error (<code>failNth</code>, every 20th request returns 500) to create occasional recovery pressure.</p>
+<p>The three clients keep the same baseline timeout and backoff settings (4000ms timeout, exponential jitter), but vary strategy: <code>retry</code> uses one retry and no hedging, <code>hedge</code> uses hedging with no retries, and <code>retry+hedge</code> combines both.</p>
+<p>Running that setup produces the following result card:</p>
+<p><img src="./scenarioC.svg" alt="Scenario C Results"></p>
+<p>This run shows why hedging is primarily a tail-latency tool, not a general error-recovery strategy. <code>hedge</code> improved latency shape versus <code>retry</code> (p95 2414ms vs 2867ms, p99 2823ms vs 2943ms) and increased throughput (0.83 rps vs 0.58 rps), but it also introduced failures (145/150 success, 3.3% error) while <code>retry</code> completed 150/150 with 0.0% error.</p>
+<p>The combined strategy, <code>retry+hedge</code>, recovered to 150/150 success and 0.0% error like <code>retry</code>, while keeping p95 better than retry-only (2510ms vs 2867ms). However, it did not dominate across all tail metrics: p99 rose to 3015ms, worse than both <code>retry</code> and <code>hedge</code> in this run. The practical takeaway is that hedging can improve tail behavior, but its benefit is workload-specific, and adding retries changes the shape again rather than producing a universal win.</p>
+<h2 id="limits-of-these-findings" tabindex="-1"><a class="header-anchor" href="#limits-of-these-findings">Limits of these findings</a></h2>
+<p>These runs are intentionally practical, not exhaustive. Even with the same URL and client settings, randomized chaos means exact values will move between runs, so the point is direction and tradeoff shape rather than a single canonical number.</p>
+<p>The scope is also deliberately narrow: one endpoint pattern, one request shape, and a browser execution context. That is enough to reveal useful interactions, but not sufficient to claim universal behavior across all services, payload sizes, or runtime environments. Node.js services, mobile clients, and edge runtimes can show different latency and scheduling characteristics.</p>
+<p>It is also important to separate client-level resilience knobs from application-level behavior. Retries, timeouts, hedging, and retry-after handling live in the HTTP client layer, but many reliability outcomes depend on higher-level controls such as caching strategy, idempotency design, request coalescing, fallbacks, queueing, and feature-level degradation paths. Those have to be designed and applied on top of the client, no client configuration can replace them on its own.</p>
+<p>So treat synthetic chaos as a decision aid: it is excellent for building intuition and comparing strategies under controlled pressure, but it is not a substitute for production validation with real traffic patterns and service constraints.</p>
+<h2 id="practical-tuning-recipes" tabindex="-1"><a class="header-anchor" href="#practical-tuning-recipes">Practical Tuning Recipes</a></h2>
+<p>As these scenarios show, resilience tuning is neither just a coding concern nor just an infrastructure concern. It sits in the overlap between development and DevOps: request semantics, timeout budgets, retry behavior, rate-limit policy, and service capacity all interact, and changing one layer often shifts pressure to another.</p>
+<p>As a developer, your responsibility is to understand the patterns, implement them correctly, and tune them based on observed behavior. As an operator, your responsibility is to provide accurate signals (latency, error rates, rate-limit feedback) and ensure that the infrastructure can handle the load patterns generated by different client strategies.</p>
+<p>That is also why this is still not reliably automated in mainstream clients. Live signals are noisy, partial and delayed, policy knobs interact in non-linear ways, so naive auto-tuning can easily overreact, oscillate, or amplify traffic at the worst possible time. In practice, the safer workflow is still iterative: observe behavior, run controlled experiments, adjust one variable, and verify again.</p>
+<p>Even so, a few generic rules hold up across most systems:</p>
+<ol>
+<li><strong>Set a realistic timeout budget before increasing retries.</strong> A retry policy on top of an unrealistically tight timeout usually makes tail latency worse without recovering enough failures. Start from end-to-end SLOs, reserve budget across hops, then decide how many retry attempts can actually fit.</li>
+<li><strong>Retry only retryable statuses and idempotent operations.</strong> Broad retry policies can turn transient errors into duplicated side effects or extra backend load. Restrict retries to safe operations and clearly transient classes (for example select 5xx/429 cases), and keep non-idempotent writes behind explicit safeguards.</li>
+<li><strong>Handle 429 explicitly and honor Retry-After when available.</strong> Rate limiting is feedback from the server, not just another failure code. Respecting Retry-After typically reduces request loss and stabilizes completion rates, even when it increases latency, because the client stops fighting the limit window.</li>
+<li><strong>Use circuit breaker for sustained backend failure, not for rate-limit configuration mistakes.</strong> Circuit breakers are best for repeated upstream instability and backpressure protection, where failing fast prevents cascading saturation. They are not a replacement for correct 429/retry-after handling.</li>
+<li><strong>Consider hedging only when the dominant problem is tail latency, not response error rate.</strong> Hedging can cut p95/p99 by racing slow requests, but it may increase request volume and does not inherently fix error-heavy failure modes. Use it when slow stragglers are the primary bottleneck, and validate the extra load cost.</li>
+</ol>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>HTTP client resilience is a complex and nuanced topic. The interactions between retries, timeouts, hedging, and rate-limit handling are non-trivial, and the outcomes are sometimes counterintuitive. Retries can improve your error rate while quietly destroying your tail latency. Hedging can shave milliseconds off the median while leaving the p99 untouched. Blindly stacking these options on top of each other, or accepting tool defaults does not get you to a resilient client, it gets you to an unpredictable one.</p>
+<p>What actually works is treating resilience configuration the same way you would treat a performance optimization: establish a baseline, form a hypothesis, change one thing, and measure again. Controlled experiments let you isolate the effect of each knob before you commit to it. The baselines you build this way are yours: tied to your traffic shape, your backend's failure modes, and your latency budget, not borrowed from a blog post or a library's README.</p>
+<p>Once you have a configuration you trust from experimentation, apply it, observe it against real traffic, and expect to tweak it again. Production has a way of surfacing failure modes that no chaos scenario fully anticipates. The goal is not to find the one correct config, but to build the habit of reasoning about resilience as a measurable property rather than a checkbox.</p>
+<h2 id="try-it-with-your-own-config" tabindex="-1"><a class="header-anchor" href="#try-it-with-your-own-config">Try it with your own config</a></h2>
+<p>Run your own scenarios here: <a href="https://fetch-kit.github.io/ffetch-demo/">https://fetch-kit.github.io/ffetch-demo/</a></p>
+<p>Configure chaos, start with one baseline client and one modified client, change one knob at a time, and compare reliability plus tail latency together.</p>
+<p>Resilience patterns are not the only things lying to you:</p>
+<ul>
+<li><a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a></li>
+<li><a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

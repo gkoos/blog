@@ -629,5 +629,14 @@
         <description>How to add convenience methods to a native Promise object without subclassing, wrapping, or changing what await returns.</description>
       </item>
     
+      <item>
+        <title>Your HTTP Client Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/</guid>
+        <pubDate>Sun, 19 Apr 2026 00:00:00 GMT</pubDate>
+
+        <description>You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse.</description>
+      </item>
+    
   </channel>
 </rss>
