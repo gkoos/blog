@@ -3,7 +3,7 @@ layout: layouts/post.njk
 title: Your HTTP Client Is Lying to You
 date: 2026-04-19
 description: "You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse."
-excerpt: "A short follow-up to my production networking guide: same patterns, but under controlled chaos, with a few counterintuitive outcomes and practical tuning recipes."
+excerpt: "If you write frontend or Node.js code long enough, you eventually hit the same reliability wall: the network is fine in local testing, then production adds latency spikes, occasional 5xx responses, rate limits, and weird timing behavior that only appears under load."
 tags:
 - posts
 - tutorials
