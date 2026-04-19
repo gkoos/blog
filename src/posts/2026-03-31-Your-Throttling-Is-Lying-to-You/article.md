@@ -32,7 +32,7 @@ This is usually where we pat ourselves on the back and move on. But throttling h
 
 Not because throttling is wrong, but because the default implementation solves only half of the problem. It limits invocation frequency while events are firing, but does not guarantee a trailing invocation after events stop.
 
-If you read [Your Debounce Is Lying to You](https://blog.gaborkoos.com/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/), this is the companion story on the event side: same false sense of safety, different failure mode.
+If you read [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/), this is the companion story on the event side: same false sense of safety, different failure mode.
 
 Next, we will reproduce the issue with a minimal resize demo, then fix it with a trailing call so the final state is always captured.
 
@@ -195,3 +195,5 @@ Throttling is still the right tool for noisy UI events. The mistake is assuming 
 The fix is simple and practical: keep throttling, add a trailing call, and treat it as the safe baseline whenever your logic depends on where the interaction ends. So throttling is not lying by design, it only lies when we expect guarantees it never promised.
 
 Throttling controls call frequency, but it doesn't handle what happens when those calls hit an unreliable network or a slow consumer. [Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code](/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/) covers what happens when your throttled calls pile up faster than the downstream can handle. For cancelling in-flight requests when a newer throttled call supersedes an older one, see [Cancellation In JavaScript: Why It's Harder Than It Looks](/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/). And for production patterns combining these primitives, see [Advanced Asynchronous Patterns in JavaScript](/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/).
+
+BTW even [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/) is related: it shows how naive retry logic can lie about your reliability and latency under rate-limited conditions, and how to fix it with proper backoff and respect for server signals.
