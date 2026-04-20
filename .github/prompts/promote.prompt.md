@@ -5,7 +5,7 @@ description: Generate promotion copy for a blog post across specified platforms
 
 You are a technical content promotion assistant. Your job is to generate ready-to-use promotion copy for a blog post.
 
-The article file is attached as context. The platforms to generate copy for are: ${input:platforms|Platforms to promote on (e.g. x hn r/golang r/programming r/javascript r/typescript r/node)}
+The article file is attached as context. The platforms to generate copy for are: ${input:platforms|Platforms to promote on (e.g. x hn r/golang r/programming r/javascript r/typescript r/node r/backend)}
 
 ## Steps
 
@@ -30,6 +30,15 @@ The article file is attached as context. The platforms to generate copy for are:
 4. Read the article body to understand the main topic, key points, and any notable findings (benchmarks, conclusions, opinions).
 
 5. For each platform listed in the platforms input, generate the copy below. Skip platforms not listed.
+
+6. Validate before final output:
+  - Every requested platform/subreddit appears in the output.
+  - Every tracked URL contains `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content`.
+  - Never output a bare canonical URL in posting fields (`Link`, `URL`, tweet URL). If any posting URL equals the canonical URL or looks like `...?` without UTM keys, regenerate.
+  - For every subreddit with `Post type = Link`, the `Link` field MUST be that subreddit's tracked URL (with `utm_source=reddit`, `utm_medium=social`, `utm_campaign=...`, `utm_content=r_<subreddit>`).
+  - The Open Tabs command contains one compose URL per generated posting target.
+  - The Open Tabs command must use Git Bash-safe PowerShell `Start-Process` format shown below.
+  - In Open Tabs, URL-decode each compose link once and verify the nested tracked URL still contains all four UTM keys including `utm_campaign`.
 
 ---
 
@@ -81,6 +90,12 @@ Known subreddit rules:
 - r/typescript: link post, self-promotion ratio rule applies — flag if the article is only tangentially TypeScript, typical flairs: "Article", "Discussion"
 - r/node: link post, self-promotion allowed with discretion, typical flairs: "Article", "Discussion", "Project"
 - r/opensource: link or text post allowed, friendly to project announcements, typical flairs: "Project", "Announcement"
+- r/backend: link post preferred, practical backend/reliability angle, typical flairs: "Article", "Discussion"
+
+Fallback rule for unknown `r/*` values:
+- Use `Post type = Link`
+- Suggest flair `Discussion`
+- Include a short warning to verify subreddit rules before posting
 
 Adapt tone per subreddit:
 - r/golang, r/programming: technical, concise
@@ -101,8 +116,13 @@ Include a final `Tracking Summary` section with:
 Include a final `Open Tabs` section with a single bash command (for Git Bash on Windows) that opens all compose/submit URLs in the default browser at once. Use this format:
 
 ```bash
-start "" "https://..." && start "" "https://..." && ...
+powershell.exe -NoProfile -Command "Start-Process 'https://...'; Start-Process 'https://...'; ..."
 ```
+
+Important for Open Tabs:
+- Use `Start-Process` entries separated by `;` inside the PowerShell command string.
+- Use fully URL-encoded tracked URLs for compose links so UTM parameters are preserved.
+- Do not use `cmd.exe /c start` in Open Tabs output.
 
 Build compose URLs per platform as follows:
 
@@ -110,6 +130,7 @@ Build compose URLs per platform as follows:
   ```
   https://www.reddit.com/r/{subreddit}/submit?title={url-encoded-title}&url={url-encoded-tracked-url}
   ```
+  - Ensure `{url-encoded-tracked-url}` encodes the entire tracked URL (including query string) as one value.
 
 - **Hacker News**:
   ```
