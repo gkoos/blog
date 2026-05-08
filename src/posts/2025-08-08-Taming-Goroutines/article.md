@@ -44,7 +44,7 @@ A channel can be *blocking* or *non-blocking*: a blocking channel will wait unti
 
 It's important to understand that concurrency does not mean parallelism. Go allows you to run many goroutines, but it can't run more parallel threads than the number of available CPU cores. The Go runtime will spawn and run your _concurrent_ goroutines, but not all of them will run in _parallel_ at the same time. Yes, they all will be scheduled to run, but not necessarily all at once.
 
-Also, goroutines introduce some overhead, such as stack space and scheduler work. If you spawn thousands of goroutines, you might end up hurting performance instead of improving it. Go is great at managing goroutines efficiently, but it's still important to be mindful of how many you create.
+Also, goroutines introduce some overhead, such as stack space and scheduler work. If you spawn thousands of goroutines, you might end up hurting performance instead of improving it. Go is great at managing goroutines efficiently, but it's still important to be mindful of how many you create. Values captured by a goroutine closure that outlive the spawning stack frame must be heap-allocated — a decision made by [the compiler's escape analysis](/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/) that directly affects per-goroutine allocation cost.
 
 ## 3. Parallelizing a Divide & Conquer Algorithm
 
