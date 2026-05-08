@@ -1,0 +1,83 @@
+<svg viewBox="0 0 800 650" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define styles -->
+  <defs>
+    <style>
+      .block-box { fill: #f0f4f8; stroke: #2c3e50; stroke-width: 2; }
+      .block-text { font-family: 'Segoe UI', sans-serif; font-size: 12px; font-weight: 600; fill: #2c3e50; }
+      .value-text { font-family: 'Courier New', monospace; font-size: 10px; fill: #555; }
+      .edge-line { stroke: #2c3e50; stroke-width: 2; fill: none; }
+      .edge-label { font-family: 'Segoe UI', sans-serif; font-size: 11px; fill: #555; }
+      .title { font-family: 'Segoe UI', sans-serif; font-size: 15px; font-weight: 600; fill: #2c3e50; }
+      .phi-box { fill: #fff4e6; stroke: #d97706; stroke-width: 2; }
+      .highlight { fill: #d97706; font-weight: 600; }
+      @media (prefers-color-scheme: dark) {
+        svg { background: #1e293b; }
+        .block-box { fill: #334155; stroke: #94a3b8; }
+        .block-text { fill: #e2e8f0; }
+        .value-text { fill: #94a3b8; }
+        .edge-line { stroke: #94a3b8; }
+        .edge-label { fill: #94a3b8; }
+        .title { fill: #e2e8f0; }
+        .phi-box { fill: #3d2e0a; stroke: #f59e0b; }
+        .highlight { fill: #fbbf24; }
+        .phi-note { fill: #fbbf24 !important; }
+        polygon { fill: #94a3b8; }
+      }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="28" class="title" text-anchor="middle">SSA Control Flow: larger(a, b int) int</text>
+  <text x="400" y="47" class="edge-label" text-anchor="middle">phi node merges two paths based on which block executed</text>
+
+  <!-- Block b0 (entry) -->
+  <rect x="280" y="60" width="240" height="110" class="block-box" rx="4"/>
+  <text x="400" y="82" class="block-text">Block b0 (entry)</text>
+  <text x="295" y="105" class="value-text">v0 = Arg &lt;int&gt; {a}</text>
+  <text x="295" y="125" class="value-text">v1 = Arg &lt;int&gt; {b}</text>
+  <text x="295" y="145" class="value-text">v2 = LessThan v0 v1</text>
+  <text x="295" y="165" class="value-text">If v2 → b1 b2</text>
+
+  <!-- Edges from b0 to b1 and b2 -->
+  <line x1="340" y1="170" x2="220" y2="240" class="edge-line" marker-end="url(#arrowhead)"/>
+  <text x="280" y="200" class="edge-label">true</text>
+
+  <line x1="460" y1="170" x2="580" y2="240" class="edge-line" marker-end="url(#arrowhead)"/>
+  <text x="530" y="200" class="edge-label">false</text>
+
+  <!-- Block b1 (b > a path) -->
+  <rect x="100" y="240" width="240" height="95" class="block-box" rx="4"/>
+  <text x="220" y="262" class="block-text">Block b1 (b &gt; a)</text>
+  <text x="115" y="285" class="value-text">v3 = Copy &lt;int&gt; v1</text>
+  <text x="115" y="305" class="value-text">Goto b3</text>
+
+  <!-- Block b2 (b <= a path) -->
+  <rect x="460" y="240" width="240" height="95" class="block-box" rx="4"/>
+  <text x="580" y="262" class="block-text">Block b2 (b ≤ a)</text>
+  <text x="475" y="285" class="value-text">v4 = Copy &lt;int&gt; v0</text>
+  <text x="475" y="305" class="value-text">Goto b3</text>
+
+  <!-- Edges from b1 and b2 to b3 -->
+  <line x1="220" y1="335" x2="220" y2="385" class="edge-line" marker-end="url(#arrowhead)"/>
+  <line x1="580" y1="335" x2="580" y2="385" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- Block b3 (merge point with phi) -->
+  <rect x="220" y="385" width="360" height="135" class="block-box" rx="4"/>
+  <text x="400" y="407" class="block-text">Block b3 (merge point)</text>
+  
+  <!-- Phi node highlighted -->
+  <rect x="248" y="435" width="238" height="18" class="phi-box" rx="3"/>
+  <text x="250" y="447" class="value-text">
+    <tspan class="highlight">v5 = Phi &lt;int&gt; v3 v4</tspan>
+  </text>
+  <text x="250" y="463" class="value-text phi-note" fill="#d97706">(select v3 if from b1, else v4)</text>
+  
+  <text x="250" y="500" class="value-text">Return v5</text>
+
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#2c3e50"/>
+    </marker>
+  </defs>
+</svg>

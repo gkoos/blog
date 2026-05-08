@@ -56,6 +56,8 @@ Go compiles **one package at a time**. Each package - whether it's part of your 
 
 Parallelism is another advantage of this per-package approach: since the compiler knows the dependency graph, it can compile multiple independent packages concurrently, fully leveraging multi-core CPUs. This is why large Go projects often feel surprisingly fast to build: a lot of work is done in parallel, and nothing is recompiled unnecessarily.
 
+If you want to understand what the compiler actually does inside that per-package compilation step — lexing, parsing, type checking, SSA construction, optimization passes, and code generation — see [*The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary*](/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/).
+
 ### Linking Is Selective
 
 *Linking* is the process of combining compiled packages into a single executable. Go **only links main packages into binaries**. Library packages never get linked on their own, they exist purely as reusable artifacts for other packages. This distinction is important: when you run `go build ./...` on a project, Go may compile dozens of packages but produce zero binaries if none of the packages are main!

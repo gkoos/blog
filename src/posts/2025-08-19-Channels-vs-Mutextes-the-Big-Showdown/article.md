@@ -215,7 +215,7 @@ BenchmarkChannelCounter-8     20000000    60 ns/op
 
 Now obviously real-world workloads might slightly differ from synthetic benchmarks (e.g., context switches, OS scheduling etc.) but that's a **~75× performance difference in favor of the mutex**!
 
-So why the huge gap? The mutex path is just an atomic operation to acquire/release the lock. The channel path involves synchronization between two goroutines, queue management, and possibly waking up a sleeping goroutine.
+So why the huge gap? The mutex path compiles down to a single atomic CPU instruction. The channel path involves synchronization between two goroutines, queue management, and possibly waking up a sleeping goroutine — a substantial amount of runtime work that [the compiler's code generation](/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/) cannot optimize away.
 
 This demonstrates why mutexes are the right tool for protecting simple shared state.
 

@@ -11,7 +11,7 @@ tags:
   - tutorials
   - golang
 ---
-In a previous [Go Interfaces - Composition Over Inheritance (And Common Sense)](/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/), we covered the basics of Go interfaces. It's time to take a deeper dive into how interfaces work under the hood, common pitfalls, and advanced best practices. Understanding these concepts can help you, well, understand these concepts. And write more efficient, maintainable, and bug-free Go code.
+In a previous article: [Go Interfaces - Composition Over Inheritance (And Common Sense)](/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/), we covered the basics of Go interfaces. It's time to take a deeper dive into how interfaces work under the hood, common pitfalls, and advanced best practices. Understanding these concepts can help you, well, understand these concepts. And write more efficient, maintainable, and bug-free Go code.
 
 ## 1. How Go Interfaces Are Internally Stored
 
@@ -391,7 +391,7 @@ func MakeLogger() Logger {
 }
 ```
 
-If you care about allocation, use Go’s `go build -gcflags="-m"` to see escape analysis results.
+If you care about allocation, use Go's `go build -gcflags="-m"` to see escape analysis results. For a deeper look at how the compiler decides what escapes and why, see [*The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary*](/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/).
 
 ### When Interface Indirection Matters
 

@@ -1,0 +1,159 @@
+<svg viewBox="0 0 1100 550" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define styles -->
+  <defs>
+    <style>
+      .stage-box { fill: #f0f4f8; stroke: #2c3e50; stroke-width: 2; }
+      .stage-text { font-family: 'Segoe UI', sans-serif; font-size: 12px; font-weight: 600; fill: #2c3e50; text-anchor: middle; }
+      .output-text { font-family: 'Segoe UI', sans-serif; font-size: 9px; fill: #666; text-anchor: middle; }
+      .tool-box { fill: #fff8e1; stroke: #f59e0b; stroke-width: 1.5; }
+      .tool-text { font-family: 'Courier New', monospace; font-size: 10px; fill: #92400e; font-weight: 500; text-anchor: middle; }
+      .edge-line { stroke: #2c3e50; stroke-width: 2; fill: none; }
+      .title { font-family: 'Segoe UI', sans-serif; font-size: 15px; font-weight: 600; fill: #2c3e50; }
+      .legend { font-family: 'Segoe UI', sans-serif; font-size: 10px; fill: #555; }
+      @media (prefers-color-scheme: dark) {
+        svg { background: #1e293b; }
+        .stage-box { fill: #334155; stroke: #94a3b8; }
+        .stage-text { fill: #e2e8f0; }
+        .output-text { fill: #94a3b8; }
+        .tool-box { fill: #2d2005; stroke: #f59e0b; }
+        .tool-text { fill: #fbbf24; }
+        .edge-line { stroke: #94a3b8; }
+        .title { fill: #e2e8f0; }
+        .legend { fill: #94a3b8; }
+        .workflow-box { fill: #0f2d1a !important; stroke: #16a34a !important; }
+        .workflow-title { fill: #4ade80 !important; }
+        polygon { fill: #94a3b8; }
+      }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="550" y="28" class="title" text-anchor="middle">Go Compiler Pipeline with Observability Tools</text>
+
+  <!-- Stage boxes and connectors -->
+  <!-- Lexer -->
+  <rect x="15" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="67" y="78" class="stage-text">Lexer</text>
+  <text x="67" y="110" class="output-text">Tokens</text>
+
+  <!-- Arrow -->
+  <line x1="120" y1="85" x2="155" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- Parser -->
+  <rect x="155" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="207" y="78" class="stage-text">Parser</text>
+  <text x="207" y="110" class="output-text">AST</text>
+
+  <!-- Arrow -->
+  <line x1="260" y1="85" x2="295" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- Type Check -->
+  <rect x="295" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="347" y="78" class="stage-text">Type Chk</text>
+  <text x="347" y="110" class="output-text">Ann. AST</text>
+
+  <!-- Arrow -->
+  <line x1="400" y1="85" x2="435" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- IR (Intermediate Representation) -->
+  <rect x="435" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="487" y="78" class="stage-text">IR</text>
+  <text x="487" y="110" class="output-text">Lowered</text>
+
+  <!-- Arrow -->
+  <line x1="540" y1="85" x2="575" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- SSA -->
+  <rect x="575" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="627" y="78" class="stage-text">SSA Const</text>
+  <text x="627" y="110" class="output-text">SSA Values</text>
+
+  <!-- Arrow -->
+  <line x1="680" y1="85" x2="715" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- Optimization -->
+  <rect x="715" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="767" y="78" class="stage-text">Optimize</text>
+  <text x="767" y="110" class="output-text">Opt. SSA</text>
+
+  <!-- Arrow -->
+  <line x1="820" y1="85" x2="855" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- Code Gen -->
+  <rect x="855" y="50" width="105" height="70" class="stage-box" rx="4"/>
+  <text x="907" y="78" class="stage-text">Code Gen</text>
+  <text x="907" y="110" class="output-text">Asm/Obj</text>
+
+  <!-- Arrow -->
+  <line x1="960" y1="85" x2="995" y2="85" class="edge-line" marker-end="url(#arrowhead)"/>
+
+  <!-- Output -->
+  <rect x="995" y="50" width="80" height="70" class="stage-box" rx="4"/>
+  <text x="1035" y="78" class="stage-text">Binary</text>
+
+  <!-- Tool annotations below -->
+  <!-- Lexer tools -->
+  <rect x="25" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="67" y="155" class="tool-text">Lex errors</text>
+  <text x="67" y="170" class="legend" font-size="8" text-anchor="middle">(unterminated)</text>
+
+  <!-- Parser tools -->
+  <rect x="165" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="207" y="155" class="tool-text">Syntax</text>
+  <text x="207" y="170" class="legend" font-size="8" text-anchor="middle">errors</text>
+
+  <!-- Type Check tools -->
+  <rect x="305" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="347" y="155" class="tool-text">Type</text>
+  <text x="347" y="170" class="legend" font-size="8" text-anchor="middle">errors</text>
+
+  <!-- IR tools (inlining, escape) -->
+  <rect x="445" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="487" y="155" class="tool-text">-m -m=2</text>
+  <text x="487" y="170" class="legend" font-size="8" text-anchor="middle">inlining</text>
+
+  <!-- SSA tools (GOSSAFUNC) -->
+  <rect x="585" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="627" y="155" class="tool-text">GOSSAFUNC</text>
+  <text x="627" y="170" class="legend" font-size="8" text-anchor="middle">HTML dump</text>
+
+  <!-- Optimization tools -->
+  <rect x="725" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="767" y="155" class="tool-text">-d help</text>
+  <text x="767" y="170" class="legend" font-size="8" text-anchor="middle">debug flags</text>
+
+  <!-- Code Gen tools (-S) -->
+  <rect x="865" y="135" width="85" height="50" class="tool-box" rx="3"/>
+  <text x="907" y="155" class="tool-text">-S</text>
+  <text x="907" y="170" class="legend" font-size="8" text-anchor="middle">assembly</text>
+
+  <!-- Linker tools (objdump) -->
+  <rect x="1005" y="135" width="70" height="50" class="tool-box" rx="3"/>
+  <text x="1040" y="155" class="tool-text">objdump</text>
+  <text x="1040" y="170" class="legend" font-size="8" text-anchor="middle">post-link</text>
+
+  <!-- Additional tools section -->
+  <rect x="20" y="210" width="1055" height="55" fill="none" stroke="#ccc" stroke-width="1" stroke-dasharray="5,5" rx="3"/>
+  <text x="30" y="235" class="legend" font-weight="600">Additional tools:</text>
+  <text x="180" y="235" class="legend">go build -json  •</text>
+  <text x="330" y="235" class="legend">-pgo=default.pgo  •</text>
+  <text x="530" y="235" class="legend">go tool compile -d help</text>
+
+  <!-- Workflow section -->
+  <rect x="20" y="280" width="1055" height="255" fill="#f0fdf4" stroke="#16a34a" stroke-width="1" rx="4"/>
+  <text x="30" y="305" class="title" fill="#15803d">Typical Investigation Workflow</text>
+  
+  <text x="30" y="335" class="legend" font-size="11"><tspan font-weight="600">1. go build -gcflags="-m=2"</tspan>   Understand inlining and escape decisions</text>
+  <text x="30" y="358" class="legend" font-size="11"><tspan font-weight="600">2. GOSSAFUNC=MyFunc go build</tspan>   Visualize SSA pass-by-pass transformations</text>
+  <text x="30" y="381" class="legend" font-size="11"><tspan font-weight="600">3. go build -gcflags="-S"</tspan>   Confirm final assembly: branches, calls, checks</text>
+  <text x="30" y="404" class="legend" font-size="11"><tspan font-weight="600">4. go tool objdump -s MyFunc ./binary</tspan>   Post-link reality check</text>
+  <text x="30" y="427" class="legend" font-size="11"><tspan font-weight="600">5. go build -pgo=default.pgo</tspan>   Compare PGO-guided build effects</text>
+  <text x="30" y="520" class="legend" font-size="10" font-style="italic">💡 Tip: This sequence keeps feedback loop short. Start with -m=2 for most questions.</text>
+
+  <!-- Arrow marker definition -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <polygon points="0 0, 10 3, 0 6" fill="#2c3e50"/>
+    </marker>
+  </defs>
+</svg>
