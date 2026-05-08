@@ -1,0 +1,86 @@
+<svg viewBox="0 0 1200 560" xmlns="http://www.w3.org/2000/svg">
+  <!-- Define styles -->
+  <defs>
+    <style>
+      .node-box { fill: #f0f4f8; stroke: #2c3e50; stroke-width: 2; }
+      .node-text { font-family: 'Segoe UI', sans-serif; font-size: 12px; font-weight: 600; fill: #2c3e50; text-anchor: middle; }
+      .node-label { font-family: 'Segoe UI', sans-serif; font-size: 10px; fill: #666; text-anchor: middle; }
+      .edge-line { stroke: #2c3e50; stroke-width: 2; fill: none; }
+      .title { font-family: 'Segoe UI', sans-serif; font-size: 15px; font-weight: 600; fill: #2c3e50; }
+      @media (prefers-color-scheme: dark) {
+        svg { background: #1e293b; }
+        .node-box { fill: #334155; stroke: #94a3b8; }
+        .node-text { fill: #e2e8f0; }
+        .node-label { fill: #94a3b8; }
+        .edge-line { stroke: #94a3b8; }
+        .title { fill: #e2e8f0; }
+        polygon { fill: #94a3b8; }
+      }
+    </style>
+  </defs>
+
+  <!-- Title -->
+  <text x="600" y="28" class="title" text-anchor="middle">AST: func add(a int) int { return a + 1 }</text>
+
+  <!-- Level 1: FuncDecl -->
+  <rect x="375" y="45" width="150" height="52" class="node-box" rx="4"/>
+  <text x="450" y="73" class="node-text">FuncDecl</text>
+
+  <!-- Level 2 connectors -->
+  <line x1="450" y1="97" x2="150" y2="140" class="edge-line"/>
+  <line x1="450" y1="97" x2="370" y2="140" class="edge-line"/>
+  <line x1="450" y1="97" x2="590" y2="140" class="edge-line"/>
+
+  <!-- Level 2: Name, Sig, Body -->
+  <rect x="75" y="140" width="150" height="58" class="node-box" rx="4"/>
+  <text x="150" y="168" class="node-text">Name</text>
+  <text x="150" y="189" class="node-label">"add"</text>
+
+  <rect x="295" y="140" width="150" height="58" class="node-box" rx="4"/>
+  <text x="370" y="168" class="node-text">Signature</text>
+
+  <rect x="515" y="140" width="150" height="58" class="node-box" rx="4"/>
+  <text x="590" y="168" class="node-text">Block(Body)</text>
+
+  <!-- Signature children -->
+  <line x1="370" y1="198" x2="150" y2="240" class="edge-line"/>
+  <line x1="370" y1="198" x2="370" y2="240" class="edge-line"/>
+
+  <rect x="75" y="240" width="150" height="58" class="node-box" rx="4"/>
+  <text x="150" y="268" class="node-text">Params</text>
+  <text x="150" y="289" class="node-label">a int</text>
+
+  <rect x="295" y="240" width="150" height="58" class="node-box" rx="4"/>
+  <text x="370" y="268" class="node-text">Results</text>
+  <text x="370" y="289" class="node-label">int</text>
+
+  <!-- Block children -->
+  <line x1="590" y1="198" x2="590" y2="240" class="edge-line"/>
+
+  <rect x="515" y="240" width="150" height="58" class="node-box" rx="4"/>
+  <text x="590" y="268" class="node-text">ReturnStmt</text>
+
+  <!-- ReturnStmt children -->
+  <line x1="590" y1="298" x2="590" y2="340" class="edge-line"/>
+
+  <rect x="515" y="340" width="150" height="58" class="node-box" rx="4"/>
+  <text x="590" y="368" class="node-text">BinaryExpr</text>
+  <text x="590" y="387" class="node-label">(+)</text>
+
+  <!-- BinaryExpr children -->
+  <line x1="590" y1="398" x2="370" y2="445" class="edge-line"/>
+  <line x1="590" y1="398" x2="590" y2="445" class="edge-line"/>
+  <line x1="590" y1="398" x2="810" y2="445" class="edge-line"/>
+
+  <rect x="295" y="445" width="150" height="58" class="node-box" rx="4"/>
+  <text x="370" y="473" class="node-text">Operand</text>
+  <text x="370" y="492" class="node-label">a (Ident)</text>
+
+  <rect x="515" y="445" width="150" height="58" class="node-box" rx="4"/>
+  <text x="590" y="473" class="node-text">Operator</text>
+  <text x="590" y="492" class="node-label">+</text>
+
+  <rect x="735" y="445" width="150" height="58" class="node-box" rx="4"/>
+  <text x="810" y="473" class="node-text">Operand</text>
+  <text x="810" y="492" class="node-label">1 (Int)</text>
+</svg>

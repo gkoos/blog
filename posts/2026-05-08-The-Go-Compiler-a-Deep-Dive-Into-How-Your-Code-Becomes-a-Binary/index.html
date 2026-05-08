@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary</title>
+  <meta name="description" content="A deep dive into the Go compiler pipeline: from lexing and parsing to SSA, optimization passes, and code generation.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary">
+  <meta property="og:description" content="A deep dive into the Go compiler pipeline: from lexing and parsing to SSA, optimization passes, and code generation.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary">
+  <meta name="twitter:description" content="A deep dive into the Go compiler pipeline: from lexing and parsing to SSA, optimization passes, and code generation.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-05-08T00:00:00.000Z">Fri May 08 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>Warning: This is a really long deep dive. If you are short on time, use the guided paths below instead of reading straight through end-to-end.</em></p>
+<h2 id="navigation" tabindex="-1"><a class="header-anchor" href="#navigation">Navigation</a></h2>
+<h3 id="guided-paths" tabindex="-1"><a class="header-anchor" href="#guided-paths">Guided paths</a></h3>
+<ul>
+<li>Beginner track (conceptual flow, lighter internals): <a href="#sec-introduction">Introduction</a> -&gt; <a href="#sec-historical-context">Historical Context</a> -&gt; <a href="#sec-lexing">Lexing</a> -&gt; <a href="#sec-parsing">Parsing</a> -&gt; <a href="#sec-practical-implications">Practical Implications</a> -&gt; <a href="#sec-summary">Summary</a></li>
+<li>Advanced track (internals first: IR/SSA/optimizations/codegen): <a href="#sec-type-checking">Type Checking</a> -&gt; <a href="#sec-ir">IR</a> -&gt; <a href="#sec-ssa">SSA</a> -&gt; <a href="#sec-optimization-passes">Optimization Passes</a> -&gt; <a href="#sec-code-generation">Code Generation</a> -&gt; <a href="#sec-tools">Tools and Experiments</a></li>
+<li>Need one specific answer fast? Use the table of contents below to jump directly to that section.</li>
+</ul>
+<h3 id="table-of-contents" tabindex="-1"><a class="header-anchor" href="#table-of-contents">Table of contents</a></h3>
+<ol>
+<li><a href="#sec-introduction">Introduction: What go build Is Really Doing</a></li>
+<li><a href="#sec-historical-context">Historical Context: From C to Go, and Back</a></li>
+<li><a href="#sec-lexing">Lexing - Turning Characters Into Tokens</a></li>
+<li><a href="#sec-parsing">Parsing - Building the AST</a></li>
+<li><a href="#sec-type-checking">Type Checking - Giving the AST Meaning</a></li>
+<li><a href="#sec-ir">IR (Intermediate Representation) - The Compiler's Internal Language</a></li>
+<li><a href="#sec-ssa">SSA - Static Single Assignment Form</a></li>
+<li><a href="#sec-optimization-passes">Optimization Passes - Where the Magic Happens</a></li>
+<li><a href="#sec-code-generation">Code Generation - From SSA to Machine Instructions</a></li>
+<li><a href="#sec-tools">Tools and Experiments</a></li>
+<li><a href="#sec-practical-implications">Practical Implications for Developers</a></li>
+<li><a href="#sec-summary">Summary</a></li>
+</ol>
+<p><a id="sec-introduction"></a></p>
+<h2 id="introduction%3A-what-go-build-is-really-doing" tabindex="-1"><a class="header-anchor" href="#introduction%3A-what-go-build-is-really-doing">Introduction: What go build Is Really Doing</a></h2>
+<p>Who this section is for: everyone; start here if you want the big picture before the internals.</p>
+<p>You write a function, run <code>go build</code>, and it works. The binary appears. Milliseconds later you're running it. Easy, right?</p>
+<p>But somewhere between the <code>.go</code> source file and the machine instructions the CPU executes, a lot happened. Not the module resolution, not the build cache (we covered both of those in <a href="/posts/2026-01-08-the-go-build-system-optimised-for-humans-and-machines/"><em>The Go Build System: Optimised for Humans and Machines</em></a>): the compiler itself. The thing that reads your Go source and turns it into actual object code.</p>
+<p>Most of the time you don't need to think about it. But understanding the compiler pays dividends in ways that are immediately practical:</p>
+<ul>
+<li>Why does returning a pointer from a function sometimes allocate on the heap?</li>
+<li>Why does passing a concrete type to an interface method occasionally cost an allocation?</li>
+<li>Why is a small function &quot;inlined&quot; but a similar one isn't?</li>
+<li>Why does a tight loop sometimes run faster after you restructure an index access?</li>
+</ul>
+<p>All of these have precise answers rooted in what the compiler does and when it does it. And unlike many compilers, Go's is entirely written in Go: it lives in <code>cmd/compile</code>, it's readable, and its design decisions are well-documented.</p>
+<p>This post walks through the full compilation pipeline in order, naming the real packages, structs, and algorithms involved. By the end, you'll have a mental model that explains not just what the compiler does, but <em>why</em> it's structured the way it is.</p>
+<p>Here's the path your code takes:</p>
+<pre class="language-"><code class="language-"><span class="token punctuation">.</span>go source → Lexer → Tokens → Parser → <span class="token punctuation">[</span><span class="token constant">AST</span><span class="token punctuation">]</span><span class="token punctuation">(</span>https<span class="token operator">:</span><span class="token operator">/</span><span class="token operator">/</span>en<span class="token punctuation">.</span>wikipedia<span class="token punctuation">.</span>org<span class="token operator">/</span>wiki<span class="token operator">/</span>Abstract_syntax_tree<span class="token punctuation">)</span> <span class="token punctuation">(</span>Abstract Syntax Tree<span class="token punctuation">)</span> → Type checker
+→ <span class="token constant">IR</span> <span class="token punctuation">(</span>Internal Representation<span class="token punctuation">)</span> nodes → <span class="token constant">SSA</span> → Optimization passes → Code generation → <span class="token punctuation">.</span>a object file
+</code></pre>
+<p>We'll cover each stage, the data structures that carry your code from one to the next, and the tools that let you observe every transformation yourself.</p>
+<p><a id="sec-historical-context"></a></p>
+<h2 id="historical-context%3A-from-c-to-go%2C-and-back" tabindex="-1"><a class="header-anchor" href="#historical-context%3A-from-c-to-go%2C-and-back">Historical Context: From C to Go, and Back</a></h2>
+<p>Who this section is for: readers who want historical context and design rationale before implementation details.</p>
+<p>To understand why Go's compiler looks the way it does today, it helps to rewind.</p>
+<p>Early Go used a compiler and runtime largely written in C, with architecture-specific tool binaries like 6g, 8g, and 5g. That implementation worked, but it carried the usual costs of a mixed-language toolchain: harder refactoring, more fragile boundaries between runtime and compiler internals, and a steeper contributor path.</p>
+<p>Go 1.5 was the turning point: the compiler and runtime were moved to Go itself (with a small amount of assembler where needed). This was not a greenfield rewrite from scratch: the compiler was mechanically translated and then iteratively improved. That detail explains why some parts of the codebase feel historically layered: old conceptual seams survived the language transition, then evolved release by release. (For example, the early compiler had a &quot;front end&quot; that handled lexing, parsing, and type checking, and a &quot;back end&quot; that handled optimization and code generation. The front end was more directly translated from the C version, while the back end was redesigned to be more modular and SSA-based. Over time, the distinction between front end and back end blurred as optimizations were added at various stages of the pipeline.)</p>
+<p>Then came the second major shift: <a href="https://en.wikipedia.org/wiki/Static_single_assignment_form"><strong>SSA</strong></a>. SSA stands for Static Single Assignment form, a powerful intermediate representation that makes many optimizations easier to implement.</p>
+<p>In Go 1.7, the compiler introduced an SSA-based back end for amd64. This was a big deal for two reasons:</p>
+<ul>
+<li>It improved generated code quality and enabled cleaner optimization passes.</li>
+<li>It provided a much better internal model for dataflow-driven analyses such as bounds-check elimination and later PGO-related optimizations.</li>
+</ul>
+<p>SSA support then expanded across architectures over subsequent releases, replacing older backend paths and gradually unifying optimization behavior.</p>
+<p>There is a third historical thread that most users never notice, but compiler contributors feel constantly: <strong>bootstrapping</strong>.</p>
+<p>Because the compiler is written in Go, building a new Go toolchain requires an existing Go toolchain. That minimum bootstrap version advances over time. Today, Go 1.24 requires Go 1.22.6 or newer to build from source. In other words, the compiler is a self-hosting system with a living dependency chain across releases.</p>
+<p>This history explains the personality of <code>cmd/compile</code>:</p>
+<ul>
+<li>pragmatic rather than academic,</li>
+<li>aggressively performance-oriented,</li>
+<li>and designed to be inspectable by ordinary Go developers.</li>
+</ul>
+<p>Now that we have the historical map, let's start with the first concrete phase in the modern pipeline: lexing.</p>
+<p><a id="sec-lexing"></a></p>
+<h2 id="lexing---turning-characters-into-tokens" tabindex="-1"><a class="header-anchor" href="#lexing---turning-characters-into-tokens">Lexing - Turning Characters Into Tokens</a></h2>
+<p>Who this section is for: beginners and intermediate readers who want to understand how source text becomes tokens.</p>
+<p>Your source file is just bytes. The word <code>package</code> is the same seven characters whether it's a keyword or someone's variable name. The job of the lexer is to transform raw text into a meaningful stream.</p>
+<p>The Go compiler's lexer lives in <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/syntax"><code>cmd/compile/internal/syntax</code></a>, the same package that contains the parser. This is different from the standard library's <code>go/scanner</code>, which is designed for tools and has a different API. The compiler lexer is optimized for the specific job of feeding the parser: reading bytes and emitting <code>Token</code> values as fast as possible.</p>
+<p>A token is not just a string, it's a structured value that includes:</p>
+<ul>
+<li><strong>Kind</strong>: what the token is (the <code>TokenKind</code> enum). Examples: <code>_Func</code>, <code>_Ident</code>, <code>_Int</code>, <code>_String</code>, operators like <code>_Plus</code>, <code>_Assign</code>, brackets, semicolons, etc.</li>
+<li><strong>Position</strong>: where in the file this token appears.</li>
+<li><strong>Literal value</strong> (for some tokens): the actual text - e.g., the identifier name or the string's raw content.</li>
+</ul>
+<p>Here's a simplified view of what the <code>Token</code> type looks like:</p>
+<pre class="language-go"><code class="language-go">type Token struct <span class="token punctuation">{</span>
+	kind TokenKind   <span class="token comment">// _Func, _Ident, _Plus, etc.</span>
+	pos  uint32      <span class="token comment">// encoded file position</span>
+	lit  string      <span class="token comment">// raw text of the token (for identifiers, keywords, literals)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The position is compact: a single 32-bit integer. The compiler doesn't store line and column separately for each token. Instead, it uses a <code>PosBase</code> type to represent a file, and encodes positions relative to that base. This is a design choice made for memory efficiency: when you have millions of tokens and AST nodes, saving a few bytes per position adds up. You can reconstruct the exact line and column from the compact position when needed.</p>
+<h3 id="semicolon-insertion" tabindex="-1"><a class="header-anchor" href="#semicolon-insertion">Semicolon Insertion</a></h3>
+<p>One of Go's well-known quirks is that semicolons are optional in source. You rarely write them. But internally, the parser still works with semicolon tokens.</p>
+<p>Here's how it works:</p>
+<p>The scanner (lexer) applies newline-sensitive rules and inserts synthetic semicolon tokens into the token stream before parsing. The parser then consumes those tokens like ordinary semicolons.</p>
+<p>The rules are simple and deterministic:</p>
+<ol>
+<li>If the last token before a newline can end a statement or expression (like <code>_Ident</code>, <code>_Int</code>, <code>return</code>, or a closing bracket <code>)</code>, <code>]</code>, <code>}</code>), the scanner inserts a synthetic semicolon token.</li>
+<li>The parser does see semicolon tokens, but many are synthesized rather than typed in source.</li>
+<li><code>gofmt</code> usually removes explicit semicolons and relies on these insertion rules, which is why idiomatic Go code rarely shows <code>;</code>.</li>
+</ol>
+<p>This is why you can write:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">x</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token number">5</span>
+<span class="token literal-property property">y</span> <span class="token operator">:</span><span class="token operator">=</span> x <span class="token operator">+</span> <span class="token number">1</span>
+</code></pre>
+<p>without semicolons, but you must write:</p>
+<pre class="language-go"><code class="language-go"><span class="token literal-property property">x</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token number">5</span>
+<span class="token punctuation">}</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>on one line (or use explicit semicolons) if you want the call to bind to the same statement. The closing <code>}</code> followed by a newline would otherwise trigger a semicolon insertion, breaking the function call chain.</p>
+<h3 id="string-literal-handling" tabindex="-1"><a class="header-anchor" href="#string-literal-handling">String Literal Handling</a></h3>
+<p>Another detail worth noting: <strong>string literal escaping happens in the lexer, not the parser</strong>. When the lexer encounters the bytes <code>\n</code> inside a string, it doesn't just pass the raw bytes to the parser. It decodes escape sequences right there. The parser receives the actual string value. This is efficient because the decoding logic is centralized, and the parser never has to worry about half-decoded strings.</p>
+<h3 id="the-token-stream-in-practice" tabindex="-1"><a class="header-anchor" href="#the-token-stream-in-practice">The Token Stream in Practice</a></h3>
+<p>If you were to inspect what the lexer produces for a simple function, it would look something like:</p>
+<pre class="language-"><code class="language-"><span class="token function">Token</span><span class="token punctuation">(</span>_Func<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"func"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Ident<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"add"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Lparen<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Ident<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"a"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Comma<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Ident<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"int"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Rparen<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Lbrace<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Return<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"return"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Ident<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"a"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Plus<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Int<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">"1"</span><span class="token punctuation">)</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Semicolon<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>  <span class="token comment">// synthetic semicolon inserted by the scanner</span>
+<span class="token function">Token</span><span class="token punctuation">(</span>_Rbrace<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
+</code></pre>
+<p>(Positions are compact 32-bit encoded values, not raw byte offsets — the <code>&lt;encoded&gt;</code> placeholders above reflect that. The compiler reconstructs exact line and column from the encoded value when needed.)</p>
+<h3 id="why-this-design%3F" tabindex="-1"><a class="header-anchor" href="#why-this-design%3F">Why This Design?</a></h3>
+<p>Why is the lexer separate from the parser? And why compact positions?</p>
+<p>The separation is clean: the lexer handles the messy task of decoding bytes (including escape sequences, numbers, and keywords), while the parser focuses on structure. This makes both easier to test and reason about.</p>
+<p>The compact positions pay off across the pipeline. Every node in the AST, IR, and SSA carries position information for error reporting. Compressing this from ~16 bytes per position (separate file, line, column fields) to 4 bytes per token or node saves significant memory during compilation of large codebases. Go's position encoding is a lesson in practical systems design: the overhead matters when scaling to real programs.</p>
+<h3 id="observing-lexing" tabindex="-1"><a class="header-anchor" href="#observing-lexing">Observing Lexing</a></h3>
+<p>You don't usually see the token stream directly, but you can see its effects. If you write code that the lexer would reject (e.g., an unterminated string), the compiler will tell you about it during lexing. Error messages like <code>unexpected EOF in string literal</code> come from the lexer phase.</p>
+<p>With the token stream in hand, the parser's job is to build structure: to recognize patterns of tokens and assemble them into an Abstract Syntax Tree. That's our next stop.</p>
+<p><a id="sec-parsing"></a></p>
+<h2 id="parsing---building-the-ast" tabindex="-1"><a class="header-anchor" href="#parsing---building-the-ast">Parsing - Building the AST</a></h2>
+<p>Who this section is for: readers learning how token streams become syntax trees and why parser design choices matter.</p>
+<p>The parser reads the token stream and builds a tree. This tree respects the grammar of Go: function declarations branch into parameter lists and bodies, binary expressions have a left operand, an operator, and a right operand, and so on.</p>
+<p>Like the lexer, the parser lives in <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/syntax"><code>cmd/compile/internal/syntax</code></a>. The key output is a <code>*syntax.File</code>, which is the root node. Every node in the tree is a <code>syntax.Node</code>.</p>
+<p>Here are some real node types you'll encounter in the Go compiler source:</p>
+<ul>
+<li><code>*syntax.FuncDecl</code> - a function declaration</li>
+<li><code>*syntax.CallExpr</code> - a function call</li>
+<li><code>*syntax.AssignStmt</code> - an assignment statement</li>
+<li><code>*syntax.IfStmt</code> - an if statement</li>
+<li><code>*syntax.BinaryExpr</code> - a binary operation (e.g., <code>a + b</code>)</li>
+<li><code>*syntax.SliceExpr</code> - a slice operation (e.g., <code>arr[1:5]</code>)</li>
+</ul>
+<p>Each node carries:</p>
+<ul>
+<li><strong>Position</strong>: the same compact position encoding as tokens</li>
+<li><strong>Kind</strong>: what type of node it is</li>
+<li><strong>Children</strong>: pointers to child nodes (operands, statements, etc.)</li>
+</ul>
+<p>A simplified node structure looks like:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// Conceptually, all nodes share this interface</span>
+type Node <span class="token keyword">interface</span> <span class="token punctuation">{</span>
+	<span class="token comment">// Pos() returns the position of this node</span>
+	<span class="token function">Pos</span><span class="token punctuation">(</span><span class="token punctuation">)</span> Pos
+	
+	<span class="token comment">// Each concrete type (FuncDecl, CallExpr, etc.) defines its own fields</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Example: a CallExpr node might look like this</span>
+type CallExpr struct <span class="token punctuation">{</span>
+	Pos_   Pos
+	Func   Expr   <span class="token comment">// the function being called</span>
+	Args   <span class="token punctuation">[</span><span class="token punctuation">]</span>Expr <span class="token comment">// the arguments</span>
+	<span class="token comment">// ... other fields</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="hand-written-recursive-descent-parsing" tabindex="-1"><a class="header-anchor" href="#hand-written-recursive-descent-parsing">Hand-Written Recursive Descent Parsing</a></h3>
+<p>Go's parser is hand-written using recursive descent, not generated from a grammar specification (unlike some compilers that use tools like <code>yacc</code> or <code>bison</code>). This is a deliberate choice with real consequences:</p>
+<ul>
+<li><strong>Better error messages</strong>: because the parser knows exactly what rule it's in, it can provide contextual help. When you write <code>if x = 5</code> instead of <code>if x == 5</code>, the parser recognizes the mistake in an <code>if</code> condition and can suggest the fix.</li>
+<li><strong>Easier to maintain</strong>: you can read the parser code directly and understand what grammar rule each function implements. There's no generated code to decipher.</li>
+<li><strong>Simpler incremental changes</strong>: adding a new syntax feature (like generics, which were added in Go 1.18) is a matter of adding parsing functions, not regenerating a state machine.</li>
+</ul>
+<p>The trade-off is that a hand-written parser requires careful implementation to avoid bugs and to handle precedence correctly.</p>
+<h3 id="precedence-and-associativity" tabindex="-1"><a class="header-anchor" href="#precedence-and-associativity">Precedence and Associativity</a></h3>
+<p>Binary operators in Go have well-defined precedence and associativity. The expression <code>a + b * c</code> must parse as <code>a + (b * c)</code>, not <code>(a + b) * c</code>.</p>
+<p>The parser handles this via <strong>precedence climbing</strong>. When parsing a binary expression, the parser compares the precedence of the next operator to the precedence of the operator it's currently in. If the next operator binds more tightly, it recurses to parse the right operand first. This ensures that multiplication, for example, &quot;climbs&quot; higher than addition.</p>
+<p>Here's the conceptual flow:</p>
+<pre class="language-"><code class="language-"><span class="token function">parseAddExpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span>
+  left <span class="token operator">=</span> <span class="token function">parseMulExpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">while</span> next token is <span class="token operator">+</span> or <span class="token operator">-</span> <span class="token operator">:</span>
+    op <span class="token operator">=</span> consume token
+    right <span class="token operator">=</span> <span class="token function">parseMulExpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    left <span class="token operator">=</span> <span class="token function">BinaryExpr</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> op<span class="token punctuation">,</span> right<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> left
+
+<span class="token function">parseMulExpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">:</span>
+  left <span class="token operator">=</span> <span class="token function">parseUnaryExpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">while</span> next token is <span class="token operator">*</span> or <span class="token operator">/</span> <span class="token operator">:</span>
+    op <span class="token operator">=</span> consume token
+    right <span class="token operator">=</span> <span class="token function">parseUnaryExpr</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    left <span class="token operator">=</span> <span class="token function">BinaryExpr</span><span class="token punctuation">(</span>left<span class="token punctuation">,</span> op<span class="token punctuation">,</span> right<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> left
+</code></pre>
+<p>This simple structure ensures that <code>2 + 3 * 4</code> is parsed as <code>2 + (3 * 4)</code>.</p>
+<h3 id="a-simple-example%3A-parsing-a-function-declaration" tabindex="-1"><a class="header-anchor" href="#a-simple-example%3A-parsing-a-function-declaration">A Simple Example: Parsing a Function Declaration</a></h3>
+<p>Let's trace what the parser builds for a tiny function:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">add</span><span class="token punctuation">(</span>a int<span class="token punctuation">)</span> int <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> <span class="token number">1</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The token stream looks like:</p>
+<pre class="language-"><code class="language-">_Func<span class="token punctuation">,</span> <span class="token string">"func"</span>
+_Ident<span class="token punctuation">,</span> <span class="token string">"add"</span>
+_Lparen<span class="token punctuation">,</span> <span class="token string">"("</span>
+_Ident<span class="token punctuation">,</span> <span class="token string">"a"</span>
+_Ident<span class="token punctuation">,</span> <span class="token string">"int"</span>
+_Rparen<span class="token punctuation">,</span> <span class="token string">")"</span>
+_Ident<span class="token punctuation">,</span> <span class="token string">"int"</span>
+_Lbrace<span class="token punctuation">,</span> <span class="token string">"{"</span>
+_Return<span class="token punctuation">,</span> <span class="token string">"return"</span>
+_Ident<span class="token punctuation">,</span> <span class="token string">"a"</span>
+_Plus<span class="token punctuation">,</span> <span class="token string">"+"</span>
+_Int<span class="token punctuation">,</span> <span class="token string">"1"</span>
+<span class="token function">_Semicolon</span> <span class="token punctuation">(</span>synthetic<span class="token punctuation">,</span> inserted by scanner<span class="token punctuation">)</span>
+_Rbrace<span class="token punctuation">,</span> <span class="token string">"}"</span>
+</code></pre>
+<p>The parser consumes these tokens and builds an AST:</p>
+<p>Each node has its position from the token stream, so error messages can point exactly to where a problem occurred.</p>
+<p><img src="diagram-1-ast-tree.svg" alt="AST Tree Structure"></p>
+<p><em>The AST for <code>func add(a int) int { return a + 1 }</code>. FuncDecl is the root; its three children are the function name, the signature (with Params and Results), and the Block(Body). The body contains a ReturnStmt whose BinaryExpr holds both operands and the operator as sibling leaf nodes.</em></p>
+<h3 id="why-this-matters%3A-better-error-recovery" tabindex="-1"><a class="header-anchor" href="#why-this-matters%3A-better-error-recovery">Why This Matters: Better Error Recovery</a></h3>
+<p>Because Go's parser is hand-written, it can implement error recovery. If you write:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">add</span><span class="token punctuation">(</span>a int<span class="token punctuation">,</span> b int <span class="token punctuation">{</span>  <span class="token comment">// missing closing parenthesis before {</span>
+    <span class="token keyword">return</span> a <span class="token operator">+</span> b
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The parser detects the syntax error, emits a diagnostic, and then tries to recover by guessing where the error was and continuing to parse. This allows the compiler to report multiple errors in one run, instead of stopping at the first mistake. That's why <code>go build</code> can often tell you everything wrong with a file at once.</p>
+<h3 id="from-ast-to-the-next-phase" tabindex="-1"><a class="header-anchor" href="#from-ast-to-the-next-phase">From AST to the Next Phase</a></h3>
+<p>The AST is faithful to the source: every closing brace, every parameter, every statement is represented exactly as written. But the compiler doesn't optimize based on the AST; it's too tied to surface syntax.</p>
+<p>The next step is type checking. The compiler will walk the AST, annotate every node with type information, resolve which identifier refers to which declaration, and verify that all operations are type-safe. Only then does the actual compilation begin.</p>
+<p><a id="sec-type-checking"></a></p>
+<h2 id="type-checking---giving-the-ast-meaning" tabindex="-1"><a class="header-anchor" href="#type-checking---giving-the-ast-meaning">Type Checking - Giving the AST Meaning</a></h2>
+<p>Who this section is for: readers who want semantic understanding of how identifiers, interfaces, and generics are validated.</p>
+<p>An AST node tells you the <em>structure</em> of the source, but not its meaning. The identifier <code>x</code> in an expression is just a name until the type checker resolves it. An addition <code>a + b</code> is syntactically valid but semantically invalid if <code>a</code> is a string and <code>b</code> is an int.</p>
+<p>Type checking in Go lives primarily in <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/typecheck"><code>cmd/compile/internal/typecheck</code></a>. There is also <code>types2</code> (closely related to <code>go/types</code>) used for frontend type-checking infrastructure and language semantics.</p>
+<p>One important nuance: this is not a single, fully unified type hierarchy across the entire compiler. Frontend checking logic relies heavily on <code>go/types</code>/<code>types2</code>-style machinery, while later compiler stages also use internal representations under <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/types"><code>cmd/compile/internal/types</code></a>.</p>
+<p>The type checker does several things:</p>
+<ol>
+<li><strong>Resolves identifiers</strong>: walks the AST and maps each use of a name to its declaration (variable, function, type, etc.).</li>
+<li><strong>Annotates with type information</strong>: every expression gets semantic type information that later phases can consume.</li>
+<li><strong>Checks assignability</strong>: verifies that assignments, function arguments, and returns match expected types.</li>
+<li><strong>Validates operations</strong>: confirms that operators are applied to compatible types (e.g., you can't add a string to an int).</li>
+</ol>
+<h3 id="type-representations-in-practice" tabindex="-1"><a class="header-anchor" href="#type-representations-in-practice">Type Representations in Practice</a></h3>
+<p>For intuition, it helps to think in terms of <code>go/types</code>/<code>types2</code> concepts. In that world, you'll see familiar categories like:</p>
+<ul>
+<li><code>*types.Basic</code> - primitive types like <code>int</code>, <code>string</code>, <code>float64</code>, <code>bool</code></li>
+<li><code>*types.Array</code> - array types, e.g., <code>[5]int</code></li>
+<li><code>*types.Slice</code> - slice types, e.g., <code>[]int</code></li>
+<li><code>*types.Map</code> - map types, e.g., <code>map[string]int</code></li>
+<li><code>*types.Chan</code> - channel types, e.g., <code>chan int</code></li>
+<li><code>*types.Struct</code> - struct types with named fields</li>
+<li><code>*types.Pointer</code> - pointer types, e.g., <code>*int</code></li>
+<li><code>*types.Interface</code> - interface types, which define method sets</li>
+<li><code>*types.Signature</code> - function types, which describe parameters and results</li>
+<li><code>*types.Named</code> - named types, which wrap an underlying type and have a name and methods</li>
+</ul>
+<p>These are great mental models for language-level reasoning. But in <code>cmd/compile</code>, backend and lowering phases are not limited to one public <code>types.Type</code> interface; they also rely on internal compiler type structures.</p>
+<p>The key practical takeaway is:</p>
+<ol>
+<li>frontend type checking uses <code>go/types</code>/<code>types2</code>-style semantics,</li>
+<li>backend compilation uses additional internal type representations,</li>
+<li>both cooperate through the pipeline rather than collapsing into a single type API.</li>
+</ol>
+<p>As a conceptual model, the <code>go/types</code> side looks like this:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// Conceptually, the interface looks like this</span>
+type Type <span class="token keyword">interface</span> <span class="token punctuation">{</span>
+	<span class="token comment">// Underlying returns the type "beneath" any type aliases</span>
+	<span class="token function">Underlying</span><span class="token punctuation">(</span><span class="token punctuation">)</span> Type
+	
+	<span class="token comment">// String returns the type's string representation</span>
+	<span class="token function">String</span><span class="token punctuation">(</span><span class="token punctuation">)</span> string
+<span class="token punctuation">}</span>
+
+<span class="token comment">// Concrete types implement this interface</span>
+type Basic struct <span class="token punctuation">{</span>
+	kind BasicKind  <span class="token comment">// INT, STRING, FLOAT64, etc.</span>
+	name string     <span class="token comment">// "int", "string", "float64", etc.</span>
+<span class="token punctuation">}</span>
+
+type Signature struct <span class="token punctuation">{</span>
+	params   <span class="token operator">*</span>Tuple  <span class="token comment">// the function's parameters</span>
+	results  <span class="token operator">*</span>Tuple  <span class="token comment">// the function's return values</span>
+	<span class="token comment">// ... other fields</span>
+<span class="token punctuation">}</span>
+
+type Interface struct <span class="token punctuation">{</span>
+	methods <span class="token operator">*</span><span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Func  <span class="token comment">// the methods this interface defines</span>
+	<span class="token comment">// ... other fields</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="interface-satisfaction-checking" tabindex="-1"><a class="header-anchor" href="#interface-satisfaction-checking">Interface Satisfaction Checking</a></h3>
+<p>One of the most important type-checking tasks is determining whether a concrete type satisfies an interface. For example:</p>
+<pre class="language-go"><code class="language-go">type Reader <span class="token keyword">interface</span> <span class="token punctuation">{</span>
+	<span class="token function">Read</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span>byte<span class="token punctuation">)</span> <span class="token punctuation">(</span>n int<span class="token punctuation">,</span> err error<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+type File struct <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+
+<span class="token function">func</span> <span class="token punctuation">(</span>f <span class="token operator">*</span>File<span class="token punctuation">)</span> <span class="token function">Read</span><span class="token punctuation">(</span>p <span class="token punctuation">[</span><span class="token punctuation">]</span>byte<span class="token punctuation">)</span> <span class="token punctuation">(</span>n int<span class="token punctuation">,</span> err error<span class="token punctuation">)</span> <span class="token punctuation">{</span> <span class="token comment">/* ... */</span> <span class="token punctuation">}</span>
+
+<span class="token comment">// Does *File satisfy Reader?</span>
+</code></pre>
+<p>The algorithm is straightforward: the type checker compares the <em>method set</em> of the concrete type to the interface. A concrete type satisfies an interface if its method set includes all the methods the interface requires, with the same signatures.</p>
+<p>In the example above:</p>
+<ul>
+<li>Interface <code>Reader</code> requires a method <code>Read</code> with signature <code>func([]byte) (int, error)</code></li>
+<li>Type <code>*File</code> has a method <code>Read</code> with the same signature</li>
+<li>Therefore, <code>*File</code> satisfies <code>Reader</code></li>
+</ul>
+<p>This check happens once during type checking, not at runtime. That's why Go can embed an interface into a struct (duck typing at compile time) but still provide safety.</p>
+<h3 id="type-inference-for-generics" tabindex="-1"><a class="header-anchor" href="#type-inference-for-generics">Type Inference for Generics</a></h3>
+<p>Go 1.18 introduced generics, and with them, type inference. When you call a generic function without explicitly specifying type arguments, the type checker infers them:</p>
+<pre class="language-go"><code class="language-go">func Map<span class="token punctuation">[</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">U</span> any<span class="token punctuation">]</span><span class="token punctuation">(</span>input <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token constant">T</span><span class="token punctuation">,</span> fn <span class="token function">func</span><span class="token punctuation">(</span><span class="token constant">T</span><span class="token punctuation">)</span> <span class="token constant">U</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token constant">U</span> <span class="token punctuation">{</span>
+	<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+
+<span class="token literal-property property">ints</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>int<span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">}</span>
+<span class="token comment">// Call without type arguments; the checker infers T=int, U=string</span>
+<span class="token literal-property property">strs</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">Map</span><span class="token punctuation">(</span>ints<span class="token punctuation">,</span> <span class="token function">func</span><span class="token punctuation">(</span>i int<span class="token punctuation">)</span> string <span class="token punctuation">{</span> <span class="token keyword">return</span> fmt<span class="token punctuation">.</span><span class="token function">Sprintf</span><span class="token punctuation">(</span><span class="token string">"%d"</span><span class="token punctuation">,</span> i<span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The type checker unifies the inferred types: it looks at the argument types, the function signature, and solves for the type parameters. This was extended in Go 1.21 to support more sophisticated inference patterns, like inferring type arguments based on the return type.</p>
+<p>Go 1.24 added support for fully parameterized type aliases (a feature previewed in Go 1.23 via <code>GOEXPERIMENT=aliastypeparams</code>), allowing constructs like:</p>
+<pre class="language-go"><code class="language-go">type Mapper<span class="token punctuation">[</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">U</span> any<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token function">func</span><span class="token punctuation">(</span><span class="token constant">T</span><span class="token punctuation">)</span> <span class="token constant">U</span>
+
+func Apply<span class="token punctuation">[</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">U</span> any<span class="token punctuation">]</span><span class="token punctuation">(</span>input <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token constant">T</span><span class="token punctuation">,</span> fn Mapper<span class="token punctuation">[</span><span class="token constant">T</span><span class="token punctuation">,</span> <span class="token constant">U</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token constant">U</span> <span class="token punctuation">{</span>
+	<span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="error-accumulation" tabindex="-1"><a class="header-anchor" href="#error-accumulation">Error Accumulation</a></h3>
+<p>Unlike many compilers that stop at the first error, Go's type checker accumulates multiple errors before giving up. This is why <code>go build</code> often reports several type errors at once:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">foo</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">x</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token string">"hello"</span>
+	<span class="token literal-property property">y</span> <span class="token operator">:</span><span class="token operator">=</span> x <span class="token operator">+</span> <span class="token number">5</span>         <span class="token comment">// error: can't add int to string</span>
+	<span class="token literal-property property">z</span> <span class="token operator">:</span><span class="token operator">=</span> x <span class="token operator">+</span> y         <span class="token comment">// error: can't add int to string</span>
+	<span class="token keyword">return</span> <span class="token string">"not int"</span>   <span class="token comment">// error: wrong return type</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The compiler reports all three errors in a single pass, then continues to the next phase (IR lowering). This is practical: you get a complete picture of what's wrong instead of a frustrating iterative loop of &quot;fix one error, run compiler, find next error.&quot;</p>
+<h3 id="observable-type-information" tabindex="-1"><a class="header-anchor" href="#observable-type-information">Observable Type Information</a></h3>
+<p>Type-checking effects are observable through compiler diagnostics and internal debug flags, but exact dump options vary across Go releases. For stable day-to-day workflows, prefer the commands in the Tools and Experiments section (especially <code>-m</code>, <code>-m=2</code>, and <code>GOSSAFUNC</code>).</p>
+<h3 id="from-source-types-to-compilation-types" tabindex="-1"><a class="header-anchor" href="#from-source-types-to-compilation-types">From Source Types to Compilation Types</a></h3>
+<p>After type checking, the AST is now semantically meaningful. Every identifier is resolved, every operation is type-safe, and every expression has a known type. But the AST is still surface-level syntax.</p>
+<p>The next phase, IR (Intermediate Representation), takes this type-checked AST and converts it into a form optimized for compilation: desugaring high-level constructs into more primitive operations, normalizing the representation, and setting up for optimization passes later.</p>
+<p><a id="sec-ir"></a></p>
+<h2 id="ir-(intermediate-representation)---the-compiler's-internal-language" tabindex="-1"><a class="header-anchor" href="#ir-(intermediate-representation)---the-compiler's-internal-language">IR (Intermediate Representation) - The Compiler's Internal Language</a></h2>
+<p>Who this section is for: readers interested in lowering and desugaring between frontend semantics and optimizer-friendly forms.</p>
+<p>At this point, the compiler has a fully type-checked AST. So why introduce another representation? Because the AST is designed to preserve source structure, not to make optimization easy. The compiler lowers syntax nodes into its own internal IR under <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ir"><code>cmd/compile/internal/ir</code></a>. This IR is closer to execution semantics and easier to transform. In practice, this is where Go starts turning &quot;what you wrote&quot; into &quot;what the machine should do&quot;.</p>
+<h3 id="why-ir-exists" tabindex="-1"><a class="header-anchor" href="#why-ir-exists">Why IR Exists</a></h3>
+<p>The AST is rich in surface syntax details that are useful for parsing and error messages, but noisy for optimization. IR strips away that syntactic variety and keeps the semantic core.</p>
+<p>Three goals drive this stage:</p>
+<ol>
+<li>Normalize equivalent source forms into a smaller set of internal shapes.</li>
+<li>Annotate nodes with data needed by later passes.</li>
+<li>Prepare functions for SSA construction.</li>
+</ol>
+<p>You can think of it as a translation from a human-facing language model to a compiler-facing one.</p>
+<h3 id="real-ir-types" tabindex="-1"><a class="header-anchor" href="#real-ir-types">Real IR Types</a></h3>
+<p>In <code>cmd/compile/internal/ir</code>, you'll see concrete node types such as:</p>
+<ul>
+<li><code>ir.Name</code> for variables, parameters, and function names</li>
+<li><code>ir.CallExpr</code> for call sites</li>
+<li><code>ir.AssignStmt</code> for assignment operations</li>
+<li><code>ir.IfStmt</code>, <code>ir.ForStmt</code>, <code>ir.BlockStmt</code> for control flow</li>
+<li><code>ir.Func</code> for an entire function being compiled</li>
+</ul>
+<p>These nodes still carry source positions, so later diagnostics can still point back to the original line and column.</p>
+<h3 id="desugaring-in-practice" tabindex="-1"><a class="header-anchor" href="#desugaring-in-practice">Desugaring in Practice</a></h3>
+<p><strong>Lowering</strong> is where higher-level constructs are rewritten into simpler forms.</p>
+<p>Common examples:</p>
+<ul>
+<li><code>switch</code> statements are transformed toward explicit conditional control flow.</li>
+<li><code>defer</code> is rewritten into runtime calls plus bookkeeping.</li>
+<li><code>range</code> loops are expanded into explicit iterator/index forms, depending on operand type.</li>
+</ul>
+<p>This is one of the most important mental models in compiler work: many &quot;language features&quot; are not compiled directly, they are first reduced into a smaller core language.</p>
+<h3 id="go-1.23-example%3A-range-over-function" tabindex="-1"><a class="header-anchor" href="#go-1.23-example%3A-range-over-function">Go 1.23 Example: Range Over Function</a></h3>
+<p>Go 1.23 introduced range-over-function iterators. Source like:</p>
+<pre class="language-go"><code class="language-go"><span class="token keyword">for</span> <span class="token literal-property property">v</span> <span class="token operator">:</span><span class="token operator">=</span> range iter <span class="token punctuation">{</span>
+	<span class="token function">use</span><span class="token punctuation">(</span>v<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>where <code>iter</code> is a supported iterator-function shape (a push iterator), such as <code>func(func(T) bool)</code> or <code>func(func(K, V) bool)</code>, is not emitted as a magical new machine-level loop form. Instead, the compiler lowers it into callback-oriented control flow that existing middle-end passes already understand.</p>
+<p>That is exactly what IR is for: absorb high-level language evolution without forcing every later phase to learn every syntactic feature directly.</p>
+<h3 id="go-1.23-example%3A-stack-slot-overlap" tabindex="-1"><a class="header-anchor" href="#go-1.23-example%3A-stack-slot-overlap">Go 1.23 Example: Stack Slot Overlap</a></h3>
+<p>Another practical IR-adjacent improvement in Go 1.23 is stack slot overlap: locals whose live ranges do not overlap can share stack memory in the same function.</p>
+<p>This reduces stack frame size, which can improve cache behavior and lower memory pressure. It's a good example of why normalization and liveness-aware internal representations matter before final code generation.</p>
+<h3 id="what-ir.func-represents" tabindex="-1"><a class="header-anchor" href="#what-ir.func-represents">What <code>ir.Func</code> Represents</a></h3>
+<p><code>ir.Func</code> is the main unit passed forward into optimization and code generation pipelines. It contains:</p>
+<ul>
+<li>function metadata (name, ABI-related details, pragmas)</li>
+<li>parameter and local variable objects (<code>ir.Name</code>)</li>
+<li>body statements in lowered IR form</li>
+<li>links to type information and position metadata</li>
+</ul>
+<p>By the time a function is in <code>ir.Func</code>, syntax-level ambiguity is mostly gone. The compiler now has a precise, manipulable model of control flow and data use.</p>
+<h3 id="observing-ir-like-effects" tabindex="-1"><a class="header-anchor" href="#observing-ir-like-effects">Observing IR-Like Effects</a></h3>
+<p>You typically don't print raw IR in normal workflows, but you can observe the consequences:</p>
+<ul>
+<li>A <code>switch</code> that looked high-level in source often appears as branch-heavy assembly in <code>-gcflags=&quot;-S&quot;</code> output.</li>
+<li><code>defer</code> in a hot loop clearly shows runtime overhead patterns in generated code. That's because the IR lowered it into explicit calls and bookkeeping, which then translates into more instructions.</li>
+<li>New language constructs (like range-over-function) compile down using familiar control-flow machinery.</li>
+</ul>
+<h3 id="from-ir-to-ssa" tabindex="-1"><a class="header-anchor" href="#from-ir-to-ssa">From IR to SSA</a></h3>
+<p>IR is where source code becomes compiler-native, but it is still mutable, statement-oriented structure. The next phase converts this IR into SSA form, where each value is assigned once and dataflow becomes explicit.</p>
+<p>That conversion unlocks most of the optimizations people care about: inlining effects, bounds-check elimination, dead-code elimination, and register-friendly value propagation.</p>
+<p><a id="sec-ssa"></a></p>
+<h2 id="ssa---static-single-assignment-form" tabindex="-1"><a class="header-anchor" href="#ssa---static-single-assignment-form">SSA - Static Single Assignment Form</a></h2>
+<p>Who this section is for: performance-minded readers who want to understand dataflow and optimization foundations.</p>
+<p>SSA is the point where the compiler stops thinking in terms of variables that are reassigned and starts thinking in terms of values that are defined once.</p>
+<p>That &quot;assigned once&quot; rule is the key idea:</p>
+<ul>
+<li>every SSA value has exactly one definition,</li>
+<li>uses of that value point back to that definition,</li>
+<li>control-flow joins use phi values to pick the right incoming definition.</li>
+</ul>
+<p>In Go, this machinery lives in <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa"><code>cmd/compile/internal/ssa</code></a>.</p>
+<h3 id="why-ssa-matters" tabindex="-1"><a class="header-anchor" href="#why-ssa-matters">Why SSA Matters</a></h3>
+<p>Most middle-end optimizations are dataflow questions:</p>
+<ul>
+<li>Is this value constant?</li>
+<li>Is this bounds check redundant?</li>
+<li>Is this branch dead?</li>
+<li>Can this temporary stay in a register?</li>
+</ul>
+<p>Those are hard to answer cleanly in mutable, statement-style IR. SSA makes them much easier because each value is immutable and has explicit dependencies.</p>
+<p>In short, SSA turns many global reasoning problems into local graph rewrites.</p>
+<h3 id="core-structures%3A-ssa.func%2C-ssa.block%2C-ssa.value" tabindex="-1"><a class="header-anchor" href="#core-structures%3A-ssa.func%2C-ssa.block%2C-ssa.value">Core Structures: <code>ssa.Func</code>, <code>ssa.Block</code>, <code>ssa.Value</code></a></h3>
+<p>Go's SSA representation is a graph of blocks and values.</p>
+<ul>
+<li><code>ssa.Func</code>: one compiled function in SSA form.</li>
+<li><code>ssa.Block</code>: a basic block with ordered values and a control-flow edge shape.</li>
+<li><code>ssa.Value</code>: one operation result, such as add, compare, load, or phi.</li>
+</ul>
+<p>A simplified mental model:</p>
+<pre class="language-go"><code class="language-go">type Func struct <span class="token punctuation">{</span>
+		Blocks <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Block
+		Entry  <span class="token operator">*</span>Block
+		<span class="token comment">// ... metadata, cache tables, ABI/liveness links</span>
+<span class="token punctuation">}</span>
+
+type Block struct <span class="token punctuation">{</span>
+		Kind    BlockKind
+		Values  <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Value
+		Succs   <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Block
+		Preds   <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Block
+		Control <span class="token operator">*</span>Value
+<span class="token punctuation">}</span>
+
+type Value struct <span class="token punctuation">{</span>
+		Op    Op
+		Type  <span class="token operator">*</span>types<span class="token punctuation">.</span>Type
+		Args  <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token operator">*</span>Value
+		Block <span class="token operator">*</span>Block
+		Aux   any
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The exact fields vary, but this shape is what matters: values in blocks, blocks in a function, with explicit control and data edges.</p>
+<h3 id="example%3A-from-imperative-code-to-ssa" tabindex="-1"><a class="header-anchor" href="#example%3A-from-imperative-code-to-ssa">Example: From Imperative Code to SSA</a></h3>
+<p>Take this function:</p>
+<pre class="language-go"><code class="language-go">func <span class="token function">larger</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b int<span class="token punctuation">)</span> int <span class="token punctuation">{</span>
+		<span class="token literal-property property">m</span> <span class="token operator">:</span><span class="token operator">=</span> a
+		<span class="token keyword">if</span> b <span class="token operator">></span> a <span class="token punctuation">{</span>
+				m <span class="token operator">=</span> b
+		<span class="token punctuation">}</span>
+		<span class="token keyword">return</span> m
+<span class="token punctuation">}</span>
+</code></pre>
+<p>In source form, <code>m</code> is assigned twice. In SSA form, it becomes separate values plus a <strong>phi</strong> (a special SSA value that selects among multiple incoming values based on control flow) at the merge point:</p>
+<pre class="language-text"><code class="language-text">b0:
+	v0 = Arg &lt;int> {a}
+	v1 = Arg &lt;int> {b}
+	v2 = LessThan &lt;bool> v0 v1
+	If v2 -> b1 b2
+
+b1:
+	// path where b > a
+	v3 = Copy &lt;int> v1
+	Goto b3
+
+b2:
+	// path where b &lt;= a
+	v4 = Copy &lt;int> v0
+	Goto b3
+
+b3:
+	v5 = Phi &lt;int> v3 v4
+	Return v5
+</code></pre>
+<p>The phi in block <code>b3</code> says: &quot;if control came from <code>b1</code>, use <code>v3</code>; if from <code>b2</code>, use <code>v4</code>.&quot; That single construct captures merge semantics cleanly and enables aggressive optimization.</p>
+<p><img src="diagram-2-ssa-cfg.svg" alt="SSA Control Flow Graph"></p>
+<p><em>The SSA control flow graph for <code>larger(a, b int) int</code>. Block b0 evaluates the condition and branches; b1 and b2 each copy the winning value; b3 is the merge point. The phi node <code>v5 = Phi v3 v4</code> selects the correct value depending on which block transferred control — no mutation needed.</em></p>
+<h3 id="what-go's-ssa-is-and-is-not" tabindex="-1"><a class="header-anchor" href="#what-go's-ssa-is-and-is-not">What Go's SSA Is and Is Not</a></h3>
+<p>Go's SSA often gets compared to LLVM IR, but they are not interchangeable.</p>
+<ul>
+<li>Go's SSA is tightly integrated with Go runtime requirements.</li>
+<li>It carries information needed for garbage collection safety points and write barriers.</li>
+<li>Its op set and lowering rules are designed around Go's own backends and calling conventions.</li>
+</ul>
+<p>So while the high-level SSA concept is shared, the representation is purpose-built for the Go toolchain.</p>
+<h3 id="ssa-construction-and-early-simplification" tabindex="-1"><a class="header-anchor" href="#ssa-construction-and-early-simplification">SSA Construction and Early Simplification</a></h3>
+<p>During SSA construction, the compiler:</p>
+<ol>
+<li>builds basic blocks from lowered IR control flow,</li>
+<li>creates SSA values for operations,</li>
+<li>inserts phi values at dominance frontiers,</li>
+<li>runs early cleanups (constant folding, trivial copy elimination, unreachable block pruning).</li>
+</ol>
+<p>This means optimization begins almost immediately once SSA exists; there is no strict wall between &quot;build SSA&quot; and &quot;optimize SSA.&quot;</p>
+<h3 id="observable-effects" tabindex="-1"><a class="header-anchor" href="#observable-effects">Observable Effects</a></h3>
+<p>You can observe SSA-driven decisions indirectly:</p>
+<ul>
+<li><code>go build -gcflags=&quot;-m&quot;</code> shows inlining and escape outcomes that depend on later SSA-friendly simplification.</li>
+<li><code>go build -gcflags=&quot;-d=ssa/check/on&quot;</code> enables internal SSA consistency checks useful when exploring compiler internals.</li>
+<li><code>go build -gcflags=&quot;-S&quot;</code> shows final assembly where many SSA optimizations are visible as fewer branches, fewer loads, and tighter loops.</li>
+</ul>
+<p>You do not need to memorize every pass name to benefit. The practical insight is that once your code reaches SSA, dataflow properties become explicit, and that is where performance-critical transformations become straightforward.</p>
+<h3 id="from-ssa-to-optimization-passes" tabindex="-1"><a class="header-anchor" href="#from-ssa-to-optimization-passes">From SSA to Optimization Passes</a></h3>
+<p>With SSA in place, the compiler now has the exact substrate needed for its core optimization passes. Next we move through those passes one by one: inlining context, escape analysis interactions, dead-code elimination, bounds and nil check elimination, and register allocation.</p>
+<p><a id="sec-optimization-passes"></a></p>
+<h2 id="optimization-passes---where-the-magic-happens" tabindex="-1"><a class="header-anchor" href="#optimization-passes---where-the-magic-happens">Optimization Passes - Where the Magic Happens</a></h2>
+<p>Who this section is for: practitioners tuning performance and trying to connect source changes to generated code outcomes.</p>
+<p>This is the part everyone asks about first: where does Go decide stack vs heap, inline vs call, keep vs delete checks, register vs stack?</p>
+<p>The short answer is: not in one place. Go runs multiple optimization passes across multiple representations.</p>
+<ul>
+<li>Some key decisions happen before SSA (notably inlining and escape analysis).</li>
+<li>Many local and global rewrites happen on SSA values and blocks.</li>
+<li>Final placement decisions happen near code generation and register allocation.</li>
+</ul>
+<p>Thinking of it as a pipeline of cooperating passes is more accurate than looking for one &quot;optimizer&quot; stage.</p>
+<h3 id="inlining-(ir-level%2C-before-ssa)" tabindex="-1"><a class="header-anchor" href="#inlining-(ir-level%2C-before-ssa)">Inlining (IR-Level, Before SSA)</a></h3>
+<p>Inlining substitutes a function call with the body of the callee when profitable. In Go, this happens on IR before SSA construction, which matters because inlined code then participates in all later SSA optimizations.</p>
+<p>Go uses a budget model: each candidate call has a cost estimate, and functions above threshold are rejected. Pragmas like <code>//go:noinline</code> force a function to remain as a call boundary.</p>
+<p>Recent evolution:</p>
+<ul>
+<li>Go 1.22 introduced new call-site-sensitive inliner heuristics behind <code>GOEXPERIMENT=newinliner</code>.</li>
+<li>Go 1.23 made that heuristic path the default.</li>
+<li>PGO-guided inlining was previewed in Go 1.20 and production-ready in Go 1.21, with much lower build-time overhead by Go 1.23.</li>
+</ul>
+<p>Observe it with:</p>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m"</span>
+</code></pre>
+<p>Look for lines such as <code>inlining call to ...</code> and devirtualization notes when PGO is enabled.</p>
+<h3 id="escape-analysis-(ir-level%2C-before-ssa)" tabindex="-1"><a class="header-anchor" href="#escape-analysis-(ir-level%2C-before-ssa)">Escape Analysis (IR-Level, Before SSA)</a></h3>
+<p>Escape analysis decides whether an allocation can stay on the stack or must move to the heap. The rule of thumb: if a value may outlive the stack frame where it was created, the compiler conservatively treats it as escaping.</p>
+<p>Typical escape triggers:</p>
+<ul>
+<li>returning pointer/reference-like values to callers,</li>
+<li>storing values into heap-reachable objects,</li>
+<li>some interface conversions and closure captures.</li>
+</ul>
+<p>Observe it with:</p>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m=2"</span>
+</code></pre>
+<p>You will see diagnostics like <code>moved to heap: x</code> and explanations about why.</p>
+<h3 id="dead-code-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#dead-code-elimination-(ssa)">Dead Code Elimination (SSA)</a></h3>
+<p>Once SSA is built, unreachable blocks and unused values become straightforward to remove:</p>
+<ul>
+<li>constant-folded branches may expose dead successors,</li>
+<li>values with no side effects and no users are dropped,</li>
+<li>resulting CFG simplification unlocks further passes.</li>
+</ul>
+<p>This is one reason small source changes can produce surprisingly different assembly: one constant or branch hint can cascade through the SSA graph.</p>
+<h3 id="bounds-check-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#bounds-check-elimination-(ssa)">Bounds Check Elimination (SSA)</a></h3>
+<p>Go inserts bounds checks for <a href="/posts/2025-09-06-arrays-slices-and-maps-in-go/">slice and array</a> safety, but SSA passes try to prove those checks redundant.</p>
+<p>If the compiler can show that an index is always within range at a use site, it removes the check. Proofs come from dataflow facts: induction variables, dominating conditions, and range constraints.</p>
+<p>This is especially visible in tight loops over slices where loop structure communicates clear bounds.</p>
+<h3 id="nil-check-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#nil-check-elimination-(ssa)">Nil Check Elimination (SSA)</a></h3>
+<p>Similarly, the compiler removes redundant nil checks when non-nilness is provable at a point in the graph. This frequently piggybacks on dominance and load/store ordering facts already established in SSA.</p>
+<p>Less redundant checking means fewer instructions and cleaner hot paths.</p>
+<h3 id="register-allocation-(late-ssa%2Fbackend-boundary)" tabindex="-1"><a class="header-anchor" href="#register-allocation-(late-ssa%2Fbackend-boundary)">Register Allocation (Late SSA/Backend Boundary)</a></h3>
+<p>SSA values are abstract. Before machine code is emitted, they must be mapped to real registers or stack slots.</p>
+<p>Go uses a linear-scan style allocator tuned for compile speed and solid generated code quality. Spills happen when register pressure is high; spill reduction often depends on earlier simplification passes shrinking live ranges.</p>
+<p>In practice, this phase can dominate the shape of final assembly in numerically heavy or branch-dense functions.</p>
+<h3 id="hot-block-alignment-(go-1.23%2B%2C-amd64%2F386)" tabindex="-1"><a class="header-anchor" href="#hot-block-alignment-(go-1.23%2B%2C-amd64%2F386)">Hot Block Alignment (Go 1.23+, amd64/386)</a></h3>
+<p>With PGO profiles, Go can align frequently executed loop blocks to cache-line boundaries on supported architectures. This typically yields modest throughput gains at a small code size cost.</p>
+<p>Disable for experiments with:</p>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-d=alignhot=0"</span>
+</code></pre>
+<h3 id="putting-it-together" tabindex="-1"><a class="header-anchor" href="#putting-it-together">Putting It Together</a></h3>
+<p>A single source-level optimization outcome usually comes from several passes working together:</p>
+<ol>
+<li>Inlining exposes more local structure.</li>
+<li>Escape analysis may keep data on stack.</li>
+<li>SSA simplification removes dead branches/checks.</li>
+<li>Register allocation packs the surviving values efficiently.</li>
+</ol>
+<p>That is why compiler diagnostics are most useful when read as a sequence, not as isolated messages.</p>
+<h3 id="observability-cheat-sheet" tabindex="-1"><a class="header-anchor" href="#observability-cheat-sheet">Observability Cheat Sheet</a></h3>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m"</span>      <span class="token comment"># inlining decisions and some escape/devirtualization notes</span>
+go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m=2"</span>    <span class="token comment"># verbose escape analysis diagnostics</span>
+go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-S"</span>      <span class="token comment"># final assembly</span>
+<span class="token assign-left variable">GOSSAFUNC</span><span class="token operator">=</span>MyFunc go build    <span class="token comment"># SSA HTML dump for a target function</span>
+go tool compile <span class="token parameter variable">-d</span> <span class="token builtin class-name">help</span>      <span class="token comment"># compiler debug flags</span>
+</code></pre>
+<p>Now that optimization decisions have transformed and tightened the SSA graph, we can look at the final phase: lowering SSA ops to architecture-specific instructions and emitting object code.</p>
+<p><a id="sec-code-generation"></a></p>
+<h2 id="code-generation---from-ssa-to-machine-instructions" tabindex="-1"><a class="header-anchor" href="#code-generation---from-ssa-to-machine-instructions">Code Generation - From SSA to Machine Instructions</a></h2>
+<p>Who this section is for: advanced readers who want to understand backend lowering and what actually reaches the CPU.</p>
+<p>This is where the compiler commits to the target CPU. Up to this point, the compiler has been reasoning mostly in machine-agnostic terms. Now it must answer concrete questions:</p>
+<ul>
+<li>Which exact instruction does this add or compare become on amd64 vs arm64?</li>
+<li>Which values stay in registers and which spill to stack?</li>
+<li>How do branches, calls, and memory operations map to real opcodes and addressing modes?</li>
+</ul>
+<p>The result of this phase is package object code and metadata the linker can combine into your final binary.</p>
+<h3 id="architecture-backends" tabindex="-1"><a class="header-anchor" href="#architecture-backends">Architecture Backends</a></h3>
+<p>Go keeps architecture-specific code generation logic under backend packages such as:</p>
+<ul>
+<li><a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/amd64"><code>cmd/compile/internal/amd64</code></a></li>
+<li><a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/arm64"><code>cmd/compile/internal/arm64</code></a></li>
+<li><a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/riscv64"><code>cmd/compile/internal/riscv64</code></a></li>
+<li>and other target directories</li>
+</ul>
+<p>Those backends know the target instruction set, calling convention details, and target-specific lowering choices.</p>
+<h3 id="lowering%3A-generic-ssa-ops-to-target-ops" tabindex="-1"><a class="header-anchor" href="#lowering%3A-generic-ssa-ops-to-target-ops">Lowering: Generic SSA Ops to Target Ops</a></h3>
+<p>Earlier SSA ops are generic enough to support multiple architectures. During lowering, they become target-specific forms.</p>
+<p>Go uses rewrite rules generated from files in <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa/_gen"> <code>cmd/compile/internal/ssa/gen</code></a>, including architecture-specific <code>*.rules</code> files. Conceptually, rules look like pattern rewrites:</p>
+<pre class="language-text"><code class="language-text">(ADDconst (ADDconst x [c1]) [c2]) -> (ADDconst x [c1+c2])
+</code></pre>
+<p>or architecture-specific folds like combining an add and load into one addressing mode when legal on the target.</p>
+<p>This rules-driven design gives two benefits:</p>
+<ol>
+<li>Declarative optimization/lowering logic is easier to audit.</li>
+<li>Target teams can improve codegen without rewriting the whole middle-end.</li>
+</ol>
+<h3 id="instruction-selection-and-emission" tabindex="-1"><a class="header-anchor" href="#instruction-selection-and-emission">Instruction Selection and Emission</a></h3>
+<p>After lowering, the backend emits instruction sequences represented in Go's internal object/assembler structures (from <code>cmd/internal/obj</code> and architecture-specific siblings).</p>
+<p>Historically, Go's assembler syntax follows <a href="https://go.dev/doc/asm">Plan 9 conventions</a>. Even if you never write assembly, this heritage matters because compiler-emitted listings (<code>-S</code>) use that syntax and naming style.</p>
+<p>At this stage, the compiler also finalizes:</p>
+<ul>
+<li>stack frame layout details,</li>
+<li>prologue/epilogue shape,</li>
+<li>relocation records for symbol references,</li>
+<li>metadata needed by runtime and linker.</li>
+</ul>
+<h3 id="what-the-compiler-produces" tabindex="-1"><a class="header-anchor" href="#what-the-compiler-produces">What the Compiler Produces</a></h3>
+<p>For package builds, the compiler emits object data that includes:</p>
+<ul>
+<li>machine code for compiled functions,</li>
+<li>symbol and relocation information,</li>
+<li>export data used by downstream package compilation.</li>
+</ul>
+<p>In normal <code>go build</code> workflows this ends up in package archives (<code>.a</code>) in the build cache, later consumed by the linker.</p>
+<p>So when people say &quot;the compiler outputs a binary,&quot; the precise version is: <strong>the compiler outputs package object artifacts, the linker builds the final executable</strong>.</p>
+<h3 id="reading-real-output" tabindex="-1"><a class="header-anchor" href="#reading-real-output">Reading Real Output</a></h3>
+<p>You can inspect what this phase produced with:</p>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-S"</span>
+</code></pre>
+<p>and for post-link disassembly:</p>
+<pre class="language-bash"><code class="language-bash">go tool objdump <span class="token parameter variable">-s</span> MyFunc ./your-binary
+</code></pre>
+<p>If a high-level source construct still seems mysterious, this is the phase where the mystery usually disappears: you can literally see every branch, move, call, and bounds-check remnant.</p>
+<h3 id="end-of-the-compiler-pipeline" tabindex="-1"><a class="header-anchor" href="#end-of-the-compiler-pipeline">End of the Compiler Pipeline</a></h3>
+<p>At this point, compilation is done. Source text has become machine-level package artifacts through a chain of explicit transformations: lexing, parsing, type checking, IR lowering, SSA construction, optimization passes, and architecture-specific code emission.</p>
+<p>Next, we'll map these internals back to practical workflows: how to debug performance decisions quickly, what compiler diagnostics to trust first, and how to reason about generated code without reading the entire toolchain source.</p>
+<p><a id="sec-tools"></a></p>
+<h2 id="tools-and-experiments" tabindex="-1"><a class="header-anchor" href="#tools-and-experiments">Tools and Experiments</a></h2>
+<p>Who this section is for: hands-on developers who want a practical toolbox to inspect compiler behavior quickly.</p>
+<p>You do not need to read all of <a href="https://github.com/golang/go/tree/master/src/cmd/compile"> <code>cmd/compile</code></a> to get useful compiler insight. A handful of commands will answer most day-to-day performance and behavior questions.</p>
+<p><img src="diagram-3-pipeline.svg" alt="Go Compiler Pipeline with Observability Tools"></p>
+<p><em>The Go compiler pipeline from source to binary, with the observability tool that gives the most insight at each stage. The workflow section shows the recommended investigation order: start with <code>-m=2</code> for inlining and escape decisions, then <code>GOSSAFUNC</code> for SSA visualization, then <code>-S</code> for final assembly.</em></p>
+<h3 id="inlining-and-escape-decisions" tabindex="-1"><a class="header-anchor" href="#inlining-and-escape-decisions">Inlining and Escape Decisions</a></h3>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m"</span> ./<span class="token punctuation">..</span>.
+go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m=2"</span> ./<span class="token punctuation">..</span>.
+</code></pre>
+<p>Use this first when you ask:</p>
+<ul>
+<li>Why did this allocate?</li>
+<li>Why was this call not inlined?</li>
+</ul>
+<p><code>-m</code> gives concise decisions; <code>-m=2</code> adds more detail. Look for messages like <code>inlining call to ...</code> and <code>moved to heap: ...</code>.</p>
+<h3 id="final-assembly-for-a-package-build" tabindex="-1"><a class="header-anchor" href="#final-assembly-for-a-package-build">Final Assembly for a Package Build</a></h3>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-S"</span> ./<span class="token punctuation">..</span>.
+</code></pre>
+<p>Use this when you need to verify what code the backend actually emitted: branch shape, calls, bounds checks, nil checks, and register pressure symptoms.</p>
+<p>If the output is too large, isolate one package or one file-sized repro.</p>
+<h3 id="ssa-visualization-for-one-function" tabindex="-1"><a class="header-anchor" href="#ssa-visualization-for-one-function">SSA Visualization for One Function</a></h3>
+<pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">GOSSAFUNC</span><span class="token operator">=</span>MyFunc go build
+</code></pre>
+<p>This writes an SSA HTML report for the target function and shows how it changes across passes. It is one of the best ways to connect source code to pass-by-pass transformations.</p>
+<p>Tip: use a uniquely named function in a tiny repro package so the dump is easy to navigate.</p>
+<h3 id="compiler-debug-knobs-discovery" tabindex="-1"><a class="header-anchor" href="#compiler-debug-knobs-discovery">Compiler Debug Knobs Discovery</a></h3>
+<pre class="language-bash"><code class="language-bash">go tool compile <span class="token parameter variable">-d</span> <span class="token builtin class-name">help</span>
+</code></pre>
+<p>This lists internal debug options supported by the current toolchain. It's useful when blog posts or old snippets mention a debug flag and you want to verify current support.</p>
+<h3 id="disassemble-a-built-binary-symbol" tabindex="-1"><a class="header-anchor" href="#disassemble-a-built-binary-symbol">Disassemble a Built Binary Symbol</a></h3>
+<pre class="language-bash"><code class="language-bash">go tool objdump <span class="token parameter variable">-s</span> MyFunc ./your-binary
+</code></pre>
+<p>Use this for post-link reality checks. It helps confirm whether package-level assembly expectations still hold once linking and layout are complete.</p>
+<h3 id="build-output-as-structured-data" tabindex="-1"><a class="header-anchor" href="#build-output-as-structured-data">Build Output as Structured Data</a></h3>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-json</span> ./<span class="token punctuation">..</span>.
+</code></pre>
+<p>This emits machine-readable build events (available since Go 1.21, extended in Go 1.24). It is especially useful for CI tooling, diagnostics dashboards, and editor integrations that need structured compiler/build output rather than plain text.</p>
+<h3 id="pgo-enabled-build-comparison" tabindex="-1"><a class="header-anchor" href="#pgo-enabled-build-comparison">PGO-Enabled Build Comparison</a></h3>
+<pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-pgo</span><span class="token operator">=</span>default.pgo ./<span class="token punctuation">..</span>.
+</code></pre>
+<p>Run this next to a non-PGO build and compare <code>-m</code> output and benchmark behavior. This is the practical way to see profile-guided devirtualization and inlining effects.</p>
+<h3 id="a-simple-investigation-workflow" tabindex="-1"><a class="header-anchor" href="#a-simple-investigation-workflow">A Simple Investigation Workflow</a></h3>
+<p>When a hot path behaves unexpectedly, this sequence is usually enough:</p>
+<ol>
+<li><code>-m=2</code> to understand inlining and escapes.</li>
+<li><code>GOSSAFUNC</code> for one suspicious function.</li>
+<li><code>-S</code> (and optionally <code>objdump</code>) to confirm final emitted shape.</li>
+<li>Re-run with <code>-pgo</code> if profile data is available.</li>
+</ol>
+<p>This keeps the feedback loop short and avoids premature deep-dives into compiler internals.</p>
+<p>Now that we have an observation toolkit, we can close with the practical implications: what these compiler phases change about everyday Go code decisions.</p>
+<p><a id="sec-practical-implications"></a></p>
+<h2 id="practical-implications-for-developers" tabindex="-1"><a class="header-anchor" href="#practical-implications-for-developers">Practical Implications for Developers</a></h2>
+<p>Who this section is for: engineers turning compiler insight into day-to-day coding and review decisions.</p>
+<p>Compiler internals are only useful if they change how you write and review code. The good news is that they do, and in predictable ways.</p>
+<h3 id="1.-stack-vs-heap-is-a-design-choice%2C-not-random-fate" tabindex="-1"><a class="header-anchor" href="#1.-stack-vs-heap-is-a-design-choice%2C-not-random-fate">1. Stack vs Heap Is a Design Choice, Not Random Fate</a></h3>
+<p>Escape analysis decisions are strongly shaped by API boundaries.</p>
+<ul>
+<li>Returning pointers, capturing locals in closures, and storing values behind interfaces can push allocations to heap.</li>
+<li>Keeping data flow local, concrete, and short-lived often keeps values on stack.</li>
+</ul>
+<p>This does not mean &quot;never use interfaces&quot; or &quot;never return pointers&quot;, just that performance-sensitive paths benefit from explicit ownership and lifetime thinking.</p>
+<h3 id="2.-small-structural-changes-can-unlock-inlining" tabindex="-1"><a class="header-anchor" href="#2.-small-structural-changes-can-unlock-inlining">2. Small Structural Changes Can Unlock Inlining</a></h3>
+<p>Inlining is not purely about line count. Call-site context, budget, and profile information matter.</p>
+<ul>
+<li>Splitting large helper functions into smaller hot/cold pieces can improve inlining on hot paths.</li>
+<li>Error-building branches and logging paths often belong off the hot path.</li>
+<li>PGO can shift inlining and devirtualization decisions in your favor for production workloads.</li>
+</ul>
+<p>If a critical call is not inlined, check diagnostics before guessing.</p>
+<h3 id="3.-loop-shape-directly-affects-bounds-and-nil-check-elimination" tabindex="-1"><a class="header-anchor" href="#3.-loop-shape-directly-affects-bounds-and-nil-check-elimination">3. Loop Shape Directly Affects Bounds and Nil Check Elimination</a></h3>
+<p>SSA-based optimizations are proof-driven. The compiler removes checks when your code structure makes safety obvious.</p>
+<ul>
+<li>Canonical loops with clear induction variables are easier to optimize.</li>
+<li>Hoisting invariant work out of loops can reduce redundant checks.</li>
+<li>Complex aliasing or opaque helper calls inside loops can block proofs.</li>
+</ul>
+<p>Readable code and optimization-friendly code are often the same code when invariants are explicit.</p>
+<h3 id="4.-interfaces-are-great%2C-but-they-have-mechanical-costs" tabindex="-1"><a class="header-anchor" href="#4.-interfaces-are-great%2C-but-they-have-mechanical-costs">4. Interfaces Are Great, But They Have Mechanical Costs</a></h3>
+<p><a href="/posts/2025-08-13-go-interfaces-beyond-the-basics/">Interface</a> dispatch and conversion are essential Go tools, but they can introduce allocation and devirtualization barriers in tight loops. Guideline:</p>
+<ul>
+<li>use interfaces at package boundaries and abstraction seams,</li>
+<li>keep inner numeric or allocation-sensitive loops concrete when profiling says it matters.</li>
+</ul>
+<p>The compiler keeps improving here, especially with profile guidance, but source shape still influences outcomes.</p>
+<h3 id="5.-generics-improve-expressiveness%2C-not-automatic-free-speed" tabindex="-1"><a class="header-anchor" href="#5.-generics-improve-expressiveness%2C-not-automatic-free-speed">5. Generics Improve Expressiveness, Not Automatic Free Speed</a></h3>
+<p>Generics remove boilerplate and preserve type safety, but performance still depends on what the instantiated code enables downstream.</p>
+<ul>
+<li>Some generic abstractions optimize beautifully.</li>
+<li>Others can inhibit inlining or expose additional interface-like costs depending on usage.</li>
+</ul>
+<p>The right approach is empirical: inspect diagnostics and benchmark representative inputs.</p>
+<h3 id="6.-unsafe-code-skips-safety-rails-and-compiler-assumptions" tabindex="-1"><a class="header-anchor" href="#6.-unsafe-code-skips-safety-rails-and-compiler-assumptions">6. Unsafe Code Skips Safety Rails and Compiler Assumptions</a></h3>
+<p>unsafe can be the right tool in carefully constrained hotspots, but it bypasses checks that normally support optimizer reasoning and correctness guarantees. Treat unsafe blocks as low-level modules:</p>
+<ul>
+<li>isolate them,</li>
+<li>document invariants,</li>
+<li>verify behavior across Go version upgrades.</li>
+</ul>
+<h3 id="a-practical-review-checklist" tabindex="-1"><a class="header-anchor" href="#a-practical-review-checklist">A Practical Review Checklist</a></h3>
+<p>When performance matters, review code with this short list:</p>
+<ol>
+<li>Which allocations are unavoidable, and which are accidental escapes?</li>
+<li>Which hot calls are inlined, and which are not?</li>
+<li>Do loop forms communicate bounds clearly?</li>
+<li>Are interface boundaries placed at the right abstraction layer?</li>
+<li>Are PGO and representative benchmarks part of the feedback loop?</li>
+</ol>
+<p>This mindset turns compiler behavior from &quot;black magic&quot; into an engineering tool. With that, we can close by returning to the original question: what really happens between a .go file and a working binary, and why understanding that path makes everyday Go code better.</p>
+<p><a id="sec-summary"></a></p>
+<h2 id="summary" tabindex="-1"><a class="header-anchor" href="#summary">Summary</a></h2>
+<p>Who this section is for: skimmers and finishers who want the condensed takeaway.</p>
+<p>From the first byte the lexer reads to the final instruction sequence emitted for your target architecture, the Go compiler is a pipeline of explicit, inspectable transformations. Source becomes tokens, tokens become syntax, syntax becomes typed meaning, typed meaning becomes compiler-native IR, IR becomes SSA, and SSA is rewritten and lowered into machine code artifacts the linker can assemble into an executable.</p>
+<p>That journey explains real day-to-day behavior: why some values escape, why some calls inline, why loop shape changes performance, and why a tiny refactor can alter assembly output. The key takeaway is not to memorize every internal pass. It is to develop a practical mental model and use the compiler's own diagnostics to test assumptions quickly.</p>
+<p>Go's compiler is not a black box. It is a readable Go program with clear phases, evolving heuristics, and tools that let you observe nearly every decision. Once you see that path clearly, optimization becomes less superstition and more engineering. Happy coding!</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

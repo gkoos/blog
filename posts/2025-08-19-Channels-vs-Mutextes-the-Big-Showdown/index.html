@@ -299,7 +299,7 @@ func <span class="token function">BenchmarkChannelCounter</span><span class="tok
 BenchmarkChannelCounter<span class="token operator">-</span><span class="token number">8</span>     <span class="token number">20000000</span>    <span class="token number">60</span> ns<span class="token operator">/</span>op
 </code></pre>
 <p>Now obviously real-world workloads might slightly differ from synthetic benchmarks (e.g., context switches, OS scheduling etc.) but that's a <strong>~75× performance difference in favor of the mutex</strong>!</p>
-<p>So why the huge gap? The mutex path is just an atomic operation to acquire/release the lock. The channel path involves synchronization between two goroutines, queue management, and possibly waking up a sleeping goroutine.</p>
+<p>So why the huge gap? The mutex path compiles down to a single atomic CPU instruction. The channel path involves synchronization between two goroutines, queue management, and possibly waking up a sleeping goroutine — a substantial amount of runtime work that <a href="/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/">the compiler's code generation</a> cannot optimize away.</p>
 <p>This demonstrates why mutexes are the right tool for protecting simple shared state.</p>
 <h2 id="real-world-examples" tabindex="-1"><a class="header-anchor" href="#real-world-examples">Real-World Examples</a></h2>
 <h3 id="1.-web-server-request-counting" tabindex="-1"><a class="header-anchor" href="#1.-web-server-request-counting">1. Web Server Request Counting</a></h3>

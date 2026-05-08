@@ -638,5 +638,14 @@
         <description>You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse.</description>
       </item>
     
+      <item>
+        <title>The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary</title>
+        <link>https://blog.gaborkoos.com/posts/2026-05-08-The-Go-Compiler-a-Deep-Dive-Into-How-Your-Code-Becomes-a-Binary/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-05-08-The-Go-Compiler-a-Deep-Dive-Into-How-Your-Code-Becomes-a-Binary/</guid>
+        <pubDate>Fri, 08 May 2026 00:00:00 GMT</pubDate>
+
+        <description>A deep dive into the Go compiler pipeline: from lexing and parsing to SSA, optimization passes, and code generation.</description>
+      </item>
+    
   </channel>
 </rss>

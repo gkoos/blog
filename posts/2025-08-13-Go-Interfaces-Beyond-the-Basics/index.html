@@ -98,7 +98,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p>In a previous <a href="/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/">Go Interfaces - Composition Over Inheritance (And Common Sense)</a>, we covered the basics of Go interfaces. It's time to take a deeper dive into how interfaces work under the hood, common pitfalls, and advanced best practices. Understanding these concepts can help you, well, understand these concepts. And write more efficient, maintainable, and bug-free Go code.</p>
+    <p>In a previous article: <a href="/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/">Go Interfaces - Composition Over Inheritance (And Common Sense)</a>, we covered the basics of Go interfaces. It's time to take a deeper dive into how interfaces work under the hood, common pitfalls, and advanced best practices. Understanding these concepts can help you, well, understand these concepts. And write more efficient, maintainable, and bug-free Go code.</p>
 <h2 id="1.-how-go-interfaces-are-internally-stored" tabindex="-1"><a class="header-anchor" href="#1.-how-go-interfaces-are-internally-stored">1. How Go Interfaces Are Internally Stored</a></h2>
 <p>Go interfaces are more than just a set of methods—they are a specific data structure in memory. Understanding how interfaces are represented internally helps explain some of Go's most notorious pitfalls and performance characteristics we are about to discuss in the forthcoming sections.</p>
 <p>Let's define an interface:</p>
@@ -426,7 +426,7 @@ v2<span class="token punctuation">,</span> <span class="token literal-property p
     <span class="token keyword">return</span> cl <span class="token comment">// cl escapes to heap because returned as interface</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>If you care about allocation, use Go’s <code>go build -gcflags=&quot;-m&quot;</code> to see escape analysis results.</p>
+<p>If you care about allocation, use Go's <code>go build -gcflags=&quot;-m&quot;</code> to see escape analysis results. For a deeper look at how the compiler decides what escapes and why, see <a href="/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/"><em>The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary</em></a>.</p>
 <h3 id="when-interface-indirection-matters" tabindex="-1"><a class="header-anchor" href="#when-interface-indirection-matters">When Interface Indirection Matters</a></h3>
 <p>Interface indirection matters most when:</p>
 <ul>
