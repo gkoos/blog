@@ -103,7 +103,7 @@
 <h3 id="guided-paths" tabindex="-1"><a class="header-anchor" href="#guided-paths">Guided paths</a></h3>
 <ul>
 <li>Beginner track (conceptual flow, lighter internals): <a href="#sec-introduction">Introduction</a> -&gt; <a href="#sec-historical-context">Historical Context</a> -&gt; <a href="#sec-lexing">Lexing</a> -&gt; <a href="#sec-parsing">Parsing</a> -&gt; <a href="#sec-practical-implications">Practical Implications</a> -&gt; <a href="#sec-summary">Summary</a></li>
-<li>Advanced track (internals first: IR/SSA/optimizations/codegen): <a href="#sec-type-checking">Type Checking</a> -&gt; <a href="#sec-ir">IR</a> -&gt; <a href="#sec-ssa">SSA</a> -&gt; <a href="#sec-optimization-passes">Optimization Passes</a> -&gt; <a href="#sec-code-generation">Code Generation</a> -&gt; <a href="#sec-tools">Tools and Experiments</a></li>
+<li>Advanced track (internals first: IR/SSA/optimizations/codegen): <a href="#sec-type-checking">Type Checking</a> -&gt; <a href="#sec-ir">IR</a> -&gt; <a href="#sec-ssa">SSA</a> -&gt; <a href="#sec-go-diverges">Where Go Diverges from the Textbook Pipeline</a> -&gt; <a href="#sec-optimization-passes">Optimization Passes</a> -&gt; <a href="#sec-code-generation">Code Generation</a> -&gt; <a href="#sec-tools">Tools and Experiments</a></li>
 <li>Need one specific answer fast? Use the table of contents below to jump directly to that section.</li>
 </ul>
 <h3 id="table-of-contents" tabindex="-1"><a class="header-anchor" href="#table-of-contents">Table of contents</a></h3>
@@ -115,6 +115,7 @@
 <li><a href="#sec-type-checking">Type Checking - Giving the AST Meaning</a></li>
 <li><a href="#sec-ir">IR (Intermediate Representation) - The Compiler's Internal Language</a></li>
 <li><a href="#sec-ssa">SSA - Static Single Assignment Form</a></li>
+<li><a href="#sec-go-diverges">Where Go Diverges from the Textbook Pipeline</a></li>
 <li><a href="#sec-optimization-passes">Optimization Passes - Where the Magic Happens</a></li>
 <li><a href="#sec-code-generation">Code Generation - From SSA to Machine Instructions</a></li>
 <li><a href="#sec-tools">Tools and Experiments</a></li>
@@ -598,6 +599,7 @@ b3:
 <li>Go's SSA is tightly integrated with Go runtime requirements.</li>
 <li>It carries information needed for garbage collection safety points and write barriers.</li>
 <li>Its op set and lowering rules are designed around Go's own backends and calling conventions.</li>
+<li>It is intentionally pragmatic: passes frequently mutate values in place and prioritize compile-time throughput over enforcing a textbook &quot;minimal SSA&quot; shape.</li>
 </ul>
 <p>So while the high-level SSA concept is shared, the representation is purpose-built for the Go toolchain.</p>
 <h3 id="ssa-construction-and-early-simplification" tabindex="-1"><a class="header-anchor" href="#ssa-construction-and-early-simplification">SSA Construction and Early Simplification</a></h3>
@@ -619,6 +621,17 @@ b3:
 <p>You do not need to memorize every pass name to benefit. The practical insight is that once your code reaches SSA, dataflow properties become explicit, and that is where performance-critical transformations become straightforward.</p>
 <h3 id="from-ssa-to-optimization-passes" tabindex="-1"><a class="header-anchor" href="#from-ssa-to-optimization-passes">From SSA to Optimization Passes</a></h3>
 <p>With SSA in place, the compiler now has the exact substrate needed for its core optimization passes. Next we move through those passes one by one: inlining context, escape analysis interactions, dead-code elimination, bounds and nil check elimination, and register allocation.</p>
+<p><a id="sec-go-diverges"></a></p>
+<h2 id="where-go-diverges-from-the-textbook-pipeline" tabindex="-1"><a class="header-anchor" href="#where-go-diverges-from-the-textbook-pipeline">Where Go Diverges from the Textbook Pipeline</a></h2>
+<p>Who this section is for: compiler-savvy readers who want to map Go's implementation choices against the classic frontend/IR/SSA/backend framing.</p>
+<p>Credit where it is due: this section is based on excellent reader feedback here: https://www.reddit.com/r/Compilers/comments/1t7pggj/comment/okrikwy/</p>
+<ul>
+<li><strong>SSA shape and pass style are pragmatic, not academic.</strong> In <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa"><code>cmd/compile/internal/ssa</code></a>, values are commonly rewritten in place and pass orchestration is tuned for fast, predictable compilation. This is different from the stricter IR invariants people may expect from LLVM-style pipelines, and the tradeoff is intentional.</li>
+<li><strong>Lowering is architecture-specific and rule-driven.</strong> Go leans on per-target rule files (for example AMD64, ARM64, and RISCV64 rules under the SSA generator path), which are turned into rewrite code. There is no single backend-agnostic instruction-selection DAG layer to extend first.</li>
+<li><strong>Escape analysis happens before SSA.</strong> Escape decisions are made earlier on frontend/lowered IR forms (see <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/escape"><code>cmd/compile/internal/escape</code></a>), and those stack-vs-heap outcomes change the shape of later SSA and the optimizations available.</li>
+<li><strong>Nil-check and bounds-check elimination depend heavily on prove-style facts.</strong> The <code>prove</code> pass (<a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa/prove.go"><code>cmd/compile/internal/ssa/prove.go</code></a>) tracks facts through dominating conditions, and inlining context can materially change which checks survive.</li>
+</ul>
+<p>These differences are not bugs or omissions, they reflect Go's compiler priorities: practical maintainability, strong compile-time performance, and robust code generation across many architectures.</p>
 <p><a id="sec-optimization-passes"></a></p>
 <h2 id="optimization-passes---where-the-magic-happens" tabindex="-1"><a class="header-anchor" href="#optimization-passes---where-the-magic-happens">Optimization Passes - Where the Magic Happens</a></h2>
 <p>Who this section is for: practitioners tuning performance and trying to connect source changes to generated code outcomes.</p>
@@ -666,10 +679,11 @@ b3:
 <h3 id="bounds-check-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#bounds-check-elimination-(ssa)">Bounds Check Elimination (SSA)</a></h3>
 <p>Go inserts bounds checks for <a href="/posts/2025-09-06-arrays-slices-and-maps-in-go/">slice and array</a> safety, but SSA passes try to prove those checks redundant.</p>
 <p>If the compiler can show that an index is always within range at a use site, it removes the check. Proofs come from dataflow facts: induction variables, dominating conditions, and range constraints.</p>
+<p>In practice, much of this reasoning is concentrated in the <code>prove</code> pass (<a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa/prove.go"><code>cmd/compile/internal/ssa/prove.go</code></a>), which propagates conditional facts over the dominator tree.</p>
 <p>This is especially visible in tight loops over slices where loop structure communicates clear bounds.</p>
 <h3 id="nil-check-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#nil-check-elimination-(ssa)">Nil Check Elimination (SSA)</a></h3>
 <p>Similarly, the compiler removes redundant nil checks when non-nilness is provable at a point in the graph. This frequently piggybacks on dominance and load/store ordering facts already established in SSA.</p>
-<p>Less redundant checking means fewer instructions and cleaner hot paths.</p>
+<p>Inlining decisions feed directly into this: when caller and callee logic are fused earlier, prove-style reasoning often has stronger facts available, so more nil checks can disappear. Less redundant checking means fewer instructions and cleaner hot paths.</p>
 <h3 id="register-allocation-(late-ssa%2Fbackend-boundary)" tabindex="-1"><a class="header-anchor" href="#register-allocation-(late-ssa%2Fbackend-boundary)">Register Allocation (Late SSA/Backend Boundary)</a></h3>
 <p>SSA values are abstract. Before machine code is emitted, they must be mapped to real registers or stack slots.</p>
 <p>Go uses a linear-scan style allocator tuned for compile speed and solid generated code quality. Spills happen when register pressure is high; spill reduction often depends on earlier simplification passes shrinking live ranges.</p>
@@ -726,6 +740,7 @@ go tool compile <span class="token parameter variable">-d</span> <span class="to
 <li>Declarative optimization/lowering logic is easier to audit.</li>
 <li>Target teams can improve codegen without rewriting the whole middle-end.</li>
 </ol>
+<p>Compared to LLVM's shared instruction-selection framework, this is a different scaling strategy: Go favors relatively direct per-architecture rewrites and backend ops that keep compile times low and backend behavior explicit.</p>
 <h3 id="instruction-selection-and-emission" tabindex="-1"><a class="header-anchor" href="#instruction-selection-and-emission">Instruction Selection and Emission</a></h3>
 <p>After lowering, the backend emits instruction sequences represented in Go's internal object/assembler structures (from <code>cmd/internal/obj</code> and architecture-specific siblings).</p>
 <p>Historically, Go's assembler syntax follows <a href="https://go.dev/doc/asm">Plan 9 conventions</a>. Even if you never write assembly, this heritage matters because compiler-emitted listings (<code>-S</code>) use that syntax and naming style.</p>
@@ -776,12 +791,12 @@ go build <span class="token parameter variable">-gcflags</span><span class="toke
 <pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-S"</span> ./<span class="token punctuation">..</span>.
 </code></pre>
 <p>Use this when you need to verify what code the backend actually emitted: branch shape, calls, bounds checks, nil checks, and register pressure symptoms.</p>
-<p>If the output is too large, isolate one package or one file-sized repro.</p>
+<p>If the output is too large, isolate one package or one file-sized example.</p>
 <h3 id="ssa-visualization-for-one-function" tabindex="-1"><a class="header-anchor" href="#ssa-visualization-for-one-function">SSA Visualization for One Function</a></h3>
 <pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">GOSSAFUNC</span><span class="token operator">=</span>MyFunc go build
 </code></pre>
 <p>This writes an SSA HTML report for the target function and shows how it changes across passes. It is one of the best ways to connect source code to pass-by-pass transformations.</p>
-<p>Tip: use a uniquely named function in a tiny repro package so the dump is easy to navigate.</p>
+<p>Tip: use a uniquely named function in a tiny example package so the dump is easy to navigate.</p>
 <h3 id="compiler-debug-knobs-discovery" tabindex="-1"><a class="header-anchor" href="#compiler-debug-knobs-discovery">Compiler Debug Knobs Discovery</a></h3>
 <pre class="language-bash"><code class="language-bash">go tool compile <span class="token parameter variable">-d</span> <span class="token builtin class-name">help</span>
 </code></pre>
@@ -805,6 +820,7 @@ go build <span class="token parameter variable">-gcflags</span><span class="toke
 <li><code>GOSSAFUNC</code> for one suspicious function.</li>
 <li><code>-S</code> (and optionally <code>objdump</code>) to confirm final emitted shape.</li>
 <li>Re-run with <code>-pgo</code> if profile data is available.</li>
+<li>Optional sanity check: compile the same example with <code>gccgo</code> and diff assembly to separate language-level constraints from gc-specific implementation choices.</li>
 </ol>
 <p>This keeps the feedback loop short and avoids premature deep-dives into compiler internals.</p>
 <p>Now that we have an observation toolkit, we can close with the practical implications: what these compiler phases change about everyday Go code decisions.</p>
