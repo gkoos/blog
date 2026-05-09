@@ -647,5 +647,14 @@
         <description>A deep dive into the Go compiler pipeline: from lexing and parsing to SSA, optimization passes, and code generation.</description>
       </item>
     
+      <item>
+        <title>Your Recursion Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/</guid>
+        <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
+
+        <description>Tail-recursive code in JavaScript still risks stack overflow in real-world runtimes. Learn when recursion is safe and when to switch to iterative patterns.</description>
+      </item>
+    
   </channel>
 </rss>
