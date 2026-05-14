@@ -9,6 +9,8 @@ tags:
 - tutorials
 - javascript
 ---
+*Featured in [Node Weekly #624](https://nodeweekly.com/issues/624)*
+
 [Recursion](https://developer.mozilla.org/en-US/docs/Glossary/Recursion) is one of those ideas developers learn early and trust for years. If the recursive step is simple and the base case is correct, the code feels clean and safe.
 
 It is elegant for a reason: many problems are naturally recursive, and the code often mirrors how we explain the logic out loud. For tree walks, nested structures, and divide-and-conquer patterns, recursion can be easier to read than explicit loops.
