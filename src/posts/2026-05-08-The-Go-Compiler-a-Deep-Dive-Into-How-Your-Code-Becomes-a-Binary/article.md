@@ -9,6 +9,8 @@ tags:
 - tutorials
 - golang
 ---
+*Featured in [Go Weekly #601](https://golangweekly.com/issues/601)*
+
 *Warning: This is a really long deep dive. If you are short on time, use the guided paths below instead of reading straight through end-to-end.*
 
 ## Navigation
