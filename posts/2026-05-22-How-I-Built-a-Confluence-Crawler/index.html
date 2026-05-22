@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How I Built a Confluence Crawler</title>
+  <meta name="description" content="Building a Go-based CLI tool to export Confluence spaces to local Markdown files for RAG pipelines, offline docs, and Git-based knowledge management.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How I Built a Confluence Crawler">
+  <meta property="og:description" content="Building a Go-based CLI tool to export Confluence spaces to local Markdown files for RAG pipelines, offline docs, and Git-based knowledge management.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="How I Built a Confluence Crawler">
+  <meta name="twitter:description" content="Building a Go-based CLI tool to export Confluence spaces to local Markdown files for RAG pipelines, offline docs, and Git-based knowledge management.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">How I Built a Confluence Crawler</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-05-22T00:00:00.000Z">Fri May 22 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">Confluence</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">RAG</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">knowledge-management</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <blockquote>
+<p>TLDR: If you are not interested in the story and just want the tool, go straight to the repository: <a href="https://github.com/gkoos/confluence2md">github.com/gkoos/confluence2md</a>. It is a CLI that crawls Confluence and mirrors it into local Markdown files, including links, comments, and attachments, with support for incremental updates.</p>
+</blockquote>
+<p>This started with a small problem that slowly became expensive: finding things in our company Confluence was harder than it should have been.</p>
+<p>The first issue was human. Search results were noisy; useful pages existed, but they were buried under stale docs, half-duplicated runbooks, and pages whose titles made sense only to the person who wrote them three years ago. When you are in the middle of an incident or trying to understand a legacy service, that's not ideal.</p>
+<p>The second issue was machine. I was building workflows with LLMs, and Confluence turned out to be a difficult source to work with directly. The content model is not designed around LLM retrieval quality. You can pull pages through APIs, but you still need to normalize structure, preserve context, handle references, and keep updates in sync. If the source layer is messy, everything downstream in your AI pipeline inherits the mess.</p>
+<p>At some point the idea clicked: Markdown is a format that both humans and machines handle well. Humans can read it in any editor, Git can diff it, indexers can process it, LLM pipelines can chunk it. So instead of fighting Confluence at query time, why not mirror the space locally into clean Markdown and treat that mirror as the canonical retrieval layer?</p>
+<p>That was the origin of <code>confluence2md</code>.</p>
+<h2 id="the-first-attempt" tabindex="-1"><a class="header-anchor" href="#the-first-attempt">The First Attempt</a></h2>
+<p>The first design looked almost too clean: at heart, this is a two-phase crawling problem.</p>
+<p>Phase one: start from one or more seed pages, crawl linked pages to a configurable depth, and convert each page into Markdown.</p>
+<p>Phase two: once you know the complete set of crawled pages, rewrite internal Confluence links into local relative links.</p>
+<p>On paper, this gives you exactly what you want. You avoid guessing link targets while crawling, because rewrite decisions happen only after the graph is known. You keep the logic separable: fetching and conversion in phase one, graph-aware link correction in phase two.</p>
+<p>I expected most of the effort to be around traversal performance and retry logic. Instead, the hardest work appeared in the conversion layer and update model. The crawling algorithm was the easy part.</p>
+<h2 id="the-pain-of-converting-confluence-to-markdown" tabindex="-1"><a class="header-anchor" href="#the-pain-of-converting-confluence-to-markdown">The Pain of Converting Confluence to Markdown</a></h2>
+<p>Confluence content is not &quot;almost Markdown&quot;: it is stored in a custom storage format that is XML-heavy, macro-heavy, and full of edge cases that are perfectly valid in Confluence but awkward outside of it.</p>
+<p>The first surprise: two pages that look visually similar in Confluence can serialize very differently in storage format. Tables, rich text blocks, code snippets, callouts, and macro output can appear in patterns that are not trivial to flatten into readable Markdown.</p>
+<p>The second surprise was links: &quot;a link to another Confluence page&quot; is not a single thing. You encounter multiple URL shapes, embedded references, path-based forms, query-based forms, and links whose targets are obvious to Confluence but not obvious to your converter. If link extraction fails silently, your local mirror is technically present but functionally broken.</p>
+<p>The third surprise was macros. Macros are one of Confluence's superpowers, but also one of the biggest export headaches. Some macros map cleanly to Markdown - like constructs. Others are effectively mini-apps embedded in page content. You need a strategy for graceful degradation, not perfect one-to-one fidelity. Your realistic goal is utility, not pixel-perfect cloning.</p>
+<p>The key lesson was that conversion is not just a renderer problem. You are trying to preserve meaning and navigability under a different representation model. Once I accepted that, the implementation got better: normalize aggressively, preserve critical references, and be explicit about what gets transformed versus passed through. And I most likely missed lots of edge cases too. The best I could do was to cover the most common patterns I encountered and make sure the system is resilient to weird content rather than brittle.</p>
+<h2 id="the-pain-of-comments-and-attachments" tabindex="-1"><a class="header-anchor" href="#the-pain-of-comments-and-attachments">The Pain of Comments and Attachments</a></h2>
+<p>After getting page conversion to a usable state, comments and attachments became the next wall.</p>
+<p>Comments matter more than people think. In many organizations, the real decision history lives in comments: caveats, corrections, &quot;do not do this anymore&quot;, and contextual notes that never made it into the page body. Exporting pages without comments creates a technically complete mirror that is practically incomplete.</p>
+<p>Attachments are similar. A runbook that references scripts, screenshots, or PDFs is only useful if those references survive locally. Broken attachment links are almost worse than missing files, because they create false confidence.</p>
+<p>In Confluence APIs, comments and attachments often come through different endpoints and different response shapes. They do not naturally slot into a naive page conversion pass. I had to treat them as first-class parts of the model: fetch, normalize, persist, and rewrite references so local files resolve correctly.</p>
+<p>For comments, the practical choice was to append them into a clear section in each generated Markdown page. That keeps context colocated with the source page while staying machine-readable. For attachments, the rule was simple: if a page references a file and that file is in scope, download it and rewrite the reference to local path. If not, fail visibly.</p>
+<p>Once those rules were in place, the mirror stopped feeling like an &quot;export artifact&quot; and started feeling like a usable documentation corpus.</p>
+<h2 id="the-pain-of-updates" tabindex="-1"><a class="header-anchor" href="#the-pain-of-updates">The Pain of Updates</a></h2>
+<p>Then came the real operational problem.</p>
+<p>A corporate Confluence space can have thousands of pages. Most runs happen because a small subset changed. Full recrawls are wasteful, slow, and expensive in API quota terms. If every update cycle requires reprocessing everything, people stop running updates, and your mirror becomes stale.</p>
+<p>Initially, <a href="https://developer.atlassian.com/cloud/confluence/advanced-searching-using-cql/">CQL</a> looked like the obvious solution. Query pages by modification window, fetch only changed content, done. In theory, elegant. In practice, not sufficient.</p>
+<p>Why it did not hold up in production:</p>
+<p>CQL can tell you what changed according to indexed metadata, but does not magically solve all dependency and consistency issues for a local mirror. Link graphs can shift. Referenced pages may become relevant without being directly changed in a way your query catches at the right time. Some operational edge cases appear around indexing lag and query behavior that are tolerable in UI search but painful for deterministic synchronization.</p>
+<p>I needed a model that prioritized reliable convergence over clever query shortcuts.</p>
+<p>The solution became an incremental strategy backed by checkpoints and deterministic traversal behavior. In short: keep the crawl model stable, detect what is dirty versus reusable, and make update decisions based on explicit processing state rather than optimistic assumptions.</p>
+<p>This is where the dual-checkpoint idea paid off:</p>
+<ul>
+<li>A completed checkpoint tracks what finished processing.</li>
+<li>A successful checkpoint tracks what finished with zero errors.</li>
+</ul>
+<p>That split avoids a common failure mode where partial runs accidentally look &quot;healthy&quot; and poison future incrementals. You can advance progress while still preserving correctness signals.</p>
+<p>The result is that updates mode can reuse clean artifacts aggressively while still rerendering genuinely dirty pages. It is fast enough to run frequently, and predictable enough to trust.</p>
+<h2 id="technical-choices" tabindex="-1"><a class="header-anchor" href="#technical-choices">Technical Choices</a></h2>
+<p>Go was a deliberate choice, not just personal preference.</p>
+<p>For CLI tools, Go gives you a very practical package: fast startup, straightforward concurrency, solid standard library, and simple deployment through static binaries. That matters when your users might run the tool in local shells, CI jobs, or mixed developer environments across operating systems.</p>
+<p>The crawling workload itself also maps well to Go's model. You can manage concurrency and rate limiting cleanly without pulling in heavyweight runtime dependencies. The codebase stays compact and maintainable, which matters for a tool that has to evolve with API quirks.</p>
+<p>On distribution, Go keeps friction low. Cross-platform release artifacts for Linux, macOS, and Windows are easy to automate, and users can download, extract, and run without installing language runtimes. For internal tooling adoption, that is a huge win.</p>
+<h2 id="from-chaos-to-a-working-mirror" tabindex="-1"><a class="header-anchor" href="#from-chaos-to-a-working-mirror">From Chaos to a Working Mirror</a></h2>
+<p>At this point, the major blockers were resolved: conversion fidelity, link rewriting, comments and attachments, and incremental update correctness.</p>
+<p>What emerged is not a one-off exporter but a repeatable mirror process. You can point it at seeds, run a full sync, then run updates regularly and keep a local Markdown representation of your Confluence knowledge that stays useful over time.</p>
+<p>That sounds simple now, but it took several iterations to make &quot;works once&quot; become &quot;works repeatedly under real constraints&quot;.</p>
+<h2 id="what-is-it-good-for" tabindex="-1"><a class="header-anchor" href="#what-is-it-good-for">What Is It Good For</a></h2>
+<p>The first obvious use case is a personal or team second brain. Once content is local Markdown, people can search and browse with tools they already trust instead of relying entirely on Confluence UI behavior.</p>
+<p>The second is offline and operational resilience. If network access is limited, if Confluence is degraded, or if you simply want a local snapshot for incident work, the mirror is immediately useful.</p>
+<p>The third is versioned knowledge management. Putting mirrored docs in Git gives you history, diffs, and visibility into how operational knowledge evolves. That is valuable for onboarding, audits, and postmortems.</p>
+<p>The fourth is machine workflows. Clean local Markdown plus metadata is a far better substrate for indexing and retrieval than trying to resolve everything live against Confluence APIs at query time.</p>
+<p>In practice, this means one mirror can serve multiple audiences: humans browsing docs, engineers diffing changes, and AI systems consuming structured text.</p>
+<h2 id="next-steps" tabindex="-1"><a class="header-anchor" href="#next-steps">Next Steps</a></h2>
+<p>The obvious next step is to feed the mirror into a <a href="https://en.wikipedia.org/wiki/Retrieval-augmented_generation">RAG pipeline</a>, but that should not mean &quot;one page equals one chunk&quot;. That naive approach throws away structural signals and often hurts retrieval quality.</p>
+<p>A stronger pipeline should chunk by semantic boundaries: headings, sections, and content blocks that correspond to coherent ideas. It should preserve metadata such as page ID, title, source URL, section path, and update timestamp. It should also account for duplicated content, stale snapshots, and link context that may improve answer grounding.</p>
+<p>Another important step is retrieval strategy. Hybrid retrieval often works better than pure vector search for operational docs, because exact keywords (service names, env vars, incident IDs) matter. A good pipeline can combine lexical and semantic retrieval, then rerank with contextual scoring.</p>
+<p>There is also room for change-aware indexing: when the mirror updates, only re-embed affected chunks and keep stable identifiers so downstream stores do not churn unnecessarily.</p>
+<p>In other words, mirroring Confluence to Markdown is not the final destination. It is the foundation. Once that foundation is reliable, higher-level knowledge workflows become much easier to build correctly.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>This project began as frustration with documentation discoverability and ended as a practical data pipeline for both humans and machines.</p>
+<p>The core idea is simple: convert an operationally messy knowledge source into a local, readable, versionable, machine-friendly representation. The implementation was not simple at all, especially around conversion fidelity and incremental correctness, but the payoff is real: a Confluence space you can actually work with.</p>
+<p>If this sounds useful for your team, the tool is open source and ready to run:
+<a href="https://github.com/gkoos/confluence2md">github.com/gkoos/confluence2md</a></p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

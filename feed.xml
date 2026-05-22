@@ -656,5 +656,14 @@
         <description>Tail-recursive code in JavaScript still risks stack overflow in real-world runtimes. Learn when recursion is safe and when to switch to iterative patterns.</description>
       </item>
     
+      <item>
+        <title>How I Built a Confluence Crawler</title>
+        <link>https://blog.gaborkoos.com/posts/2026-05-22-How-I-Built-a-Confluence-Crawler/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-05-22-How-I-Built-a-Confluence-Crawler/</guid>
+        <pubDate>Fri, 22 May 2026 00:00:00 GMT</pubDate>
+
+        <description>Building a Go-based CLI tool to export Confluence spaces to local Markdown files for RAG pipelines, offline docs, and Git-based knowledge management.</description>
+      </item>
+    
   </channel>
 </rss>
