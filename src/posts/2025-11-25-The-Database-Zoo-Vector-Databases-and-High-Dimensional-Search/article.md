@@ -9,7 +9,7 @@ tags:
 - database zoo
 - databases
 ---
-*This post is part of* The Database Zoo: Exotic Data Storage Engines *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
+*This post is part of* [The Database Zoo: Exotic Data Storage Engines](/categories/?tag=database%20zoo) *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
 
 ## Introduction
 
@@ -623,3 +623,7 @@ By following this workflow, engineers can build production-grade semantic search
 Vector databases are purpose-built engines designed for high-dimensional search, enabling fast and accurate similarity queries over massive datasets. By combining efficient storage, indexing structures like HNSW or IVF, and optimized query execution, they handle workloads that general-purpose databases struggle with.
 
 Understanding the core principles: embedding generation, vector indexing, and approximate nearest neighbor search helps engineers choose the right vector database and design effective semantic search or recommendation systems.
+
+---
+
+*The ideas in this series are being developed into a book. [The Database Safari](https://link.springer.com/book/9798868827082) (Apress, Springer Nature) will expand on these topics with a more structured treatment of specialized databases: how they work internally, what trade-offs they make, and when they make sense in real systems.*
