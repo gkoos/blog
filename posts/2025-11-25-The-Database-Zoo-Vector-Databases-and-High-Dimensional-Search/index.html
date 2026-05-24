@@ -99,7 +99,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><em>This post is part of</em> The Database Zoo: Exotic Data Storage Engines <em>, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.</em></p>
+    <p><em>This post is part of</em> <a href="/categories/?tag=database%20zoo">The Database Zoo: Exotic Data Storage Engines</a> <em>, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.</em></p>
 <h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
 <p><em>Vector embeddings</em> have quietly become one of the most important data types in modern systems. Every LLM application, recommendation engine, semantic search feature, image similarity tool, fraud detector, and &quot;find me things like this&quot; workflow ultimately boils down to the same operation: convert some input into a high-dimensional vector, then search for its nearest neighbours.</p>
 <p>At small scales this is straightforward, but as the volume of data and dimensionality grow, it's the sort of problem that turns general-purpose databases into smoke.</p>
@@ -598,6 +598,8 @@ results <span class="token operator">=</span> collection<span class="token punct
 <h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>Vector databases are purpose-built engines designed for high-dimensional search, enabling fast and accurate similarity queries over massive datasets. By combining efficient storage, indexing structures like HNSW or IVF, and optimized query execution, they handle workloads that general-purpose databases struggle with.</p>
 <p>Understanding the core principles: embedding generation, vector indexing, and approximate nearest neighbor search helps engineers choose the right vector database and design effective semantic search or recommendation systems.</p>
+<hr>
+<p><em>The ideas in this series are being developed into a book. <a href="https://link.springer.com/book/9798868827082">The Database Safari</a> (Apress, Springer Nature) will expand on these topics with a more structured treatment of specialized databases: how they work internally, what trade-offs they make, and when they make sense in real systems.</em></p>
 
   </div>
 </article>

@@ -99,7 +99,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><em>This post is part of</em> The Database Zoo: Exotic Data Storage Engines <em>, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.</em></p>
+    <p><em>This post is part of</em> <a href="/categories/?tag=database%20zoo">The Database Zoo: Exotic Data Storage Engines</a> <em>, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.</em></p>
 <h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
 <p>Modern systems often generate vast streams of high-volume, high-cardinality, or continuously changing data. Performing exact queries - like counting unique users on a website, tracking event frequencies, or checking membership in massive sets - can be slow, memory-intensive, or even infeasible on traditional relational or NoSQL databases.</p>
 <p>Probabilistic and approximate databases solve this problem by using compact data summaries, such as <em>Bloom filters</em>, <em>HyperLogLog</em>, and <em>sketches</em>, to provide fast, memory-efficient answers. Instead of storing every individual data point, these engines maintain summaries that can be updated incrementally, merged across partitions, and queried efficiently. By accepting a small, controlled error, they achieve real-time analytics at scale.</p>
@@ -287,7 +287,7 @@
 <li><strong>Recommendations</strong>: Identifying trends and frequent items in massive datasets</li>
 </ul>
 <p>In all of these cases, <strong>approximate answers are good enough</strong>, provided they are fast, scalable, and memory efficient.</p>
-<p>Note that there are overlaps with other specialized databases. For example, time-series databases like InfluxDB or TimescaleDB can handle high-throughput telemetry, but may struggle with high-cardinality distinct counts at scale. Similarly, stream processing frameworks like Apache Flink or Kafka Streams can perform aggregations, but often require more operational complexity and resources than a purpose-built probabilistic database.</p>
+<p>Note that there are overlaps with other specialized databases. For example, <a href="/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/">time-series databases</a> like InfluxDB or TimescaleDB can handle high-throughput telemetry, but may struggle with high-cardinality distinct counts at scale. Similarly, stream processing frameworks like Apache Flink or Kafka Streams can perform aggregations, but often require more operational complexity and resources than a purpose-built probabilistic database.</p>
 <h2 id="examples-of-probabilistic-databases" tabindex="-1"><a class="header-anchor" href="#examples-of-probabilistic-databases">Examples of Probabilistic Databases</a></h2>
 <p>Several modern data systems incorporate probabilistic techniques to achieve scale and performance. While they are not always branded as &quot;probabilistic databases&quot;, their query engines rely heavily on approximate data structures and execution strategies.</p>
 <h3 id="apache-druid" tabindex="-1"><a class="header-anchor" href="#apache-druid"><a href="https://druid.apache.org/">Apache Druid</a></a></h3>
@@ -395,6 +395,9 @@
 <p>Probabilistic and approximate databases occupy a unique space in the database ecosystem. They are not designed for transactional workloads, nor do they aim for perfect accuracy. Instead, they embrace the reality that at web scale, &quot;fast and close enough&quot; beats &quot;slow and exact&quot;.</p>
 <p>By relying on Bloom filters, HyperLogLog, sketches, and similar techniques, these systems unlock analytics that would otherwise be impossible in real time. The trade-off - giving up a fraction of accuracy - is minor compared to the benefits in performance, scalability, and cost efficiency.</p>
 <p>From Netflix and Shopify to Cloudflare and fintech platforms, some of the largest data-driven companies in the world already rely on probabilistic techniques in production. For organizations dealing with massive, fast-moving, or high-cardinality datasets, this database family offers a practical, battle-tested way to keep analytics interactive and affordable.</p>
+<p>Next time we will explore <a href="/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/">Vector databases and high dimensional search</a>, a category AI applications have made increasingly important.</p>
+<hr>
+<p><em>The ideas in this series are being developed into a book. <a href="https://link.springer.com/book/9798868827082">The Database Safari</a> (Apress, Springer Nature) will expand on these topics with a more structured treatment of specialized databases: how they work internally, what trade-offs they make, and when they make sense in real systems.</em></p>
 
   </div>
 </article>
