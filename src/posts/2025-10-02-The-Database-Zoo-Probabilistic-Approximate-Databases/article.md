@@ -9,7 +9,7 @@ tags:
 - database zoo
 - databases
 ---
-*This post is part of* The Database Zoo: Exotic Data Storage Engines *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
+*This post is part of* [The Database Zoo: Exotic Data Storage Engines](/categories/?tag=database%20zoo) *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
 
 ## Introduction
 
@@ -246,7 +246,7 @@ Key workloads where probabilistic databases shine:
 
 In all of these cases, **approximate answers are good enough**, provided they are fast, scalable, and memory efficient.
 
-Note that there are overlaps with other specialized databases. For example, time-series databases like InfluxDB or TimescaleDB can handle high-throughput telemetry, but may struggle with high-cardinality distinct counts at scale. Similarly, stream processing frameworks like Apache Flink or Kafka Streams can perform aggregations, but often require more operational complexity and resources than a purpose-built probabilistic database.
+Note that there are overlaps with other specialized databases. For example, [time-series databases](/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/) like InfluxDB or TimescaleDB can handle high-throughput telemetry, but may struggle with high-cardinality distinct counts at scale. Similarly, stream processing frameworks like Apache Flink or Kafka Streams can perform aggregations, but often require more operational complexity and resources than a purpose-built probabilistic database.
 
 ## Examples of Probabilistic Databases
 
@@ -406,3 +406,9 @@ Probabilistic and approximate databases occupy a unique space in the database ec
 By relying on Bloom filters, HyperLogLog, sketches, and similar techniques, these systems unlock analytics that would otherwise be impossible in real time. The trade-off - giving up a fraction of accuracy - is minor compared to the benefits in performance, scalability, and cost efficiency.
 
 From Netflix and Shopify to Cloudflare and fintech platforms, some of the largest data-driven companies in the world already rely on probabilistic techniques in production. For organizations dealing with massive, fast-moving, or high-cardinality datasets, this database family offers a practical, battle-tested way to keep analytics interactive and affordable.
+
+Next time we will explore [Vector databases and high dimensional search](/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/), a category AI applications have made increasingly important.
+
+---
+
+*The ideas in this series are being developed into a book. [The Database Safari](https://link.springer.com/book/9798868827082) (Apress, Springer Nature) will expand on these topics with a more structured treatment of specialized databases: how they work internally, what trade-offs they make, and when they make sense in real systems.*

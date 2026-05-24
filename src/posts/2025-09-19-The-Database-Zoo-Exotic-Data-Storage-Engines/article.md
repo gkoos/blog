@@ -226,15 +226,15 @@ While SQL and NoSQL databases have proven indispensable, modern workloads reveal
 
 ### Time-Series Metrics
 
-Monitoring systems, IoT devices, and financial tick data generate vast streams of timestamped information. Traditional relational databases struggle to handle millions of writes per second, and even some NoSQL stores face challenges with compression and efficient range queries over time. Querying metrics across long intervals can become slow and resource-intensive without specialized time-series optimizations.
+Monitoring systems, IoT devices, and financial tick data generate vast streams of timestamped information. Traditional relational databases struggle to handle millions of writes per second, and even some NoSQL stores face challenges with compression and efficient range queries over time. Querying metrics across long intervals can become slow and resource-intensive without specialized time-series optimizations. See [Time-Series Databases](/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/)
 
 ### High-Dimensional Vector Search
 
-Machine learning and recommendation systems frequently rely on embeddings and vectors with hundreds or thousands of dimensions. Neither SQL nor typical NoSQL stores are optimized for similarity search in high-dimensional spaces. Indexing and nearest-neighbor queries at scale require algorithms like HNSW (Hierarchical Navigable Small Worlds) or approximate nearest neighbor search, which general-purpose engines do not provide.
+Machine learning and recommendation systems frequently rely on embeddings and vectors with hundreds or thousands of dimensions. Neither SQL nor typical NoSQL stores are optimized for similarity search in high-dimensional spaces. Indexing and nearest-neighbor queries at scale require algorithms like HNSW (Hierarchical Navigable Small Worlds) or approximate nearest neighbor search, which general-purpose engines do not provide. See [Vector Databases](/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/)
 
 ### Massive Analytical Queries
 
-Analytical workloads over billions of rows, such as aggregations, joins, and scans, expose the limitations of row-oriented storage. Columnar storage, compression, and query execution strategies optimized for analytics are rarely present in standard RDBMS or NoSQL systems, making OLAP-style queries inefficient at scale.
+Analytical workloads over billions of rows, such as aggregations, joins, and scans, expose the limitations of row-oriented storage. Columnar storage, compression, and query execution strategies optimized for analytics are rarely present in standard RDBMS or NoSQL systems, making OLAP-style queries inefficient at scale. See [Probabilistic / Approximate Databases](/posts/2025-10-02-The-Database-Zoo-Probabilistic-Approximate-Databases/)
 
 ### Event Sourcing / Append-Only Streams
 
@@ -257,6 +257,10 @@ This series, The Database Zoo: Exotic Data Storage Engines, will explore these e
 - Query models and optimizations: techniques that enable high performance at scale.
 - Real-world examples: popular engines and their use cases.
 
-The first post will focus on Time-Series Databases, examining how they efficiently store, compress, and query billions of timestamped metrics, a workload that pushes general-purpose databases to their limits.
+The first post will focus on [Time-Series Databases](/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/), examining how they efficiently store, compress, and query billions of timestamped metrics, a workload that pushes general-purpose databases to their limits.
 
 Stay tuned as we venture into the diverse and fascinating world of specialized databases, each a unique creature in the ever-expanding database zoo!
+
+---
+
+*The ideas in this series are being developed into a book. [The Database Safari](https://link.springer.com/book/9798868827082) (Apress, Springer Nature) will expand on these topics with a more structured treatment of specialized databases: how they work internally, what trade-offs they make, and when they make sense in real systems.*

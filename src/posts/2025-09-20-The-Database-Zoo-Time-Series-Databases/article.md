@@ -9,7 +9,7 @@ tags:
 - database zoo
 - databases
 ---
-*This post is part of* The Database Zoo: Exotic Data Storage Engines *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
+*This post is part of* [The Database Zoo: Exotic Data Storage Engines](/categories/?tag=database%20zoo) *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
 
 ## Introduction
 
@@ -547,3 +547,9 @@ Through our InfluxDB workflow example, we've seen how a TSDB handles the full li
 When choosing a time-series database, it's essential to balance ingestion throughput, query complexity, retention requirements, and operational considerations. Engines like InfluxDB, TimescaleDB, Prometheus, and VictoriaMetrics each make different trade-offs, reflecting the diversity of time-series use cases from infrastructure monitoring and IoT telemetry to financial tick data and event logging.
 
 Ultimately, understanding the core principles and trade-offs behind TSDBs empowers engineers to select the right tool for their workloads, ensuring that temporal data is captured efficiently, queried rapidly, and stored sustainably. By leveraging purpose-built time-series engines, teams can gain actionable insights from data streams that would overwhelm general-purpose databases, unlocking performance, scalability, and observability in systems that rely on real-time temporal information.
+
+The next post in this series will explore another specialized database type: [Probabilistic / Approximate Databases](/posts/2025-10-02-The-Database-Zoo-Probabilistic-Approximate-Databases/), designed for workloads that require fast, approximate answers over massive datasets.
+
+---
+
+*The ideas in this series are being developed into a book. [The Database Safari](https://link.springer.com/book/9798868827082) (Apress, Springer Nature) will expand on these topics with a more structured treatment of specialized databases: how they work internally, what trade-offs they make, and when they make sense in real systems.*
