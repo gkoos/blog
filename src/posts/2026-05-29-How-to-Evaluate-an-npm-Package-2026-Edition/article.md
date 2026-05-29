@@ -1,6 +1,6 @@
 ---
 layout: layouts/post.njk
-title: "How to Evaluate an npm Package — 2026 Edition"
+title: "How to Evaluate an npm Package - 2026 Edition"
 date: 2026-05-29
 description: "Stars and downloads tell you about popularity, not safety. Here's a practical checklist for evaluating an npm package's security, reliability, and long-term maintenance in 2026."
 excerpt: "Every time you run npm install, you are adding code that will execute in your production environment: code written by someone you have never met, with access to whatever your process can reach. It might touch your filesystem, make outbound network requests, read environment variables, or quietly exfiltrate data. You are, in effect, trusting a stranger with your infrastructure."
