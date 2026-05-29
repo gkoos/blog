@@ -665,5 +665,14 @@
         <description>Building a Go-based CLI tool to export Confluence spaces to local Markdown files for RAG pipelines, offline docs, and Git-based knowledge management.</description>
       </item>
     
+      <item>
+        <title>How to Evaluate an npm Package — 2026 Edition</title>
+        <link>https://blog.gaborkoos.com/posts/2026-05-29-How-to-Evaluate-an-npm-Package-2026-Edition/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-05-29-How-to-Evaluate-an-npm-Package-2026-Edition/</guid>
+        <pubDate>Fri, 29 May 2026 00:00:00 GMT</pubDate>
+
+        <description>Stars and downloads tell you about popularity, not safety. Here&#39;s a practical checklist for evaluating an npm package&#39;s security, reliability, and long-term maintenance in 2026.</description>
+      </item>
+    
   </channel>
 </rss>

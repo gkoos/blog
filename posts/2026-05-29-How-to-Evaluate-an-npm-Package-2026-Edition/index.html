@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Evaluate an npm Package — 2026 Edition</title>
+  <meta name="description" content="Stars and downloads tell you about popularity, not safety. Here&#39;s a practical checklist for evaluating an npm package&#39;s security, reliability, and long-term maintenance in 2026.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How to Evaluate an npm Package — 2026 Edition">
+  <meta property="og:description" content="Stars and downloads tell you about popularity, not safety. Here&#39;s a practical checklist for evaluating an npm package&#39;s security, reliability, and long-term maintenance in 2026.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="How to Evaluate an npm Package — 2026 Edition">
+  <meta name="twitter:description" content="Stars and downloads tell you about popularity, not safety. Here&#39;s a practical checklist for evaluating an npm package&#39;s security, reliability, and long-term maintenance in 2026.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">How to Evaluate an npm Package — 2026 Edition</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-05-29T00:00:00.000Z">Fri May 29 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">npm</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">security</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">open-source</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Every time you run <code>npm install</code>, you are adding code that will execute in your production environment: code written by someone you have never met, with access to whatever your process can reach. It might touch your filesystem, make outbound network requests, read environment variables, or quietly exfiltrate data. You are, in effect, trusting a stranger with your infrastructure.</p>
+<p>Most developers manage this risk by checking two numbers: weekly downloads and GitHub stars. Neither tells you anything meaningful about whether a package is safe, maintained, or honest about what it does.</p>
+<p>Supply chain attacks have made this worse. Event-stream, ua-parser-js, node-ipc, xz utils — the pattern is consistent: a legitimate, widely-used package gets compromised, either through a maintainer being social-engineered, a typosquat, or a dependency buried three levels deep. The npm ecosystem, with its culture of small composable packages and deep transitive dependency trees, is a particularly attractive target. You can do everything right and still get hit through something you never directly installed.</p>
+<p>There is a newer variation worth knowing about. AI coding assistants hallucinate package names. They confidently suggest <code>npm install some-plausible-sounding-package</code> for packages that do not exist. Attackers monitor those hallucinations and register the names - a technique now called <strong>slopsquatting</strong> - so that when a developer follows the suggestion without checking, they install something malicious. If an LLM suggests a package you have never heard of, verify that it exists, has a real history, and has provenance before you run the install.</p>
+<p>None of this means you should stop using open source packages - that would make you less productive without making you meaningfully safer. What it means is that picking a package deserves more than a five-second glance at the star count.</p>
+<p>This guide gives you a repeatable process for evaluating an npm package before you add it. It takes 5–10 minutes. It won't guarantee safety - nothing will - but it will help you make an informed decision rather than an optimistic one.</p>
+<h2 id="1.-is-it-actively-maintained%3F" tabindex="-1"><a class="header-anchor" href="#1.-is-it-actively-maintained%3F">1. Is it actively maintained?</a></h2>
+<p>An unmaintained package is a liability that compounds over time. Security vulnerabilities go unpatched. Compatibility with newer Node versions breaks silently. The API freezes while the ecosystem moves on, and eventually you are pinned to an old version of something because updating it would require replacing a package nobody is touching anymore.</p>
+<p>The obvious signal is recent commits, but commit frequency alone is misleading. A package can have a commit last week that does nothing but update a CI action. What you are looking for is whether the author is still engaged with the actual software.</p>
+<h3 id="what-to-check%3A" tabindex="-1"><a class="header-anchor" href="#what-to-check%3A">What to check:</a></h3>
+<p>On the GitHub repository, go to the <strong>Issues</strong> tab. Look at the oldest open issues, are they acknowledged? If someone reported a bug 18 months ago and the author has never replied, that tells you something about what the maintenance relationship looks like when things go wrong.</p>
+<p>Look at the <strong>Commits</strong> tab. Filter out bot commits and CI noise. When was the last time a human made a meaningful change to the source code, not just a dependency bump or a workflow tweak?</p>
+<p>On the <strong>npm page</strong>, go to the Versions tab. Is there a recognisable release cadence - monthly, quarterly, whatever - or a 2-year gap followed by a burst of activity? Long gaps followed by sudden updates are sometimes a red flag in themselves: accounts do get taken over.</p>
+<p>Check the <strong>CHANGELOG</strong>. If it just lists commit hashes, it is nearly useless. A changelog that says &quot;Fixed: deduplication plugin now clones responses per waiter to prevent body-already-used errors&quot; is a changelog written by someone who cares whether you understand what changed and why. The quality of the changelog is a proxy for how the author thinks about the people using their software.</p>
+<p>Finally, if the package exposes a public API that has changed over time, look for a migration guide. An author who documents breaking changes and provides an upgrade path is an author who thinks about the downstream cost of their decisions.</p>
+<h2 id="2.-can-you-trust-what's-actually-published-to-npm%3F" tabindex="-1"><a class="header-anchor" href="#2.-can-you-trust-what's-actually-published-to-npm%3F">2. Can you trust what's actually published to npm?</a></h2>
+<p>Maintenance is about the future. This section is about something more immediate: whether what is on the npm registry right now is actually what the author intended to publish.</p>
+<p>The npm registry has no verification by default. When you install a package, you are trusting that the bytes you receive match the source code you can read on GitHub. For most packages, most of the time, that is true. But the mechanism that links source to publish - an <code>NPM_TOKEN</code> stored as a CI secret, or sometimes just on a developer's laptop - is exactly the kind of credential that attackers target.</p>
+<p>The event-stream attack in 2018 is the clearest example: a maintainer handed over control of a popular package to a stranger. The stranger published a version with a malicious dependency. Millions of projects were affected before anyone noticed. No one hacked GitHub. No one broke npm's infrastructure. They just got the credentials.</p>
+<p><a href="https://docs.npmjs.com/cli/v9/commands/npm-publish#provenance"><strong>Provenance attestation</strong></a> is the modern answer to this. When a package is published with provenance, the npm registry receives a cryptographic attestation (signed by GitHub's OIDC infrastructure) that ties the specific package tarball to a specific commit in a specific repository, built by a specific GitHub Actions workflow run. You can verify it. The attestation is public. If someone publishes a package claiming to be from a specific repository but the attestation does not match, that is detectable.</p>
+<h3 id="what-to-check%3A-1" tabindex="-1"><a class="header-anchor" href="#what-to-check%3A-1">What to check:</a></h3>
+<p>Go to <code>npmjs.com/package/&lt;package-name&gt;</code>. Next to the version name, there should be a green &quot;Provenance&quot; badge if the package was published with provenance:</p>
+<p><img src="badge.png" alt="Provenance badge"></p>
+<p>Click on it, then on the &quot;View more details&quot; link. It will take you to the bottom of the page:</p>
+<p><img src="provenance.png" alt="Provenance details"></p>
+<p>It shows the repository URL, the commit SHA, and the GitHub Actions workflow run that published the package. You can click through to all of those things to verify that they exist and make sense. If the badge is there and the details check out, you can be reasonably confident that the package you are installing is what the author intended to publish.</p>
+<p>If it is not there, the package was published without provenance — which is not automatically suspicious (most packages predate the feature), but it means you cannot verify the source-to-publish chain.</p>
+<p>You can also check from the command line. In any project that has the package installed, run:</p>
+<pre class="language-sh"><code class="language-sh"><span class="token function">npm</span> audit signatures
+</code></pre>
+<p>This verifies the cryptographic signatures of all installed packages and reports which ones have valid provenance attestation.</p>
+<p>If you want to look at how a package is published, find the <code>.github/workflows/</code> directory in the repository and open the publish workflow. Look for three things:</p>
+<ul>
+<li><code>npm publish --provenance</code> - this is what generates the attestation</li>
+<li><code>id-token: write</code> in the job permissions - this is what allows the OIDC token exchange with npm</li>
+<li>The absence of <code>NPM_TOKEN</code> as a secret - if the workflow uses Trusted Publishing (OIDC), there is no long-lived token to steal</li>
+</ul>
+<p>Finally, look at how GitHub Actions are referenced in the workflow files. Actions referenced as <code>uses: actions/checkout@v4</code> or <code>uses: actions/setup-node@main</code> are pinned to a mutable tag — the action author can change what that tag points to at any time, and your workflow will silently start running different code. Actions pinned to a full commit SHA (<code>uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd</code>) cannot be changed without updating the reference in the workflow file itself. It is a small thing, but it closes a real attack surface.</p>
+<p>One more thing that runs code on your machine before you have reviewed any of it: install scripts. The <code>preinstall</code>, <code>install</code>, and <code>postinstall</code> hooks in <code>package.json</code> execute the moment you run <code>npm install</code>. Most legitimate packages do not need them — native addons that compile C++ bindings are the main genuine use case. If you see an install script in a package that has no obvious reason for one, that is worth understanding before you proceed.</p>
+<h2 id="3.-is-the-ci-pipeline-real-or-decorative%3F" tabindex="-1"><a class="header-anchor" href="#3.-is-the-ci-pipeline-real-or-decorative%3F">3. Is the CI pipeline real or decorative?</a></h2>
+<p>A green badge in the README is easy to fake, or rather, easy to earn without it meaning much. A repository can have continuous integration that runs three tests on a single happy path and reports 100% pass rate. That badge is technically accurate and entirely useless.</p>
+<p>What you want to know is whether the CI pipeline actually protects the codebase: whether it would catch a regression, a type error, or a broken edge case before it ships.</p>
+<h3 id="what-to-check%3A-2" tabindex="-1"><a class="header-anchor" href="#what-to-check%3A-2">What to check:</a></h3>
+<p>Go to the <strong>Actions</strong> tab on GitHub. Look at the workflow runs. Do they trigger on <code>pull_request</code> events, not just on pushes to <code>main</code>? A pipeline that only runs after merging is not protecting anything, it's just producing a record of what already happened.</p>
+<p>Open a recent merged pull request. Did CI run on it? Did anyone have to wait for it to pass before merging? If the PR was merged 30 seconds after it was opened with no CI run, the pipeline is decoration.</p>
+<p>Find the test configuration file: <code>vitest.config.js</code>, <code>jest.config.js</code>, or equivalent. Look for coverage thresholds. Something like:</p>
+<pre class="language-js"><code class="language-js"><span class="token literal-property property">thresholds</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">lines</span><span class="token operator">:</span> <span class="token number">90</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">functions</span><span class="token operator">:</span> <span class="token number">90</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">branches</span><span class="token operator">:</span> <span class="token number">90</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>If thresholds are configured, the CI pipeline will fail if coverage drops below them. If they are not configured, coverage might be reported but it is not enforced, an author can delete half the tests and the build will still pass.</p>
+<p>Also look at what the tests actually cover. A <code>test/</code> directory that mirrors the <code>src/</code> structure, or unit tests co-located with the source files, is a good sign. A single <code>index.test.ts</code> file with a handful of smoke tests is a different thing entirely. You cannot audit the tests in detail, but you can get a sense of whether the author takes them seriously.</p>
+<h2 id="4.-is-the-code-quality-visible%3F" tabindex="-1"><a class="header-anchor" href="#4.-is-the-code-quality-visible%3F">4. Is the code quality visible?</a></h2>
+<p>You are not going to audit the entire codebase of every package you consider. That is not realistic. But you can take a quick look at the signals that correlate with code quality, the things an author does or does not do that are visible at a glance and tend to predict whether the package is robust or fragile.</p>
+<h3 id="what-to-check%3A-3" tabindex="-1"><a class="header-anchor" href="#what-to-check%3A-3">What to check:</a></h3>
+<p>Look at the linting configuration: <code>eslint.config.js</code>, <code>.eslintrc</code>, or equivalent. Does it exist? Is it non-trivial? A blank or near-empty linting config suggests the author is not enforcing consistency or catching obvious mistakes automatically. Linting is table stakes; its absence is a signal.</p>
+<p>Check whether the package ships a well-formed bundle. Look at the <code>exports</code> field in <code>package.json</code>. A modern package should specify named export conditions: <code>import</code> and <code>require</code> if it supports both module systems, or just <code>import</code> if it is intentionally ESM-only, and ideally <code>types</code> if it ships TypeScript declarations. A package that only sets <code>main</code> with no <code>exports</code> field at all was written before this became standard practice. That is not disqualifying, but it tells you something about how current the author's practice is.</p>
+<p>Look at the <code>package.json</code> for a <code>prepublishOnly</code> script:</p>
+<pre class="language-json"><code class="language-json"><span class="token property">"prepublishOnly"</span><span class="token operator">:</span> <span class="token string">"npm run build &amp;&amp; npm run test:ci"</span>
+</code></pre>
+<p>This prevents an author from accidentally publishing a broken build or a build that skips tests. It does not protect against malicious publishes, but it does tell you the author has thought about accidental ones.</p>
+<p><strong>For TypeScript packages specifically:</strong> open <code>tsconfig.json</code> and check whether <code>strict: true</code> is set. Strict mode enables null checks, strict function types, and no-implicit-any — a whole class of bugs caught at compile time rather than in production. An author who turns it off has decided some of those bugs are acceptable.</p>
+<p>Also search the repository for <code>any</code> and <code>@ts-ignore</code>. A few uses in genuinely awkward interop situations is normal. Dozens of them scattered through the source code means the TypeScript types are largely cosmetic: the package has the <code>.ts</code> extension but not the type safety.</p>
+<h2 id="5.-what-happens-when-something-goes-wrong%3F" tabindex="-1"><a class="header-anchor" href="#5.-what-happens-when-something-goes-wrong%3F">5. What happens when something goes wrong?</a></h2>
+<p>Every non-trivial package will eventually have a security vulnerability. The question is how the author handles it when it does. Do they respond quickly? Do they disclose responsibly - privately first, then publicly with a fix? Do they document what happened so you can assess whether your version is affected?</p>
+<h3 id="what-to-check%3A-4" tabindex="-1"><a class="header-anchor" href="#what-to-check%3A-4">What to check:</a></h3>
+<p>Look for a <code>SECURITY.md</code> file in the repository root, or go to <code>github.com/&lt;owner&gt;/&lt;repo&gt;/security/policy</code>. This should tell you how to report a vulnerability privately, a contact method, a timeline for response, and some indication that the author takes disclosures seriously. Its absence does not mean the package is insecure, but it does mean that if you find something, you have no clear path to report it without accidentally disclosing it publicly.</p>
+<p>Go to the <strong>Security</strong> tab on GitHub and look at the Advisories section. Has anything been published? If yes, how was it handled - was the disclosure coordinated, was a fix available when it went public, was the affected version range clearly documented? A well-handled historical advisory is actually a positive signal; it means the author knows what a responsible disclosure process looks like and has followed it.</p>
+<p>Check <code>osv.dev</code> or <code>snyk.io</code> for known vulnerabilities in the package. These aggregate CVEs and GitHub Security Advisories. If the package has known unpatched vulnerabilities, that is something you need to know before installing it.</p>
+<p><a href="https://socket.dev">Socket.dev</a> goes further than CVE databases. Rather than waiting for a vulnerability to be reported and catalogued, it does behavioural analysis: does this package access the network? Does it touch the filesystem in unexpected ways? Does it contain obfuscated code? Does it have install scripts? It also has a GitHub app that runs this analysis on pull requests and flags new dependencies before they are merged. For packages you are seriously considering, it is worth a quick check.</p>
+<p>Finally, look at how quickly past security issues were addressed. A critical vulnerability fixed within days is different from one that sat open for three months. Response time on security issues is one of the clearest signals of how seriously an author takes the responsibility of maintaining a public package.</p>
+<h2 id="the-checklist" tabindex="-1"><a class="header-anchor" href="#the-checklist">The Checklist</a></h2>
+<p>Not all of these checks carry equal weight. If you only have time for three things:</p>
+<ol>
+<li><strong>Does it have provenance?</strong> This is the single clearest signal that the published package is what the author intended to publish. No other check gives you that.</li>
+<li><strong>Does it have unexplained install scripts?</strong> Code runs on your machine the moment you run <code>npm install</code>. Everything else in this guide assumes you get to review the code first.</li>
+<li><strong>Is the maintainer responsive?</strong> Go to the Issues tab and look at the oldest open ones. Unacknowledged issues from 18 months ago tell you what support looks like when something goes wrong.</li>
+</ol>
+<p>Everything else is worth checking when the stakes are higher.</p>
+<h3 id="security-critical-signals" tabindex="-1"><a class="header-anchor" href="#security-critical-signals">Security-critical signals</a></h3>
+<p>These affect whether the package is safe to install and whether what you are installing is what the author published.</p>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Where to check</th>
+<th>Green</th>
+<th>Red</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Provenance</td>
+<td>npmjs.com version page</td>
+<td>&quot;Provenance&quot; section present and matches repo</td>
+<td>No provenance, or version published from unknown source</td>
+</tr>
+<tr>
+<td>Trusted publishing</td>
+<td><code>.github/workflows/publish.yml</code></td>
+<td>OIDC + <code>--provenance</code>, no <code>NPM_TOKEN</code></td>
+<td><code>NPM_TOKEN</code> secret, manual publish steps</td>
+</tr>
+<tr>
+<td>Install scripts</td>
+<td><code>package.json</code> scripts field</td>
+<td>None present, or obvious native-addon reason</td>
+<td><code>preinstall</code>/<code>postinstall</code> with no clear justification</td>
+</tr>
+<tr>
+<td>Pinned CI actions</td>
+<td><code>.github/workflows/*.yml</code></td>
+<td>SHA-pinned third-party actions</td>
+<td><code>@v3</code>, <code>@latest</code>, <code>@main</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="operational-maturity-signals" tabindex="-1"><a class="header-anchor" href="#operational-maturity-signals">Operational maturity signals</a></h3>
+<p>These tell you how seriously the author takes maintenance, quality, and the long-term cost of depending on their package.</p>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Where to check</th>
+<th>Green</th>
+<th>Red</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Active maintenance</td>
+<td>GitHub commits + open issues</td>
+<td>Commits in last 3 months, issues acknowledged</td>
+<td>Last commit 2+ years ago, stale issues ignored</td>
+</tr>
+<tr>
+<td>Coverage enforced</td>
+<td>vitest/jest config</td>
+<td>Thresholds configured at 80%+</td>
+<td>No thresholds, or coverage badge that never changes</td>
+</tr>
+<tr>
+<td>Security policy</td>
+<td><code>SECURITY.md</code> or Security tab</td>
+<td>Clear disclosure process, contact method</td>
+<td>Missing, or just a generic template with no contact</td>
+</tr>
+</tbody>
+</table>
+<p>A package that is clean on security-critical signals but weak on operational maturity is a calculated risk. A package that fails the security-critical signals is a different category of problem.</p>
+<h2 id="risk-is-not-binary" tabindex="-1"><a class="header-anchor" href="#risk-is-not-binary">Risk is not binary</a></h2>
+<p>None of this is a pass/fail test. It is a risk assessment, and risk depends on context.</p>
+<p>A utility that formats dates in a UI has a different risk profile than an HTTP client sitting between your service and a government API. A dependency that receives 50 million weekly downloads has more eyes on it than one that receives 500. A package from an organisation with a dedicated security team is different from one maintained by a single developer in their spare time. None of these are disqualifying conditions on their own - some of the most reliable packages in the ecosystem are maintained by individuals - but they affect how much scrutiny you should apply.</p>
+<p>The goal is not to find a package with a perfect score on every dimension. The goal is to understand what you are accepting when you add it to your project, and to make that decision deliberately rather than by default.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
