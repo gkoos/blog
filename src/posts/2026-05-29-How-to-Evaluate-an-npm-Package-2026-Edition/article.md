@@ -19,7 +19,9 @@ Supply chain attacks have made this worse. Event-stream, ua-parser-js, node-ipc,
 
 There is a newer variation worth knowing about. AI coding assistants hallucinate package names. They confidently suggest `npm install some-plausible-sounding-package` for packages that do not exist. Attackers monitor those hallucinations and register the names - a technique now called **slopsquatting** - so that when a developer follows the suggestion without checking, they install something malicious. If an LLM suggests a package you have never heard of, verify that it exists, has a real history, and has provenance before you run the install.
 
-None of this means you should stop using open source packages - that would make you less productive without making you meaningfully safer. What it means is that picking a package deserves more than a five-second glance at the star count.
+This risk increases when you run LLMs in agent mode. In many setups, package selection and installation happen back-to-back without a human checkpoint. If you are doing that, rely on enforcement in the toolchain (for example, a wrapper or install hook that blocks unknown or unverified packages), not on "remember to check first" prompt text.
+
+None of the above means you should stop using open source packages - that would make you less productive without making you meaningfully safer. What it means is that picking a package deserves more than a five-second glance at the star count.
 
 This guide gives you a repeatable process for evaluating an npm package before you add it. It takes 5 to 10 minutes. It won't guarantee safety - nothing will - but it will help you make an informed decision rather than an optimistic one.
 
