@@ -9,7 +9,7 @@ tags:
 - tutorials
 - javascript
 ---
-*Featured in [Node Weekly #624](https://nodeweekly.com/issues/624)*
+*Featured in [Node Weekly #624](https://nodeweekly.com/issues/624)* and [Javascript Weekly - 2026-06-02](https://javascriptweekly.com/issues/788)*
 
 [Recursion](https://developer.mozilla.org/en-US/docs/Glossary/Recursion) is one of those ideas developers learn early and trust for years. If the recursive step is simple and the base case is correct, the code feels clean and safe.
 
