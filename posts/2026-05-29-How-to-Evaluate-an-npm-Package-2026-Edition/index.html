@@ -103,7 +103,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><em>Featured in <a href="https://javascriptweekly.com/issues/788">Javascript Weekly - 2026-06-02</a></em></p>
+    <p><em>Featured in <a href="https://javascriptweekly.com/issues/788">Javascript Weekly - 2026-06-02</a> and <a href="https://nodeweekly.com/issues/627">Node Weekly - 2026-06-04</a></em></p>
 <p>Every time you run <code>npm install</code>, you are adding code that will execute in your production environment: code written by someone you have never met, with access to whatever your process can reach. It might touch your filesystem, make outbound network requests, read environment variables, or quietly exfiltrate data. You are, in effect, trusting a stranger with your infrastructure.</p>
 <p>Most developers manage this risk by checking two numbers: weekly downloads and GitHub stars. Neither tells you anything meaningful about whether a package is safe, maintained, or honest about what it does. (Most npm packages use GitHub. If a project is hosted elsewhere, apply the same principles.)</p>
 <p>Supply chain attacks have made this worse. Event-stream, ua-parser-js, node-ipc, xz utils - the pattern is consistent: a legitimate, widely used package gets compromised, either through a maintainer being social-engineered, a typosquat, or a dependency buried three levels deep. The npm ecosystem, with its culture of small composable packages and deep transitive dependency trees, is a particularly attractive target. You can do everything right and still get hit through something you never directly installed.</p>
