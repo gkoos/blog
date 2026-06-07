@@ -11,7 +11,7 @@ tags:
 - security
 - open-source
 ---
-*Featured in [Javascript Weekly - 2026-06-02](https://javascriptweekly.com/issues/788)*
+*Featured in [Javascript Weekly - 2026-06-02](https://javascriptweekly.com/issues/788) and [Node Weekly - 2026-06-04](https://nodeweekly.com/issues/627)*
 
 Every time you run `npm install`, you are adding code that will execute in your production environment: code written by someone you have never met, with access to whatever your process can reach. It might touch your filesystem, make outbound network requests, read environment variables, or quietly exfiltrate data. You are, in effect, trusting a stranger with your infrastructure.
 
