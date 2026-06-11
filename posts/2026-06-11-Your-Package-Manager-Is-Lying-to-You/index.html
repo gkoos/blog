@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Package Manager Is Lying to You</title>
+  <meta name="description" content="npm, Yarn, pnpm, Bun, and Deno are not interchangeable install tools. They encode different assumptions about dependency layout, compatibility, reproducibility, and developer speed.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your Package Manager Is Lying to You">
+  <meta property="og:description" content="npm, Yarn, pnpm, Bun, and Deno are not interchangeable install tools. They encode different assumptions about dependency layout, compatibility, reproducibility, and developer speed.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Your Package Manager Is Lying to You">
+  <meta name="twitter:description" content="npm, Yarn, pnpm, Bun, and Deno are not interchangeable install tools. They encode different assumptions about dependency layout, compatibility, reproducibility, and developer speed.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Your Package Manager Is Lying to You</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-06-11T00:00:00.000Z">Thu Jun 11 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">nodejs</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">npm</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">yarn</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">pnpm</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">bun</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">deno</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tooling</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Package managers are usually treated as interchangeable tooling: install dependencies, commit the lockfile, and move on. In that framing, the only question that seems to matter is performance.</p>
+<p>In practice, the differences run much deeper. npm, Yarn, and pnpm are built on fundamentally different models of what <code>node_modules</code> should be: different assumptions about how dependencies should be represented on disk, how strictly boundaries should be enforced, and how much implicit behavior the ecosystem should tolerate.</p>
+<p>Bun and Deno go further: they challenge the model itself. Bun treats the entire developer loop as something that should feel instantaneous. Deno folds dependency management into a broader security and web-native runtime philosophy.</p>
+<p>This is why migrations often feel disproportionate. The lockfile might be perfect and your application code untouched, yet builds break because scripts, plugins, and tools were written against a different set of invariants about the filesystem.</p>
+<p><strong>The real axis of difference isn't speed or disk usage, but how each tool chooses to represent and resolve dependencies.</strong></p>
+<p>Every package manager is a different compromise between what physically exists on disk and what the ecosystem expects to find. Those tradeoffs are easiest to see through five competing goals.</p>
+<h2 id="the-five-competing-goals" tabindex="-1"><a class="header-anchor" href="#the-five-competing-goals">The Five Competing Goals</a></h2>
+<p>Every package manager is trying to optimize the same things:</p>
+<ul>
+<li>Reproducible installs</li>
+<li>Install speed and cache reuse</li>
+<li>Disk efficiency across multiple projects</li>
+<li>Compatibility with the Node ecosystem as it exists today</li>
+<li>Developer experience (integrated tooling, lower friction, safer defaults)</li>
+</ul>
+<p>No tool can maximize all five at once. The practical choice is usually the one whose failure mode you’re most willing to tolerate.</p>
+<h2 id="npm%3A-the-pragmatic-baseline-(compatibility-over-correctness)" tabindex="-1"><a class="header-anchor" href="#npm%3A-the-pragmatic-baseline-(compatibility-over-correctness)"><a href="https://www.npmjs.com/">npm</a>: The Pragmatic Baseline (Compatibility Over Correctness)</a></h2>
+<p>npm is the default package manager for Node.js and has been since its early days. If you use Node, you have npm. This gives npm a huge advantage in terms of ecosystem compatibility and developer familiarity, but it also means npm has had to make compromises to maintain that compatibility over time.</p>
+<h3 id="core-model" tabindex="-1"><a class="header-anchor" href="#core-model">Core Model</a></h3>
+<p>npm flattens the dependency tree by placing packages as high as possible in <code>node_modules</code>, then falls back to nested subdirectories only when version conflicts force it. This simple strategy was born from pragmatism: Node's module resolution algorithm walks up the directory tree looking for <code>node_modules</code>, so the flatter the structure, the faster the lookup and the fewer surprises developers encounter. The strategy has persisted because it still broadly works with how the Node ecosystem is wired.</p>
+<h3 id="design-philosophy" tabindex="-1"><a class="header-anchor" href="#design-philosophy">Design Philosophy</a></h3>
+<p>npm's philosophy is pragmatic continuity: rather than enforce a strict model of dependency access, npm prioritizes keeping the ecosystem running as it currently runs. This means tolerating patterns that are structurally impure if those patterns are common in the wild. A new, stricter model might be more correct, but it would break existing code and tooling, so npm's design philosophy is to bend toward the ecosystem rather than ask the ecosystem to bend toward it.</p>
+<h3 id="strengths" tabindex="-1"><a class="header-anchor" href="#strengths">Strengths</a></h3>
+<p>This design brings several concrete advantages. Compatibility is the biggest: almost every tool in the JavaScript ecosystem was first tested and optimized for npm's semantics, so migrating away from npm often means discovering edge cases in other tooling. Setup is minimal, which matters for teams that don't want to spend cycles learning tooling; npm just works by default. And there is real value in being bundled with Node itself: it means npm is always available, always installed, and always familiar to anyone with Node on their machine.</p>
+<h3 id="weaknesses" tabindex="-1"><a class="header-anchor" href="#weaknesses">Weaknesses</a></h3>
+<p>The cost of this compatibility-first approach is structural ambiguity. Hoisting can make undeclared dependencies accidentally available, which means the actual runtime dependency graph often differs from what <code>package.json</code> files claim. On larger codebases, this ambiguity compounds: <code>node_modules</code> can become very large and performance can degrade in monorepos or CI pipelines where many projects share the same machine. Install times are generally slower than newer, store-based approaches, especially when you are running the same installs repeatedly across different projects or CI runs.</p>
+<h3 id="the-lie-it-tells" tabindex="-1"><a class="header-anchor" href="#the-lie-it-tells">The Lie It Tells</a></h3>
+<p>npm's lie is a useful one: it suggests that a package's runtime behavior matches its declared dependencies. In reality, a package can often reach into the hoisted tree and use packages it never declared, simply because those packages were placed somewhere reachable. The discrepancy is usually invisible until something changes—a new dependency, a version conflict, or a different install layout on a different machine—and suddenly that undeclared access no longer works.</p>
+<h3 id="example" tabindex="-1"><a class="header-anchor" href="#example">Example</a></h3>
+<p>Suppose your app declares <code>react</code>, but one of your dependencies declares <code>lodash</code>. npm hoists both to the top level of <code>node_modules</code>. If your app imports <code>lodash</code> directly, it will work—and the import may be there because someone saw it was available and used it for convenience. Months later, you update a different dependency, or remove the one that was declaring <code>lodash</code>. Now npm's hoisting algorithm arranges things differently, and <code>lodash</code> is no longer at the top level. Your app's direct <code>import lodash</code> suddenly fails, and the error looks baffling because you never explicitly declared the dependency and the import appears to be fine in the code.</p>
+<h3 id="best-for" tabindex="-1"><a class="header-anchor" href="#best-for">Best for</a></h3>
+<p>npm remains the default choice for most teams, especially those building straightforward applications, maintaining legacy codebases, or operating in environments where broad ecosystem compatibility matters more than perfect structural correctness. If your priority is minimizing friction and maximizing the number of third-party packages and tools that work without special configuration, npm is still usually the right call.</p>
+<h2 id="yarn-(berry)%3A-reproducibility-as-a-response-to-npm's-early-chaos" tabindex="-1"><a class="header-anchor" href="#yarn-(berry)%3A-reproducibility-as-a-response-to-npm's-early-chaos"><a href="https://yarnpkg.com/">Yarn (Berry)</a>: Reproducibility as a Response to npm's Early Chaos</a></h2>
+<p>When people refer to &quot;Yarn&quot; in 2026, there is often ambiguity about which version they mean. Yarn Classic (v1) was released as a faster alternative to npm in the npm v3–v4 era and is still widely used in legacy projects. Yarn Berry (v2 and later) is a much more ambitious reimagining, released around 2019, that fundamentally questions whether <code>node_modules</code> should exist at all. This section focuses on Yarn Berry, because that is where Yarn's design philosophy is most visible.</p>
+<h3 id="core-model-1" tabindex="-1"><a class="header-anchor" href="#core-model-1">Core Model</a></h3>
+<p>Yarn Berry combines a strong lockfile system with an optional Plug'n'Play (PnP) mode that abandons the <code>node_modules</code> directory entirely. Instead of storing packages on disk in the traditional way, PnP mode uses a <code>.pnp.cjs</code> file to map each package to its location in a global cache, and Node's module resolution is intercepted to consult that map. The lockfile is deterministic to the byte, meaning the same <code>yarn.lock</code> on any machine will always produce the exact same dependency tree and artifacts. If you want, you can run <code>yarn install --immutable</code> and ship the dependencies as part of your repository, enabling zero-install setups where CI does not need to download or build anything.</p>
+<h3 id="design-philosophy-1" tabindex="-1"><a class="header-anchor" href="#design-philosophy-1">Design Philosophy</a></h3>
+<p>Yarn's philosophy is reproducibility as a first-class concern and extensibility as a design principle. Every decision in Yarn Berry prioritizes the ability to reproduce an install exactly, down to the checksum of every file. The plugin system allows customization at nearly every step of the install process, which appeals to large organizations that need to enforce internal policies or integrate custom private registries and tooling. Yarn treats package management as a build artifact that deserves the same rigor as compiled code.</p>
+<h3 id="strengths-1" tabindex="-1"><a class="header-anchor" href="#strengths-1">Strengths</a></h3>
+<p>Yarn delivers on reproducibility in ways that are genuinely powerful for large teams. Every install is deterministic and can be verified; there is no ambiguity about what your project depends on or how it was resolved. The plugin ecosystem is extensive, allowing organizations to customize resolution, transport, and authentication without forking the entire tool. Zero-install workflows are real: you can ship <code>.yarn/cache</code> and <code>.pnp.cjs</code> in version control so anyone cloning the repo can start work immediately without running <code>yarn install</code>. For enterprise teams managing complex monorepos with internal tooling, Yarn's flexibility can be a major advantage.</p>
+<h3 id="weaknesses-1" tabindex="-1"><a class="header-anchor" href="#weaknesses-1">Weaknesses</a></h3>
+<p>The cost of this power is complexity and ecosystem friction. Plug'n'Play mode breaks many tools that assume a traditional <code>node_modules</code> directory exists. Older packages may have scripts that do <code>fs.readdirSync('node_modules')</code> or similar filesystem introspection, and those simply fail under PnP. Even many modern tools can behave unexpectedly because they were written for <code>node_modules</code> semantics. Build tools, bundlers, and testing frameworks often need special configuration or plugins to work well with PnP. Yarn Berry adoption is still much smaller than npm or pnpm, so community support and third-party integration are less mature. For teams that do not have a dedicated DevOps or tooling function, Yarn's flexibility can feel like unnecessary overhead.</p>
+<h3 id="the-lie-it-tells-1" tabindex="-1"><a class="header-anchor" href="#the-lie-it-tells-1">The Lie It Tells</a></h3>
+<p>Yarn's lie is seductive: that you can completely abstract away <code>node_modules</code> and replace it with something cleaner and more reproducible without paying a compatibility tax. The reality is that the Node ecosystem is deeply wired around the expectation of a physical <code>node_modules</code> directory, and that wiring is stronger than Yarn's tooling can fully hide. Tools that Yarn does not control will still expect <code>node_modules</code> to exist.</p>
+<h3 id="example-1" tabindex="-1"><a class="header-anchor" href="#example-1">Example</a></h3>
+<p>You enable PnP mode and everything works locally. Your build tool has a Yarn plugin, your test runner runs fine, and the install is instant. Then a team member uses a script that was written by someone else in your organization years ago, or tries to use a third-party tool that does <code>require.resolve()</code> with filesystem assumptions, and it fails because the packages are not actually on disk in <code>node_modules</code> anymore. You can often fix this by adding a Yarn plugin or switching to a different tool, but each fix is a small friction point.</p>
+<h3 id="best-for-1" tabindex="-1"><a class="header-anchor" href="#best-for-1">Best for</a></h3>
+<p>Yarn Berry is best suited to large organizations with dedicated tooling teams, complex monorepos, or projects where reproducibility and extensibility are more valuable than broad tool compatibility. If you are willing to invest in understanding and maintaining Yarn's plugin system, or if your CI environment is fully under your control and can be customized, Yarn offers genuine advantages. For smaller teams or projects that need to work smoothly with a wide variety of third-party tools out of the box, Yarn's cost-to-benefit ratio is often too high.</p>
+<h2 id="pnpm%3A-structural-correctness-through-isolation" tabindex="-1"><a class="header-anchor" href="#pnpm%3A-structural-correctness-through-isolation"><a href="https://pnpm.io/">pnpm</a>: Structural Correctness Through Isolation</a></h2>
+<p><em>Note that I am biased towards pnpm, because it was created by a fellow Hungarian called Zoltan Kochan.</em></p>
+<p>pnpm takes a different approach to the same problems that motivated Yarn. Rather than try to abstract away <code>node_modules</code>, pnpm makes <code>node_modules</code> stricter and more honest about what dependencies are actually available.</p>
+<h3 id="core-model-2" tabindex="-1"><a class="header-anchor" href="#core-model-2">Core Model</a></h3>
+<p>pnpm uses a content-addressable global store and symlinks to build a non-flattened <code>node_modules</code> tree. Each package in your project gets its own <code>node_modules</code> directory containing only the packages it directly declares, plus symlinks to those packages' dependencies. This means a package's <code>node_modules</code> mirrors its <code>package.json</code> exactly: if it declares <code>lodash</code>, <code>lodash</code> is there; if it does not, <code>lodash</code> is not accessible through the filesystem, even if some other package brought it in. The global store deduplicates identical copies of the same package across multiple projects, which saves substantial disk space, especially in monorepo environments.</p>
+<h3 id="design-philosophy-2" tabindex="-1"><a class="header-anchor" href="#design-philosophy-2">Design Philosophy</a></h3>
+<p>pnpm's philosophy is structural correctness and efficiency. The core belief is that the dependency graph should be explicit and strict: if a package declares a dependency, it should be there; if it does not, it should not be. This honesty creates friction with the ecosystem, but it also exposes bugs and bad practices that npm and Yarn hide. pnpm's secondary goal is disk efficiency, achieved through content-addressable storage and symlinks rather than through hoisting or abstraction.</p>
+<h3 id="strengths-2" tabindex="-1"><a class="header-anchor" href="#strengths-2">Strengths</a></h3>
+<p>pnpm delivers tangible benefits for the specific use cases it targets. Disk savings are real and measurable, especially in monorepos or CI environments where many projects are installed on the same machine; a global store means installing <code>lodash</code> a second time costs almost nothing. Isolation eliminates phantom dependencies entirely, so your code is forced to match what your <code>package.json</code> claims. Installation is fast, both because the global store avoids duplication and because pnpm can leverage hard links and copy-on-write in certain environments. For monorepos in particular, pnpm's performance characteristics are better than npm's in almost every scenario.</p>
+<h3 id="weaknesses-2" tabindex="-1"><a class="header-anchor" href="#weaknesses-2">Weaknesses</a></h3>
+<p>The cost is ecosystem friction. Tools and packages that were written assuming npm's hoisting behavior will break under pnpm. A <code>postinstall</code> script that does <code>require('lodash')</code> without declaring <code>lodash</code> will fail. Build tools that walk the <code>node_modules</code> tree looking for specific files may find them in unexpected places because they are symlinked rather than copied. Older packages with complex installs sometimes fail. On Windows, symlinks can introduce permission issues. The Node ecosystem was not built around strict isolation, so opting into pnpm means being prepared for occasional surprises and workarounds.</p>
+<h3 id="the-lie-it-tells-2" tabindex="-1"><a class="header-anchor" href="#the-lie-it-tells-2">The Lie It Tells</a></h3>
+<p>pnpm's lie is that the filesystem representation of dependencies is obvious and complete. The reality is that the filesystem is now abstract: packages are symlinks to a global store, and the actual files are cached globally. You can no longer walk into <code>node_modules</code> and see what you have; you have to understand symlinks and content addressing. For teams used to simple filesystem navigation, this is a minor lie, but it is there.</p>
+<h3 id="example-2" tabindex="-1"><a class="header-anchor" href="#example-2">Example</a></h3>
+<p>You install a package that has a <code>postinstall</code> script expecting to reach a transitive dependency. Under npm, the hoisting may make that work accidentally. Under pnpm, the transitive dependency is not in that package's <code>node_modules</code> tree, so the script fails. You either need to add the transitive dependency to the package's declared dependencies (which is the &quot;correct&quot; fix) or work around it. This kind of friction is common enough to notice during monorepo migrations.</p>
+<h3 id="best-for-2" tabindex="-1"><a class="header-anchor" href="#best-for-2">Best for</a></h3>
+<p>pnpm is the best practical upgrade from npm if your pain point is disk usage or install time in a monorepo, or if you want the strictness of explicit dependencies without the complexity and friction of Yarn's PnP mode. It is increasingly becoming the package manager of choice for large monorepos and organizations that can tolerate the ecosystem friction. For solo projects or teams that prioritize broad compatibility over strictness, pnpm offers less value.</p>
+<h2 id="bun%3A-speed-as-a-first-class-citizen" tabindex="-1"><a class="header-anchor" href="#bun%3A-speed-as-a-first-class-citizen"><a href="https://bun.sh/">Bun</a>: Speed as a First-Class Citizen</a></h2>
+<p>Bun is a newer runtime that bundles its own package manager, and that manager reflects Bun's core philosophy: speed should feel magical, and the entire developer experience should be instantaneous. Unlike npm, Yarn, and pnpm, which are package managers that happen to work with Node, Bun's package manager is designed from the ground up as part of a runtime that understands and optimizes for the entire development loop.</p>
+<h3 id="core-model-3" tabindex="-1"><a class="header-anchor" href="#core-model-3">Core Model</a></h3>
+<p>Bun's package manager uses a global store similar to pnpm but with tighter integration into Bun's runtime and with different optimization strategies. The install process is dramatically faster than npm, in part because Bun itself is written in Zig and uses parallelism aggressively, and in part because Bun can resolve and validate dependencies using runtime knowledge that npm cannot. Bun also attempts to maintain broad compatibility with npm's <code>node_modules</code> layout, so the transition is often smooth, but Bun can also use its own dependency resolution when advantageous.</p>
+<h3 id="design-philosophy-3" tabindex="-1"><a class="header-anchor" href="#design-philosophy-3">Design Philosophy</a></h3>
+<p>Bun's philosophy is simplicity through speed. The core belief is that friction in the development loop comes from waiting—waiting for installs, waiting for builds, waiting for tests. Bun attacks that friction by making every operation as fast as possible, and by consolidating tools that developers usually need to install separately (bundler, transpiler, test runner, package manager) into a single cohesive system. The design accepts some ecosystem incompatibility if that incompatibility enables significant speed gains.</p>
+<h3 id="strengths-3" tabindex="-1"><a class="header-anchor" href="#strengths-3">Strengths</a></h3>
+<p>Bun is genuinely fast in ways that matter. Install times are often 5–10x faster than npm, and that speed translates to real developer experience gains, especially in CI pipelines or on machines with slower disks. Running <code>bun install</code> and then immediately using installed packages feels snappy in a way that npm rarely achieves. Because Bun is a complete runtime, it can also function as a drop-in replacement for Node in many scenarios: you can run TypeScript files directly without transpilation, use Bun's built-in test runner instead of installing Jest, and use Bun's bundler instead of webpack. For greenfield projects or teams willing to commit to Bun as their primary runtime, this all-in-one experience is compelling.</p>
+<h3 id="weaknesses-3" tabindex="-1"><a class="header-anchor" href="#weaknesses-3">Weaknesses</a></h3>
+<p>Bun is still maturing, and that maturity gap is visible in production. Some native Node modules do not work with Bun because Bun's native module interface is different from Node's. Complex webpack configurations or advanced build setups sometimes require adaptation. Third-party tools that hook into Node internals (like certain APM or debugging tools) may not work. Bun's adoption is still small compared to Node, so the ecosystem is less tested against Bun semantics. The risk is real: betting on Bun means accepting that you may hit undocumented edge cases or that some dependency may not work as expected. For teams that need guaranteed stability and compatibility across a broad range of tooling, Bun is not yet a safe choice.</p>
+<h3 id="the-lie-it-tells-3" tabindex="-1"><a class="header-anchor" href="#the-lie-it-tells-3">The Lie It Tells</a></h3>
+<p>Bun's lie is that you can use it as a drop-in replacement for Node without any friction. The reality is that while Bun is compatible with a high percentage of Node packages and tooling, it is not completely compatible. Tools that assume Node internals, native modules with Node-specific bindings, or code that relies on subtle Node.js behavior differences will surface issues that are not immediately obvious.</p>
+<h3 id="example-3" tabindex="-1"><a class="header-anchor" href="#example-3">Example</a></h3>
+<p>You switch your project to Bun and installs become blazingly fast. Your basic tests run. You deploy and everything works for a few weeks. Then a package that uses a native module breaks because its Node-specific binding does not work in Bun. Or an internal tool relies on <code>node</code> being available in the PATH, and Bun is not recognized as a drop-in replacement. Or a third-party SDK that patches Node internals fails. These are not Bun issues; they are ecosystem expectations that Bun has not yet fully absorbed.</p>
+<h3 id="best-for-3" tabindex="-1"><a class="header-anchor" href="#best-for-3">Best for</a></h3>
+<p>Bun is best for greenfield projects where you control the entire toolchain and can commit to Bun as your primary runtime. If your primary goal is speed and developer experience, and you are willing to occasionally work around compatibility edge cases, Bun is a compelling choice. For existing projects heavily invested in Node.js tooling, or for production systems that require broad compatibility guarantees, Bun is not yet the pragmatic choice.</p>
+<h2 id="deno%3A-the-secure%2C-web-native-alternative" tabindex="-1"><a class="header-anchor" href="#deno%3A-the-secure%2C-web-native-alternative"><a href="https://deno.land/">Deno</a>: The Secure, Web-Native Alternative</a></h2>
+<p>Deno is a runtime built by the creator of Node, and its package manager reflects a philosophical rethinking of what dependency management should mean on the web. Rather than importing from <code>node_modules</code>, Deno primarily imports from URLs, storing code in a global cache. This approach is radically different from all the tools we have discussed, and it surfaces a different set of tradeoffs that appeal to developers who care about security and clean architecture more than ecosystem inertia.</p>
+<h3 id="core-model-4" tabindex="-1"><a class="header-anchor" href="#core-model-4">Core Model</a></h3>
+<p>Deno uses a URL-based import model by default. When you import a module, you provide its full URL (e.g., <code>https://deno.land/std/fmt/mod.ts</code>), and Deno caches it globally on your machine. There is no <code>node_modules</code> folder, no hoisting, no flattening. You are also not limited to npm packages; you can import from GitHub raw files, any web server, or third-party registries. For teams that have adopted <code>package.json</code> and npm, Deno 2+ also supports npm compatibility, allowing you to run <code>deno install</code> on a traditional <code>package.json</code> file and get similar behavior to npm.</p>
+<h3 id="design-philosophy-4" tabindex="-1"><a class="header-anchor" href="#design-philosophy-4">Design Philosophy</a></h3>
+<p>Deno's philosophy is security by default and simplicity through URLs. The core belief is that dependencies should be explicit and traceable, and that the web's native import model (URLs) is cleaner and more secure than npm's node_modules. Security is not an afterthought; Deno grants zero permissions by default. A script cannot access the network, file system, or environment variables without explicit permission flags. This is a radical departure from Node, where every installed package can do anything to your system.</p>
+<h3 id="strengths-4" tabindex="-1"><a class="header-anchor" href="#strengths-4">Strengths</a></h3>
+<p>Deno's security model is genuinely compelling. You know exactly what URLs you are importing from, and you can audit them. Third-party code cannot access your file system or make network calls unless you explicitly allow it with permission flags. The built-in toolchain is also excellent: Deno includes a formatter, linter, test runner, documentation generator, and bundler without needing additional installations. For projects starting from scratch with TypeScript, Deno feels clean and cohesive in a way that Node does not. URL-based imports also side-step the entire ecosystem compatibility issue because you control exactly which code you are importing.</p>
+<h3 id="weaknesses-4" tabindex="-1"><a class="header-anchor" href="#weaknesses-4">Weaknesses</a></h3>
+<p>Deno is smaller than Node and npm, so the ecosystem is more limited. While there are many high-quality Deno packages available, the breadth and maturity of npm's ecosystem is incomparable. A specialized library or framework you rely on might not exist for Deno, or might be maintained by a small team with less stability than the npm equivalent. Converting an existing npm project to Deno-native imports is labor-intensive because you must rewrite every import to use URLs instead of package names. For teams deeply embedded in the npm ecosystem, Deno feels like a step backward in terms of library availability and community support.</p>
+<h3 id="the-lie-it-tells-4" tabindex="-1"><a class="header-anchor" href="#the-lie-it-tells-4">The Lie It Tells</a></h3>
+<p>Deno's lie is that security and clean philosophy automatically translate to better software. The reality is that URL-based imports are harder to version correctly, easier to accidentally pin old versions, and less discoverable than npm's centralized registry. A globally cached third-party module is still a third-party module, with all the attendant risks.</p>
+<h3 id="example-4" tabindex="-1"><a class="header-anchor" href="#example-4">Example</a></h3>
+<p>You start a new Deno project and use URL-based imports from deno.land. Everything feels clean. You grant only the permissions your code actually needs: <code>deno run --allow-read --allow-net my-script.ts</code>. Six months later, you want to upgrade a dependency, but because you pinned the URL to a specific version, you have to manually find and update every import throughout your codebase. If you had used a package.json with Deno 2+ npm compatibility, you would have a cleaner upgrade path, but then you lose the simplicity of URL-based imports.</p>
+<h3 id="best-for-4" tabindex="-1"><a class="header-anchor" href="#best-for-4">Best for</a></h3>
+<p>Deno is best for security-conscious projects, fresh TypeScript greenfield work, and teams that philosophically prefer the web's native import model. If you are building backend services or tooling where the built-in security model matters, and you are willing to accept a smaller ecosystem, Deno is a compelling choice. For projects that rely heavily on npm packages or for teams that need maximum ecosystem access, Deno is not yet pragmatic.</p>
+<h2 id="the-core-thesis%3A-different-mental-models" tabindex="-1"><a class="header-anchor" href="#the-core-thesis%3A-different-mental-models">The Core Thesis: Different Mental Models</a></h2>
+<p>When we step back from each tool's implementation details, a clearer pattern emerges. The real axis of difference is not speed or disk usage or which tool claims to be the fastest. The real difference is how each tool chooses to represent and resolve dependencies in the first place, and what that representation means about the relationship between your code and the packages it depends on.</p>
+<p>At the heart of these five tools is one fundamental question: how should the package manager resolve and physically (or virtually) lay out dependencies on your machine? npm flattens them to maximize compatibility. Yarn reproducibly locks them and can abstract them away entirely. pnpm isolates them structurally. Bun optimizes around speed. Deno rejects the node_modules model altogether. Each answer reflects a different assumption about what dependencies should be, and each assumption carries consequences.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Mental Model</th>
+<th>Core Assumption</th>
+<th>Best For</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>npm</td>
+<td>Flattened convenience graph</td>
+<td>Compatibility first</td>
+<td>Most everyday projects</td>
+</tr>
+<tr>
+<td>Yarn</td>
+<td>Reproducible build artifact</td>
+<td>Tooling extensibility</td>
+<td>Enterprise customization</td>
+</tr>
+<tr>
+<td>pnpm</td>
+<td>Explicit isolated graph</td>
+<td>Structural correctness</td>
+<td>Monorepos &amp; large codebases</td>
+</tr>
+<tr>
+<td>Bun</td>
+<td>Invisible high-performance detail</td>
+<td>Speed should feel magical</td>
+<td>Speed-first greenfield</td>
+</tr>
+<tr>
+<td>Deno</td>
+<td>Web-native secure code imports</td>
+<td>Dependencies can be clean and safe</td>
+<td>Security / philosophy-driven work</td>
+</tr>
+</tbody>
+</table>
+<h2 id="where-things-actually-break" tabindex="-1"><a class="header-anchor" href="#where-things-actually-break">Where Things Actually Break</a></h2>
+<p>Understanding these mental models is intellectually interesting, but the gap between philosophy and practice is where package managers reveal themselves. The Node.js ecosystem was built entirely around npm's assumptions. Thousands of packages, build tools, and deployment scripts are hardcoded to expect npm's specific model of dependency resolution and layout. Any deviation from that model carries a compatibility tax, and that tax is paid in small, accumulated frictions that add up.</p>
+<p><em>I once spent four hours debugging a monorepo migration from npm to pnpm. The overall migrate looked clean: update the lockfile, run <code>pnpm install</code>, commit, done. But a postinstall script deep in one of our dependencies was doing something that should have been impossible: it was reaching into a transitive dependency that pnpm didn't hoist by default. The script didn't declare that dependency, so it shouldn't have been able to find it. Under npm's flattened model, it was just there. Under pnpm's strict model, it was nowhere. The build broke silently at a step the script didn't fail on, it just couldn't find what it needed. Debugging required understanding not just what pnpm did differently, but what that dependency's script was secretly assuming about npm's layout.</em></p>
+<h2 id="why-switching-feels-like-progress-(or-regress)" tabindex="-1"><a class="header-anchor" href="#why-switching-feels-like-progress-(or-regress)">Why Switching Feels Like Progress (or Regress)</a></h2>
+<p>Every few years, a new wave of developers discovers a newer package manager and adopts it with missionary zeal. npm → Yarn felt revolutionary in 2016 because npm was genuinely unstable and Yarn's lockfile was a genuine breakthrough. npm → pnpm often feels like finally getting it right, because pnpm's strict isolation catches real bugs that npm hides. npm → Bun feels like magic because it <em>is</em> fast. npm → Deno feels philosophically cleaner because security-by-default and URL-based imports genuinely reduce certain classes of risk.</p>
+<p>And yet, for most day-to-day work, staying on npm still feels like the rational default. That is not because npm is objectively best, adoption is rarely driven by just technical superiority in isolation. It's driven by the difference between friction and payoff. For a small team on a stable project with no monorepo pain, the chore of switching to pnpm outweighs the payoff. For a team that has just hit their third incident caused by a phantom dependency, pnpm suddenly looks very attractive. For a greenfield project where speed is critical and you can control the entire toolchain, Bun is worth the risk. But most teams inherit their package manager from whatever was already there when they joined.</p>
+<h2 id="practical-decision-guidance-in-2026" tabindex="-1"><a class="header-anchor" href="#practical-decision-guidance-in-2026">Practical Decision Guidance in 2026</a></h2>
+<p>Choosing a package manager should be boring and practical, not philosophical. Here is how to think about it:</p>
+<p>If you are starting a new project or working on something small, solo, or legacy where nothing breaks and you want zero friction, <strong>npm</strong> is still the right choice. It is the default, it works, and your entire team already understands it. If you have a monorepo with hundreds of packages and your CI pipeline is slow or your developers are regularly confused about which dependencies are actually available, <strong>pnpm</strong> is the strongest practical upgrade. It solves real pain points without requiring architectural rethinking. If you have a large enterprise with heavy custom workflows, heavy internal tooling requirements, or deep build customization, <strong>Yarn Berry</strong> can provide the plugin system and flexibility you need. If you are starting a new greenfield project and your primary constraint is speed—and you are willing to occasionally work around compatibility edges, <strong>Bun</strong> offers a genuinely better developer experience. If you are building something security-critical or you are philosophically committed to clean, traceable dependencies, <strong>Deno</strong> is worth the ecosystem cost.</p>
+<p>The truth is that most teams do not actually choose their package manager, they inherit one. The developer who set up the project chose it three years ago, and now changing it feels like choosing to fight an unnecessary battle. That inertia is not always wrong. Switching has real costs, and the payoff is often smaller than it feels until you have actually experienced years of pain under your current tool.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Your package manager is not malicious. It's not lying out of deception, it's lying out of necessity. Every tool optimizes for a specific set of assumptions about what <code>node_modules</code> should represent, what dependencies should mean, and what the developer's priority actually is. npm optimizes for compatibility and zero configuration. Yarn optimizes for reproducibility and extensibility. pnpm optimizes for correctness and disk efficiency. Bun optimizes for speed. Deno optimizes for security and simplicity on the web.</p>
+<p>The real question you need to ask yourself is not &quot;which package manager is best?&quot; but &quot;which set of assumptions - and which set of lies - am I willing to live with?&quot; Because every tool has tradeoffs: they make a fundamental choice about what matters and what you can afford to sacrifice. Understanding those choices, and understanding what your real pain point actually is, is the only way to make a decision you will not regret.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

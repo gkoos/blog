@@ -674,5 +674,14 @@
         <description>Stars and downloads tell you about popularity, not safety. Here&#39;s a practical checklist for evaluating an npm package&#39;s security, reliability, and long-term maintenance in 2026.</description>
       </item>
     
+      <item>
+        <title>Your Package Manager Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/</guid>
+        <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
+
+        <description>npm, Yarn, pnpm, Bun, and Deno are not interchangeable install tools. They encode different assumptions about dependency layout, compatibility, reproducibility, and developer speed.</description>
+      </item>
+    
   </channel>
 </rss>
