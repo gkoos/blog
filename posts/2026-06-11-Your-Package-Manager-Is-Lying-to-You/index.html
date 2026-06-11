@@ -266,6 +266,13 @@
 <h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>Your package manager is not malicious. It's not lying out of deception, it's lying out of necessity. Every tool optimizes for a specific set of assumptions about what <code>node_modules</code> should represent, what dependencies should mean, and what the developer's priority actually is. npm optimizes for compatibility and zero configuration. Yarn optimizes for reproducibility and extensibility. pnpm optimizes for correctness and disk efficiency. Bun optimizes for speed. Deno optimizes for security and simplicity on the web.</p>
 <p>The real question you need to ask yourself is not &quot;which package manager is best?&quot; but &quot;which set of assumptions - and which set of lies - am I willing to live with?&quot; Because every tool has tradeoffs: they make a fundamental choice about what matters and what you can afford to sacrifice. Understanding those choices, and understanding what your real pain point actually is, is the only way to make a decision you will not regret.</p>
+<p>Dependency tools are not the only place where clean abstractions can hide operational reality. The same pattern shows up in UI control flow, network resilience, and language-level ergonomics too:</p>
+<ul>
+<li><a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a></li>
+<li><a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a></li>
+<li><a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a></li>
+<li><a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a></li>
+</ul>
 
   </div>
 </article>
