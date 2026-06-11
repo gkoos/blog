@@ -111,3 +111,4 @@ Configure chaos, start with one baseline client and one modified client, change 
 Resilience patterns are not the only things lying to you:
 - [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/)
 - [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/)
+- [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/)
