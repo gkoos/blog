@@ -17,7 +17,7 @@ It is elegant for a reason: many problems are naturally recursive, and the code 
 
 The catch is physical limits. Even with a correct base case and sound logic, each recursive call still consumes stack space. At some depth, you crash with stack overflow.
 
-If you read [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/) and [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/), this is the recursion version of the same pattern: elegant abstraction, hidden operational edge.
+If you read [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/) and [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/), this is the recursion version of the same pattern: elegant abstraction, hidden operational edge. Even dependency management can lie to you, as explored in [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/).
 
 ## Problem Setup: Recursion Hits The Wall
 

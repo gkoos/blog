@@ -239,3 +239,9 @@ The truth is that most teams do not actually choose their package manager, they 
 Your package manager is not malicious. It's not lying out of deception, it's lying out of necessity. Every tool optimizes for a specific set of assumptions about what `node_modules` should represent, what dependencies should mean, and what the developer's priority actually is. npm optimizes for compatibility and zero configuration. Yarn optimizes for reproducibility and extensibility. pnpm optimizes for correctness and disk efficiency. Bun optimizes for speed. Deno optimizes for security and simplicity on the web.
 
 The real question you need to ask yourself is not "which package manager is best?" but "which set of assumptions - and which set of lies - am I willing to live with?" Because every tool has tradeoffs: they make a fundamental choice about what matters and what you can afford to sacrifice. Understanding those choices, and understanding what your real pain point actually is, is the only way to make a decision you will not regret.
+
+Dependency tools are not the only place where clean abstractions can hide operational reality. The same pattern shows up in UI control flow, network resilience, and language-level ergonomics too:
+- [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/)
+- [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/)
+- [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/)
+- [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/)
