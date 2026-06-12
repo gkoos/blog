@@ -76,7 +76,7 @@ When people refer to "Yarn" in 2026, there is often ambiguity about which versio
 
 ### Core Model
 
-Yarn Berry combines a strong lockfile system with an optional Plug'n'Play (PnP) mode that abandons the `node_modules` directory entirely. Instead of storing packages on disk in the traditional way, PnP mode uses a `.pnp.cjs` file to map each package to its location in a global cache, and Node's module resolution is intercepted to consult that map. The lockfile is deterministic to the byte, meaning the same `yarn.lock` on any machine will always produce the exact same dependency tree and artifacts. If you want, you can run `yarn install --immutable` and ship the dependencies as part of your repository, enabling zero-install setups where CI does not need to download or build anything.
+Yarn Berry combines a strong lockfile system with Plug'n'Play (PnP) as its default linker mode, which can abandon the traditional `node_modules` directory entirely. In PnP mode, Yarn uses a `.pnp.cjs` file to map each package to its location in a global cache, and module resolution is intercepted to consult that map. Berry is not limited to PnP, though: it also supports alternative linker modes that use `node_modules` layouts (including npm-like and pnpm-like behavior), which can reduce migration friction for ecosystems that still assume on-disk trees. The lockfile is deterministic to the byte, meaning the same `yarn.lock` on any machine will always produce the exact same dependency tree and artifacts. If you want, you can run `yarn install --immutable` and ship the dependencies as part of your repository, enabling zero-install setups where CI does not need to download or build anything.
 
 ### Design Philosophy
 
@@ -88,7 +88,7 @@ Yarn delivers on reproducibility in ways that are genuinely powerful for large t
 
 ### Weaknesses
 
-The cost of this power is complexity and ecosystem friction. Plug'n'Play mode breaks many tools that assume a traditional `node_modules` directory exists. Older packages may have scripts that do `fs.readdirSync('node_modules')` or similar filesystem introspection, and those simply fail under PnP. Even many modern tools can behave unexpectedly because they were written for `node_modules` semantics. Build tools, bundlers, and testing frameworks often need special configuration or plugins to work well with PnP. Yarn Berry adoption is still much smaller than npm or pnpm, so community support and third-party integration are less mature. For teams that do not have a dedicated DevOps or tooling function, Yarn's flexibility can feel like unnecessary overhead.
+The cost of this power is complexity and ecosystem friction. Plug'n'Play mode breaks many tools that assume a traditional `node_modules` directory exists. Older packages may have scripts that do `fs.readdirSync('node_modules')` or similar filesystem introspection, and those simply fail under PnP. Even many modern tools can behave unexpectedly because they were written for `node_modules` semantics. Build tools, bundlers, and testing frameworks often need special configuration or plugins to work well with PnP. Using node_modules-based linker modes can reduce some of that migration pain, but you also give up part of PnP's strictness and determinism story. Yarn Berry adoption is still much smaller than npm or pnpm, so community support and third-party integration are less mature. For teams that do not have a dedicated DevOps or tooling function, Yarn's flexibility can feel like unnecessary overhead.
 
 ### The Lie It Tells
 
@@ -142,7 +142,7 @@ Bun is a newer runtime that bundles its own package manager, and that manager re
 
 ### Core Model
 
-Bun's package manager uses a global store similar to pnpm but with tighter integration into Bun's runtime and with different optimization strategies. The install process is dramatically faster than npm, in part because Bun itself is written in Zig and uses parallelism aggressively, and in part because Bun can resolve and validate dependencies using runtime knowledge that npm cannot. Bun also attempts to maintain broad compatibility with npm's `node_modules` layout, so the transition is often smooth, but Bun can also use its own dependency resolution when advantageous.
+Bun's package manager uses a global cache with aggressive deduplication, typically via hardlinks rather than pnpm-style symlink graphs. pnpm's approach is symlink-heavy and isolation-first. Bun's is tuned for fast installs and runtime throughput. The install process is dramatically faster than npm, in part because Bun itself is written in Zig and uses parallelism aggressively, and in part because Bun can resolve and validate dependencies using runtime knowledge that npm cannot. Bun also attempts to maintain broad compatibility with npm's `node_modules` layout, so the transition is often smooth, but Bun can also use its own dependency resolution when advantageous.
 
 ### Design Philosophy
 
@@ -170,11 +170,11 @@ Bun is best for greenfield projects where you control the entire toolchain and c
 
 ## [Deno](https://deno.land/): The Secure, Web-Native Alternative
 
-Deno is a runtime built by the creator of Node, and its package manager reflects a philosophical rethinking of what dependency management should mean on the web. Rather than importing from `node_modules`, Deno primarily imports from URLs, storing code in a global cache. This approach is radically different from all the tools we have discussed, and it surfaces a different set of tradeoffs that appeal to developers who care about security and clean architecture more than ecosystem inertia.
+Deno is a runtime built by the creator of Node, and its package manager reflects a philosophical rethinking of what dependency management should mean on the web. Its design starts from URL-native imports and a global cache model, but modern Deno also provides strong npm interoperability for teams that need Node-style workflows. This hybrid approach is still meaningfully different from the defaults in npm, Yarn, pnpm, and Bun, and it surfaces tradeoffs that appeal to developers who care about security and clean architecture more than ecosystem inertia.
 
 ### Core Model
 
-Deno uses a URL-based import model by default. When you import a module, you provide its full URL (e.g., `https://deno.land/std/fmt/mod.ts`), and Deno caches it globally on your machine. There is no `node_modules` folder, no hoisting, no flattening. You are also not limited to npm packages; you can import from GitHub raw files, any web server, or third-party registries. For teams that have adopted `package.json` and npm, Deno 2+ also supports npm compatibility, allowing you to run `deno install` on a traditional `package.json` file and get similar behavior to npm.
+In modern Deno, you can import npm packages directly with `npm:` specifiers (for example `import chalk from "npm:chalk@5"`) and map clean bare specifiers via `deno.json`/`deno.jsonc` import maps. The runtime still uses a global cache as its primary model, but for Node compatibility workflows it can also materialize a `node_modules` directory when needed. In that mode, layout behavior is configurable rather than fixed, so teams can choose conventions that are closer to isolated or hoisted dependency trees depending on interoperability needs.
 
 ### Design Philosophy
 
@@ -182,19 +182,19 @@ Deno's philosophy is security by default and simplicity through URLs. The core b
 
 ### Strengths
 
-Deno's security model is genuinely compelling. You know exactly what URLs you are importing from, and you can audit them. Third-party code cannot access your file system or make network calls unless you explicitly allow it with permission flags. The built-in toolchain is also excellent: Deno includes a formatter, linter, test runner, documentation generator, and bundler without needing additional installations. For projects starting from scratch with TypeScript, Deno feels clean and cohesive in a way that Node does not. URL-based imports also side-step the entire ecosystem compatibility issue because you control exactly which code you are importing.
+Deno's security model is genuinely compelling. You know exactly what URLs you are importing from, and you can audit them. Third-party code cannot access your file system or make network calls unless you explicitly allow it with permission flags. The built-in toolchain is also excellent: Deno includes a formatter, linter, test runner, documentation generator, and bundler without needing additional installations. For projects starting from scratch with TypeScript, Deno feels clean and cohesive in a way that Node does not. URL-based imports can also reduce registry coupling and make dependency provenance clearer in workflows that use them.
 
 ### Weaknesses
 
-Deno is smaller than Node and npm, so the ecosystem is more limited. While there are many high-quality Deno packages available, the breadth and maturity of npm's ecosystem is incomparable. A specialized library or framework you rely on might not exist for Deno, or might be maintained by a small team with less stability than the npm equivalent. Converting an existing npm project to Deno-native imports is labor-intensive because you must rewrite every import to use URLs instead of package names. For teams deeply embedded in the npm ecosystem, Deno feels like a step backward in terms of library availability and community support.
+Deno is smaller than Node and npm, so the ecosystem is still narrower in practice even with strong npm interoperability. While many npm packages now run well through Deno's compatibility layer, edge cases remain around tooling assumptions, native addons, and deeply Node-specific behavior in older dependencies. Import maps and `npm:` specifiers reduce migration friction substantially, but they do not eliminate all compatibility work for mature codebases with complex build pipelines. For teams deeply embedded in Node-specific tooling, Deno can still feel like a step sideways before it feels like a step forward.
 
 ### The Lie It Tells
 
-Deno's lie is that security and clean philosophy automatically translate to better software. The reality is that URL-based imports are harder to version correctly, easier to accidentally pin old versions, and less discoverable than npm's centralized registry. A globally cached third-party module is still a third-party module, with all the attendant risks.
+Deno's lie is that teams treat its compatibility story as a migration shortcut. In practice, Deno gives you several valid models at once (URL imports, `npm:` imports, import maps, optional `node_modules`), and that flexibility creates architectural decisions teams still need to standardize. Security defaults and cleaner primitives help, but dependency policy, version governance, and ecosystem fit checks are still real work.
 
 ### Example
 
-You start a new Deno project and use URL-based imports from deno.land. Everything feels clean. You grant only the permissions your code actually needs: `deno run --allow-read --allow-net my-script.ts`. Six months later, you want to upgrade a dependency, but because you pinned the URL to a specific version, you have to manually find and update every import throughout your codebase. If you had used a package.json with Deno 2+ npm compatibility, you would have a cleaner upgrade path, but then you lose the simplicity of URL-based imports.
+You start a new Deno project and mix `npm:` imports with import-map aliases, so local development feels close to Node while still keeping Deno's runtime defaults. It works well for most dependencies. Later, your team adds tooling that assumes a specific `node_modules` layout and hits subtle integration issues in CI until you align configuration and conventions across repos. The lesson is not that Deno is incompatible; it is that flexibility needs explicit team standards.
 
 ### Best for
 
@@ -212,7 +212,7 @@ At the heart of these five tools is one fundamental question: how should the pac
 | Yarn     | Reproducible build artifact               | Tooling extensibility                  | Enterprise customization          |
 | pnpm     | Explicit isolated graph                   | Structural correctness                 | Monorepos & large codebases       |
 | Bun      | Invisible high-performance detail         | Speed should feel magical              | Speed-first greenfield            |
-| Deno     | Web-native secure code imports            | Dependencies can be clean and safe     | Security / philosophy-driven work |
+| Deno     | URL-native + npm-compatible hybrid        | Security-first defaults + interoperability | Security / philosophy-driven work |
 
 ## Where Things Actually Break
 
@@ -238,7 +238,7 @@ The truth is that most teams do not actually choose their package manager, they 
 
 Your package manager is not malicious. It's not lying out of deception, it's lying out of necessity. Every tool optimizes for a specific set of assumptions about what `node_modules` should represent, what dependencies should mean, and what the developer's priority actually is. npm optimizes for compatibility and zero configuration. Yarn optimizes for reproducibility and extensibility. pnpm optimizes for correctness and disk efficiency. Bun optimizes for speed. Deno optimizes for security and simplicity on the web.
 
-The real question you need to ask yourself is not "which package manager is best?" but "which set of assumptions - and which set of lies - am I willing to live with?" Because every tool has tradeoffs: they make a fundamental choice about what matters and what you can afford to sacrifice. Understanding those choices, and understanding what your real pain point actually is, is the only way to make a decision you will not regret.
+The real question you need to ask yourself is not "which package manager is best?" but "which set of assumptions, and which set of lies, am I willing to live with?" Because every tool has tradeoffs: they make a fundamental choice about what matters and what you can afford to sacrifice. Understanding those choices, and understanding what your real pain point actually is, is the only way to make a decision you will not regret.
 
 Dependency tools are not the only place where clean abstractions can hide operational reality. The same pattern shows up in UI control flow, network resilience, and language-level ergonomics too:
 - [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/)
