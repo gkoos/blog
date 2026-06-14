@@ -9,6 +9,7 @@ tags:
 - announcements
 - javascript
 - typescript
+- fetch-kit
 ---
 [Ffetch](https://www.npmjs.com/package/@fetchkit/ffetch) v4.1.0 is out! 
 

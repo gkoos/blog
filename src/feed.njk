@@ -32,6 +32,9 @@
             (No summary available)
           {%- endif -%}
         </description>
+        {% for tag in post.data.tags %}{% if tag != "posts" %}
+        <category>{{ tag }}</category>
+        {% endif %}{% endfor %}
       </item>
     {% endfor %}
   </channel>
