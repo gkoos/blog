@@ -24,6 +24,9 @@
         <pubDate>Fri, 27 Jan 2017 00:00:00 GMT</pubDate>
 
         <description>The first post - why this blog exists and what to expect.</description>
+        
+        <category>announcements</category>
+        
       </item>
     
       <item>
@@ -33,6 +36,11 @@
         <pubDate>Sun, 29 Jan 2017 00:00:00 GMT</pubDate>
 
         <description>How to use Webpack to inject version number from package.json into your app.</description>
+        
+        <category>javascript</category>
+        
+        <category>webpack</category>
+        
       </item>
     
       <item>
@@ -42,6 +50,11 @@
         <pubDate>Wed, 01 Feb 2017 00:00:00 GMT</pubDate>
 
         <description>This post introduces the basic concepts of matched betting and the mathematics behind it.</description>
+        
+        <category>mathematics</category>
+        
+        <category>matched betting</category>
+        
       </item>
     
       <item>
@@ -51,6 +64,11 @@
         <pubDate>Thu, 09 Feb 2017 00:00:00 GMT</pubDate>
 
         <description>This post discusses how to rate a matched bet based on the back and lay odds.</description>
+        
+        <category>mathematics</category>
+        
+        <category>matched betting</category>
+        
       </item>
     
       <item>
@@ -60,6 +78,11 @@
         <pubDate>Thu, 16 Feb 2017 00:00:00 GMT</pubDate>
 
         <description>A mathematical approach to the Sun Bets Halftime Hero offer.</description>
+        
+        <category>mathematics</category>
+        
+        <category>matched betting</category>
+        
       </item>
     
       <item>
@@ -69,6 +92,11 @@
         <pubDate>Sun, 02 Apr 2017 00:00:00 GMT</pubDate>
 
         <description>This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.</description>
+        
+        <category>mathematics</category>
+        
+        <category>matched betting</category>
+        
       </item>
     
       <item>
@@ -78,6 +106,11 @@
         <pubDate>Sun, 02 Apr 2017 00:00:00 GMT</pubDate>
 
         <description>This post discusses a specific matched betting offer from Bet365 and how to calculate the lay stake for guaranteed profit.</description>
+        
+        <category>mathematics</category>
+        
+        <category>matched betting</category>
+        
       </item>
     
       <item>
@@ -87,6 +120,11 @@
         <pubDate>Sun, 25 Mar 2018 00:00:00 GMT</pubDate>
 
         <description>This post explains the concepts of overlaying and underlaying in matched betting, including when and how to use them for maximizing profits.</description>
+        
+        <category>mathematics</category>
+        
+        <category>matched betting</category>
+        
       </item>
     
       <item>
@@ -96,6 +134,9 @@
         <pubDate>Thu, 28 Feb 2019 00:00:00 GMT</pubDate>
 
         <description>Announcing the launch of my personal website.</description>
+        
+        <category>announcements</category>
+        
       </item>
     
       <item>
@@ -105,6 +146,11 @@
         <pubDate>Thu, 31 Jul 2025 00:00:00 GMT</pubDate>
 
         <description>This post explains skyline queries and their applications in non-academic settings.</description>
+        
+        <category>tutorials</category>
+        
+        <category>algorithms</category>
+        
       </item>
     
       <item>
@@ -114,6 +160,15 @@
         <pubDate>Sat, 02 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A practical introduction to skyline queries in Go, including a command line tool for skyline calculations.</description>
+        
+        <category>tutorials</category>
+        
+        <category>algorithms</category>
+        
+        <category>golang</category>
+        
+        <category>skyline (go library)</category>
+        
       </item>
     
       <item>
@@ -123,6 +178,11 @@
         <pubDate>Sun, 03 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
+        
+        <category>tutorials</category>
+        
+        <category>algorithms</category>
+        
       </item>
     
       <item>
@@ -132,6 +192,13 @@
         <pubDate>Thu, 07 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A deep dive into hash maps, their implementation, and performance considerations in Go.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
+        <category>concurrency</category>
+        
       </item>
     
       <item>
@@ -141,6 +208,13 @@
         <pubDate>Fri, 08 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A practical introduction to skyline queries in Go, including a command line tool for skyline calculations.</description>
+        
+        <category>announcements</category>
+        
+        <category>golang</category>
+        
+        <category>skyline (go library)</category>
+        
       </item>
     
       <item>
@@ -150,6 +224,11 @@
         <pubDate>Sun, 10 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A post about golanfg interfaces</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -159,6 +238,15 @@
         <pubDate>Mon, 11 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A privacy-focused ephemeral email service.</description>
+        
+        <category>announcements</category>
+        
+        <category>nullmail</category>
+        
+        <category>email privacy</category>
+        
+        <category>disposable email</category>
+        
       </item>
     
       <item>
@@ -168,6 +256,11 @@
         <pubDate>Wed, 13 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A deep dive into golang interfaces</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -177,6 +270,15 @@
         <pubDate>Fri, 15 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -186,6 +288,15 @@
         <pubDate>Sun, 17 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V1.1 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -195,6 +306,13 @@
         <pubDate>Mon, 18 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A practical introduction to skyline queries in Go, including a command line tool for skyline calculations.</description>
+        
+        <category>announcements</category>
+        
+        <category>golang</category>
+        
+        <category>skyline (go library)</category>
+        
       </item>
     
       <item>
@@ -204,6 +322,13 @@
         <pubDate>Tue, 19 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A comparison of channels and mutexes in Golang.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
+        <category>concurrency</category>
+        
       </item>
     
       <item>
@@ -213,6 +338,13 @@
         <pubDate>Tue, 26 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A deep-dive into Go&#39;s channel internals.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
+        <category>concurrency</category>
+        
       </item>
     
       <item>
@@ -222,6 +354,15 @@
         <pubDate>Thu, 28 Aug 2025 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V1.2 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -231,6 +372,11 @@
         <pubDate>Thu, 04 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>A free mermaid diagram tool to edit, render and export diagrams and flowcharts.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
       </item>
     
       <item>
@@ -240,6 +386,13 @@
         <pubDate>Fri, 05 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>Implement a sharded, concurrent leaderboard in Go.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
+        <category>concurrency</category>
+        
       </item>
     
       <item>
@@ -249,6 +402,13 @@
         <pubDate>Sat, 06 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>A quick guide to Go&#39;s collection types, published on freeCodeCamp.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -258,6 +418,15 @@
         <pubDate>Sun, 07 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V2.0 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -267,6 +436,15 @@
         <pubDate>Wed, 10 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>A privacy-focused ephemeral email service with browser extensions.</description>
+        
+        <category>announcements</category>
+        
+        <category>nullmail</category>
+        
+        <category>email privacy</category>
+        
+        <category>disposable email</category>
+        
       </item>
     
       <item>
@@ -276,6 +454,11 @@
         <pubDate>Fri, 12 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>Explore the evolution of garbage collection in Go, from early techniques to the latest advancements.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -285,6 +468,13 @@
         <pubDate>Sat, 13 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>How to use the ffetch library to make your fetch requests production-ready with retries, timeouts, cancellations and more.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -294,6 +484,13 @@
         <pubDate>Sat, 13 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>Go standard library helpers to work with collections, published on freeCodeCamp.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -303,6 +500,15 @@
         <pubDate>Mon, 15 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V3.1 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -312,6 +518,13 @@
         <pubDate>Wed, 17 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>How to make your fetch requests production-ready by implementing the circuit breaker pattern to handle failing APIs gracefully.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -321,6 +534,11 @@
         <pubDate>Fri, 19 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>An overview of specialized databases designed for unique data types and workloads.</description>
+        
+        <category>database zoo</category>
+        
+        <category>databases</category>
+        
       </item>
     
       <item>
@@ -330,6 +548,11 @@
         <pubDate>Sat, 20 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>An in-depth look at Time-Series Databases (TSDBs), their architecture, use cases, and how they differ from traditional databases.</description>
+        
+        <category>database zoo</category>
+        
+        <category>databases</category>
+        
       </item>
     
       <item>
@@ -339,6 +562,15 @@
         <pubDate>Sun, 21 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>How to use Chaos Proxy to simulate a slow network and test UI loading states in a Next.js app.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>testing</category>
+        
       </item>
     
       <item>
@@ -348,6 +580,15 @@
         <pubDate>Wed, 24 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>ffetch, chaos-proxy, and the upcoming chaos-fetch are now in the new fetch-kit GitHub org.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -357,6 +598,13 @@
         <pubDate>Thu, 25 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>Go dependency injection tutorial, published on freeCodeCamp.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -366,6 +614,15 @@
         <pubDate>Fri, 26 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>FFetch is now @fetchkit/ffetch on npm, with improved support in the FetchKit ecosystem.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -375,6 +632,17 @@
         <pubDate>Fri, 26 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>Chaos Proxy is now @fetchkit/chaos-proxy on npm, with new features and improved support in the FetchKit ecosystem.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>testing</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -384,6 +652,17 @@
         <pubDate>Sat, 27 Sep 2025 00:00:00 GMT</pubDate>
 
         <description>chaos-fetch is a TypeScript library for injecting network chaos - latency, failures, drops - into fetch requests. Easily simulate adverse network conditions in client-side code for robust testing and resilience. Now available as @fetchkit/chaos-fetch on npm.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>testing</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -393,6 +672,9 @@
         <pubDate>Wed, 01 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>Using chaos-fetch and chaos-proxy for lightweight chaos testing in dev/staging to improve app resilience and UX.</description>
+        
+        <category>testing</category>
+        
       </item>
     
       <item>
@@ -402,6 +684,11 @@
         <pubDate>Thu, 02 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>An in-depth look at Probabilistic / Approximate Databases, their architecture, use cases, and how they differ from traditional databases.</description>
+        
+        <category>database zoo</category>
+        
+        <category>databases</category>
+        
       </item>
     
       <item>
@@ -411,6 +698,13 @@
         <pubDate>Mon, 06 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>Go pointers tutorial, published on freeCodeCamp.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -420,6 +714,13 @@
         <pubDate>Tue, 07 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>Learn how to use chaos-driven testing in full stack apps with integration tests that simulate network failures and latency. Discover practical techniques with chaos-fetch to build more resilient JavaScript and TypeScript applications.</description>
+        
+        <category>testing</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -429,6 +730,15 @@
         <pubDate>Sat, 11 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.</description>
+        
+        <category>testing</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -438,6 +748,15 @@
         <pubDate>Fri, 24 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V4.1.0 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -447,6 +766,11 @@
         <pubDate>Sat, 25 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>Explore the concurrency model of modern JavaScript, including the event loop, async/await, and more.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -456,6 +780,13 @@
         <pubDate>Tue, 28 Oct 2025 00:00:00 GMT</pubDate>
 
         <description>Go closures tutorial, published on freeCodeCamp.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -465,6 +796,11 @@
         <pubDate>Tue, 25 Nov 2025 00:00:00 GMT</pubDate>
 
         <description>An in-depth look at Vector Databases, their architecture, use cases, and how they differ from traditional databases.</description>
+        
+        <category>database zoo</category>
+        
+        <category>databases</category>
+        
       </item>
     
       <item>
@@ -474,6 +810,11 @@
         <pubDate>Tue, 23 Dec 2025 00:00:00 GMT</pubDate>
 
         <description>Explore why true cancellation is challenging in JavaScript. Learn the differences between cancellation, timeouts, and failures, and understand the limitations of Promises, async/await, and AbortController in handling async operations.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -483,6 +824,11 @@
         <pubDate>Tue, 06 Jan 2026 00:00:00 GMT</pubDate>
 
         <description>Master backpressure in JavaScript: how streams, fetch, and async code control data flow. Prevent memory spikes, latency collapse, and crashes in Node.js and the browser.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -492,6 +838,11 @@
         <pubDate>Thu, 08 Jan 2026 00:00:00 GMT</pubDate>
 
         <description>Go&#39;s build system optimized for humans and machines: faster reproducible builds, smart caching, seamless CI/CD, and practical guidance to streamline modern developer workflows.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -501,6 +852,13 @@
         <pubDate>Wed, 14 Jan 2026 00:00:00 GMT</pubDate>
 
         <description>Unit Testing in Go tutorial, published on freeCodeCamp.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -510,6 +868,11 @@
         <pubDate>Wed, 28 Jan 2026 00:00:00 GMT</pubDate>
 
         <description>Learn how to eliminate redundant cache computations in distributed systems using Cloudflare Durable Objects.</description>
+        
+        <category>infoq</category>
+        
+        <category>javascript</category>
+        
       </item>
     
       <item>
@@ -519,6 +882,11 @@
         <pubDate>Fri, 30 Jan 2026 00:00:00 GMT</pubDate>
 
         <description>Advanced async in JavaScript: cancellation, timeouts, bounded concurrency, AbortSignal, and error handling for resilient Node.js and browser apps.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -528,6 +896,13 @@
         <pubDate>Wed, 18 Feb 2026 00:00:00 GMT</pubDate>
 
         <description>Running a privacy-first disposable email service: Lessons from handling domain abuse flags, ServerHold suspension, and registry issues with nullmail.cc.</description>
+        
+        <category>nullmail</category>
+        
+        <category>email privacy</category>
+        
+        <category>disposable email</category>
+        
       </item>
     
       <item>
@@ -537,6 +912,11 @@
         <pubDate>Thu, 19 Feb 2026 00:00:00 GMT</pubDate>
 
         <description>Exploring how pagination strategies can impact GraphQL performance in Node.js applications.</description>
+        
+        <category>javascript</category>
+        
+        <category>graphql</category>
+        
       </item>
     
       <item>
@@ -546,6 +926,13 @@
         <pubDate>Tue, 10 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>Exploring the growing ecosystem of modern databases and the journey from the Database Zoo series to the upcoming book, The Database Safari.</description>
+        
+        <category>announcements</category>
+        
+        <category>database zoo</category>
+        
+        <category>databases</category>
+        
       </item>
     
       <item>
@@ -555,6 +942,13 @@
         <pubDate>Wed, 11 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>How to find the top-K items in Go using heap and streaming approaches.</description>
+        
+        <category>freecodecamp</category>
+        
+        <category>golang</category>
+        
+        <category>tutorials</category>
+        
       </item>
     
       <item>
@@ -564,6 +958,15 @@
         <pubDate>Sat, 14 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V5.0.0 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -573,6 +976,15 @@
         <pubDate>Thu, 19 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>Compare the performance of chaos-proxy in Node.js vs Go for HTTP chaos testing. See benchmarks, results, and practical advice for choosing the right proxy for resilient full stack app testing.</description>
+        
+        <category>testing</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -582,6 +994,11 @@
         <pubDate>Sat, 28 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>Debounce smooths UI events but does not fix request lifecycle bugs. Learn how to prevent stale responses using AbortController, retries, and resilient fetch patterns.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
       </item>
     
       <item>
@@ -591,6 +1008,13 @@
         <pubDate>Sun, 29 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>Unify response caching and in-flight request deduplication with Cloudflare Durable Objects to eliminate duplicate work during cache misses in distributed systems.</description>
+        
+        <category>distributed cache</category>
+        
+        <category>Cloudflare</category>
+        
+        <category>javascript</category>
+        
       </item>
     
       <item>
@@ -600,6 +1024,11 @@
         <pubDate>Tue, 31 Mar 2026 00:00:00 GMT</pubDate>
 
         <description>Throttling reduces noisy UI events, but naive implementations can drop the final state. Learn how trailing throttle guarantees correctness for resize, scroll, and high-frequency interactions.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
       </item>
     
       <item>
@@ -609,6 +1038,17 @@
         <pubDate>Sun, 05 Apr 2026 00:00:00 GMT</pubDate>
 
         <description>ffetch-demo is a live browser arena for benchmarking JavaScript HTTP clients under controlled network chaos.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>testing</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -618,6 +1058,15 @@
         <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
 
         <description>A production-ready TypeScript-first drop-in replacement for native fetch. V5.1.0 is out.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
       </item>
     
       <item>
@@ -627,6 +1076,13 @@
         <pubDate>Fri, 10 Apr 2026 00:00:00 GMT</pubDate>
 
         <description>How to add convenience methods to a native Promise object without subclassing, wrapping, or changing what await returns.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
       </item>
     
       <item>
@@ -636,6 +1092,13 @@
         <pubDate>Sun, 19 Apr 2026 00:00:00 GMT</pubDate>
 
         <description>You tightened your client with retries and resilience knobs. Sometimes that helps. Sometimes it quietly makes latency and reliability worse.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>networking</category>
+        
       </item>
     
       <item>
@@ -645,6 +1108,11 @@
         <pubDate>Fri, 08 May 2026 00:00:00 GMT</pubDate>
 
         <description>A deep dive into the Go compiler pipeline: from lexing and parsing to SSA, optimization passes, and code generation.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
       </item>
     
       <item>
@@ -654,6 +1122,11 @@
         <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
 
         <description>Tail-recursive code in JavaScript still risks stack overflow in real-world runtimes. Learn when recursion is safe and when to switch to iterative patterns.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
       </item>
     
       <item>
@@ -663,6 +1136,15 @@
         <pubDate>Fri, 22 May 2026 00:00:00 GMT</pubDate>
 
         <description>Building a Go-based CLI tool to export Confluence spaces to local Markdown files for RAG pipelines, offline docs, and Git-based knowledge management.</description>
+        
+        <category>golang</category>
+        
+        <category>Confluence</category>
+        
+        <category>RAG</category>
+        
+        <category>knowledge-management</category>
+        
       </item>
     
       <item>
@@ -672,6 +1154,15 @@
         <pubDate>Fri, 29 May 2026 00:00:00 GMT</pubDate>
 
         <description>Stars and downloads tell you about popularity, not safety. Here&#39;s a practical checklist for evaluating an npm package&#39;s security, reliability, and long-term maintenance in 2026.</description>
+        
+        <category>javascript</category>
+        
+        <category>npm</category>
+        
+        <category>security</category>
+        
+        <category>open-source</category>
+        
       </item>
     
       <item>
@@ -681,6 +1172,23 @@
         <pubDate>Thu, 11 Jun 2026 00:00:00 GMT</pubDate>
 
         <description>npm, Yarn, pnpm, Bun, and Deno are not interchangeable install tools. They encode different assumptions about dependency layout, compatibility, reproducibility, and developer speed.</description>
+        
+        <category>javascript</category>
+        
+        <category>nodejs</category>
+        
+        <category>npm</category>
+        
+        <category>yarn</category>
+        
+        <category>pnpm</category>
+        
+        <category>bun</category>
+        
+        <category>deno</category>
+        
+        <category>tooling</category>
+        
       </item>
     
   </channel>
