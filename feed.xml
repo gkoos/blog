@@ -1191,5 +1191,23 @@
         
       </item>
     
+      <item>
+        <title>fetch-kit now has a home: fetchkit.org</title>
+        <link>https://blog.gaborkoos.com/posts/2026-06-14-fetch-kit-now-has-a-home-fetchkit-org/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-06-14-fetch-kit-now-has-a-home-fetchkit-org/</guid>
+        <pubDate>Sun, 14 Jun 2026 00:00:00 GMT</pubDate>
+
+        <description>The fetch-kit ecosystem finally has a dedicated website at fetchkit.org, with overviews of all tools, examples, and the chaos arena.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>fetch-kit</category>
+        
+      </item>
+    
   </channel>
 </rss>
