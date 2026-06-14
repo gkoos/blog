@@ -9,6 +9,7 @@ tags:
 - announcements
 - javascript
 - typescript
+- fetch-kit
 ---
 FFetch is now published as `@fetchkit/ffetch` on npm!
 

@@ -10,6 +10,7 @@ tags:
 - javascript
 - typescript
 - testing
+- fetch-kit
 ---
 After a lot of work and some migration struggles, Chaos Proxy is now published as `@fetchkit/chaos-proxy` on npm and has reached version 1.0.3!
 

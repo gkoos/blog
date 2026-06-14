@@ -9,6 +9,7 @@ tags:
 - announcements
 - javascript
 - typescript
+- fetch-kit
 ---
 I've moved my JavaScript fetch tools - `ffetch`, `chaos-proxy`, and the upcoming `chaos-fetch` - into a new GitHub organization: [fetch-kit](https://github.com/fetch-kit).
 
