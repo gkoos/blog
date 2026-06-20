@@ -13,6 +13,8 @@ tags:
 ---
 *Featured in [Javascript Weekly - 2026-06-02](https://javascriptweekly.com/issues/788) and [Node Weekly - 2026-06-04](https://nodeweekly.com/issues/627)*
 
+*Update (2026-06-20): the install-script and reachability guidance in this post was expanded based on [this excellent Reddit comment](https://www.reddit.com/r/npm/comments/1trc2yb/comment/osgwq49/?screen_view_count=2&context=3).*
+
 Every time you run `npm install`, you are adding code that will execute in your production environment: code written by someone you have never met, with access to whatever your process can reach. It might touch your filesystem, make outbound network requests, read environment variables, or quietly exfiltrate data. You are, in effect, trusting a stranger with your infrastructure.
 
 Most developers manage this risk by checking two numbers: weekly downloads and GitHub stars. Neither tells you anything meaningful about whether a package is safe, maintained, or honest about what it does. (Most npm packages use GitHub. If a project is hosted elsewhere, apply the same principles.)
@@ -101,9 +103,25 @@ If you want to look at how a package is published, find the `.github/workflows/`
 - `id-token: write` in the job permissions - this is what allows the OIDC token exchange with npm
 - The absence of `NPM_TOKEN` as a secret - if the workflow uses Trusted Publishing (OIDC), there is no long-lived token to steal
 
+For packages you maintain, also enforce a strict publish policy in npm package settings: require 2FA and disallow token-based publish. For third-party packages, this setting is usually not externally visible, so treat OIDC Trusted Publishing as the stronger public signal for token hygiene.
+
 Finally, look at how GitHub Actions are referenced in the workflow files. Actions referenced as `uses: actions/checkout@v4` or `uses: actions/setup-node@main` are pinned to a mutable tag - the action author can change what that tag points to at any time, and your workflow will silently start running different code. Actions pinned to a full commit SHA (`uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd`) cannot be changed without updating the reference in the workflow file itself. It is a small thing, but it closes a real attack surface.
 
 One more thing that runs code on your machine before you have reviewed any of it: install scripts. The `preinstall`, `install`, and `postinstall` hooks in `package.json` execute the moment you run `npm install`. Most legitimate packages do not need them - native addons that compile C++ bindings are the main genuine use case. If you see an install script in a package that has no obvious reason for one, that is worth understanding before you proceed.
+
+Before installing, do a quick script check:
+
+```sh
+npm pack --dry-run 2>/dev/null | grep -E "preinstall|postinstall|install"
+```
+
+Or the PowerShell equivalent:
+
+```powershell
+npm pack --dry-run 2>$null | Select-String -Pattern "preinstall|postinstall|install"
+```
+
+If install hooks are present, inspect what they do before running the package. This is a fast triage step that catches a surprising amount of risk.
 
 ## 3. Is the CI pipeline real or decorative?
 
@@ -165,6 +183,8 @@ Go to the **Security** tab on GitHub and look at the Advisories section. Has any
 
 Check `osv.dev` or `snyk.io` for known vulnerabilities in the package. These aggregate CVEs and GitHub Security Advisories. If the package has known unpatched vulnerabilities, that is something you need to know before installing it.
 
+Do not stop at "CVE present" as a binary result. Prioritize by reachability: a vulnerability in a code path your app actually invokes is usually far more urgent than one in a transitive dependency path you never execute. Presence tells you what exists; reachability tells you what is likely exploitable in your context. If you do not have reachability tooling, prioritize direct dependencies and runtime-critical paths first.
+
 [Socket.dev](https://socket.dev) goes further than CVE databases. Rather than waiting for a vulnerability to be reported and cataloged, it does behavioral analysis: does this package access the network? Does it touch the filesystem in unexpected ways? Does it contain obfuscated code? Does it have install scripts? It also has a GitHub app that runs this analysis on pull requests and flags new dependencies before they are merged. For packages you are seriously considering, it is worth a quick check.
 
 If you operate in a high-assurance environment, [Socket Firewall](https://socket.dev/features/firewall) is also worth knowing about. Instead of only warning at review time, it enforces package policy at install time and can block known-malicious packages from entering your environment at all. That is usually overkill for hobby projects, but for regulated or security-sensitive systems it can be a strong extra control.
@@ -190,8 +210,8 @@ These affect whether the package is safe to install and whether what you are ins
 | Signal | Where to check | Green | Red |
 |---|---|---|---|
 | Provenance | npmjs.com version page | "Provenance" section present and matches repo | No provenance, or version published from unknown source |
-| Trusted publishing | `.github/workflows/publish.yml` | OIDC + `--provenance`, no `NPM_TOKEN` | `NPM_TOKEN` secret, manual publish steps |
-| Install scripts | `package.json` scripts field | None present, or obvious native-addon reason | `preinstall`/`postinstall` with no clear justification |
+| Trusted publishing and token hygiene | `.github/workflows/publish.yml` + npm package settings (if you control the package) | OIDC + `--provenance`, no `NPM_TOKEN`; package policy requires 2FA and disallows token publish | `NPM_TOKEN` secret, manual publish steps, or bypass-token dependent publish flow |
+| Install scripts | `package.json` scripts field (`npm pack --dry-run \| grep -E "preinstall\|postinstall\|install"` or `npm view <pkg>@<ver> scripts --json`) | None present, or obvious native-addon reason | `preinstall`/`postinstall` with no clear justification |
 | Pinned CI actions | `.github/workflows/*.yml` | SHA-pinned third-party actions | `@v3`, `@latest`, `@main` |
 
 ### Operational maturity signals
@@ -215,3 +235,4 @@ None of this is a pass/fail test. It is a risk assessment, and risk depends on c
 A utility that formats dates in a UI has a different risk profile than an HTTP client sitting between your service and a government API. A dependency that receives 50 million weekly downloads has more eyes on it than one that receives 500. A package from an organization with a dedicated security team is different from one maintained by a single developer in their spare time. None of these are disqualifying conditions on their own - some of the most reliable packages in the ecosystem are maintained by individuals - but they affect how much scrutiny you should apply.
 
 The goal is not to find a package with a perfect score on every dimension. The goal is to understand what you are accepting when you add it to your project, and to make that decision deliberately rather than by default.
+
