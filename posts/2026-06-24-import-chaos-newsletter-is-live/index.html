@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Ffetch v3.1 Is Out!</title>
-  <meta name="description" content="A production-ready TypeScript-first drop-in replacement for native fetch. V3.1 is out.">
+  <title>The import chaos newsletter is live</title>
+  <meta name="description" content="I launched a newsletter for import chaos with new posts, practical engineering notes, and occasional release updates.">
   <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Ffetch v3.1 Is Out!">
-  <meta property="og:description" content="A production-ready TypeScript-first drop-in replacement for native fetch. V3.1 is out.">
+  <meta property="og:title" content="The import chaos newsletter is live">
+  <meta property="og:description" content="I launched a newsletter for import chaos with new posts, practical engineering notes, and occasional release updates.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="Ffetch v3.1 Is Out!">
-  <meta name="twitter:description" content="A production-ready TypeScript-first drop-in replacement for native fetch. V3.1 is out.">
+  <meta name="twitter:title" content="The import chaos newsletter is live">
+  <meta name="twitter:description" content="I launched a newsletter for import chaos with new posts, practical engineering notes, and occasional release updates.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
@@ -83,9 +83,9 @@
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
 <article>
-  <h1 class="text-3xl font-bold mb-4">Ffetch v3.1 Is Out!</h1>
+  <h1 class="text-3xl font-bold mb-4">The import chaos newsletter is live</h1>
   <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-    <time datetime="2025-09-15T00:00:00.000Z">Mon Sep 15 2025</time>
+    <time datetime="2026-06-24T00:00:00.000Z">Wed Jun 24 2026</time>
     
     
       <span class="text-gray-300">•</span>
@@ -93,34 +93,39 @@
         
           <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">announcements</div>
         
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">fetch-kit</div>
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">newsletter</div>
         
       </div>
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><a href="https://www.npmjs.com/package/@gkoos/ffetch">Ffetch</a> v3.1 is released.</p>
-<p>Ffetch is a lightweight, production-ready TypeScript-first drop-in replacement for native fetch.</p>
-<p>This release introduces support for pluggable fetch implementations and removes the manual <code>AbortSignal.any</code> fallback.</p>
-<p>Highlights</p>
+    <p>I launched a new newsletter: <strong>Import Chaos</strong>.</p>
+<div style="margin: 0 0 1.25rem 0; padding: 0.9rem 1rem; border: 1px solid #e5e7eb; border-radius: 0.75rem; background: #f9fafb; text-align: center;">
+	<iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="360" height="170" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(360px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+</div>
+<p>This newsletter is a separate space for concise engineering notes, experiments, and in-progress ideas from real projects.</p>
+<h2 id="what-it-covers" tabindex="-1"><a class="header-anchor" href="#what-it-covers">What it covers</a></h2>
 <ul>
-<li>Added <code>fetchHandler</code> option, allowing users to provide any fetch-compatible implementation. This improves compatibility with SSR frameworks, edge environments, and custom backends.</li>
-<li>Removed the manual fallback for combining abort signals. <code>ffetch</code> now requires native <code>AbortSignal.any</code> or a polyfill.</li>
-<li>Documentation has been updated to clarify the new requirements and provide instructions for polyfill installation.</li>
+<li>Go internals and runtime behavior</li>
+<li>JavaScript and TypeScript networking and resilience</li>
+<li>Modern database topics I am researching for <em>The Database Safari</em></li>
+<li>Production war stories, tradeoffs, and postmortem-style lessons</li>
+<li>My fail of the week (I do make mistakes)</li>
+<li>Build notes from open source work such as fetch-kit and confluence2md</li>
 </ul>
-<p>To upgrade, run:</p>
-<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> <span class="token function">install</span> @gkoos/ffetch@latest
-<span class="token comment"># or</span>
-<span class="token function">yarn</span> <span class="token function">add</span> @gkoos/ffetch@latest
-<span class="token comment"># or</span>
-<span class="token function">pnpm</span> <span class="token function">add</span> @gkoos/ffetch@latest
-</code></pre>
-<p>Refer to the documentation for migration details and compatibility notes.</p>
-<p>GitHub: <a href="https://github.com/gkoos/ffetch">gkoos/ffetch</a></p>
+<p>The core theme stays the same as this blog: test assumptions, break abstractions, and learn from controlled chaos.</p>
+<h2 id="frequency-and-format" tabindex="-1"><a class="header-anchor" href="#frequency-and-format">Frequency and format</a></h2>
+<p>Expect low volume: roughly one issue every 1-4 weeks, when there is something useful to share.</p>
+<p>Most issues will be one of these:</p>
+<ul>
+<li>Deep technical breakdowns</li>
+<li>Behind-the-scenes development notes</li>
+<li>Early research snippets and ideas in progress</li>
+<li>Short &quot;Your X Is Lying to You&quot; style takes</li>
+</ul>
+<p>If you want those updates in your inbox:</p>
+<p><a href="https://gaborkoos.substack.com/">Subscribe on Substack</a></p>
+<p>If you prefer reading only on the blog, nothing changes here.</p>
 
   </div>
 </article>

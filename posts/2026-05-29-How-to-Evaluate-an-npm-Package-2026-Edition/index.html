@@ -104,6 +104,7 @@
   </div>
   <div class="prose dark:prose-invert max-w-none">
     <p><em>Featured in <a href="https://javascriptweekly.com/issues/788">Javascript Weekly - 2026-06-02</a> and <a href="https://nodeweekly.com/issues/627">Node Weekly - 2026-06-04</a></em></p>
+<p><em>Update (2026-06-20): the install-script and reachability guidance in this post was expanded based on <a href="https://www.reddit.com/r/npm/comments/1trc2yb/comment/osgwq49/?screen_view_count=2&amp;context=3">this excellent Reddit comment</a>.</em></p>
 <p>Every time you run <code>npm install</code>, you are adding code that will execute in your production environment: code written by someone you have never met, with access to whatever your process can reach. It might touch your filesystem, make outbound network requests, read environment variables, or quietly exfiltrate data. You are, in effect, trusting a stranger with your infrastructure.</p>
 <p>Most developers manage this risk by checking two numbers: weekly downloads and GitHub stars. Neither tells you anything meaningful about whether a package is safe, maintained, or honest about what it does. (Most npm packages use GitHub. If a project is hosted elsewhere, apply the same principles.)</p>
 <p>Supply chain attacks have made this worse. Event-stream, ua-parser-js, node-ipc, xz utils - the pattern is consistent: a legitimate, widely used package gets compromised, either through a maintainer being social-engineered, a typosquat, or a dependency buried three levels deep. The npm ecosystem, with its culture of small composable packages and deep transitive dependency trees, is a particularly attractive target. You can do everything right and still get hit through something you never directly installed.</p>
@@ -151,8 +152,16 @@
 <li><code>id-token: write</code> in the job permissions - this is what allows the OIDC token exchange with npm</li>
 <li>The absence of <code>NPM_TOKEN</code> as a secret - if the workflow uses Trusted Publishing (OIDC), there is no long-lived token to steal</li>
 </ul>
+<p>For packages you maintain, also enforce a strict publish policy in npm package settings: require 2FA and disallow token-based publish. For third-party packages, this setting is usually not externally visible, so treat OIDC Trusted Publishing as the stronger public signal for token hygiene.</p>
 <p>Finally, look at how GitHub Actions are referenced in the workflow files. Actions referenced as <code>uses: actions/checkout@v4</code> or <code>uses: actions/setup-node@main</code> are pinned to a mutable tag - the action author can change what that tag points to at any time, and your workflow will silently start running different code. Actions pinned to a full commit SHA (<code>uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd</code>) cannot be changed without updating the reference in the workflow file itself. It is a small thing, but it closes a real attack surface.</p>
 <p>One more thing that runs code on your machine before you have reviewed any of it: install scripts. The <code>preinstall</code>, <code>install</code>, and <code>postinstall</code> hooks in <code>package.json</code> execute the moment you run <code>npm install</code>. Most legitimate packages do not need them - native addons that compile C++ bindings are the main genuine use case. If you see an install script in a package that has no obvious reason for one, that is worth understanding before you proceed.</p>
+<p>Before installing, do a quick script check:</p>
+<pre class="language-sh"><code class="language-sh"><span class="token function">npm</span> pack --dry-run <span class="token operator"><span class="token file-descriptor important">2</span>></span>/dev/null <span class="token operator">|</span> <span class="token function">grep</span> <span class="token parameter variable">-E</span> <span class="token string">"preinstall|postinstall|install"</span>
+</code></pre>
+<p>Or the PowerShell equivalent:</p>
+<pre class="language-powershell"><code class="language-powershell">npm pack <span class="token operator">--</span>dry<span class="token operator">-</span>run <span class="token number">2</span><span class="token operator">></span>$<span class="token keyword">null</span> <span class="token operator">|</span> Select<span class="token operator">-</span>String <span class="token operator">-</span>Pattern <span class="token string">"preinstall|postinstall|install"</span>
+</code></pre>
+<p>If install hooks are present, inspect what they do before running the package. This is a fast triage step that catches a surprising amount of risk.</p>
 <h2 id="3.-is-the-ci-pipeline-real-or-decorative%3F" tabindex="-1"><a class="header-anchor" href="#3.-is-the-ci-pipeline-real-or-decorative%3F">3. Is the CI pipeline real or decorative?</a></h2>
 <p>A green badge in the README is easy to fake, or rather, easy to earn without it meaning much. A repository can have continuous integration that runs three tests on a single happy path and reports 100% pass rate. That badge is technically accurate and entirely useless.</p>
 <p>What you want to know is whether the CI pipeline actually protects the codebase: whether it would catch a regression, a type error, or a broken edge case before it ships.</p>
@@ -185,6 +194,7 @@
 <p>Look for a <code>SECURITY.md</code> file in the repository root, or go to <code>github.com/&lt;owner&gt;/&lt;repo&gt;/security/policy</code>. This should tell you how to report a vulnerability privately, a contact method, a timeline for response, and some indication that the author takes disclosures seriously. Its absence does not mean the package is insecure, but it does mean that if you find something, you have no clear path to report it without accidentally disclosing it publicly.</p>
 <p>Go to the <strong>Security</strong> tab on GitHub and look at the Advisories section. Has anything been published? If yes, how was it handled - was the disclosure coordinated, was a fix available when it went public, was the affected version range clearly documented? A well-handled historical advisory is actually a positive signal; it means the author knows what a responsible disclosure process looks like and has followed it.</p>
 <p>Check <code>osv.dev</code> or <code>snyk.io</code> for known vulnerabilities in the package. These aggregate CVEs and GitHub Security Advisories. If the package has known unpatched vulnerabilities, that is something you need to know before installing it.</p>
+<p>Do not stop at &quot;CVE present&quot; as a binary result. Prioritize by reachability: a vulnerability in a code path your app actually invokes is usually far more urgent than one in a transitive dependency path you never execute. Presence tells you what exists; reachability tells you what is likely exploitable in your context. If you do not have reachability tooling, prioritize direct dependencies and runtime-critical paths first.</p>
 <p><a href="https://socket.dev">Socket.dev</a> goes further than CVE databases. Rather than waiting for a vulnerability to be reported and cataloged, it does behavioral analysis: does this package access the network? Does it touch the filesystem in unexpected ways? Does it contain obfuscated code? Does it have install scripts? It also has a GitHub app that runs this analysis on pull requests and flags new dependencies before they are merged. For packages you are seriously considering, it is worth a quick check.</p>
 <p>If you operate in a high-assurance environment, <a href="https://socket.dev/features/firewall">Socket Firewall</a> is also worth knowing about. Instead of only warning at review time, it enforces package policy at install time and can block known-malicious packages from entering your environment at all. That is usually overkill for hobby projects, but for regulated or security-sensitive systems it can be a strong extra control.</p>
 <p>Finally, look at how quickly past security issues were addressed. A critical vulnerability fixed within days is different from one that sat open for three months. Response time on security issues is one of the clearest signals of how seriously an author takes the responsibility of maintaining a public package.</p>
@@ -216,14 +226,14 @@
 <td>No provenance, or version published from unknown source</td>
 </tr>
 <tr>
-<td>Trusted publishing</td>
-<td><code>.github/workflows/publish.yml</code></td>
-<td>OIDC + <code>--provenance</code>, no <code>NPM_TOKEN</code></td>
-<td><code>NPM_TOKEN</code> secret, manual publish steps</td>
+<td>Trusted publishing and token hygiene</td>
+<td><code>.github/workflows/publish.yml</code> + npm package settings (if you control the package)</td>
+<td>OIDC + <code>--provenance</code>, no <code>NPM_TOKEN</code>; package policy requires 2FA and disallows token publish</td>
+<td><code>NPM_TOKEN</code> secret, manual publish steps, or bypass-token dependent publish flow</td>
 </tr>
 <tr>
 <td>Install scripts</td>
-<td><code>package.json</code> scripts field</td>
+<td><code>package.json</code> scripts field (<code>npm pack --dry-run | grep -E &quot;preinstall|postinstall|install&quot;</code> or <code>npm view &lt;pkg&gt;@&lt;ver&gt; scripts --json</code>)</td>
 <td>None present, or obvious native-addon reason</td>
 <td><code>preinstall</code>/<code>postinstall</code> with no clear justification</td>
 </tr>
@@ -295,6 +305,8 @@
   <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
     <div class="max-w-4xl mx-auto px-6 py-12">
       <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
         <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
       </div>
     </div>
