@@ -52,6 +52,22 @@ This design is intentional: if DevTools were to eagerly serialize every object a
 
 But that optimization comes with a tradeoff: **what you see in the console is not always what existed at the moment you logged it**. Once you internalize that distinction (log time vs view time), a whole class of "weird bugs" starts making sense.
 
+The same idea applies to the DOM, as a DOM node is still a JavaScript object, and DevTools may show you its current state when you expand it, not necessarily the state it had when you logged it. If a framework re-rendered the component, changed a class, removed an attribute, or replaced child nodes, an old `console.log(element)` can be misleading.
+
+When the DOM state matters, snapshot the specific facts:
+
+```js
+console.log({
+  path: location.pathname,
+  html: element.outerHTML,
+  text: element.textContent,
+  classes: [...element.classList],
+  disabled: element.disabled,
+})
+```
+
+The point is the same: preserve the evidence, not just a handle to something that may keep changing.
+
 ## Promises and Async Timing
 
 Promises change state over time, so a promise that was pending when you logged it may appear fulfilled when you inspect it later. This is related to a deeper async distinction: promises represent future results, not ownership of the work producing those results, which is why [cancellation in JavaScript is harder than it looks](/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/).
@@ -260,6 +276,21 @@ console.log(structuredClone(state))
 ```
 
 This avoids live-reference surprises and gives you evidence you can trust later. Cloning can be expensive for large objects, so reserve it for the values you actually need to freeze.
+
+### "What did the DOM look like when the UI broke?"
+
+Snapshot the relevant DOM facts, not the element object itself.
+
+```js
+console.log({
+  path: location.pathname,
+  html: element.outerHTML,
+  classes: [...element.classList],
+  text: element.textContent,
+})
+```
+
+DOM nodes and collections are often the wrong thing to clone or inspect later. For UI bugs, the useful evidence is usually the route, the element's markup or selected attributes, and the interaction that led there.
 
 ### "How does this value evolve over time?"
 
