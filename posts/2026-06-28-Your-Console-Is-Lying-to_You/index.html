@@ -130,6 +130,17 @@ user<span class="token punctuation">.</span>name <span class="token operator">=<
 <p>This behavior can feel unintuitive at first, because most developers mentally model <code>console.log()</code> as &quot;print this value right now&quot;, but in browser DevTools, it is closer to &quot;show me this object as it exists when I look at it&quot;.</p>
 <p>This design is intentional: if DevTools were to eagerly serialize every object at log time, it would have to deeply traverse and copy potentially large object graphs on every log call. In complex applications, especially ones with frequent logging inside loops or render cycles, that overhead would be expensive in both memory and performance. By deferring evaluation, DevTools stays fast and interactive, even when working with large or constantly changing state.</p>
 <p>But that optimization comes with a tradeoff: <strong>what you see in the console is not always what existed at the moment you logged it</strong>. Once you internalize that distinction (log time vs view time), a whole class of &quot;weird bugs&quot; starts making sense.</p>
+<p>The same idea applies to the DOM, as a DOM node is still a JavaScript object, and DevTools may show you its current state when you expand it, not necessarily the state it had when you logged it. If a framework re-rendered the component, changed a class, removed an attribute, or replaced child nodes, an old <code>console.log(element)</code> can be misleading.</p>
+<p>When the DOM state matters, snapshot the specific facts:</p>
+<pre class="language-js"><code class="language-js">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">path</span><span class="token operator">:</span> location<span class="token punctuation">.</span>pathname<span class="token punctuation">,</span>
+  <span class="token literal-property property">html</span><span class="token operator">:</span> element<span class="token punctuation">.</span>outerHTML<span class="token punctuation">,</span>
+  <span class="token literal-property property">text</span><span class="token operator">:</span> element<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span>
+  <span class="token literal-property property">classes</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span>element<span class="token punctuation">.</span>classList<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">disabled</span><span class="token operator">:</span> element<span class="token punctuation">.</span>disabled<span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The point is the same: preserve the evidence, not just a handle to something that may keep changing.</p>
 <h2 id="promises-and-async-timing" tabindex="-1"><a class="header-anchor" href="#promises-and-async-timing">Promises and Async Timing</a></h2>
 <p>Promises change state over time, so a promise that was pending when you logged it may appear fulfilled when you inspect it later. This is related to a deeper async distinction: promises represent future results, not ownership of the work producing those results, which is why <a href="/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/">cancellation in JavaScript is harder than it looks</a>.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> promise <span class="token operator">=</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'https://jsonplaceholder.typicode.com/posts/1'</span><span class="token punctuation">)</span>
@@ -291,6 +302,16 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <pre class="language-js"><code class="language-js">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">structuredClone</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span><span class="token punctuation">)</span>
 </code></pre>
 <p>This avoids live-reference surprises and gives you evidence you can trust later. Cloning can be expensive for large objects, so reserve it for the values you actually need to freeze.</p>
+<h3 id="%22what-did-the-dom-look-like-when-the-ui-broke%3F%22" tabindex="-1"><a class="header-anchor" href="#%22what-did-the-dom-look-like-when-the-ui-broke%3F%22">&quot;What did the DOM look like when the UI broke?&quot;</a></h3>
+<p>Snapshot the relevant DOM facts, not the element object itself.</p>
+<pre class="language-js"><code class="language-js">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">path</span><span class="token operator">:</span> location<span class="token punctuation">.</span>pathname<span class="token punctuation">,</span>
+  <span class="token literal-property property">html</span><span class="token operator">:</span> element<span class="token punctuation">.</span>outerHTML<span class="token punctuation">,</span>
+  <span class="token literal-property property">classes</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span>element<span class="token punctuation">.</span>classList<span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">text</span><span class="token operator">:</span> element<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>DOM nodes and collections are often the wrong thing to clone or inspect later. For UI bugs, the useful evidence is usually the route, the element's markup or selected attributes, and the interaction that led there.</p>
 <h3 id="%22how-does-this-value-evolve-over-time%3F%22" tabindex="-1"><a class="header-anchor" href="#%22how-does-this-value-evolve-over-time%3F%22">&quot;How does this value evolve over time?&quot;</a></h3>
 <p>Use breakpoints and step-through debugging.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">debugger</span>
