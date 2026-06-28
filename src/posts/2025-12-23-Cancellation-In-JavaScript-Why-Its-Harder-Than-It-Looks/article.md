@@ -68,6 +68,8 @@ In JavaScript APIs, timeouts and failures are frequently overloaded to stand in 
 
 Once you separate these concepts, a pattern emerges: JavaScript is good at expressing waiting and failure, but it has no built-in notion of stopping work. Everything that looks like cancellation is either a timeout, an ignored result, or a cooperative protocol layered on top.
 
+This also affects debugging: when you log a promise or mutable object while chasing cancellation bugs, [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/) explains why what you inspect later may not be what existed when you logged it.
+
 ## Why Promises Can't Be Cancelled
 
 When developers ask why cancellation is hard in JavaScript, what they usually mean is: *why can't I cancel a Promise?* After all, promises are the foundation of async/await, and most asynchronous work is expressed in terms of them. If promises represented "tasks", cancellation would seem straightforward.

@@ -9,6 +9,7 @@ tags:
 - tutorials
 - javascript
 - networking
+- "... is lying to you"
 ---
 If you write frontend or Node.js code long enough, you eventually hit the same reliability wall: the network is fine in local testing, then production adds latency spikes, occasional 5xx responses, rate limits, and weird timing behavior that only appears under load.
 
@@ -112,3 +113,4 @@ Resilience patterns are not the only things lying to you:
 - [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/)
 - [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/)
 - [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/)
+- [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)

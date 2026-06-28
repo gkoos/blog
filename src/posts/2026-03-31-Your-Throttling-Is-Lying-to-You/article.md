@@ -8,6 +8,7 @@ tags:
 - posts
 - tutorials
 - javascript
+- "... is lying to you"
 ---
 [Throttling](https://www.geeksforgeeks.org/javascript/javascript-throttling/) is a fundamental technique for controlling the frequency of function calls in response to high-frequency events. Like [debounce](https://www.geeksforgeeks.org/javascript/debouncing-in-javascript/), it's a common tool in the frontend developer's toolkit.
 
@@ -195,5 +196,7 @@ Throttling is still the right tool for noisy UI events. The mistake is assuming 
 The fix is simple and practical: keep throttling, add a trailing call, and treat it as the safe baseline whenever your logic depends on where the interaction ends. So throttling is not lying by design, it only lies when we expect guarantees it never promised.
 
 Throttling controls call frequency, but it doesn't handle what happens when those calls hit an unreliable network or a slow consumer. [Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code](/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/) covers what happens when your throttled calls pile up faster than the downstream can handle. For cancelling in-flight requests when a newer throttled call supersedes an older one, see [Cancellation In JavaScript: Why It's Harder Than It Looks](/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/). And for production patterns combining these primitives, see [Advanced Asynchronous Patterns in JavaScript](/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/).
+
+If you are using console output to verify throttled event state, [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/) is the companion debugging trap: live object inspection and timing changes can make the evidence less stable than it looks.
 
 BTW even [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/) is related: it shows how naive retry logic can lie about your reliability and latency under rate-limited conditions, and how to fix it with proper backoff and respect for server signals. The same pattern appears in dependency tooling too: [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/).
