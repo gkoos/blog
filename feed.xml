@@ -999,6 +999,8 @@
         
         <category>javascript</category>
         
+        <category>... is lying to you</category>
+        
       </item>
     
       <item>
@@ -1028,6 +1030,8 @@
         <category>tutorials</category>
         
         <category>javascript</category>
+        
+        <category>... is lying to you</category>
         
       </item>
     
@@ -1099,6 +1103,8 @@
         
         <category>networking</category>
         
+        <category>... is lying to you</category>
+        
       </item>
     
       <item>
@@ -1126,6 +1132,8 @@
         <category>tutorials</category>
         
         <category>javascript</category>
+        
+        <category>... is lying to you</category>
         
       </item>
     
@@ -1189,6 +1197,8 @@
         
         <category>tooling</category>
         
+        <category>... is lying to you</category>
+        
       </item>
     
       <item>
@@ -1220,6 +1230,26 @@
         <category>announcements</category>
         
         <category>newsletter</category>
+        
+      </item>
+    
+      <item>
+        <title>Your Console Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-06-28-Your-Console-Is-Lying-to_You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-06-28-Your-Console-Is-Lying-to_You/</guid>
+        <pubDate>Sun, 28 Jun 2026 00:00:00 GMT</pubDate>
+
+        <description>console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are four ways the console misleads you, and why each one exists.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>debugging</category>
+        
+        <category>devtools</category>
+        
+        <category>... is lying to you</category>
         
       </item>
     

@@ -95,6 +95,8 @@
         
           <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
         
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">... is lying to you</div>
+        
       </div>
     
   </div>
@@ -244,6 +246,7 @@ window<span class="token punctuation">.</span><span class="token function">addEv
 <p>Throttling is still the right tool for noisy UI events. The mistake is assuming the default implementation is enough for correctness-sensitive flows. Naive throttling controls frequency, but it can drop the final state. In many real features, that final state is the one you care most about.</p>
 <p>The fix is simple and practical: keep throttling, add a trailing call, and treat it as the safe baseline whenever your logic depends on where the interaction ends. So throttling is not lying by design, it only lies when we expect guarantees it never promised.</p>
 <p>Throttling controls call frequency, but it doesn't handle what happens when those calls hit an unreliable network or a slow consumer. <a href="/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/">Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code</a> covers what happens when your throttled calls pile up faster than the downstream can handle. For cancelling in-flight requests when a newer throttled call supersedes an older one, see <a href="/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/">Cancellation In JavaScript: Why It's Harder Than It Looks</a>. And for production patterns combining these primitives, see <a href="/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/">Advanced Asynchronous Patterns in JavaScript</a>.</p>
+<p>If you are using console output to verify throttled event state, <a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your Console Is Lying to You</a> is the companion debugging trap: live object inspection and timing changes can make the evidence less stable than it looks.</p>
 <p>BTW even <a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a> is related: it shows how naive retry logic can lie about your reliability and latency under rate-limited conditions, and how to fix it with proper backoff and respect for server signals. The same pattern appears in dependency tooling too: <a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a>.</p>
 
   </div>
