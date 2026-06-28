@@ -1239,7 +1239,7 @@
         <guid>https://blog.gaborkoos.com/posts/2026-06-28-Your-Console-Is-Lying-to_You/</guid>
         <pubDate>Sun, 28 Jun 2026 00:00:00 GMT</pubDate>
 
-        <description>console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are four ways the console misleads you, and why each one exists.</description>
+        <description>console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are the ways the console misleads you, and why each one exists.</description>
         
         <category>tutorials</category>
         

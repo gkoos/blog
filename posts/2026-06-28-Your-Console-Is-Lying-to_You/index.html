@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Your Console Is Lying to You</title>
-  <meta name="description" content="console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are four ways the console misleads you, and why each one exists.">
+  <meta name="description" content="console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are the ways the console misleads you, and why each one exists.">
   <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Your Console Is Lying to You">
-  <meta property="og:description" content="console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are four ways the console misleads you, and why each one exists.">
+  <meta property="og:description" content="console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are the ways the console misleads you, and why each one exists.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
@@ -19,7 +19,7 @@
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
   <meta name="twitter:title" content="Your Console Is Lying to You">
-  <meta name="twitter:description" content="console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are four ways the console misleads you, and why each one exists.">
+  <meta name="twitter:description" content="console.log() feels like a direct window into your program&#39;s state. It isn&#39;t. Here are the ways the console misleads you, and why each one exists.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
@@ -210,6 +210,21 @@ console<span class="token punctuation">.</span><span class="token function">log<
 </code></pre>
 <p>The takeaway: the value you logged was never live to begin with. It was frozen into the handler when the render created it, so reading it after <code>setCount</code> tells you about that render, not your current state.</p>
 <p>The same stale-observation problem shows up in request-driven UI too: <a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a> covers stale responses and request lifecycle bugs, while <a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a> covers event timing bugs where the final observed state matters.</p>
+<h2 id="the-line-number-can-lie-too" tabindex="-1"><a class="header-anchor" href="#the-line-number-can-lie-too">The Line Number Can Lie Too</a></h2>
+<p>Sometimes the misleading part is not the value, but where DevTools says it came from.</p>
+<p>In modern JavaScript apps, the code running in the browser is often not the code you wrote. It may have passed through TypeScript, Babel, minification, bundling, code splitting, JSX transforms, or framework compilers. Source maps try to connect the generated code back to your original files, but that mapping is only as good as the build pipeline that produced it.</p>
+<p>When source maps are stale, missing, incorrectly uploaded, or generated with low fidelity, console stack traces can point at the wrong file, the wrong line, or a line that only roughly corresponds to the generated code. This is especially confusing when debugging production builds, where minification and bundling can collapse many original modules into a small number of generated files.</p>
+<p>This does not mean DevTools is broken. It means it is doing a reverse lookup through a translation table.</p>
+<p>Common causes:</p>
+<ul>
+<li>The browser is using an old cached bundle or source map.</li>
+<li>The deployed JavaScript and deployed source maps are from different builds.</li>
+<li>Minification collapsed or reordered code in ways the map only approximates.</li>
+<li>Framework or compiler transforms moved your logic away from the line you wrote.</li>
+<li>Production source maps were stripped, hidden, or uploaded only to an error tracker.</li>
+</ul>
+<p>When the line number looks suspicious, verify the build artifact. Check whether the logged code exists in the compiled bundle, hard refresh or disable cache, compare build hashes, and reproduce in a development build with high-quality source maps.</p>
+<p>The console may be showing the right event, but the wrong address.</p>
 <h2 id="when-you-actually-need-a-snapshot" tabindex="-1"><a class="header-anchor" href="#when-you-actually-need-a-snapshot">When You Actually Need a Snapshot</a></h2>
 <p>Most of the time, live inspection is useful. But sometimes you need one hard guarantee: &quot;show me exactly what this value looked like at this moment.&quot; That is when you take a snapshot explicitly.</p>
 <h3 id="option-1%3A-structuredclone-(best-default)" tabindex="-1"><a class="header-anchor" href="#option-1%3A-structuredclone-(best-default)">Option 1: <code>structuredClone</code> (best default)</a></h3>
@@ -283,6 +298,9 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p>Then inspect call stack, scope, and update order directly instead of inferring from scattered logs. The art of debugging is a vast topic itself, but the key is to <strong>observe the program's execution in a controlled way</strong>.</p>
 <h3 id="%22why-is-framework-state-stale-here%3F%22" tabindex="-1"><a class="header-anchor" href="#%22why-is-framework-state-stale-here%3F%22">&quot;Why is framework state stale here?&quot;</a></h3>
 <p>Use framework DevTools (React/Vue/Svelte), not raw logs after update calls. They show lifecycle timing, render phases, and batched updates, which is exactly the scheduling that ad-hoc logging gets wrong.</p>
+<h3 id="%22why-does-this-stack-trace-point-to-the-wrong-line%3F%22" tabindex="-1"><a class="header-anchor" href="#%22why-does-this-stack-trace-point-to-the-wrong-line%3F%22">&quot;Why does this stack trace point to the wrong line?&quot;</a></h3>
+<p>Check your source maps and build artifacts.</p>
+<p>Make sure the JavaScript bundle and source map came from the same build, disable cache while debugging, and reproduce in a development build when possible. In production, treat source-mapped line numbers as clues, not absolute proof.</p>
 <h3 id="%22what-happened-in-production%3F%22" tabindex="-1"><a class="header-anchor" href="#%22what-happened-in-production%3F%22">&quot;What happened in production?&quot;</a></h3>
 <p>Use structured logging with stable fields.</p>
 <pre class="language-js"><code class="language-js">logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">'request_finished'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
