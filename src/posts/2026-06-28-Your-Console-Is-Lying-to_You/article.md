@@ -2,8 +2,8 @@
 layout: layouts/post.njk
 title: "Your Console Is Lying to You"
 date: 2026-06-28
-description: "console.log() feels like a direct window into your program's state. It isn't. Here are four ways the console misleads you, and why each one exists."
-excerpt: "Most developers use console.log() as their first debugging tool. It's fast, familiar, and almost always wrong about something. Here are four ways the console misleads you, and why each one is a deliberate tradeoff rather than a bug."
+description: "console.log() feels like a direct window into your program's state. It isn't. Here are the ways the console misleads you, and why each one exists."
+excerpt: "Most developers use console.log() as their first debugging tool. It's fast, familiar, and almost always wrong about something. Here are the ways the console misleads you, and why each one is a deliberate tradeoff rather than a bug."
 tags:
 - posts
 - tutorials
@@ -161,6 +161,27 @@ The takeaway: the value you logged was never live to begin with. It was frozen i
 
 The same stale-observation problem shows up in request-driven UI too: [Your Debounce Is Lying to You](/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/) covers stale responses and request lifecycle bugs, while [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/) covers event timing bugs where the final observed state matters.
 
+## The Line Number Can Lie Too
+
+Sometimes the misleading part is not the value, but where DevTools says it came from.
+
+In modern JavaScript apps, the code running in the browser is often not the code you wrote. It may have passed through TypeScript, Babel, minification, bundling, code splitting, JSX transforms, or framework compilers. Source maps try to connect the generated code back to your original files, but that mapping is only as good as the build pipeline that produced it.
+
+When source maps are stale, missing, incorrectly uploaded, or generated with low fidelity, console stack traces can point at the wrong file, the wrong line, or a line that only roughly corresponds to the generated code. This is especially confusing when debugging production builds, where minification and bundling can collapse many original modules into a small number of generated files.
+
+This does not mean DevTools is broken. It means it is doing a reverse lookup through a translation table.
+
+Common causes:
+- The browser is using an old cached bundle or source map.
+- The deployed JavaScript and deployed source maps are from different builds.
+- Minification collapsed or reordered code in ways the map only approximates.
+- Framework or compiler transforms moved your logic away from the line you wrote.
+- Production source maps were stripped, hidden, or uploaded only to an error tracker.
+
+When the line number looks suspicious, verify the build artifact. Check whether the logged code exists in the compiled bundle, hard refresh or disable cache, compare build hashes, and reproduce in a development build with high-quality source maps.
+
+The console may be showing the right event, but the wrong address.
+
 ## When You Actually Need a Snapshot
 
 Most of the time, live inspection is useful. But sometimes you need one hard guarantee: "show me exactly what this value looked like at this moment." That is when you take a snapshot explicitly.
@@ -253,6 +274,12 @@ Then inspect call stack, scope, and update order directly instead of inferring f
 ### "Why is framework state stale here?"
 
 Use framework DevTools (React/Vue/Svelte), not raw logs after update calls. They show lifecycle timing, render phases, and batched updates, which is exactly the scheduling that ad-hoc logging gets wrong.
+
+### "Why does this stack trace point to the wrong line?"
+
+Check your source maps and build artifacts.
+
+Make sure the JavaScript bundle and source map came from the same build, disable cache while debugging, and reproduce in a development build when possible. In production, treat source-mapped line numbers as clues, not absolute proof.
 
 ### "What happened in production?"
 
