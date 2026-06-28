@@ -14,6 +14,7 @@ tags:
 - bun
 - deno
 - tooling
+- "... is lying to you"
 ---
 Package managers are usually treated as interchangeable tooling: install dependencies, commit the lockfile, and move on. In that framing, the only question that seems to matter is performance.
 
@@ -245,3 +246,4 @@ Dependency tools are not the only place where clean abstractions can hide operat
 - [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/)
 - [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/)
 - [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/)
+- [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)

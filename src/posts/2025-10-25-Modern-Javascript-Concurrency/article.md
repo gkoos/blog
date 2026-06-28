@@ -268,6 +268,8 @@ While still a proposal, structured concurrency represents a promising direction 
 
 Asynchronous and concurrent code introduces ordering and timing issues that can make bugs hard to reproduce. Even if your tasks aren't truly parallel, the cooperative nature of JavaScript concurrency means that the **sequence in which async operations complete can affect program behavior**.
 
+Debugging async ordering with console output has its own traps: [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/) covers live object inspection, promise timing, and how logging can change fragile scheduling behavior.
+
 ### Common Challenges
 
 - **Unawaited promises**: Forgetting to await a promise can cause silent failures or race conditions.

@@ -399,6 +399,8 @@ Timers, network handles, database cursors all are easy to forget when aborting a
 
 Async patterns are tricky: cancellations, timeouts, and partial failures can silently affect results. Logging or metrics that expose which tasks were aborted, which timed out, and which failed partially make debugging tractable. Without this, even correct patterns become almost impossible to reason about when things go wrong.
 
+For local debugging, be careful with raw console inspection: [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/) shows why object logs, promise state, and timing-sensitive races can be misleading.
+
 ### Patterns Are Tools, Not Rules
 
 Finally, **none of these patterns are universal laws**. The right choice depends on task criticality, resource constraints, and workflow semantics. Observing systems in production shows that developers who rigidly apply patterns without considering context often introduce complexity without benefit.

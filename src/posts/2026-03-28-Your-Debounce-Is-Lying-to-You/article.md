@@ -8,6 +8,7 @@ tags:
 - posts
 - tutorials
 - javascript
+- "... is lying to you"
 ---
 *Featured in [TLDR Dev - 2026-03-30](https://tldr.tech/dev/2026-03-30)*
 
@@ -252,3 +253,5 @@ Debounce is not the problem. The problem is treating it as a complete solution f
 By the way, debouncing is often discussed together with [throttling](https://www.geeksforgeeks.org/javascript/javascript-throttling/), and ironically, your throttling is also [lying to you](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/). Just like [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/). And if you want the package-management version of the same hidden-assumption trap, see [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/).
 
 The cancellation angle mentioned above goes deeper than it might seem. If you want to understand why stopping async work is genuinely hard in JavaScript — not just for debounce, but for any async operation — see [Cancellation In JavaScript: Why It's Harder Than It Looks](/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/). And when debounce interacts with streaming data or fetch pipelines, [Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code](/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/) covers the flow-control side. For production patterns that combine all of these — cancellation, backpressure, and bounded concurrency — see [Advanced Asynchronous Patterns in JavaScript](/posts/2026-01-30-Advanced-Asynchronous-Patterns-in-JavaScript/).
+
+And when you debug these stale-response bugs, remember that [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/) too: logged objects, promises, and timing-sensitive flows can all mislead you while you are trying to inspect them.
