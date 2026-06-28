@@ -1,6 +1,6 @@
 ---
 layout: layouts/post.njk
-title: "Your Console Is Lying to You"
+title: "Your console.log Is Lying to You"
 date: 2026-06-28
 description: "console.log() feels like a direct window into your program's state. It isn't. Here are the ways the console misleads you, and why each one exists."
 excerpt: "Most developers use console.log() as their first debugging tool. It's fast, familiar, and almost always wrong about something. Here are the ways the console misleads you, and why each one is a deliberate tradeoff rather than a bug."
