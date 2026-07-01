@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="460" viewBox="0 0 960 460" role="img" aria-labelledby="title desc">
+  <title id="title">Checkout flow beyond the happy path</title>
+  <desc id="desc">Checkout uses deadlines, idempotency, bounded retries, controlled payment states, deferred work, and observability around the payment boundary.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="460" fill="#f7f4ee"/>
+
+  <g transform="translate(70 142)" filter="url(#shadow)">
+    <rect width="210" height="118" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="105" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#20313a">Checkout</text>
+    <text x="105" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">deadline</text>
+    <text x="105" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">remaining budget</text>
+  </g>
+
+  <g transform="translate(390 70)" filter="url(#shadow)">
+    <rect width="210" height="118" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="105" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="700" fill="#20313a">Payment</text>
+    <text x="105" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">idempotency key</text>
+    <text x="105" y="94" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">bounded retries</text>
+  </g>
+
+  <g transform="translate(390 254)" filter="url(#shadow)">
+    <rect width="210" height="96" rx="8" fill="#ffffff" stroke="#b08f54" stroke-width="2"/>
+    <text x="105" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#654d23">Order state</text>
+    <text x="105" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">paid / declined / pending</text>
+  </g>
+
+  <g transform="translate(690 70)" filter="url(#shadow)">
+    <rect width="210" height="96" rx="8" fill="#ffffff" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="105" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#34533a">Deferred work</text>
+    <text x="105" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">email / analytics</text>
+  </g>
+
+  <g transform="translate(690 254)" filter="url(#shadow)">
+    <rect width="210" height="96" rx="8" fill="#ffffff" stroke="#8d7294" stroke-width="2"/>
+    <text x="105" y="38" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#443b52">Observability</text>
+    <text x="105" y="66" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">latency / retries / states</text>
+  </g>
+
+  <g font-family="Arial, sans-serif">
+    <line x1="305" y1="174" x2="365" y2="128" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+    <text x="332" y="126" text-anchor="middle" font-size="14" fill="#53646d">bounded call</text>
+
+    <line x1="305" y1="230" x2="365" y2="290" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <line x1="615" y1="112" x2="665" y2="112" stroke="#7a9a7e" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+    <text x="640" y="94" text-anchor="middle" font-size="14" fill="#53646d">after response</text>
+
+    <line x1="615" y1="302" x2="665" y2="302" stroke="#8d7294" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+    <text x="640" y="284" text-anchor="middle" font-size="14" fill="#53646d">signals</text>
+
+  </g>
+</svg>
