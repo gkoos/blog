@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
+  <title id="title">Observability around a network boundary</title>
+  <desc id="desc">A checkout to payment boundary is observed through latency, errors, timeouts, retries, saturation, circuit breaker state, and idempotency conflicts.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="420" fill="#f7f4ee"/>
+
+  <g transform="translate(70 64)" filter="url(#shadow)">
+    <rect width="820" height="280" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="410" y="42" text-anchor="middle" font-family="Arial, sans-serif" font-size="23" font-weight="700" fill="#20313a">Checkout -> Payment boundary</text>
+
+    <g font-family="Arial, sans-serif">
+      <g transform="translate(54 82)">
+        <rect width="210" height="64" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+        <text x="105" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#34533a">latency</text>
+        <text x="105" y="47" text-anchor="middle" font-size="13" fill="#53646d">p50 / p95 / p99</text>
+      </g>
+
+      <g transform="translate(304 82)">
+        <rect width="210" height="64" rx="8" fill="#f2ddd3" stroke="#b45f45"/>
+        <text x="105" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#6b3729">errors + timeouts</text>
+        <text x="105" y="47" text-anchor="middle" font-size="13" fill="#53646d">by dependency</text>
+      </g>
+
+      <g transform="translate(554 82)">
+        <rect width="210" height="64" rx="8" fill="#efe8d8" stroke="#b08f54"/>
+        <text x="105" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#654d23">retries</text>
+        <text x="105" y="47" text-anchor="middle" font-size="13" fill="#53646d">attempts + success after retry</text>
+      </g>
+
+      <g transform="translate(54 178)">
+        <rect width="210" height="64" rx="8" fill="#dfe9ec" stroke="#8d9aa3"/>
+        <text x="105" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#20313a">saturation</text>
+        <text x="105" y="47" text-anchor="middle" font-size="13" fill="#53646d">workers / queues / pools</text>
+      </g>
+
+      <g transform="translate(304 178)">
+        <rect width="210" height="64" rx="8" fill="#e8e1ef" stroke="#8d7294"/>
+        <text x="105" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#443b52">breaker state</text>
+        <text x="105" y="47" text-anchor="middle" font-size="13" fill="#53646d">closed / open / probing</text>
+      </g>
+
+      <g transform="translate(554 178)">
+        <rect width="210" height="64" rx="8" fill="#f4eadf" stroke="#b89473"/>
+        <text x="105" y="26" text-anchor="middle" font-size="14" font-weight="700" fill="#5f4935">idempotency</text>
+        <text x="105" y="47" text-anchor="middle" font-size="13" fill="#53646d">replays + conflicts</text>
+      </g>
+    </g>
+  </g>
+
+  <text x="480" y="382" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">The call between services has its own behavior.</text>
+</svg>
