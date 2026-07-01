@@ -1253,5 +1253,25 @@
         
       </item>
     
+      <item>
+        <title>Beyond Happy Path Engineering: the Network</title>
+        <link>https://blog.gaborkoos.com/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/</guid>
+        <pubDate>Wed, 01 Jul 2026 00:00:00 GMT</pubDate>
+
+        <description>The network is where application code meets uncertainty: latency, retries, timeouts, duplicate side effects, degraded states, and ambiguous outcomes.</description>
+        
+        <category>tutorials</category>
+        
+        <category>networking</category>
+        
+        <category>reliability</category>
+        
+        <category>distributed systems</category>
+        
+        <category>software architecture</category>
+        
+      </item>
+    
   </channel>
 </rss>
