@@ -312,6 +312,17 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <span class="token punctuation">}</span><span class="token punctuation">)</span>
 </code></pre>
 <p>DOM nodes and collections are often the wrong thing to clone or inspect later. For UI bugs, the useful evidence is usually the route, the element's markup or selected attributes, and the interaction that led there.</p>
+<p>The same applies in browser automation. A Playwright or Puppeteer element handle is still a handle to something in a changing page, not a frozen record of what existed when you logged it. If timing matters, read the facts inside the page context and return a plain value:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> snapshot <span class="token operator">=</span> <span class="token keyword">await</span> locator<span class="token punctuation">.</span><span class="token function">evaluate</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">element</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">html</span><span class="token operator">:</span> element<span class="token punctuation">.</span>outerHTML<span class="token punctuation">,</span>
+  <span class="token literal-property property">text</span><span class="token operator">:</span> element<span class="token punctuation">.</span>textContent<span class="token punctuation">,</span>
+  <span class="token literal-property property">visible</span><span class="token operator">:</span> <span class="token operator">!</span><span class="token operator">!</span><span class="token punctuation">(</span>element<span class="token punctuation">.</span>offsetWidth <span class="token operator">||</span> element<span class="token punctuation">.</span>offsetHeight <span class="token operator">||</span> element<span class="token punctuation">.</span><span class="token function">getClientRects</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>length<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">disabled</span><span class="token operator">:</span> element<span class="token punctuation">.</span><span class="token function">hasAttribute</span><span class="token punctuation">(</span><span class="token string">'disabled'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>snapshot<span class="token punctuation">)</span>
+</code></pre>
+<p>That gives your test evidence from the point where the page was actually inspected, instead of a remote object you may expand after the UI has already moved on.</p>
 <h3 id="%22how-does-this-value-evolve-over-time%3F%22" tabindex="-1"><a class="header-anchor" href="#%22how-does-this-value-evolve-over-time%3F%22">&quot;How does this value evolve over time?&quot;</a></h3>
 <p>Use breakpoints and step-through debugging.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">debugger</span>
