@@ -292,6 +292,21 @@ console.log({
 
 DOM nodes and collections are often the wrong thing to clone or inspect later. For UI bugs, the useful evidence is usually the route, the element's markup or selected attributes, and the interaction that led there.
 
+The same applies in browser automation. A Playwright or Puppeteer element handle is still a handle to something in a changing page, not a frozen record of what existed when you logged it. If timing matters, read the facts inside the page context and return a plain value:
+
+```js
+const snapshot = await locator.evaluate((element) => ({
+  html: element.outerHTML,
+  text: element.textContent,
+  visible: !!(element.offsetWidth || element.offsetHeight || element.getClientRects().length),
+  disabled: element.hasAttribute('disabled'),
+}))
+
+console.log(snapshot)
+```
+
+That gives your test evidence from the point where the page was actually inspected, instead of a remote object you may expand after the UI has already moved on.
+
 ### "How does this value evolve over time?"
 
 Use breakpoints and step-through debugging.
