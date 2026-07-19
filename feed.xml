@@ -1273,5 +1273,25 @@
         
       </item>
     
+      <item>
+        <title>Beyond Happy Path Engineering: Time</title>
+        <link>https://blog.gaborkoos.com/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/</guid>
+        <pubDate>Sun, 19 Jul 2026 00:00:00 GMT</pubDate>
+
+        <description>Time is where application code meets uncertainty: clock skew, wall-clock corrections, ambiguous ordering, late schedulers, and business-calendar boundaries.</description>
+        
+        <category>tutorials</category>
+        
+        <category>reliability</category>
+        
+        <category>distributed systems</category>
+        
+        <category>software architecture</category>
+        
+        <category>time</category>
+        
+      </item>
+    
   </channel>
 </rss>

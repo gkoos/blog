@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Timestamp order can differ from event order</title>
+  <desc id="desc">Two services write reservation events with different local clocks. Sorting by timestamp shows released before reserved, while the actual event order was reserved before released.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Timestamps do not prove order</text>
+  <text x="480" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Clock time and event order can tell different stories</text>
+
+  <g filter="url(#shadow)">
+    <rect x="78" y="118" width="360" height="214" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="258" y="154" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#20313a">Actual event order</text>
+
+    <line x1="138" y1="224" x2="378" y2="224" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="108" y="184" width="118" height="80" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+    <text x="167" y="216" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#34533a">reserved</text>
+    <text x="167" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">happens first</text>
+
+    <rect x="288" y="184" width="118" height="80" rx="8" fill="#f4e4df" stroke="#c37a68"/>
+    <text x="347" y="216" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">released</text>
+    <text x="347" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">happens later</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="522" y="118" width="360" height="214" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="702" y="154" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#20313a">Sorted by timestamp</text>
+
+    <line x1="582" y1="224" x2="822" y2="224" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="552" y="184" width="130" height="80" rx="8" fill="#f4e4df" stroke="#c37a68"/>
+    <text x="617" y="211" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">released</text>
+    <text x="617" y="236" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">10:00:03</text>
+
+    <rect x="732" y="184" width="130" height="80" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+    <text x="797" y="211" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#34533a">reserved</text>
+    <text x="797" y="236" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">10:00:05</text>
+  </g>
+
+  <g>
+    <rect x="210" y="360" width="540" height="42" rx="8" fill="#ffffff" stroke="#b9c1c7"/>
+    <text x="480" y="386" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">When order matters, the system needs an ordering rule</text>
+  </g>
+</svg>

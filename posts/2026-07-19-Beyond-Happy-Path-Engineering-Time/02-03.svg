@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="390" viewBox="0 0 960 390" role="img" aria-labelledby="title desc">
+  <title id="title">Clock skew changes expiration decisions</title>
+  <desc id="desc">Checkout and an expiration worker compare the same reservation expiration timestamp, but their clocks disagree. Checkout sees the reservation as still valid while the worker sees it as expired.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="390" fill="#f7f4ee"/>
+
+  <text x="480" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Same reservation, different clocks</text>
+  <text x="480" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The expiration timestamp is shared; the meaning of now is not</text>
+
+  <g filter="url(#shadow)">
+    <rect x="90" y="126" width="320" height="156" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="250" y="164" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Checkout</text>
+    <text x="250" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#53646d">local clock: 10:14</text>
+    <rect x="150" y="228" width="200" height="34" rx="17" fill="#e7efe8" stroke="#7a9a7e"/>
+    <text x="250" y="251" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#34533a">still valid</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="550" y="126" width="320" height="156" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="710" y="164" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Expiration worker</text>
+    <text x="710" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#53646d">local clock: 10:16</text>
+    <rect x="610" y="228" width="200" height="34" rx="17" fill="#f4e4df" stroke="#c37a68"/>
+    <text x="710" y="251" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">expired</text>
+  </g>
+
+  <g>
+    <rect x="320" y="310" width="320" height="44" rx="8" fill="#ffffff" stroke="#b9c1c7"/>
+    <text x="480" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">reservation expires at 10:15</text>
+  </g>
+</svg>

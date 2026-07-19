@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beyond Happy Path Engineering: Time</title>
+  <meta name="description" content="Time is where application code meets uncertainty: clock skew, wall-clock corrections, ambiguous ordering, late schedulers, and business-calendar boundaries.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Beyond Happy Path Engineering: Time">
+  <meta property="og:description" content="Time is where application code meets uncertainty: clock skew, wall-clock corrections, ambiguous ordering, late schedulers, and business-calendar boundaries.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Beyond Happy Path Engineering: Time">
+  <meta name="twitter:description" content="Time is where application code meets uncertainty: clock skew, wall-clock corrections, ambiguous ordering, late schedulers, and business-calendar boundaries.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Beyond Happy Path Engineering: Time</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-07-19T00:00:00.000Z">Sun Jul 19 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">reliability</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">software architecture</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">time</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>Most software is first built under unusually friendly conditions. On a developer machine, the database is nearby, the network is quiet, the service you need is running, the test user behaves sensibly, the clock moves forward, the queue drains, the deployment finishes, and the request succeeds. Those conditions are useful, they let us build the first version of a thing without having to worry about everything that can go wrong in production. Requests don't always succeed, networks are not always fast, databases don't always respond immediately, deployments are not instantaneous, users do not behave predictably, and dependencies have their own limits, maintenance windows, bugs, overloads, and bad days. A system designed only for the smooth path may work beautifully most of the time, but when reality bends away from that path, things fall apart.</em></p>
+<p><em>This series is about making your programs more resilient. Each post looks at one part of the system we take for granted: networks, time, databases, storage, users, dependencies, deployments, queues, and concurrency. The question is always the same: what assumptions are we making here, and what should we do when they stop being true?</em></p>
+<ul>
+<li><a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a></li>
+<li><a href="/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/">Beyond Happy Path Engineering: Time</a></li>
+</ul>
+<hr>
+<p>Time looks like one of the simplest dependencies in a program: you ask for the current moment, compare it against another, and make a decision. That decision might be whether a reservation has expired, a session is still valid, a retry should wait a little longer, or a report belongs to yesterday. The code often handles that with a timestamp, a duration, or a call to <code>now()</code>, and the answer feels obvious.</p>
+<p>In production, the answer is less obvious than the code suggests. Machines disagree about the current time, and wall-clock corrections can move a clock forward or backward mid-operation. A duration and a calendar date are different things, and a timestamp is not reliable proof that one event happened before another. Scheduled work can run late, run twice, or catch up in a burst. User-facing time also carries local and business meaning — midnight, billing periods, store hours, and daylight saving rules all depend on more than a universal clock.</p>
+<p>This post looks at time as a <strong>design boundary</strong>. The right kind of time depends on the question being asked: elapsed duration for measuring work, a stable instant for recording events, a version or transaction for ordering competing writes, a time zone and a business rule for anything the user sees. Once those distinctions are explicit, time stops being a hidden assumption and becomes something the system can reason about.</p>
+<h2 id="the-happy-path" tabindex="-1"><a class="header-anchor" href="#the-happy-path">The happy path</a></h2>
+<p>Consider a checkout flow that reserves an item while the user finishes payment. The reservation lasts for fifteen minutes. If the user completes payment before that window closes, the order becomes complete and the reservation no longer needs to expire. If the user walks away, a background job eventually releases the inventory so another customer can buy it.</p>
+<p>The happy path is easy to draw because every decision agrees about the order of events:</p>
+<p><img src="02-01.svg" alt="Diagram: reservation timeline where the item is reserved, payment is authorized, the order completes, and the later expiration check does nothing"></p>
+<p>At this level, time behaves like a shared fact. The checkout flow records that the reservation expires at <code>10:15</code>. The payment completes at <code>10:08</code>. The order is marked complete at <code>10:09</code>. When the expiration job runs later, it sees that the reservation already became an order and leaves it alone. There is no disagreement about which event happened first, no gap between machine time and user time, and no delayed worker trying to make an old decision in a new context.</p>
+<p>That model naturally leads to code that treats time as a simple comparison:</p>
+<pre class="language-text"><code class="language-text">if now() > reservation.expiresAt:
+    release(reservation)
+</code></pre>
+<p>In isolation, this is perfectly reasonable. It says what the programmer means, and it is easy to test. Create a reservation, move the clock past the expiration time, and verify that the item is released. Most of the time, production will also be kind enough for this mental model to appear correct.</p>
+<p>The hidden assumptions start to surface once the system grows beyond that clean timeline. The code assumes that <code>now()</code> means the same thing wherever the decision runs. It assumes the stored timestamp still has the meaning the writer intended. It assumes the expiration job runs after the events it is judging, and that sorting records by timestamp tells the same story as the business process. The happy path still has value, but it is quiet about how much agreement it needs from the clocks, schedulers, databases, and workers around it.</p>
+<h2 id="reality" tabindex="-1"><a class="header-anchor" href="#reality">Reality</a></h2>
+<p>The first crack in the model is that <strong>time is not a single tool</strong>. A program may use the same type, the same column, or the same word for several different questions: how long did this take, when did the user do this, which update should win, is this reservation still valid, what business day does this event belong to? Those questions look related because they all involve time, but they are not the same engineering problem.</p>
+<p>The diagram below is the mental split the rest of the post will use:</p>
+<p><img src="02-02.svg" alt="Diagram: different time-related questions mapped to monotonic duration, wall-clock timestamp, causal ordering, and business calendar"></p>
+<p><em>Wall-clock time</em> is the time people usually mean when they look at a clock or calendar. It is useful for recording that a user clicked a button at a particular instant, showing timestamps in an audit log, or explaining to support when an order moved from one state to another. It is also the time most likely to carry human expectations, because users do not think in monotonic counters; they think in days, hours, time zones, and appointments.</p>
+<p><em>Monotonic time</em> answers a different question: how much time has elapsed? That is the clock you want for measuring latency, enforcing a timeout, spacing out retries, or deciding whether a request has spent its useful waiting budget. A monotonic clock does not need to tell you that it is <code>10:08</code>; it needs to keep moving forward so the system can measure duration without being confused by wall-clock corrections.</p>
+<p><em>Logical time</em> is about ordering rather than clocks. If two updates race, the important question may be which version of the record each update saw, which event came next in a stream, or which state transition the business process allows. A timestamp can be helpful evidence, but it is a weak substitute for a version number, sequence, transaction, or explicit state rule when correctness depends on order.</p>
+<p><em>Business time</em> is the meaning attached to a domain. A billing period, a delivery cutoff, a reservation window, a store's opening hours, and &quot;yesterday's report&quot; all depend on rules that a raw timestamp does not contain. Some of those rules depend on a user's time zone. Some depend on a warehouse, bank, exchange, or legal jurisdiction. Some change over time. Treating them as plain instants strips away the information the product actually needs.</p>
+<p>The reservation example already touches several of these at once. The fifteen-minute hold is a duration. The expiration timestamp is an instant. The race between payment completion and expiration is an ordering problem. The message shown to the user may be local calendar time. The system can store and compare all of those values, but it should not pretend they are interchangeable.</p>
+<h3 id="clocks-drift-and-disagree" tabindex="-1"><a class="header-anchor" href="#clocks-drift-and-disagree">Clocks drift and disagree</a></h3>
+<p>Clock disagreement between machines is usually called <strong>clock skew</strong>. Operating systems and infrastructure try to keep clocks close, but close is not the same as identical, and small differences are enough to matter when code uses timestamps to expire records, claim work, order events, or decide ownership.</p>
+<p>The reservation flow shows the problem:</p>
+<p><img src="02-03.svg" alt="Diagram: checkout sees the reservation as valid at 10:14 while an expiration worker sees it as expired at 10:16"></p>
+<p>Checkout writes a reservation that expires at <code>10:15</code>. A minute before that deadline, the user is still paying. From the checkout machine's point of view, the reservation is valid. On another machine, an expiration worker has a clock that is two minutes ahead. It reads the same row, compares the same <code>expiresAt</code> value, and decides the reservation is old enough to release. Nothing in that story requires a broken database or a dramatic outage. The systems simply disagree about <code>now()</code>.</p>
+<p>Clock synchronization reduces this disagreement, and in many systems it keeps the error small enough that nobody notices. It should still be treated as an operational dependency rather than a correctness proof. Machines can drift between syncs. Hosts can be misconfigured. Virtual machines and containers inherit time behavior from the layers beneath them. During an incident, the difference between &quot;a little wrong&quot; and &quot;wrong in the direction that releases inventory early&quot; is the difference the user experiences.</p>
+<p>The safest designs avoid making important business transitions depend only on one worker's local wall clock. The expiration worker can use the timestamp as a candidate filter, but the state transition still needs a rule: expire this reservation only if it is still reserved, no payment has completed, and the system is willing to make that decision <em>now</em>. If the decision is close to a boundary, the design may include a grace window, a pending state, or reconciliation rather than pretending the timestamp comparison settled everything.</p>
+<p>This is where time starts to resemble the network boundary from the <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">previous post</a>. A timeout was a budget for useful waiting, not a magic statement about whether remote work happened. An expiration timestamp is similar: it is useful evidence for a decision, but the system still needs to decide what state can change, who is allowed to change it, and how to recover if another part of the system saw the world differently.</p>
+<h3 id="measuring-elapsed-time" tabindex="-1"><a class="header-anchor" href="#measuring-elapsed-time">Measuring elapsed time</a></h3>
+<p>Time also appears in a more ordinary place: measuring how long work took. A request handler wants to know how long payment authorization took. A client wants to know whether there is still time left in its deadline. A retry loop wants to wait a little before trying again. Those are duration questions, and those are easy to get wrong when they are answered with wall-clock timestamps.</p>
+<p>The tempting implementation is to record the current wall-clock time before the work starts, record it again after the work finishes, and subtract the two. That feels natural because the timestamps look precise. The problem is that the clock being subtracted is allowed to change while the work is running.</p>
+<p><img src="02-04.svg" alt="Diagram: wall-clock correction moves time backward, making elapsed time appear negative"></p>
+<p>Imagine a worker records a start time of <code>10:00:00</code>, does some work, and then records a finish time of <code>09:59:55</code> because the system clock was corrected backward during the operation. A simple subtraction now says the operation took negative five seconds. If the correction went the other way, a quick operation might look as if it took minutes. The measurement used a clock that was built to answer a different question - <strong>elapsed-time measurement belongs on a monotonic clock</strong>. Latency metrics, timeout budgets, retry delays, backoff calculations, lock lease durations, and request deadlines all care about duration. They need a clock that moves forward consistently while the process measures work.</p>
+<p>This distinction also keeps production data easier to trust. If a dashboard says payment authorization took negative time, the team now has two problems: the original behavior and the measurement that made the behavior harder to understand. If a timeout fires because the wall clock jumped forward, the system may create a false failure and then react to that failure with retries, cancellation, or user-visible errors. Choosing the right clock is a small implementation detail that protects much larger decisions.</p>
+<h3 id="timestamps-do-not-prove-order" tabindex="-1"><a class="header-anchor" href="#timestamps-do-not-prove-order">Timestamps do not prove order</a></h3>
+<p>The next trap is using timestamps to decide which event came first. That works when every event is written by the same process, using the same clock, on a quiet timeline. It becomes much weaker once events come from different machines, queues, browsers, jobs, and services. A timestamp says when one clock believed an event was recorded, it does not automatically say what caused what, or which update should win.</p>
+<p>The reservation flow can fail this way too:</p>
+<p><img src="02-05.svg" alt="Diagram: actual event order is reserved then released, while timestamp order shows released then reserved"></p>
+<p>Imagine checkout records that an item was reserved. A separate worker later records that the same reservation was released. Because the worker's clock is behind, the release receives an earlier timestamp than the reservation. If an audit view, reconciliation job, or conflict resolver simply sorts those records by timestamp, it tells the story backward: released, then reserved.</p>
+<p>That reversed story matters when another part of the system treats the log as something it can replay into state. If it applies <code>released</code> and then <code>reserved</code>, the final record may say the item is still held even though the real sequence released it. The replay needs something stronger than timestamp sorting: a database transaction, a version number, an event stream offset, a compare-and-swap update, or a domain state machine that says which transitions are allowed.</p>
+<p>This is especially important near business boundaries like payment authorization arriving after cancellation, inventory release racing with order completion, or an old browser tab submitting a stale form. Choosing whichever event has the later clock reading gives the timestamp too much power - the real question is <strong>what transition is allowed from the current state</strong>. Time can help explain when events were observed, but the state owner should decide what those events mean.</p>
+<h3 id="expiration-is-a-state-transition" tabindex="-1"><a class="header-anchor" href="#expiration-is-a-state-transition">Expiration is a state transition</a></h3>
+<p>The reservation expires after fifteen minutes, but the timestamp does not perform the expiration. Some piece of code still has to read the reservation, decide what it is allowed to do, and write a new state. That distinction matters because expiration often races with the rest of the workflow. Payment may complete near the boundary. The expiration worker may run late. A retry may arrive after the user has already seen a timeout. The timestamp tells the system when the reservation became a candidate for expiration; it does not describe the whole business situation.</p>
+<p>The state model is the more useful picture:</p>
+<p><img src="02-06.svg" alt="Diagram: reservation moving from reserved to completed, expired, cancelled, or pending review through explicit transitions"></p>
+<p>From <code>reserved</code>, payment authorization can move the reservation to <code>completed</code>. A user cancellation can move it to <code>cancelled</code>. A deadline can move it to <code>expired</code>. Some edge cases may need a <code>pending review</code> state if the system cannot safely decide whether payment, cancellation, or expiration won the race. The important part is that each change starts from the current state instead of an isolated timestamp check somewhere else in the codebase.</p>
+<p>The expiration worker should therefore behave like a participant in the state machine. It can scan for reservations whose expiration time has passed, but the write should still be conditional:</p>
+<pre class="language-text"><code class="language-text">update reservations
+set state = "expired"
+where id = reservationID
+  and state = "reserved"
+  and paymentAuthorizationID is null
+</code></pre>
+<p>That conditional write makes a late or duplicated worker much less dangerous. Once payment, cancellation, or another worker has already moved the reservation forward, the expiration update no longer matches the record. The worker may still run at an awkward time, but it can only make the narrow change the current state allows.</p>
+<p>The user-facing behavior becomes easier to explain once expiration has that shape. The system can preserve completed orders, send expired reservations back through checkout, and route ambiguous boundary cases into reconciliation instead of inheriting whichever answer a cleanup job happened to write first. Expiration becomes a visible state change with business meaning, owned by the same model as completion and cancellation.</p>
+<h3 id="scheduled-work-is-still-work" tabindex="-1"><a class="header-anchor" href="#scheduled-work-is-still-work">Scheduled work is still work</a></h3>
+<p>Once expiration becomes a state transition, the next question is how that transition gets triggered. A common answer is a scheduled job: every minute, find reservations whose expiration time has passed and try to expire them. That design can be perfectly reasonable, but the schedule is only the plan for starting work. It does not prove that the work started on time, finished on time, ran exactly once, or handled the same amount of load every time.</p>
+<p>The difference becomes obvious after a pause:</p>
+<p><img src="02-07.svg" alt="Diagram: scheduled expiration work normally runs in small batches, but after a pause several missed intervals are processed together"></p>
+<p>Under normal conditions, the expiration worker might process a small batch at <code>10:00</code>, another at <code>10:01</code>, and another at <code>10:02</code>. If the worker is paused for a few minutes during a deploy, a failover, or a resource shortage, the next run may discover all of that delayed work at once. From the scheduler's point of view, it is catching up. From the rest of the system's point of view, it may be a sudden burst of database updates, inventory releases, notifications, reconciliation work, and user-visible state changes.</p>
+<p>This is why scheduled jobs need the same engineering attention as request handlers. A retried job should be able to repeat a write safely. A multi-worker job should have a clear owner for each batch. Catch-up work should move through the system at a rate the database and downstream services can absorb. Long runs should record progress durably, so a restart resumes from a known point instead of starting the whole sweep again.</p>
+<p>For reservation expiration, that might mean processing records in bounded batches, claiming a batch before updating it, and recording progress after each chunk. The job can still be simple, but it should have a shape the system can survive: claim a little work, attempt guarded state transitions, commit progress, and continue. Late runs catch up gradually, duplicated runs are constrained by the same state checks, and a growing backlog becomes an operational signal instead of a surprise users discover first.</p>
+<p>The schedule tells the system when to look. The workflow decides what happens to the work it finds.</p>
+<h3 id="user-time-has-product-meaning" tabindex="-1"><a class="header-anchor" href="#user-time-has-product-meaning">User time has product meaning</a></h3>
+<p>So far, the examples have mostly used time inside the system: deadlines, durations, timestamps, state transitions, and scheduled jobs. User-facing time adds another layer. A customer does not usually care that an order was created at <code>2026-03-29T00:30:00Z</code>; they care whether it was placed before the delivery cutoff, whether a reservation lasts until the time shown on the screen, whether a subscription renews on the expected local day, or whether a report includes the business day they asked for.</p>
+<p>That difference is easy to miss because a UTC timestamp looks so precise:</p>
+<p><img src="02-08.svg" alt="Diagram: a UTC instant, a local time, and a business rule each answer a different user-facing time question"></p>
+<p>An instant is excellent for storing when something happened. It gives the system a stable point on the timeline. Displaying that instant to a user requires a time zone. Making a product decision often requires more than display: the system needs to know which calendar, cutoff, billing period, store location, or legal rule owns the decision. &quot;End of day&quot; means very little until the system knows whose day.</p>
+<p>The reservation flow can carry this distinction too. A fifteen-minute hold is a duration. Showing &quot;reserved until 14:30&quot; is a local-time presentation. Deciding whether the order qualifies for same-day delivery may depend on a warehouse cutoff in a different time zone from the user. These values can be related, but collapsing them into one timestamp loses the reason each value exists.</p>
+<p>Daylight saving time is where this becomes visible to users. Some local times never happen, others happen twice. A meeting scheduled for a future local time needs the intended time zone, not only the offset that happened to apply when the user created it. An offset like <code>+01:00</code> describes one moment. A zone like <code>Europe/London</code> carries the rule set the system needs when the future arrives.</p>
+<p>The practical habit is to <strong>store the context with the time</strong>. Store instants for events that already happened. Store local date, local time, and time zone when a future human appointment must keep its local meaning. Store billing periods, delivery windows, and reporting days as domain concepts instead of pretending they are only timestamps. UTC is a good way to represent instants. Product time also needs the rule that gives the instant meaning.</p>
+<h3 id="time-bugs-spread-quietly" tabindex="-1"><a class="header-anchor" href="#time-bugs-spread-quietly">Time bugs spread quietly</a></h3>
+<p>Time failures are often harder to recognize than outright crashes. A service may stay up, requests may keep flowing, and dashboards may show ordinary success rates while the system is making slightly wrong decisions. The bug is rarely announced as &quot;the clock assumption is wrong.&quot; It arrives as a support ticket, a confusing state transition, a report that looks off by one day, or a cleanup job that seems to have touched the wrong records.</p>
+<p>The shape often looks like this:</p>
+<p><img src="02-09.svg" alt="Diagram: an early expiration creates stale cache state, confusing user state, and a misleading support trail"></p>
+<p>The hard part is that every symptom has a plausible local explanation. A stale cache can look like a cache invalidation bug. An early expiration can look like checkout logic. A report boundary can look like a query problem. Those explanations may even be partly true, which is what makes the investigation slippery. The time assumption sits underneath the visible behavior, shaping several parts of the system without looking like a single failing component.</p>
+<p>Logs can make the investigation harder when they inherit the same time problem. Sorting events by timestamp may hide the causal order. Ingested logs may arrive late and appear to describe the past after the team has already moved on. Metrics based on event time and metrics based on processing time may disagree without saying why. The system is still producing evidence, but the evidence needs the same context as the application data: which clock produced it, when it was observed, and what ordering rule it belongs to.</p>
+<p>The practical lesson is to treat time-sensitive decisions as things worth observing directly. Count expirations, late jobs, stale writes, clock skew, queue age, event age, and reconciliation cases. Surface the boundary conditions rather than only the final state. If reservations are frequently expiring within a few seconds of payment completion, that is useful information even when every individual transition was technically allowed. Time bugs become much less mysterious once the system can show where its time assumptions are under pressure. If you want practical ways to inject these failure conditions before production, <a href="/posts/2025-10-01-Small-Scale-Chaos-Testing-The-Missing-Step-Before-Production/">Small-Scale Chaos Testing: The Missing Step Before Production</a> is a good companion.</p>
+<h2 id="engineering-beyond-the-happy-path" tabindex="-1"><a class="header-anchor" href="#engineering-beyond-the-happy-path">Engineering beyond the happy path</a></h2>
+<p>We have seen how easily time slips into a source of ambiguity. The practical response is to make each time-sensitive decision explicit: what question is being answered, what kind of time can answer it, and what the system should do when the answer arrives late or remains uncertain.</p>
+<h3 id="choose-the-clock-for-the-question" tabindex="-1"><a class="header-anchor" href="#choose-the-clock-for-the-question">Choose the clock for the question</a></h3>
+<p>Start by naming the decision the code is making. A timestamp may be the right tool, but it should not be the default answer before the system knows whether it is measuring duration, recording an instant, ordering events, expiring state, scheduling work, or applying a human calendar rule.</p>
+<p>For the reservation flow, those questions are all present at once. The fifteen-minute hold is a duration. The <code>createdAt</code> field is an instant. The transition from <code>reserved</code> to <code>completed</code> or <code>expired</code> is a state question. The message shown to the user is a local-time presentation. The delivery cutoff may belong to a warehouse calendar. Treating those as separate concerns does not make the design elaborate; it keeps one convenient timestamp from becoming responsible for five different jobs.</p>
+<p>A time-sensitive path should make those choices deliberately. Elapsed work belongs to monotonic time. Recorded events need instants. Competing updates need versions, transactions, event offsets, or state transitions. Product rules need the time zone, calendar, cutoff, or period that gives the timestamp meaning. Scheduled work needs a workflow that can tolerate lateness and duplication.</p>
+<p>The checkout example becomes much calmer when those choices are explicit. The request deadline is measured against a monotonic budget. The reservation stores an expiration instant, but expiration itself is a guarded state transition. The confirmation screen formats time in the user's zone. The delivery promise uses the warehouse cutoff. The expiration worker records job lag and batch progress. Each part still uses time, but each part uses time for one job at a time.</p>
+<p>This is the same kind of discipline as treating a network call as a boundary. A timestamp in a database column may look like a small implementation detail, but it often carries a promise about what the system believes, what the user sees, or what a later worker is allowed to do. Choosing the right clock for the question makes that promise visible.</p>
+<h3 id="use-monotonic-time-for-durations-and-deadlines" tabindex="-1"><a class="header-anchor" href="#use-monotonic-time-for-durations-and-deadlines">Use monotonic time for durations and deadlines</a></h3>
+<p>The <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Network post</a> discusses timeout budgets in detail: how long the caller should wait, how that budget moves through the request path, and what happens when the caller gives up. Here, the important point is narrower: <strong>once the system has a duration budget, measure it with monotonic time</strong>. A deadline can still expire, a dependency can still be slow, and a side effect can still finish after the caller gives up. Monotonic time keeps the measurement stable while the rest of the system decides how to handle those outcomes.</p>
+<p>The same principle applies to retry spacing, backoff delays, lock leases, latency metrics, and job runtimes: those values describe elapsed work or remaining budget. Wall-clock timestamps can still be recorded for audit and debugging, but the operational decision should use a duration source that moves forward consistently while the work is being measured.</p>
+<h3 id="store-instants-carefully%2C-display-dates-deliberately" tabindex="-1"><a class="header-anchor" href="#store-instants-carefully%2C-display-dates-deliberately">Store instants carefully, display dates deliberately</a></h3>
+<p>When the system stores a time value, the field should make its meaning clear. A column named <code>time</code> or <code>date</code> rarely says enough by itself. The durable shape should show whether the value is an instant on the timeline, a local time chosen by a person, or a period defined by the business.</p>
+<p><img src="02-10.svg" alt="Diagram: event timestamps, user appointments, and billing periods need different storage shapes"></p>
+<p>For events that already happened, store an instant in a stable representation. Fields such as <code>createdAt</code>, <code>paidAt</code>, and <code>cancelledAt</code> usually answer one question: when did this event happen on the shared timeline? UTC works well for that job. The same stored instant can later be displayed in the user's zone, an operator's zone, or the zone used by a support tool without changing the underlying fact.</p>
+<p>Future human commitments have a different shape. If a user schedules a pickup for 9 AM in London next month, the local intention matters. The record should keep the local date, the local time, and the time zone or calendar rule needed to interpret them. Storing only a formatted string makes the value hard to validate, compare, reschedule, or explain. Converting too early to one instant can also hide the user's intended local time, which is often the thing the product actually promised.</p>
+<p>Business periods deserve domain names as well. A billing month, delivery window, trading day, or reporting period is a product concept with rules attached to it. Store the period and the rule that owns it: the account locale, warehouse calendar, regional cutoff, or reporting calendar. A timestamp may still be recorded beside it. The rule belongs in the model, where later code can read it directly.</p>
+<p>A useful test is to ask what the value would mean in a support conversation. &quot;The payment was captured at this instant&quot; is a different claim from &quot;the customer chose 9 AM in London&quot; or &quot;this invoice belongs to the March billing period.&quot; When the schema preserves that difference, display formatting becomes a presentation concern, and later business decisions do not depend on guessing what an old timestamp was supposed to mean.</p>
+<h3 id="let-the-state-owner-decide-competing-writes" tabindex="-1"><a class="header-anchor" href="#let-the-state-owner-decide-competing-writes">Let the state owner decide competing writes</a></h3>
+<p>A write that changes business state needs protection beyond an audit timestamp. If two pieces of work race, it's safer to ask whether the current state still allows the attempted transition. The code that owns the record should answer that question at the moment it writes.</p>
+<p><img src="02-11.svg" alt="Diagram: payment completion and expiration both pass through the reservation state rule before the reservation changes state"></p>
+<p>In the reservation example this is a potential race condition. Payment completion may try to move the reservation to <code>completed</code> near the same time an expiration worker tries to move it to <code>expired</code>. During the race, the record needs a rule that protects its current state. The reservation can only move from <code>reserved</code> to one of those terminal states, and the write should express that rule directly.</p>
+<pre class="language-text"><code class="language-text">update reservations
+set state = "expired"
+where id = reservationID
+  and state = "reserved"
+  and paymentAuthorizationID is null
+</code></pre>
+<p>The same pattern applies to payment completion:</p>
+<pre class="language-text"><code class="language-text">update reservations
+set state = "completed",
+    paymentAuthorizationID = authorizationID
+where id = reservationID
+  and state = "reserved"
+</code></pre>
+<p>Only one of those updates should match the row. The other attempt sees that the reservation has already moved and becomes a no-op, a retry with fresh state, or a reconciliation case if the business needs one. The timestamp still belongs in the audit trail, where it can help operators explain what happened. The state rule carries the authority for the write.</p>
+<p>Different systems enforce this rule in different ways. A database transaction may lock and update the row. An optimistic write may check a version number. An event stream may rely on offsets. A compare-and-swap operation may check the value it last read. The mechanism can vary, but the ownership should be clear: ordering is enforced by the system that owns the state, using the current state of the record.</p>
+<h3 id="make-expiration-safe-to-retry-and-possible-to-repair" tabindex="-1"><a class="header-anchor" href="#make-expiration-safe-to-retry-and-possible-to-repair">Make expiration safe to retry and possible to repair</a></h3>
+<p>An expiration worker usually runs after the timestamp it is checking. By then, another worker may have tried the same update, payment may have completed, or checkout may still be finishing. The expiration path should be written for that uncertainty, because the timestamp only says when the item became eligible for a decision.</p>
+<p><img src="02-12.svg" alt="Diagram: reserved state can complete, expire, or move through review for repair or compensation"></p>
+<p>For a reservation, the first rule is idempotence: repeating an expiration attempt must be harmless. If the reservation is still <code>reserved</code>, mark it <code>expired</code> and release the hold. If it is already <code>expired</code>, finish cleanly. If payment completed first, leave the reservation <code>completed</code>.</p>
+<p>That shape usually argues for marking state before deleting data. An expired reservation can preserve the original hold, the expiration time, the worker that changed it, and any payment or checkout activity near the boundary. Support, reconciliation, analytics, and repair jobs all need that evidence after the cleanup path has run.</p>
+<p>Some boundary cases need an explicit place to land. A payment callback may arrive seconds after expiration. A user may finish checkout with a page that still showed an active hold. During a payment-provider delay, the expiration worker may make a technically valid decision that still deserves a second look. The common cases can remain expired. The ambiguous ones should move into a review or reconciliation path with enough context for the system to resolve them deliberately.</p>
+<p>The same idea applies outside reservations: session expiry can invalidate future use while keeping audit history, offer expiry may include a short grace rule for checkout in progress, and temporary access grants can move to revoked before cleanup deletes old records. Expiration is more robust when it records what changed, preserves enough context to explain it, and leaves a controlled repair path for edge cases.</p>
+<h3 id="design-scheduled-jobs-as-workflows" tabindex="-1"><a class="header-anchor" href="#design-scheduled-jobs-as-workflows">Design scheduled jobs as workflows</a></h3>
+<p>A schedule tells the system when to start looking for work. The reliable part of the design is the workflow that follows: how work is claimed, how much is processed at once, how progress is recorded, and how recovery behaves when a run is late or repeated.</p>
+<p><img src="02-13.svg" alt="Diagram: scheduler starts a run, worker claims a bounded batch, processes it, records progress, and continues with the next batch"></p>
+<p>For expiration, process reservations in bounded claimed batches through the same guarded state transitions described above. The batch becomes a unit of ownership and progress, and it keeps retries, lag tracking, and catch-up controlled after a pause. If the worker was down for ten minutes, recovery should still move through those bounded claims so each chunk can be processed, checkpointed, and released without flooding the rest of the system. For a deeper treatment of why unchecked queues and producer/consumer imbalance become system pressure, see <a href="/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/">Backpressure in JavaScript: The Hidden Force Behind Streams, Fetch, and Async Code</a>.</p>
+<p>Ownership also needs to be explicit when more than one worker can run. A claimed batch should have an owner, a lease or timeout, and a way for another worker to pick it up if the owner disappears.</p>
+<p>Operationally, a scheduled job should be observable like any other workflow. The system should expose how many items are eligible, how many are claimed, how old the oldest item is, how many updates succeeded, how many were skipped by state checks, and how long catch-up is taking. &quot;Cron ran at 10:00&quot; is a weak comfort. &quot;This batch was claimed, processed, and checkpointed&quot; is the fact the system can build on.</p>
+<h3 id="treat-time-zones-as-domain-data" tabindex="-1"><a class="header-anchor" href="#treat-time-zones-as-domain-data">Treat time zones as domain data</a></h3>
+<p>Time-zone handling starts with ownership. Before the code converts or formats a value, it should know which rule owns the decision: the user's chosen zone, the warehouse calendar, the account locale, the store location, the reporting region, or some other domain rule.</p>
+<p><img src="02-14.svg" alt="Diagram: duration, future local time, and reporting questions each need different time context"></p>
+<p>A short reservation hold is mostly a duration question. The system can measure fifteen minutes with monotonic time and store the resulting expiration instant for later checks. A future pickup time has a different owner. If the user chose 9 AM in London, the record should keep that local date, local time, and <code>Europe/London</code>, because the user's promise is tied to the local clock reading.</p>
+<p>Date-only values need the same care. &quot;Orders from yesterday&quot; sounds simple until the system has to decide whose yesterday counts. Support reports, merchant dashboards, warehouse cutoffs, and regional compliance reports may all attach the date to different calendars. The correct zone is part of the product rule, so it belongs near the data and the query that use it.</p>
+<p>Offsets are too small for this job. <code>+01:00</code> describes the offset that applied at one moment; <code>Europe/London</code> names a rule set that can answer future questions. Those rules can include daylight saving transitions, historical changes, and local exceptions maintained by the time-zone database. Application code should rely on that maintained data instead of carrying hand-written offset tables or assuming a fixed number of hours from UTC.</p>
+<p>The awkward cases deserve tests. Some local times are skipped when clocks move forward, and some happen twice when clocks move back. A scheduling flow should define what happens if a user chooses a missing local time, and it should preserve enough information to distinguish the two occurrences of a repeated local time when that distinction matters. These cases are rare in daily traffic and common enough in production to deserve explicit behavior.</p>
+<h3 id="observe-time-assumptions" tabindex="-1"><a class="header-anchor" href="#observe-time-assumptions">Observe time assumptions</a></h3>
+<p>Time-sensitive workflows need signals around the assumptions they depend on. A checkout path can have ordinary request success rates while expiration is running late, clocks are drifting apart, or a growing number of writes are being rejected because the state already moved. Those conditions should be visible before they become support tickets.</p>
+<p><img src="02-15.svg" alt="Diagram: time-sensitive workflows should expose clock health, work age, boundary pressure, state outcomes, and evidence delay"></p>
+<p>Delay is the first signal to make visible. Job lag, queue age, event age, and processing duration show whether the system is acting on fresh information or catching up from behind. For expiration work, the age of the oldest eligible reservation is often more useful than a simple count of successful updates. A small backlog of very old work tells a different story from a large backlog that is draining steadily.</p>
+<p>Boundary decisions deserve their own counters. Count reservations that expire near payment completion, state transitions rejected because the record already moved, stale writes avoided by version checks, and cases routed to review. These are the places where the system is relying on the rules from the previous sections. If they start rising, the design is telling you where the pressure is.</p>
+<p>Clock and evidence quality need their own signals. Where the platform exposes it, track clock skew by host, runtime, or region. Compare event timestamps with ingestion time so delayed logs and late events are easier to recognize during an incident. A dashboard sorted by event time can be misleading when the evidence itself arrives late; observing the delay makes that limitation explicit.</p>
+<p>The useful signals are the ones that expose the time assumptions behind the workflow: whether the system is late, deciding near a boundary, seeing stale writes, or reconstructing events from delayed evidence. Once those signals exist, time bugs stop looking like scattered oddities and start looking like pressure on specific parts of the design.</p>
+<h3 id="reconcile-when-time-cannot-decide" tabindex="-1"><a class="header-anchor" href="#reconcile-when-time-cannot-decide">Reconcile when time cannot decide</a></h3>
+<p>Some outcomes remain ambiguous even when the clocks, state checks, and job workflow are designed carefully. The system may see a payment callback after a local expiration, a partial subscription renewal after a failed batch, or an event stream whose processing order does not match the recorded timestamps. Those cases need a repair path that compares current facts and chooses a controlled outcome.</p>
+<p><img src="02-16.svg" alt="Diagram: local reservation state and payment provider state feed reconciliation, which chooses complete, refund, or review"></p>
+<p>For the reservation flow, reconciliation might compare the local reservation state with the payment provider's authoritative state. If the reservation is <code>expired</code> and the provider says the charge was authorized, the timestamp alone cannot say what the customer should experience. The repair policy may complete the order if inventory is still available, refund the authorization if the hold was released, or send the case to review if the facts are incomplete.</p>
+<p>The important part is that ambiguous cases stay visible and finite. Reconciliation should have a queue, an owner, retry behavior, and metrics. It should record which facts it compared and which repair action it took. A case that cannot be repaired automatically should move to a known manual or compensating path instead of disappearing into logs.</p>
+<p>This pattern appears in many time-sensitive systems. Renewal jobs compare local billing records with payment-provider state. Inventory repair compares reservations with warehouse movements. Event processors rebuild projections from the source stream when local state looks suspect. Time still helps explain what happened; the repair decision comes from the authoritative facts the system compares. For a concrete pattern that unifies cached results and in-flight work ownership, see <a href="/posts/2026-03-29-One-Cache-to-Rule-Them-All-Handling-Responses-and-In-Flight-Requests-with-Durable-Objects/">One Cache to Rule Them All: Handling Responses and In-Flight Requests with Durable Objects</a>.</p>
+<p>Reconciliation gives the design a way to recover when the world was observed in the wrong order, too late, or from two places that briefly disagreed. It turns uncertainty into explicit work: gather the authoritative facts, apply the repair rule, record the outcome, and keep the number of unresolved cases small enough to understand.</p>
+<h3 id="pulling-the-pieces-together" tabindex="-1"><a class="header-anchor" href="#pulling-the-pieces-together">Pulling the pieces together</a></h3>
+<p>The original reservation flow looked small because time was doing several jobs invisibly: the code stored an expiration timestamp, compared it with <code>now()</code>, and released inventory when the comparison said the hold was over. On the happy path, that is enough. In production, it leaves too many decisions inside one timestamp check.</p>
+<p><img src="02-17.svg" alt="Diagram: checkout, reservation state, expiration worker, observation, and reconciliation each own part of the time-aware reservation flow"></p>
+<p>The time-aware version is still a small system. The checkout uses a monotonic budget for request work; the reservation record stores state, an expiration instant, a version, and any local-time context the product needs. Completion and expiration move through guarded state transitions. The expiration worker claims bounded batches and records progress. Observation shows lag, stale writes, boundary cases, and clock health. Reconciliation handles the cases where local state and external facts disagree.</p>
+<p>The design gives each use of time a narrower job. A duration measures useful waiting. An instant records when something happened or when a record becomes eligible for expiration. A state transition decides what is allowed to change. A time zone or business calendar gives user-facing dates their meaning. A scheduled job turns elapsed time into repeatable work. Reconciliation repairs the cases that clocks and local state cannot settle cleanly.</p>
+<p>The practical difference is ownership. The request path owns its deadline, the reservation model owns its state transitions, the worker owns batches and progress. The product rule owns the calendar, the observability layer owns the signals that show when the assumptions are under pressure. Once those responsibilities are visible, a time bug has somewhere to be investigated and somewhere to be fixed.</p>
+<h3 id="patterns-for-sharper-edges" tabindex="-1"><a class="header-anchor" href="#patterns-for-sharper-edges">Patterns for sharper edges</a></h3>
+<p>Clear clock choice, guarded state transitions, retryable jobs, domain time zones, observation, and reconciliation cover a surprising amount of production reality. The sharper tools belong in systems built around distributed coordination, event-time processing, large fan-out workflows, or strict ordering rules.</p>
+<p><em>Logical clocks</em> help when the important question is ordering: which event follows which, which update was based on which version, or which replica observed another replica's work. They require discipline across the whole workflow, because one component treating the logical clock casually can weaken the ordering guarantee for everyone else.</p>
+<p><em>Hybrid logical clocks</em> appear in systems that need both a physical-time signal and a logical ordering signal. They fit databases, replicated systems, and coordination layers where many nodes need a shared way to talk about order. Ordinary application code usually gets more value from explicit versions, transactions, stream offsets, and state transitions.</p>
+<p><em>Leases</em> can give a worker temporary ownership of a batch, partition, or leadership role. The design has to account for clock skew, renewal timing, slow pauses, and what happens when the old owner keeps working after another owner has taken over. A lease is a time-based claim, so it should be paired with guarded writes and clear recovery behavior.</p>
+<p>Streaming systems often add <em>watermarks</em> and <em>time-windowed deduplication</em>. A watermark tells the system how complete it believes an event-time window is. A deduplication window gives receivers a bounded memory of recent event identities. Both patterns encode trade-offs: late events may wait, be corrected later, or be dropped depending on the policy.</p>
+<p>These tools should enter the design with a specific failure in mind. If the problem is ordinary expiration, a guarded state transition and a retryable worker are usually simpler. If the problem is event-time completeness, replica ordering, or lease-based ownership across many workers, the sharper pattern may be worth the extra rules. The question is the same as before: what decision is time helping us make, and what can go wrong if that signal is late, duplicated, or interpreted differently by another part of the system?</p>
+<h2 id="production-example%3A-a-clock-moved-backward" tabindex="-1"><a class="header-anchor" href="#production-example%3A-a-clock-moved-backward">Production example: a clock moved backward</a></h2>
+<p>On January 1, 2017, Cloudflare published a <a href="https://blog.cloudflare.com/how-and-why-the-leap-second-affected-cloudflare-dns/">write-up of a leap-second-related DNS incident</a>. The failure began with a small assumption in resolver-performance measurement: the code recorded a start time, later called <code>time.Now()</code>, and subtracted the two. Around the leap second, that subtraction produced a negative duration.</p>
+<p>The immediate business logic was ordinary: Cloudflare's DNS system measured how quickly internal resolvers answered CNAME lookups, smoothed those measurements, and used them to choose a resolver. The bug was in the kind of time used for the measurement: the code was measuring elapsed duration with a wall-clock source that could move backward. Once a negative value entered the resolver-selection data, later code received an input it was never supposed to see and panicked.</p>
+<p>The incident is a clean example of why clock choice matters. A timestamp can only tell a system when something was observed - a duration measurement needs a source that behaves like elapsed time. When those two jobs share the same wall-clock call, the code can look reasonable until the machine's wall clock is corrected underneath it.</p>
+<p>It also shows how a time bug spreads: the negative measurement moved through smoothing, then into weighted resolver selection, then into a panic path. By the time customers saw errors, the original mistake no longer looked like &quot;time moved backward.&quot; It looked like DNS resolution failing in some places for some requests.</p>
+<p>The fix in Cloudflare's write-up prevented negative measurements from being recorded and allowed resolver performance data to normalize again. The incident is small and focused enough to understand but large enough to matter: one wrong clock choice turned an internal measurement into bad operational state.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Time looks simple when it stays in the background. A request starts, a timestamp is written, a reservation expires, a job runs, a report asks for yesterday. The trouble begins when one time value is asked to answer all of those questions at once.</p>
+<p>Production systems need a more careful model. Durations need clocks that measure elapsed work. Events need stable instants. State changes need owners and guarded transitions. User-facing dates need zones, calendars, and business rules. Scheduled work needs workflow state, retry behavior, and observation. Ambiguous outcomes need reconciliation.</p>
+<p>That is the shape of engineering beyond the happy path for time. The design chooses what kind of time a decision depends on, what authority that time value has, and what happens when the answer is late, repeated, corrected, or incomplete. Once those choices are explicit, time stops being a hidden assumption and becomes part of the system's behavior.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

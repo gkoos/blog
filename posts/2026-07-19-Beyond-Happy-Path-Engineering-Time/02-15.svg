@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Time-sensitive workflows need signals around delay, boundaries, and ordering</title>
+  <desc id="desc">A time-sensitive workflow emits signals for clock health, backlog age, boundary decisions, stale writes, and log delay.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Expose the pressure around time decisions</text>
+  <text x="480" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The system should show lateness, boundary cases, and stale decisions as they happen</text>
+
+  <g filter="url(#shadow)">
+    <rect x="72" y="126" width="240" height="86" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="192" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#20313a">Clock health</text>
+    <text x="192" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">skew by host or runtime</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="360" y="126" width="240" height="86" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="480" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#20313a">Work age</text>
+    <text x="480" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">job lag, queue age, event age</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="648" y="126" width="240" height="86" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="768" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#20313a">Boundary pressure</text>
+    <text x="768" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">near-deadline records</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="214" y="254" width="240" height="86" rx="8" fill="#ffffff" stroke="#8a6f33" stroke-width="2"/>
+    <text x="334" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#20313a">State outcomes</text>
+    <text x="334" y="312" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">expired, skipped, stale write</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="506" y="254" width="240" height="86" rx="8" fill="#ffffff" stroke="#8a6f33" stroke-width="2"/>
+    <text x="626" y="286" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#20313a">Evidence delay</text>
+    <text x="626" y="312" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">log ingestion vs event time</text>
+  </g>
+
+  <text x="480" y="386" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">Observe the assumptions the code depends on, not only the final success rate</text>
+</svg>
