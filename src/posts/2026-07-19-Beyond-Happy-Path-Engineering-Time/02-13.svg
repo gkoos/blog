@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Scheduled work should be processed as claimed batches</title>
+  <desc id="desc">A scheduler starts work, a worker claims a bounded batch, processes it, records progress, and continues with the next batch.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2f4858"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Make the batch the reliable unit</text>
+  <text x="480" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The durable record is the batch that was claimed, processed, and checkpointed</text>
+
+  <g filter="url(#shadow)">
+    <rect x="62" y="164" width="136" height="78" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="130" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">scheduler</text>
+    <text x="130" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">starts a run</text>
+  </g>
+
+  <line x1="210" y1="203" x2="278" y2="203" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="292" y="164" width="136" height="78" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="360" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">claim batch</text>
+    <text x="360" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">bounded work</text>
+  </g>
+
+  <line x1="440" y1="203" x2="508" y2="203" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="522" y="164" width="136" height="78" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="590" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">process</text>
+    <text x="590" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">safe retries</text>
+  </g>
+
+  <line x1="670" y1="203" x2="738" y2="203" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="752" y="164" width="146" height="78" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="825" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">checkpoint</text>
+    <text x="825" y="218" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">record progress</text>
+  </g>
+
+  <path d="M825 252 C825 315, 360 315, 360 253" fill="none" stroke="#8a6f33" stroke-width="2.5" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+  <text x="590" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#53646d">continue with the next batch at a controlled rate</text>
+
+  <text x="480" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#20313a">A late run catches up through the same workflow in controlled pieces</text>
+</svg>

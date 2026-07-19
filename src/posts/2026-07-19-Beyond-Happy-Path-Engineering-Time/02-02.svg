@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Different time questions need different time tools</title>
+  <desc id="desc">A table showing that elapsed duration, event timestamps, update ordering, reservation state, and billing days each need a different kind of time model.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="50" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Time is several different tools</text>
+  <text x="480" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The right answer depends on the decision being made</text>
+
+  <g filter="url(#shadow)">
+    <rect x="80" y="110" width="800" height="260" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+
+    <rect x="80" y="110" width="800" height="52" rx="8" fill="#2f4858"/>
+    <path d="M 80 154 H 880 V 162 H 80 Z" fill="#2f4858"/>
+    <text x="136" y="143" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Question</text>
+    <text x="540" y="143" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#ffffff">Better tool</text>
+
+    <line x1="472" y1="110" x2="472" y2="370" stroke="#d7dde1" stroke-width="2"/>
+    <line x1="80" y1="214" x2="880" y2="214" stroke="#d7dde1" stroke-width="1"/>
+    <line x1="80" y1="266" x2="880" y2="266" stroke="#d7dde1" stroke-width="1"/>
+    <line x1="80" y1="318" x2="880" y2="318" stroke="#d7dde1" stroke-width="1"/>
+
+    <text x="120" y="196" font-family="Arial, sans-serif" font-size="16" fill="#20313a">How long did this take?</text>
+    <text x="512" y="196" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">monotonic duration</text>
+
+    <text x="120" y="248" font-family="Arial, sans-serif" font-size="16" fill="#20313a">When did the user click?</text>
+    <text x="512" y="248" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">wall-clock timestamp</text>
+
+    <text x="120" y="300" font-family="Arial, sans-serif" font-size="16" fill="#20313a">Which update wins?</text>
+    <text x="512" y="300" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">version, offset, or causal rule</text>
+
+    <text x="120" y="352" font-family="Arial, sans-serif" font-size="16" fill="#20313a">What day is this invoice for?</text>
+    <text x="512" y="352" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">business calendar</text>
+  </g>
+</svg>

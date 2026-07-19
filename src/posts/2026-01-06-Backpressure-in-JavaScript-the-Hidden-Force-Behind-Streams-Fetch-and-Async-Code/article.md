@@ -15,6 +15,8 @@ We all know JavaScript's asynchronous model. `async/await`, `Promises`, and stre
 
 The answer lies in a concept many developers have never heard by name: *backpressure*. Backpressure is the system-level feedback mechanism that allows a consumer to slow down a producer when it's producing data faster than the consumer can handle. Without it, your asynchronous tasks wouldn't just run concurrently, they'd pile up, creating unbounded queues in memory and ultimately breaking your application.
 
+If you want to connect this to production failure handling at service boundaries, see [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) and [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/).
+
 In JavaScript, backpressure exists in multiple places: Node.js streams, the Fetch API, Web Streams, and even async loops over large datasets. But it can be tricky. The language gives you the tools: `ReadableStream`, `WritableStream`, stream events like `drain` - but it doesn't enforce correct usage. And many developers end up ignoring these signals, mostly because the code "just works" on small datasets. Then the data grows, the load increases, and suddenly your app is struggling to keep up: crashes, OOMs, and latency spikes seem to come out of nowhere.
 
 This article will unpack what backpressure really is, why it matters in JavaScript, and how to write async code that respects it. By the end, you'll see that backpressure isn't a limitation, it's a feature of well-behaved systems, and understanding it can save you from countless production headaches.

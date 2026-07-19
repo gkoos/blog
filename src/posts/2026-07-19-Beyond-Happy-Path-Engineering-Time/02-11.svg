@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="450" viewBox="0 0 960 450" role="img" aria-labelledby="title desc">
+  <title id="title">Competing writes should go through the owner of the state</title>
+  <desc id="desc">Payment completion and expiration both attempt to update a reservation. The reservation state rule checks the current state and allows only one valid transition.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,3 L0,6 Z" fill="#2f4858"/>
+    </marker>
+  </defs>
+
+  <rect width="960" height="450" fill="#f7f4ee"/>
+
+  <text x="480" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">The state owner decides the race</text>
+  <text x="480" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Timestamps can describe attempts; the reservation rule controls which write is valid</text>
+
+  <g filter="url(#shadow)">
+    <rect x="82" y="128" width="220" height="70" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="192" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">Payment completes</text>
+    <text x="192" y="181" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">attempt: complete reservation</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="82" y="252" width="220" height="70" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="192" y="282" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">Deadline passes</text>
+    <text x="192" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">attempt: expire reservation</text>
+  </g>
+
+  <line x1="314" y1="163" x2="426" y2="208" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="314" y1="287" x2="426" y2="242" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="440" y="176" width="246" height="98" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="563" y="209" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#20313a">Reservation rule</text>
+    <text x="563" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">read current state</text>
+    <text x="563" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">apply one allowed transition</text>
+  </g>
+
+  <line x1="700" y1="206" x2="792" y2="174" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="700" y1="244" x2="792" y2="276" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="806" y="130" width="102" height="58" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="857" y="164" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">completed</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="806" y="262" width="102" height="58" rx="8" fill="#ffffff" stroke="#58724f" stroke-width="2"/>
+    <text x="857" y="296" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">expired</text>
+  </g>
+
+  <text x="480" y="372" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">A losing write becomes a no-op or reconciliation case</text>
+</svg>

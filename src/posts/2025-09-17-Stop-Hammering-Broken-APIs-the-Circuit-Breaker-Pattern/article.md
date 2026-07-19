@@ -16,6 +16,8 @@ Modern applications rarely live in isolation. A single page load might involve c
 
 What happens if one of these services slows down or starts failing? Without safeguards, your app may keep retrying, queuing up requests, or waiting on timeouts. The result: wasted resources, frustrated users, and sometimes cascading failures that spread from one misbehaving service into the rest of your system.
 
+If you want a broader system-design view of these failure modes, see [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) and its companion [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/).
+
 This is where the *circuit breaker pattern* comes in. Inspired by electrical circuits, a software circuit breaker "opens" once failures reach a threshold. While the breaker is open, calls to the failing service are blocked immediately, giving it time to recover and protecting the rest of the system. After a cooldown period, the breaker closes again and normal traffic resumes.
 
 Circuit breakers are especially useful in multi-endpoint pipelines - scenarios where one failing dependency can cause an entire chain of requests to collapse. Think of:

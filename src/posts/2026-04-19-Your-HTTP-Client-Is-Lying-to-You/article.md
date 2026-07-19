@@ -17,6 +17,8 @@ The usual response is to harden the client: add retries, tune timeouts. Maybe ad
 
 But in practice, these patterns can interact in surprising ways. Sometimes they help. Sometimes they quietly make latency and reliability worse. To show this, we will run a few controlled experiments under realistic chaos conditions. The goal here is not a deep analysis, just a short, practical tour of a few counterintuitive outcomes I observed while running controlled chaos scenarios, plus a few recipes for deciding what to tune next.
 
+For the architectural perspective behind these client-side tradeoffs, see [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) and [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/).
+
 ## Welcome to the Arena
 
 We will use [ffetch-demo](https://fetch-kit.github.io/ffetch-demo/), a browser-based chaos arena. Originally built to compare different HTTP clients under identical network conditions, it also makes a great sandbox for testing different resilience patterns and configurations against the same synthetic network chaos mix. We define the network behavior by adding chaos rules (latency, random failures, rate limits, etc.) to the transport layer, then run a repeatable workload against a test endpoint with a predefined set of http clients, and compare reliability scores, error patterns, and latency side-by-side. The chaos is deterministic and repeatable, but also randomized within configured bounds, so you can see how different patterns behave under the same conditions, but with some variability in the exact numbers. The goal is to show directional trends and tradeoffs, not exact values.

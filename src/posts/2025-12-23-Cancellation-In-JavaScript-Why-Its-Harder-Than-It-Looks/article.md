@@ -17,6 +17,8 @@ A user navigates away, a component unmounts, a newer request supersedes an older
 
 In practice, we reach for familiar patterns: `Promise.race()` with a timeout, ignoring the result when it eventually arrives, or wiring up an `AbortController` and assuming the problem is solved. Often this appears to work, until the application starts leaking resources, performing late side effects, or behaving inconsistently under load.
 
+For a broader resilience framing of timeout budgets, retries, and ambiguous outcomes across service boundaries, see [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) and [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/).
+
 The underlying, fundamental issue is: **JavaScript does not provide task cancellation as a primitive**. Once asynchronous work has been scheduled, there is no general mechanism to forcibly stop it. Promises, callbacks, and async functions represent results and continuations, not ownership of the underlying execution.
 
 This creates a mismatch between intent and reality: developers think in terms of "stopping work", but the language operates in terms of letting work run to completion and optionally reacting to its outcome. As a result, many so-called cancellation techniques merely stop waiting for a result rather than stopping the work itself.

@@ -12,6 +12,8 @@ Chaos testing usually brings Netflix or Amazon to mind: production services deli
 
 But controlled chaos tests in dev or staging can catch problems earlier, improve resilience, and prevent production surprises - all without tearing down your infrastructure.
 
+For a system-design perspective on why these experiments matter, see [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) and [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/).
+
 ## What Real Developers Are Doing
 
 I recently asked developers on Reddit about chaos testing in everyday dev/QA environments. Key takeaways:

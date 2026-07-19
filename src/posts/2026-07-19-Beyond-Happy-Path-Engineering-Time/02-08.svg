@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">User-facing time carries business meaning</title>
+  <desc id="desc">The same instant can have different meanings depending on the time zone, local date, and business rule attached to it.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">User-facing time needs context</text>
+  <text x="480" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">An instant, a local clock reading, and a business rule answer different questions</text>
+
+  <g filter="url(#shadow)">
+    <rect x="88" y="120" width="228" height="182" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="202" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#20313a">Instant</text>
+    <text x="202" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">2026-03-29</text>
+    <text x="202" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">00:30 UTC</text>
+    <text x="202" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">good for storage</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="366" y="120" width="228" height="182" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="480" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#20313a">Local time</text>
+    <text x="480" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">01:30</text>
+    <text x="480" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">Europe/London</text>
+    <text x="480" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">good for display</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="644" y="120" width="228" height="182" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="758" y="158" text-anchor="middle" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#20313a">Business rule</text>
+    <text x="758" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">delivery cutoff</text>
+    <text x="758" y="228" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">billing day</text>
+    <text x="758" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">good for decisions</text>
+  </g>
+
+  <rect x="188" y="342" width="584" height="42" rx="8" fill="#ffffff" stroke="#b9c1c7"/>
+  <text x="480" y="368" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">The product decision needs the rule, not only the timestamp</text>
+</svg>
