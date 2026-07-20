@@ -1293,5 +1293,25 @@
         
       </item>
     
+      <item>
+        <title>chaos-proxy 3.4.0 and chaos-proxy-go 0.6.0, plus CI upgrades across fetch-kit</title>
+        <link>https://blog.gaborkoos.com/posts/2026-07-20-verbose-observability-and-ci-upgrades-across-fetch-kit/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-07-20-verbose-observability-and-ci-upgrades-across-fetch-kit/</guid>
+        <pubDate>Mon, 20 Jul 2026 00:00:00 GMT</pubDate>
+
+        <description>Both chaos proxies gain structured --verbose observability, and every fetch-kit repo moves its release automation to a GitHub App with fixed Discord announcements.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>go</category>
+        
+        <category>fetch-kit</category>
+        
+      </item>
+    
   </channel>
 </rss>
