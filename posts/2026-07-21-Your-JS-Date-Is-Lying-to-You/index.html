@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your JS Date Is Lying to You</title>
+  <meta name="description" content="The built-in Date API is full of traps: unreliable parsing, mutation, timezone confusion, and broken arithmetic. Here&#39;s what it&#39;s actually doing, and how Temporal finally fixes it.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your JS Date Is Lying to You">
+  <meta property="og:description" content="The built-in Date API is full of traps: unreliable parsing, mutation, timezone confusion, and broken arithmetic. Here&#39;s what it&#39;s actually doing, and how Temporal finally fixes it.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Your JS Date Is Lying to You">
+  <meta name="twitter:description" content="The built-in Date API is full of traps: unreliable parsing, mutation, timezone confusion, and broken arithmetic. Here&#39;s what it&#39;s actually doing, and how Temporal finally fixes it.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Your JS Date Is Lying to You</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-07-21T00:00:00.000Z">Tue Jul 21 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">dates</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">temporal</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">... is lying to you</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Run this in your browser console:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> d1 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d1<span class="token punctuation">.</span><span class="token function">getDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<p>If you are in a timezone west of UTC, you will see <code>20</code>, not <code>21</code>. The string looks unambiguous, but <code>Date</code> parsed it as UTC midnight, then <code>getDate()</code> converted to your local time and moved the clock back. You asked for July 21st, but got July 20th.</p>
+<p>Or try the constructor directly:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> d2 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token number">2026</span><span class="token punctuation">,</span> <span class="token number">7</span><span class="token punctuation">,</span> <span class="token number">21</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d2<span class="token punctuation">.</span><span class="token function">toDateString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// "Fri Aug 21 2026"</span>
+</code></pre>
+<p>Months are 0-indexed, so <code>7</code> is August, not July. You probably asked for July 21st and got August 21st.</p>
+<p>And if you needed a reminder that <code>Date</code> objects are mutable:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> deadline <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21'</span><span class="token punctuation">)</span>
+deadline<span class="token punctuation">.</span><span class="token function">setDate</span><span class="token punctuation">(</span><span class="token number">32</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>deadline<span class="token punctuation">)</span> <span class="token comment">// 2026-08-01</span>
+</code></pre>
+<p>No error, just silent rollover.</p>
+<p>These are default behavior of the most-used date API in the world, quietly corrupting date logic in production applications for thirty years. <code>Date</code> was written in ten days in 1995, modeled closely on the Java <code>java.util.Date</code> class (which Java later deprecated). The web grew around it, frameworks worked around it, and the traps became invisible because everyone assumed the API made sense.</p>
+<p>This post works through the main ways <code>Date</code> misleads you - parsing, mutation, timezones, arithmetic, and serialization - and shows how the <code>Temporal</code> API, now available in modern runtimes, fixes each one. Along the way, it also covers safe patterns for code that is still stuck on <code>Date</code> and cannot migrate yet.</p>
+<h2 id="parsing-is-unreliable" tabindex="-1"><a class="header-anchor" href="#parsing-is-unreliable">Parsing Is Unreliable</a></h2>
+<p>The <a href="https://tc39.es/ecma262/#sec-date-time-string-format">ECMAScript spec</a> says <code>new Date(string)</code> must support one format: ISO 8601 date-time strings like <code>&quot;2026-07-21T12:00:00Z&quot;</code>, everything else is implementation-defined. In practice every engine accepts a wide range of informal strings — <code>&quot;July 21, 2026&quot;</code>, <code>&quot;21/07/2026&quot;</code>, <code>&quot;07-21-2026&quot;</code>, but they don't agree on all of them, and the spec does not require them to.</p>
+<p>That sounds like an edge case until you hit the most common one: a plain date string.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21'</span><span class="token punctuation">)</span>   <span class="token comment">// parsed as UTC midnight</span>
+<span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026/07/21'</span><span class="token punctuation">)</span>   <span class="token comment">// parsed as local midnight (or Invalid Date in some engines)</span>
+<span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'July 21 2026'</span><span class="token punctuation">)</span> <span class="token comment">// parsed as local midnight</span>
+</code></pre>
+<p>The ISO date-only format <code>YYYY-MM-DD</code> is treated as UTC by the spec. All other date strings are treated as local time, if they parse at all. So two strings that look functionally identical to a human can produce timestamps twelve hours apart depending on which separator you happened to use. The first one will shift dates when you call <code>getDate()</code>, <code>getMonth()</code>, or any other local-time method while the user is outside UTC. The second may throw <code>Invalid Date</code> in one runtime and succeed in another.</p>
+<p><code>Invalid Date</code> is its own problem. <code>Date</code> does not throw on a bad string:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> d <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'not a date'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span>           <span class="token comment">// Invalid Date</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">isNaN</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">)</span>    <span class="token comment">// true</span>
+</code></pre>
+<p>The object is constructed. It breaks later, silently, when you try to use the value - typically as a <code>NaN</code> that propagates through arithmetic, or as the string <code>&quot;Invalid Date&quot;</code> that ends up stored in a database or sent to an API.</p>
+<p>This is why nearly every production codebase that deals seriously with dates ends up reaching for a library. <a href="https://date-fns.org/">date-fns</a>, <a href="https://day.js.org/">dayjs</a>, and <a href="https://moment.github.io/luxon/">luxon</a> all provide strict parsing functions that throw explicitly when a string does not match the expected format. That behavior is what <code>Date</code> should have had from the start.</p>
+<p><a href="https://tc39.es/proposal-temporal/"><code>Temporal</code></a> is JavaScript's next-generation built-in date and time API (<code>Temporal.*</code>), designed to replace the sharp edges of <code>Date</code>. At the time of writing, its normative text is still maintained in the proposal repository while final ECMA-262 publication catches up, but engines and polyfills can still implement it because the Stage 4 semantics are already fixed. <code>Temporal.PlainDate.from('2026-07-21')</code> parses one format and always means a calendar date with no timezone involved. <code>Temporal.Instant.from('2026-07-21T00:00:00Z')</code> requires an explicit UTC offset. Ambiguous input becomes a parse error instead of a silent timezone shift.</p>
+<p>That closes the parsing story. For the next sections, we stay on <code>Date</code> because most existing codebases still run on it, and these bugs are where production incidents usually happen. <code>Temporal</code> appears as a reference model for safer semantics, not as an assumption that every project can migrate immediately.</p>
+<h2 id="0-based-months-and-mutation-break-assumptions" tabindex="-1"><a class="header-anchor" href="#0-based-months-and-mutation-break-assumptions">0-Based Months and Mutation Break Assumptions</a></h2>
+<p>Even when you construct a <code>Date</code> correctly, month indexing and mutation rules still create production bugs.</p>
+<p>As shown in the intro example (<code>new Date(2026, 7, 21)</code>), constructor month values are 0-based, so <code>7</code> means August, creating round-trip errors:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">toApiDateParts</span><span class="token punctuation">(</span><span class="token parameter">d</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">return</span> <span class="token punctuation">{</span>
+		<span class="token literal-property property">year</span><span class="token operator">:</span> d<span class="token punctuation">.</span><span class="token function">getFullYear</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+		<span class="token literal-property property">month</span><span class="token operator">:</span> d<span class="token punctuation">.</span><span class="token function">getMonth</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token comment">// returns 0..11</span>
+		<span class="token literal-property property">day</span><span class="token operator">:</span> d<span class="token punctuation">.</span><span class="token function">getDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+	<span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">toApiDateParts</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-12-15T00:00:00Z'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// { year: 2026, month: 11, day: 15 }</span>
+</code></pre>
+<p>If another service expects <code>month: 12</code>, your December data is now November data.</p>
+<p>Mutation makes this worse because helper functions can modify caller-owned values without signaling it:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">addBusinessDays</span><span class="token punctuation">(</span><span class="token parameter">date<span class="token punctuation">,</span> days</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token comment">// Mutates input object</span>
+	date<span class="token punctuation">.</span><span class="token function">setDate</span><span class="token punctuation">(</span>date<span class="token punctuation">.</span><span class="token function">getDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> days<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> date
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> invoiceDate <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T00:00:00Z'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> dueDate <span class="token operator">=</span> <span class="token function">addBusinessDays</span><span class="token punctuation">(</span>invoiceDate<span class="token punctuation">,</span> <span class="token number">14</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>invoiceDate<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-08-04T00:00:00.000Z</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>dueDate<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">// 2026-08-04T00:00:00.000Z</span>
+</code></pre>
+<p>Many teams discover this only after seeing audit fields or cache keys &quot;randomly&quot; drift.</p>
+<p>Overflow normalization adds another hidden branch to your logic:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> renewal <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-01-31T00:00:00Z'</span><span class="token punctuation">)</span>
+renewal<span class="token punctuation">.</span><span class="token function">setMonth</span><span class="token punctuation">(</span>renewal<span class="token punctuation">.</span><span class="token function">getMonth</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>renewal<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// 2026-03-03T00:00:00.000Z</span>
+</code></pre>
+<p>Your intent was &quot;next month&quot;. The runtime result was &quot;plus a month, then normalize invalid day.&quot; That can be acceptable for some domains and disastrous for billing, compliance, or reporting.</p>
+<p><code>Temporal</code> addresses all three pain points directly: clearer type boundaries, one-based calendar fields in <code>PlainDate</code>, and immutable operations that return new values.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> invoiceDate <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>PlainDate<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'2026-07-21'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> dueDate <span class="token operator">=</span> invoiceDate<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">days</span><span class="token operator">:</span> <span class="token number">14</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>invoiceDate<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-07-21</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>dueDate<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">// 2026-08-04</span>
+</code></pre>
+<p>The original value stays unchanged, and the intent is visible in the code.</p>
+<h2 id="timezones-and-dst-turn-simple-logic-into-incidents" tabindex="-1"><a class="header-anchor" href="#timezones-and-dst-turn-simple-logic-into-incidents">Timezones and DST Turn Simple Logic Into Incidents</a></h2>
+<p><code>Date</code> stores an instant (milliseconds since Unix epoch, UTC), but most everyday methods (<code>getHours</code>, <code>getDate</code>, <code>toString</code>) project that instant into the host machine's local timezone. Bugs appear when code mixes UTC and local operations without noticing.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> d <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T00:30:00Z'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-07-21T00:30:00.000Z</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">getUTCDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment">// 21</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">getDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">// may be 20 in timezones west of UTC</span>
+</code></pre>
+<p>Same instant, different calendar day, depending on which getter you call. This is a common source of &quot;off by one day&quot; bugs in reports and date filters.</p>
+<p>DST adds another layer. In DST-observing timezones, some local days are 23 hours and some are 25.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// Example outcome in America/New_York around spring-forward transition</span>
+<span class="token keyword">const</span> start <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-03-08T00:00:00-05:00'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> end <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-03-09T00:00:00-04:00'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">(</span>end <span class="token operator">-</span> start<span class="token punctuation">)</span> <span class="token operator">/</span> <span class="token punctuation">(</span><span class="token number">1000</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">60</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// 23</span>
+</code></pre>
+<p>If billing, rate limits, retention windows, or SLAs assume every local day is 24 hours, these transitions produce subtle data drift.</p>
+<p>Serialization makes the confusion travel between systems:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> d <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T15:00:00-04:00'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">// local representation</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>  <span class="token comment">// UTC representation</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>d<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// same as ISO string</span>
+</code></pre>
+<p><code>JSON.stringify</code> always emits UTC ISO strings. If another service later interprets that value as a local wall-clock time, the original timezone intent is gone.</p>
+<p>Safe <code>Date</code> rule for distributed systems: persist and transmit instants in UTC (<code>toISOString()</code>), then attach an explicit IANA timezone (<code>America/New_York</code>, <code>Europe/Berlin</code>) when you need calendar semantics.</p>
+<p><code>Temporal</code> splits these concepts into different types so mistakes are harder to make:</p>
+<ul>
+<li><code>Temporal.Instant</code> for machine time points</li>
+<li><code>Temporal.ZonedDateTime</code> for timezone-aware calendar math</li>
+<li><code>Temporal.PlainDate</code> for date-only values with no timezone</li>
+</ul>
+<p>That type separation removes a large class of local-vs-UTC mix-ups that <code>Date</code> makes easy.</p>
+<h2 id="arithmetic-and-duration-logic-are-fragile-by-default" tabindex="-1"><a class="header-anchor" href="#arithmetic-and-duration-logic-are-fragile-by-default">Arithmetic and Duration Logic Are Fragile by Default</a></h2>
+<p><code>Date</code> has no first-class duration type, so most code falls back to raw millisecond math:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> msPerDay <span class="token operator">=</span> <span class="token number">24</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span>
+<span class="token keyword">const</span> expiresAt <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>start<span class="token punctuation">.</span><span class="token function">getTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">30</span> <span class="token operator">*</span> msPerDay<span class="token punctuation">)</span>
+</code></pre>
+<p>That looks harmless, but it bakes in assumptions that are often false in local-time workflows (DST days are not always 24 hours) and hard to audit in business logic.</p>
+<p>Calendar arithmetic is where these shortcuts break fastest. &quot;Add one month&quot; is not equivalent to &quot;add 30 days&quot; and can diverge by several days around month boundaries.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> jan31 <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-01-31T00:00:00Z'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> plus30Days <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>jan31<span class="token punctuation">.</span><span class="token function">getTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">30</span> <span class="token operator">*</span> <span class="token number">24</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> plus1Month <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>jan31<span class="token punctuation">)</span>
+plus1Month<span class="token punctuation">.</span><span class="token function">setUTCMonth</span><span class="token punctuation">(</span>plus1Month<span class="token punctuation">.</span><span class="token function">getUTCMonth</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>plus30Days<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-03-02T00:00:00.000Z</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>plus1Month<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-03-03T00:00:00.000Z</span>
+</code></pre>
+<p>Both are &quot;reasonable&quot; operations. Neither means the same thing. If your domain says &quot;next billing month&quot;, milliseconds are the wrong unit.</p>
+<p>Even simple comparisons can blur intent when everything is expressed as numbers:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> ageMs <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> createdAt<span class="token punctuation">.</span><span class="token function">getTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>ageMs <span class="token operator">></span> <span class="token number">90</span> <span class="token operator">*</span> <span class="token number">24</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1000</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token function">archive</span><span class="token punctuation">(</span>record<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This mixes machine-time thresholds with calendar expectations. Around DST and timezone conversions, teams start seeing records archived earlier or later than product owners expect.</p>
+<p>Safe <code>Date</code> pattern when migration is not possible:</p>
+<ul>
+<li>use UTC for machine-time durations (timeouts, TTLs, retry backoff)</li>
+<li>use explicit calendar logic for date-based rules (monthly renewals, &quot;same day next month&quot;)</li>
+<li>centralize date math helpers and test them against DST and month-end cases</li>
+</ul>
+<p><code>Temporal</code> makes this separation explicit by giving you dedicated types for both instants and durations:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> start <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>ZonedDateTime<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token string">'2026-01-31T00:00:00+00:00[UTC]'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> nextMonth <span class="token operator">=</span> start<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">months</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> plus30Days <span class="token operator">=</span> start<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">days</span><span class="token operator">:</span> <span class="token number">30</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>nextMonth<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-02-28T00:00:00+00:00[UTC]</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>plus30Days<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// 2026-03-02T00:00:00+00:00[UTC]</span>
+</code></pre>
+<p>The code now states intent directly: calendar month arithmetic versus day-count arithmetic.</p>
+<h2 id="serialization-and-storage-quietly-drop-intent" tabindex="-1"><a class="header-anchor" href="#serialization-and-storage-quietly-drop-intent">Serialization and Storage Quietly Drop Intent</a></h2>
+<p>By the time a date leaves your process, the hardest problem is no longer parsing but preserving meaning across boundaries. With <code>Date</code>, the value carries an instant, but many business workflows care about local calendar intent: &quot;run at 9:00 in Berlin,&quot; &quot;invoice date is July 21 in tenant timezone,&quot; or &quot;daily reset at local midnight.&quot;</p>
+<p>A plain JSON round-trip often erases that intent:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> payload <span class="token operator">=</span> <span class="token punctuation">{</span>
+	<span class="token literal-property property">scheduledAt</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T09:00:00-04:00'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>payload<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+<span class="token comment">// {"scheduledAt":"2026-07-21T13:00:00.000Z"}</span>
+</code></pre>
+<p>The offset <code>-04:00</code> is gone. You still have the same instant, but not the original wall-clock context.</p>
+<p>The same issue shows up in storage layers:</p>
+<pre class="language-js"><code class="language-js">localStorage<span class="token punctuation">.</span><span class="token function">setItem</span><span class="token punctuation">(</span><span class="token string">'dueDate'</span><span class="token punctuation">,</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> raw <span class="token operator">=</span> localStorage<span class="token punctuation">.</span><span class="token function">getItem</span><span class="token punctuation">(</span><span class="token string">'dueDate'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> loaded <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>raw<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>loaded<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// rendered in current machine timezone, which may differ from where it was created</span>
+</code></pre>
+<p>Move the data between regions, or open it on a laptop with a different timezone, and &quot;same date&quot; features start drifting by hours or even by a day.</p>
+<p>API contracts can amplify this drift when they mix ambiguous field names and inconsistent semantics:</p>
+<ul>
+<li><code>createdAt</code>: instant in UTC</li>
+<li><code>businessDate</code>: calendar date in tenant timezone</li>
+<li><code>runAt</code>: local wall-clock time tied to a specific IANA zone</li>
+</ul>
+<p>If all three are serialized as plain ISO strings without explicit schema rules, bugs are guaranteed.</p>
+<p>Safe transport pattern with <code>Date</code>:</p>
+<ul>
+<li>for instants, send UTC ISO strings (<code>toISOString()</code>)</li>
+<li>for calendar dates, send date-only strings (<code>YYYY-MM-DD</code>) as plain data, not <code>Date</code> objects</li>
+<li>for local-time schedules, send both local time and timezone id (<code>Europe/Berlin</code>)</li>
+<li>validate and normalize at service boundaries, not deep inside business logic</li>
+</ul>
+<p><code>Temporal</code> maps cleanly to this contract style:</p>
+<ul>
+<li><code>Temporal.Instant</code> for UTC machine timestamps</li>
+<li><code>Temporal.PlainDate</code> for date-only business fields</li>
+<li><code>Temporal.ZonedDateTime</code> when timezone and wall-clock semantics must survive round-trips</li>
+</ul>
+<p>Serialization stops being a guessing game once the type matches the meaning.</p>
+<h2 id="temporal-in-real-projects%3A-adoption-without-a-big-bang-rewrite" tabindex="-1"><a class="header-anchor" href="#temporal-in-real-projects%3A-adoption-without-a-big-bang-rewrite">Temporal in Real Projects: Adoption Without a Big-Bang Rewrite</a></h2>
+<p>As <code>Temporal</code> seems to address many of the shortcomings of <code>Date</code>, at this point the natural question is: should you replace every <code>Date</code> right now?</p>
+<p>Usually, no.</p>
+<p>Most teams need a mixed model for a while:</p>
+<ul>
+<li>keep <code>Date</code> at interop edges that require it (legacy APIs, third-party SDKs, older libraries)</li>
+<li>use <code>Temporal</code> for new domain logic where correctness matters</li>
+<li>convert explicitly at boundaries instead of letting values drift implicitly</li>
+</ul>
+<p>That incremental approach avoids the riskiest migration pattern: touching every timestamp in the codebase at once.</p>
+<p>A practical rollout plan:</p>
+<ol>
+<li>Identify high-cost date paths first: billing cycles, reporting windows, retention policies, scheduling.</li>
+<li>Introduce small date utilities that expose intent (<code>toBusinessDate</code>, <code>toUtcInstant</code>, <code>nextBillingDate</code>).</li>
+<li>Implement those utilities with <code>Temporal</code> internally.</li>
+<li>Keep adapters for <code>Date</code> at API/database boundaries until dependent systems are updated.</li>
+<li>Add tests for DST transitions, month-end rollover, and timezone conversion invariants.</li>
+</ol>
+<p>Interop is straightforward when done explicitly:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// Date -> Temporal</span>
+<span class="token keyword">const</span> instant <span class="token operator">=</span> Temporal<span class="token punctuation">.</span>Instant<span class="token punctuation">.</span><span class="token function">fromEpochMilliseconds</span><span class="token punctuation">(</span>date<span class="token punctuation">.</span><span class="token function">getTime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment">// Temporal -> Date</span>
+<span class="token keyword">const</span> date <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>instant<span class="token punctuation">.</span>epochMilliseconds<span class="token punctuation">)</span>
+</code></pre>
+<p>For environments that do not yet provide native <code>Temporal</code>, use one of the <a href="https://www.npmjs.com/package/@js-temporal/polyfill">polyfills</a> and keep the same API surface. That lets you standardize semantics now and remove polyfill wiring later.</p>
+<p>Choose the model that matches the boundary and the risk profile:</p>
+<ul>
+<li><code>Date</code> remains a compatibility type.</li>
+<li><code>Temporal</code> becomes your correctness type.</li>
+</ul>
+<p>Defining those roles explicitly makes date logic simpler, safer, and easier to review.</p>
+<h2 id="practical-rules-for-date-code-you-still-have-to-maintain" tabindex="-1"><a class="header-anchor" href="#practical-rules-for-date-code-you-still-have-to-maintain">Practical Rules for Date Code You Still Have to Maintain</a></h2>
+<p>Many teams cannot switch everything to <code>Temporal</code> in one quarter. If your codebase still uses <code>Date</code> heavily, enforce a few hard rules and date bugs drop quickly.</p>
+<ol>
+<li>
+<p>Ban ambiguous parsing.
+Only accept strict input formats. Parse <code>YYYY-MM-DD</code> as a calendar date value, and parse instants with explicit offsets (<code>Z</code> or <code>+/-HH:mm</code>). Reject everything else.</p>
+</li>
+<li>
+<p>Separate instant fields from calendar fields in your schema.
+Use names that encode semantics, such as <code>createdAtUtc</code>, <code>businessDate</code>, <code>localRunTime</code>, and <code>timeZoneId</code>.</p>
+</li>
+<li>
+<p>Keep UTC for transport and storage.
+Persist instants as ISO UTC strings, and store timezone identifiers separately when wall-clock behavior matters.</p>
+</li>
+<li>
+<p>Never mutate a shared <code>Date</code> instance.
+Clone before modification in helper functions:</p>
+</li>
+</ol>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">addDaysImmutable</span><span class="token punctuation">(</span><span class="token parameter">date<span class="token punctuation">,</span> days</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+	<span class="token keyword">const</span> next <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>date<span class="token punctuation">)</span>
+	next<span class="token punctuation">.</span><span class="token function">setUTCDate</span><span class="token punctuation">(</span>next<span class="token punctuation">.</span><span class="token function">getUTCDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> days<span class="token punctuation">)</span>
+	<span class="token keyword">return</span> next
+<span class="token punctuation">}</span>
+</code></pre>
+<ol start="5">
+<li>
+<p>Centralize date math.
+Put all date arithmetic in one module with tests for DST boundaries, month-end rollover, leap years, and timezone conversions.</p>
+</li>
+<li>
+<p>Test with multiple timezones in CI.
+Run the same test suite at least in <code>UTC</code> and one DST-observing timezone. Many bugs only appear outside your local developer setup.</p>
+</li>
+<li>
+<p>Log both machine and calendar context in critical flows.
+When debugging production incidents, log the instant, timezone id, and derived local date/time used in business decisions.</p>
+</li>
+</ol>
+<p>These rules are boring by design. Boring date handling is what prevents expensive production surprises.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p><code>Date</code> survives because it is everywhere, not because it is safe (or even correct) by default. It mixes parsing ambiguity, mutable state, timezone projection, and normalization rules into one API, then asks application code to keep all of that straight under production load. <code>Temporal</code> fixes most of the pain by separating concerns, enforcing immutability, and providing explicit types for instants, calendar dates, and timezone-aware schedules. So the latter is the right choice for new code, and the former is a compatibility type that should be isolated behind adapters, and eventually retired.</p>
+<p>You do not need a full rewrite tomorrow, you need explicit semantics today.</p>
+<ul>
+<li>treat instants, calendar dates, and timezone-aware schedules as different data types</li>
+<li>enforce strict parsing and boundary validation</li>
+<li>isolate legacy <code>Date</code> usage behind adapters</li>
+<li>move high-risk business logic to <code>Temporal</code> as you touch it</li>
+</ul>
+<p>That approach works in real teams, with real constraints. It reduces incident risk immediately and creates a clear path away from the sharp edges of <code>Date</code>.</p>
+<hr>
+<p>Dates are not the only things lying to you in JavaScript. Other posts in the series:</p>
+<ul>
+<li><a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a></li>
+<li><a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a></li>
+<li><a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a></li>
+<li><a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a></li>
+<li><a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a></li>
+<li><a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your console.log Is Lying to You</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

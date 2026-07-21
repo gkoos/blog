@@ -1271,6 +1271,8 @@
         
         <category>software architecture</category>
         
+        <category>beyond happy path engineering</category>
+        
       </item>
     
       <item>
@@ -1291,6 +1293,8 @@
         
         <category>time</category>
         
+        <category>beyond happy path engineering</category>
+        
       </item>
     
       <item>
@@ -1310,6 +1314,26 @@
         <category>go</category>
         
         <category>fetch-kit</category>
+        
+      </item>
+    
+      <item>
+        <title>Your JS Date Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/</guid>
+        <pubDate>Tue, 21 Jul 2026 00:00:00 GMT</pubDate>
+
+        <description>The built-in Date API is full of traps: unreliable parsing, mutation, timezone confusion, and broken arithmetic. Here&#39;s what it&#39;s actually doing, and how Temporal finally fixes it.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>dates</category>
+        
+        <category>temporal</category>
+        
+        <category>... is lying to you</category>
         
       </item>
     
