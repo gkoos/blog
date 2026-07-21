@@ -11,6 +11,7 @@ tags:
 - distributed systems
 - software architecture
 - time
+- beyond happy path engineering
 ---
 *Most software is first built under unusually friendly conditions. On a developer machine, the database is nearby, the network is quiet, the service you need is running, the test user behaves sensibly, the clock moves forward, the queue drains, the deployment finishes, and the request succeeds. Those conditions are useful, they let us build the first version of a thing without having to worry about everything that can go wrong in production. Requests don't always succeed, networks are not always fast, databases don't always respond immediately, deployments are not instantaneous, users do not behave predictably, and dependencies have their own limits, maintenance windows, bugs, overloads, and bad days. A system designed only for the smooth path may work beautifully most of the time, but when reality bends away from that path, things fall apart.*
 
@@ -164,6 +165,8 @@ Daylight saving time is where this becomes visible to users. Some local times ne
 
 The practical habit is to **store the context with the time**. Store instants for events that already happened. Store local date, local time, and time zone when a future human appointment must keep its local meaning. Store billing periods, delivery windows, and reporting days as domain concepts instead of pretending they are only timestamps. UTC is a good way to represent instants. Product time also needs the rule that gives the instant meaning.
 
+If you write JavaScript, the built-in `Date` API makes most of these distinctions harder to maintain than they should be. [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/) covers the specific API-level traps: parsing ambiguity, mutation, local-vs-UTC method confusion, and where `Temporal` replaces them with explicit types.
+
 ### Time bugs spread quietly
 
 Time failures are often harder to recognize than outright crashes. A service may stay up, requests may keep flowing, and dashboards may show ordinary success rates while the system is making slightly wrong decisions. The bug is rarely announced as "the clock assumption is wrong." It arrives as a support ticket, a confusing state transition, a report that looks off by one day, or a cleanup job that seems to have touched the wrong records.
@@ -171,6 +174,14 @@ Time failures are often harder to recognize than outright crashes. A service may
 The shape often looks like this:
 
 ![Diagram: an early expiration creates stale cache state, confusing user state, and a misleading support trail](02-09.svg)
+
+A reader shared a clean example of this pattern on [Reddit](https://www.reddit.com/r/webdev/comments/1v1iz4z/comment/oyu4tuw/):
+
+> Every profile in a leaderboard I built gets cached for 12 hours and recomputes on the next request past that window. Fine, until I retuned one of the scoring weights. Rows that happened to refresh in the next few hours picked up the new weights, rows that had not yet hit their TTL kept showing scores computed under the old formula.
+>
+> For about half a day the leaderboard was quietly comparing two different scoring systems, and nothing in the logs said so, because every individual read looked correct in isolation.
+
+The bug came from a config change, and was not observable until someone noticed the rankings made no sense. Every cached entry was fresh within its own window, every recomputed entry was correct under the new weights. The inconsistency only existed between them.
 
 The hard part is that every symptom has a plausible local explanation. A stale cache can look like a cache invalidation bug. An early expiration can look like checkout logic. A report boundary can look like a query problem. Those explanations may even be partly true, which is what makes the investigation slippery. The time assumption sits underneath the visible behavior, shaping several parts of the system without looking like a single failing component.
 

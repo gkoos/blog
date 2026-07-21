@@ -247,3 +247,4 @@ Dependency tools are not the only place where clean abstractions can hide operat
 - [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/)
 - [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/)
 - [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)
+- [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/)

@@ -116,3 +116,4 @@ Resilience patterns are not the only things lying to you:
 - [Your Throttling Is Lying to You](/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/)
 - [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/)
 - [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)
+- [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/)
