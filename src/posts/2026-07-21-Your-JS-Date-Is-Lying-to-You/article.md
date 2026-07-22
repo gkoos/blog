@@ -387,6 +387,7 @@ You do not need a full rewrite tomorrow, you need explicit semantics today.
 
 That approach works in real teams, with real constraints. It reduces incident risk immediately and creates a clear path away from the sharp edges of `Date`.
 
+If you think you have mastered `Date`, try the excellent (unaffiliated) quiz at [https://jsdate.wtf/](https://jsdate.wtf/). You might be in for a surprise 😄
 ---
 
 Dates are not the only things lying to you in JavaScript. Other posts in the series:
