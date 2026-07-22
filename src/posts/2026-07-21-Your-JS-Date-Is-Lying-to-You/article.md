@@ -132,7 +132,7 @@ console.log(renewal.toISOString())
 // 2026-03-03T00:00:00.000Z
 ```
 
-Your intent was "next month". The runtime result was "plus a month, then normalize invalid day." That can be acceptable for some domains and disastrous for billing, compliance, or reporting.
+Your intent was "next month", the runtime result is "plus a month, then normalize invalid day". That can be acceptable for some domains and disastrous for billing, compliance, or reporting.
 
 Normalization also applies to constructor parts, including negative and zero values:
 
