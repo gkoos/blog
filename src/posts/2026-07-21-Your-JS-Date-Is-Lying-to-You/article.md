@@ -42,7 +42,7 @@ No error, just silent rollover.
 
 These are default behavior of the most-used date API in the world, quietly corrupting date logic in production applications for thirty years. `Date` was written in ten days in 1995, modeled closely on the Java `java.util.Date` class (which Java later deprecated). The web grew around it, frameworks worked around it, and the traps became invisible because everyone assumed the API made sense.
 
-This post works through the main ways `Date` misleads you - parsing, mutation, timezones, arithmetic, and serialization - and shows how the `Temporal` API, now available in modern runtimes, fixes each one. Along the way, it also covers safe patterns for code that is still stuck on `Date` and cannot migrate yet.
+This post works through the main ways `Date` misleads you - parsing, mutation, timezones, arithmetic, and serialization - and shows how the `Temporal` API, now available in most modern runtimes, fixes each one. Along the way, it also covers safe patterns for code that is still stuck on `Date` and cannot migrate yet.
 
 ## Parsing Is Unreliable
 
@@ -51,12 +51,21 @@ The [ECMAScript spec](https://tc39.es/ecma262/#sec-date-time-string-format) says
 That sounds like an edge case until you hit the most common one: a plain date string.
 
 ```js
-new Date('2026-07-21')   // parsed as UTC midnight
-new Date('2026/07/21')   // parsed as local midnight (or Invalid Date in some engines)
-new Date('July 21 2026') // parsed as local midnight
+console.log(new Date('2026-07-21'))   // parsed as UTC midnight
+console.log(new Date('2026/07/21'))   // parsed as local midnight (or Invalid Date in some engines)
+console.log(new Date('July 21 2026')) // parsed as local midnight
 ```
 
 The ISO date-only format `YYYY-MM-DD` is treated as UTC by the spec. All other date strings are treated as local time, if they parse at all. So two strings that look functionally identical to a human can produce timestamps twelve hours apart depending on which separator you happened to use. The first one will shift dates when you call `getDate()`, `getMonth()`, or any other local-time method while the user is outside UTC. The second may throw `Invalid Date` in one runtime and succeed in another.
+
+Another footgun: `Date()` and `new Date()` do not do the same thing.
+
+```js
+console.log(Date('2026-07-21'))      // current date-time string, input ignored
+console.log(new Date('2026-07-21'))  // parsed Date object: eg. Tue Jul 21 2026 01:00:00 GMT+0100 (British Summer Time)
+```
+
+Forgetting `new` changes the operation from parsing to formatting "now", which can quietly invalidate tests and debugging output.
 
 `Invalid Date` is its own problem. `Date` does not throw on a bad string:
 
@@ -72,7 +81,7 @@ This is why nearly every production codebase that deals seriously with dates end
 
 [`Temporal`](https://tc39.es/proposal-temporal/) is JavaScript's next-generation built-in date and time API (`Temporal.*`), designed to replace the sharp edges of `Date`. At the time of writing, its normative text is still maintained in the proposal repository while final ECMA-262 publication catches up, but engines and polyfills can still implement it because the Stage 4 semantics are already fixed. `Temporal.PlainDate.from('2026-07-21')` parses one format and always means a calendar date with no timezone involved. `Temporal.Instant.from('2026-07-21T00:00:00Z')` requires an explicit UTC offset. Ambiguous input becomes a parse error instead of a silent timezone shift.
 
-That closes the parsing story. For the next sections, we stay on `Date` because most existing codebases still run on it, and these bugs are where production incidents usually happen. `Temporal` appears as a reference model for safer semantics, not as an assumption that every project can migrate immediately.
+For the next sections, we stay on `Date` because most existing codebases still run on it, and these bugs are where production incidents usually happen. `Temporal` appears as a reference model for safer semantics, not as an assumption that every project can migrate immediately.
 
 ## 0-Based Months and Mutation Break Assumptions
 
@@ -125,6 +134,15 @@ console.log(renewal.toISOString())
 
 Your intent was "next month". The runtime result was "plus a month, then normalize invalid day." That can be acceptable for some domains and disastrous for billing, compliance, or reporting.
 
+Normalization also applies to constructor parts, including negative and zero values:
+
+```js
+console.log(new Date(2026, -1, 1).toISOString()) // 2025-12-01T00:00:00.000Z
+console.log(new Date(2026, 1, 0).toISOString())  // 2026-01-31T00:00:00.000Z
+```
+
+This behavior is sometimes useful for date arithmetic, but dangerous when accidental.
+
 `Temporal` addresses all three pain points directly: clearer type boundaries, one-based calendar fields in `PlainDate`, and immutable operations that return new values.
 
 ```js
@@ -175,6 +193,18 @@ console.log(JSON.stringify(d)) // same as ISO string
 ```
 
 `JSON.stringify` always emits UTC ISO strings. If another service later interprets that value as a local wall-clock time, the original timezone intent is gone.
+
+This is why `Date` cannot preserve input timezone intent. It stores an instant, not a "timezoneful" local timestamp. For example:
+
+```js
+const d = new Date('2000-01-01T00:00:00+20:00')
+console.log(d.getTimezoneOffset())
+// your machine's local offset, not +20:00
+```
+
+The `+20:00` changed how the input was interpreted into an instant, but that offset is not retained as date object metadata.
+
+Form controls add another sharp edge. When `valueAsDate` is supported and populated for `<input type="date">` and `<input type="time">`, it follows UTC-oriented semantics, which often surprises teams expecting local wall-clock behavior.
 
 Safe `Date` rule for distributed systems: persist and transmit instants in UTC (`toISOString()`), then attach an explicit IANA timezone (`America/New_York`, `Europe/Berlin`) when you need calendar semantics.
 
@@ -323,14 +353,19 @@ A practical rollout plan:
 Interop is straightforward when done explicitly:
 
 ```js
+const sourceDate = new Date('2026-07-21T00:00:00.000Z')
+
 // Date -> Temporal
-const instant = Temporal.Instant.fromEpochMilliseconds(date.getTime())
+const instant = Temporal.Instant.fromEpochMilliseconds(sourceDate.getTime())
 
 // Temporal -> Date
-const date = new Date(instant.epochMilliseconds)
+const roundTripDate = new Date(instant.epochMilliseconds)
+
+console.log(instant.toString())
+console.log(roundTripDate.toISOString())
 ```
 
-For environments that do not yet provide native `Temporal`, use one of the [polyfills](https://www.npmjs.com/package/@js-temporal/polyfill) and keep the same API surface. That lets you standardize semantics now and remove polyfill wiring later.
+For environments that do not yet provide native `Temporal`, use one of the [polyfills](https://www.npmjs.com/package/@js-temporal/polyfill) and keep the same API surface. That lets you standardize semantics now and remove polyfill wiring later. If bundle size is a concern, evaluate lighter alternatives and only ship the parts you need. In many apps this cost is still preferable to recurring production date bugs.
 
 Choose the model that matches the boundary and the risk profile:
 
@@ -344,7 +379,7 @@ Defining those roles explicitly makes date logic simpler, safer, and easier to r
 Many teams cannot switch everything to `Temporal` in one quarter. If your codebase still uses `Date` heavily, enforce a few hard rules and date bugs drop quickly.
 
 1. Ban ambiguous parsing.
-Only accept strict input formats. Parse `YYYY-MM-DD` as a calendar date value, and parse instants with explicit offsets (`Z` or `+/-HH:mm`). Reject everything else.
+Only accept strict input formats. Parse `YYYY-MM-DD` as a calendar date value, and parse instants with full ISO date-time plus explicit offsets (`Z` or `+/-HH:mm`). Reject everything else.
 
 2. Separate instant fields from calendar fields in your schema.
 Use names that encode semantics, such as `createdAtUtc`, `businessDate`, `localRunTime`, and `timeZoneId`.
