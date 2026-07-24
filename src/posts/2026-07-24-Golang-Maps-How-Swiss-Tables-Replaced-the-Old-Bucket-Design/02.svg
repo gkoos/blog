@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" role="img" aria-labelledby="title desc">
+  <title id="title">Swiss Table group and control word layout</title>
+  <desc id="desc">One Swiss Table group with eight control bytes and eight key-value slots, showing state and h2 fingerprint usage.</desc>
+
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #20313a; }
+      .subtitle { font: 16px Arial, sans-serif; fill: #53646d; }
+      .label { font: 700 14px Arial, sans-serif; fill: #20313a; }
+      .small { font: 13px Arial, sans-serif; fill: #43565f; }
+      .mono { font: 13px Consolas, Monaco, monospace; fill: #23343d; }
+      .cell { stroke: #2f4858; stroke-width: 1.3; }
+    </style>
+  </defs>
+
+  <rect width="1100" height="560" fill="#f7f4ee"/>
+
+  <text x="550" y="52" text-anchor="middle" class="title">Swiss Table Group Layout</text>
+  <text x="550" y="79" text-anchor="middle" class="subtitle">8 control bytes + 8 key slots + 8 value slots</text>
+
+  <g filter="url(#shadow)">
+    <rect x="70" y="110" width="960" height="390" rx="12" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+  </g>
+
+  <text x="120" y="148" class="label">Control bytes (one per slot)</text>
+  <text x="120" y="272" class="label">Key slots</text>
+  <text x="120" y="392" class="label">Value slots</text>
+
+  <g>
+    <rect x="250" y="170" width="90" height="56" rx="6" fill="#d9ecf7" class="cell"/>
+    <rect x="345" y="170" width="90" height="56" rx="6" fill="#d9ecf7" class="cell"/>
+    <rect x="440" y="170" width="90" height="56" rx="6" fill="#fbe3cc" class="cell"/>
+    <rect x="535" y="170" width="90" height="56" rx="6" fill="#d9ecf7" class="cell"/>
+    <rect x="630" y="170" width="90" height="56" rx="6" fill="#fbe3cc" class="cell"/>
+    <rect x="725" y="170" width="90" height="56" rx="6" fill="#d9ecf7" class="cell"/>
+    <rect x="820" y="170" width="90" height="56" rx="6" fill="#e7f2df" class="cell"/>
+    <rect x="915" y="170" width="90" height="56" rx="6" fill="#d9ecf7" class="cell"/>
+
+    <text x="295" y="194" text-anchor="middle" class="mono">h2=0x15</text>
+    <text x="390" y="194" text-anchor="middle" class="mono">h2=0x3a</text>
+    <text x="485" y="194" text-anchor="middle" class="mono">EMPTY</text>
+    <text x="580" y="194" text-anchor="middle" class="mono">h2=0x2c</text>
+    <text x="675" y="194" text-anchor="middle" class="mono">DELETED</text>
+    <text x="770" y="194" text-anchor="middle" class="mono">h2=0x15</text>
+    <text x="865" y="194" text-anchor="middle" class="mono">EMPTY</text>
+    <text x="960" y="194" text-anchor="middle" class="mono">h2=0x41</text>
+
+    <text x="295" y="213" text-anchor="middle" class="small">occupied</text>
+    <text x="390" y="213" text-anchor="middle" class="small">occupied</text>
+    <text x="485" y="213" text-anchor="middle" class="small">stop marker</text>
+    <text x="580" y="213" text-anchor="middle" class="small">occupied</text>
+    <text x="675" y="213" text-anchor="middle" class="small">tombstone</text>
+    <text x="770" y="213" text-anchor="middle" class="small">occupied</text>
+    <text x="865" y="213" text-anchor="middle" class="small">stop marker</text>
+    <text x="960" y="213" text-anchor="middle" class="small">occupied</text>
+  </g>
+
+  <g>
+    <rect x="250" y="290" width="90" height="52" rx="6" fill="#f3f8fb" class="cell"/>
+    <rect x="345" y="290" width="90" height="52" rx="6" fill="#f3f8fb" class="cell"/>
+    <rect x="440" y="290" width="90" height="52" rx="6" fill="#ffffff" class="cell"/>
+    <rect x="535" y="290" width="90" height="52" rx="6" fill="#f3f8fb" class="cell"/>
+    <rect x="630" y="290" width="90" height="52" rx="6" fill="#f3f8fb" class="cell"/>
+    <rect x="725" y="290" width="90" height="52" rx="6" fill="#f3f8fb" class="cell"/>
+    <rect x="820" y="290" width="90" height="52" rx="6" fill="#ffffff" class="cell"/>
+    <rect x="915" y="290" width="90" height="52" rx="6" fill="#f3f8fb" class="cell"/>
+
+    <text x="295" y="320" text-anchor="middle" class="mono">key0</text>
+    <text x="390" y="320" text-anchor="middle" class="mono">key1</text>
+    <text x="485" y="320" text-anchor="middle" class="mono">-</text>
+    <text x="580" y="320" text-anchor="middle" class="mono">key3</text>
+    <text x="675" y="320" text-anchor="middle" class="mono">stale</text>
+    <text x="770" y="320" text-anchor="middle" class="mono">key5</text>
+    <text x="865" y="320" text-anchor="middle" class="mono">-</text>
+    <text x="960" y="320" text-anchor="middle" class="mono">key7</text>
+  </g>
+
+  <g>
+    <rect x="250" y="410" width="90" height="52" rx="6" fill="#f6fbf7" class="cell"/>
+    <rect x="345" y="410" width="90" height="52" rx="6" fill="#f6fbf7" class="cell"/>
+    <rect x="440" y="410" width="90" height="52" rx="6" fill="#ffffff" class="cell"/>
+    <rect x="535" y="410" width="90" height="52" rx="6" fill="#f6fbf7" class="cell"/>
+    <rect x="630" y="410" width="90" height="52" rx="6" fill="#f6fbf7" class="cell"/>
+    <rect x="725" y="410" width="90" height="52" rx="6" fill="#f6fbf7" class="cell"/>
+    <rect x="820" y="410" width="90" height="52" rx="6" fill="#ffffff" class="cell"/>
+    <rect x="915" y="410" width="90" height="52" rx="6" fill="#f6fbf7" class="cell"/>
+
+    <text x="295" y="440" text-anchor="middle" class="mono">val0</text>
+    <text x="390" y="440" text-anchor="middle" class="mono">val1</text>
+    <text x="485" y="440" text-anchor="middle" class="mono">-</text>
+    <text x="580" y="440" text-anchor="middle" class="mono">val3</text>
+    <text x="675" y="440" text-anchor="middle" class="mono">stale</text>
+    <text x="770" y="440" text-anchor="middle" class="mono">val5</text>
+    <text x="865" y="440" text-anchor="middle" class="mono">-</text>
+    <text x="960" y="440" text-anchor="middle" class="mono">val7</text>
+  </g>
+</svg>
