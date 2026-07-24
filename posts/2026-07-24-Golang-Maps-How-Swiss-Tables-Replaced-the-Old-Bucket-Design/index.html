@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Golang Maps: How Swiss Tables Replaced the Old Bucket Design</title>
+  <meta name="description" content="Go 1.24 replaces the old bucket-and-overflow map internals with a Swiss Table-inspired design to improve cache locality, lookup speed, and memory efficiency.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Golang Maps: How Swiss Tables Replaced the Old Bucket Design">
+  <meta property="og:description" content="Go 1.24 replaces the old bucket-and-overflow map internals with a Swiss Table-inspired design to improve cache locality, lookup speed, and memory efficiency.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Golang Maps: How Swiss Tables Replaced the Old Bucket Design">
+  <meta name="twitter:description" content="Go 1.24 replaces the old bucket-and-overflow map internals with a Swiss Table-inspired design to improve cache locality, lookup speed, and memory efficiency.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Golang Maps: How Swiss Tables Replaced the Old Bucket Design</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-07-24T00:00:00.000Z">Fri Jul 24 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">runtime internals</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">data structures</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">performance</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
+<p>Maps sit on the hot path of almost every non-trivial Go program: they power request routing, cache lookups, deduplication sets, aggregation pipelines, and a lot of the glue code we barely notice until it gets slow. Because they are so common, even small runtime-level improvements in map behavior can produce measurable gains across real systems.</p>
+<p>Go 1.24 shipped one of the biggest map-internals changes in years: the classic bucket-plus-overflow implementation has been replaced by a Swiss Table-inspired design. The external API did not change, your code still writes <code>map[K]V</code> and calls <code>make</code>, indexing, <code>delete</code>, and <code>range</code> the same way as before. Under the hood, however, lookup and insert paths were reshaped around tighter metadata, flatter probing patterns, and much better cache locality.</p>
+<p>The practical effect is straightforward: less pointer chasing, fewer cache misses, higher useful load factors, and faster common operations in many workloads. In microbenchmarks this can be dramatic, while full applications usually see smaller but still meaningful aggregate wins. Memory behavior also improves in many scenarios, especially where old overflow chains used to accumulate.</p>
+<p>This post focuses on what changed specifically in Go's runtime design, why those choices matter, and where the trade-offs still show up. If you want a conceptual refresher on hash tables first, see <a href="/posts/2025-08-03-Hash-Map-Deep-Dive/">Hash Map Deep Dive</a>.</p>
+<h2 id="go's-old-map-implementation-(pre-1.24)" tabindex="-1"><a class="header-anchor" href="#go's-old-map-implementation-(pre-1.24)">Go's Old Map Implementation (Pre-1.24)</a></h2>
+<p>Before Go 1.24, maps used a bucketed design that had been refined for years and worked well for a wide range of workloads. Each map owned an array of buckets. Each bucket held up to 8 key/value pairs, plus metadata used to speed up matching and track slot state. When a bucket filled up, the runtime allocated an overflow bucket and chained it to the original one.</p>
+<p>At a high level, the layout looked like this:</p>
+<p><img src="01.svg" alt="Diagram: pre-1.24 map layout with buckets, 8 slots per bucket, and overflow chains"></p>
+<p>The key idea was simple and practical. Hash the key, use part of the hash to pick the bucket, then scan that bucket's entries. If no matching key was found and an overflow bucket existed, keep walking the chain until the key was found or the chain ended.</p>
+<p>In simplified form, the core structures were roughly:</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// Conceptual shape, not the exact runtime source.</span>
+type hmap struct <span class="token punctuation">{</span>   <span class="token comment">// map header</span>
+	count      int
+	<span class="token constant">B</span>          uint8   <span class="token comment">// number of buckets is 1&lt;&lt;B</span>
+	buckets    <span class="token operator">*</span>bmap
+	oldbuckets <span class="token operator">*</span>bmap   <span class="token comment">// previous bucket array during growth</span>
+<span class="token punctuation">}</span>
+
+type bmap struct <span class="token punctuation">{</span>   <span class="token comment">// bucket with 8 slots</span>
+	tophash  <span class="token punctuation">[</span><span class="token number">8</span><span class="token punctuation">]</span>uint8
+	keys     <span class="token punctuation">[</span><span class="token number">8</span><span class="token punctuation">]</span><span class="token constant">K</span>
+	values   <span class="token punctuation">[</span><span class="token number">8</span><span class="token punctuation">]</span><span class="token constant">V</span>
+	overflow <span class="token operator">*</span>bmap
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This design had real strengths: it was stable, battle-tested, and supported incremental growth so resize work did not arrive as one huge latency spike. During growth, the map kept both old and new bucket arrays for a while, and operations gradually evacuated old buckets into their new positions as the map was accessed.</p>
+<p>The main cost was memory locality under pressure. Overflow chains introduced pointer chasing, and pointer chasing means cache misses. Once hot buckets started spilling into overflow, lookups and inserts could bounce across non-contiguous memory. The implementation also had practical load-factor limits around 81 percent (roughly 6.5 filled slots per 8-slot bucket) before growth pressure and collision costs became harder to ignore.</p>
+<p>So the old map was not a broken design waiting to be replaced, but an effective implementation with trade-offs that became more visible as modern CPUs, cache behavior, and high-throughput services pushed for tighter, flatter probe paths.</p>
+<h2 id="swiss-tables%3A-core-design" tabindex="-1"><a class="header-anchor" href="#swiss-tables%3A-core-design">Swiss Tables: Core Design</a></h2>
+<p>Historically, Swiss Tables came out of Google's internal performance work on hash tables and were later documented and open-sourced through <a href="https://abseil.io/">Abseil</a> — Google's open-source C++ library collection — as <code>flat_hash_map</code> and related containers. The <a href="https://abseil.io/about/design/swisstables">design notes</a> are still the best primary reference for the model and its trade-offs.</p>
+<p>Swiss Tables keep the same high-level hash-table contract, but reorganize the data path around two ideas: <strong>compact per-slot metadata</strong> and <strong>probe-friendly contiguous groups</strong>. The design has since been adopted across several runtimes and databases because it moves the common-case probe work onto a much more cache-efficient path.</p>
+<p>The first thing to understand is that Swiss Tables do not start probing by reading full keys. They start by reading metadata bytes that are cheap to scan in bulk. Only candidates survive to full key comparison. This sounds small, but it changes where CPU time goes.</p>
+<h3 id="hash-split%3A-one-part-for-placement%2C-one-part-for-filtering" tabindex="-1"><a class="header-anchor" href="#hash-split%3A-one-part-for-placement%2C-one-part-for-filtering">Hash split: one part for placement, one part for filtering</a></h3>
+<p>A key is hashed once, then split into two logical pieces:</p>
+<ul>
+<li><code>h1</code>: used to choose the initial group index.</li>
+<li><code>h2</code>: a short fingerprint stored in per-slot metadata.</li>
+</ul>
+<p>You can think of <code>h2</code> as a fast pre-check. If a slot's fingerprint does not match, there is no reason to touch that slot's key bytes at all. Most probes end up rejecting many slots at this metadata stage, which is much cheaper than repeatedly loading and comparing full keys.</p>
+<h3 id="group-oriented-layout" tabindex="-1"><a class="header-anchor" href="#group-oriented-layout">Group-oriented layout</a></h3>
+<p>Instead of treating each slot as an isolated unit, Swiss Tables organize slots into fixed-size groups. In Go's design, that group size is 8 slots, which aligns with compact metadata handling and practical cache behavior.</p>
+<p>Each group stores:</p>
+<ul>
+<li>a control word (one metadata byte per slot, packed together),</li>
+<li>8 key slots,</li>
+<li>8 value slots.</li>
+</ul>
+<p>Conceptually:</p>
+<pre class="language-text"><code class="language-text">group i:
+	ctrl: [c0 c1 c2 c3 c4 c5 c6 c7]
+	keys: [k0 k1 k2 k3 k4 k5 k6 k7]
+	vals: [v0 v1 v2 v3 v4 v5 v6 v7]
+</code></pre>
+<p>Control bytes encode slot state (empty, deleted, occupied) and, for occupied slots, include the <code>h2</code> fingerprint bits. Because those 8 control bytes are contiguous, the runtime can inspect all slot states for a group in one tight operation.</p>
+<p><img src="02.svg" alt="Diagram: Swiss Table group with control bytes, key slots, value slots, and slot-state metadata"></p>
+<h3 id="probe-sequence%3A-filter-first%2C-compare-keys-second" tabindex="-1"><a class="header-anchor" href="#probe-sequence%3A-filter-first%2C-compare-keys-second">Probe sequence: filter first, compare keys second</a></h3>
+<p>Lookup becomes a two-stage loop:</p>
+<ol>
+<li>Read the current group's control bytes.</li>
+<li>Find control-byte positions whose fingerprints match <code>h2</code>.</li>
+<li>For those positions only, compare real keys.</li>
+<li>If no match, advance to the next group in the probe sequence.</li>
+<li>Stop when an empty slot proves the key is absent.</li>
+</ol>
+<p>Simplified pseudocode:</p>
+<pre class="language-text"><code class="language-text">g = startGroup(h1)
+for {
+	matches = matchFingerprint(ctrl[g], h2)
+	for each pos in matches {
+		if keys[g][pos] == key {
+			return vals[g][pos]
+		}
+	}
+
+	if hasEmpty(ctrl[g]) {
+		return not found
+	}
+
+	g = nextGroup(g)
+}
+</code></pre>
+<p><img src="03.svg" alt="Diagram: probe sequence where h2 matches filter candidate slots before full key comparison"></p>
+<p>The <code>hasEmpty(ctrl[g])</code> check is key. In open addressing, an empty slot means probing can terminate: if the key had ever been inserted along this sequence, the probe would have encountered it before the first truly empty slot.</p>
+<h3 id="insertion-and-the-role-of-deleted-slots" tabindex="-1"><a class="header-anchor" href="#insertion-and-the-role-of-deleted-slots">Insertion and the role of deleted slots</a></h3>
+<p>Insert follows the same probe path used by lookup, but it tracks the first reusable position it sees. Reusable can mean either:</p>
+<ul>
+<li>an empty slot, or</li>
+<li>a deleted slot (tombstone), depending on policy and probe progress.</li>
+</ul>
+<p>When lookup fails to find the key, insert writes into the best reusable slot discovered so far. This preserves probe invariants while limiting uncontrolled cluster growth.</p>
+<p>Deletion does not usually compact the cluster immediately. Instead, it marks metadata as deleted. Immediate compaction would make single deletes expensive and can break probe continuity guarantees. The trade-off is that too many tombstones can lengthen future probes, so implementations need cleanup behavior during growth or reorganization phases.</p>
+<h3 id="why-this-maps-well-to-modern-cpus" tabindex="-1"><a class="header-anchor" href="#why-this-maps-well-to-modern-cpus">Why this maps well to modern CPUs</a></h3>
+<p>Swiss Tables are often described as &quot;SIMD-friendly,&quot; but the broader point is locality plus branch behavior:</p>
+<ul>
+<li><strong>Contiguous metadata scan:</strong> a group's control bytes are read together, reducing scattered memory touches.</li>
+<li><strong>Fewer full key loads:</strong> most slots fail at fingerprint stage, so key comparisons are sparse.</li>
+<li><strong>Predictable hot loop:</strong> probe steps are simple and repetitive, helping branch prediction.</li>
+<li><strong>Better cache residency:</strong> metadata and nearby slots are packed to favor cache lines.</li>
+</ul>
+<p>Even without architecture-specific vector instructions, this shape tends to perform better than pointer-heavy traversals once maps reach realistic production sizes.</p>
+<h3 id="load-factor-and-practical-ceiling" tabindex="-1"><a class="header-anchor" href="#load-factor-and-practical-ceiling">Load factor and practical ceiling</a></h3>
+<p>The old bucket-overflow model had to balance overflow growth costs relatively early. Swiss-style open addressing tolerates denser occupancy before performance degrades sharply, because probe work remains mostly linear scans over compact metadata and nearby slots.</p>
+<p>In practice, this pushes useful load factors upward into the high-80% range (often discussed around 87.5% for 8-slot group designs). The exact threshold is implementation-dependent, but the key result is consistent: denser tables are possible before lookups and inserts become too expensive.</p>
+<p>Higher usable density means less memory overhead per stored entry and fewer growth events for the same number of elements — both effects that show up directly in heap profiles and allocation rates.</p>
+<h3 id="the-trade-offs-do-not-disappear" tabindex="-1"><a class="header-anchor" href="#the-trade-offs-do-not-disappear">The trade-offs do not disappear</a></h3>
+<p>Swiss Tables are not universally faster in every corner case. At high tombstone density or under specific delete-heavy patterns, probe lengths can regress until cleanup or growth restores table quality. Extremely adversarial hash distributions still hurt any open-addressing design, even with strong metadata filtering.</p>
+<p>The improvement comes from moving the common case onto a much more cache-efficient path, not from eliminating all hard cases.</p>
+<p>That is why the shift matters so much for Go: maps are used everywhere, and the common case is where most CPU cycles are spent.</p>
+<h2 id="go-specific-adaptations" tabindex="-1"><a class="header-anchor" href="#go-specific-adaptations">Go-Specific Adaptations</a></h2>
+<p>If this were only a straightforward port of Abseil-style Swiss Tables, the runtime work would have been simpler. Go maps, however, have constraints that come from language behavior, GC integration, and long-standing expectations around latency and iteration. The interesting part of Go 1.24 is not just adopting Swiss-style probing, but adapting it so those constraints still hold.</p>
+<h3 id="growth-without-long-stop-the-world-style-spikes" tabindex="-1"><a class="header-anchor" href="#growth-without-long-stop-the-world-style-spikes">Growth without long stop-the-world style spikes</a></h3>
+<p>Classic open-addressing tables are often resized by allocating a larger table and reinserting everything in one large migration step. That is fine in some systems, but Go maps are used on hot request paths where single-operation latency matters. A resize strategy that occasionally performs a full-table rehash can create exactly the kind of long tail the runtime tries to avoid.</p>
+<p>Go's adaptation avoids that monolithic jump by spreading growth across smaller units. Instead of treating the map as one giant table that doubles and fully rehashes at once, the runtime can split work so expansion happens incrementally. Operationally, this keeps mutation costs more stable because a single insert is less likely to inherit the full cost of moving every existing element.</p>
+<p>The practical effect is similar in spirit to the old map's gradual evacuation model: growth still happens, but migration work is amortized across normal operations rather than concentrated into one expensive event.</p>
+<h3 id="multiple-independent-tables-and-directory-style-routing" tabindex="-1"><a class="header-anchor" href="#multiple-independent-tables-and-directory-style-routing">Multiple independent tables and directory-style routing</a></h3>
+<p>One of the key Go-specific choices is to organize storage as multiple smaller Swiss-style tables rather than one ever-growing monolith. A higher-level directory (conceptually similar to extendible hashing) routes keys to a specific table segment, and only the segment under pressure needs to split.</p>
+<p>Keeping growth local means hot key regions can expand without forcing a global rebuild, and bounding memory movement to the splitting segment improves latency predictability under write-heavy bursts.</p>
+<p>At a conceptual level, insertion looks like this:</p>
+<pre class="language-text"><code class="language-text">hash key
+use high bits to select table segment
+probe within that segment's Swiss groups
+if segment exceeds thresholds, split that segment and update directory
+</code></pre>
+<p>That directory update is much cheaper than rebuilding every segment, and it composes well with Go's preference for incremental runtime work.</p>
+<h3 id="preserving-go's-range-semantics-while-tables-change" tabindex="-1"><a class="header-anchor" href="#preserving-go's-range-semantics-while-tables-change">Preserving Go's range semantics while tables change</a></h3>
+<p>One of the hardest constraints is preserving Go's map iteration behavior while inserts, deletes, and growth are happening.</p>
+<p>In Go, iterating with <code>range</code> over a map has deliberately loose ordering guarantees, but it still has safety and consistency expectations. The runtime cannot expose torn state, lose reachability to entries that should still be visible under the language rules, or let relocation mechanics violate iterator correctness.</p>
+<p>With segmented Swiss-style storage, this means iterators must understand that entries may move as segments split or internal probe layouts change. The runtime therefore couples iteration state to map-internal versioning and traversal metadata so the iterator can continue safely even while structure evolves.</p>
+<p>The implementation details are complex, but the user-visible result is simple: <code>for k, v := range m</code> keeps working while the runtime earns better cache locality and denser storage under the hood.</p>
+<h3 id="gc-and-write-barrier-friendliness" tabindex="-1"><a class="header-anchor" href="#gc-and-write-barrier-friendliness">GC and write-barrier friendliness</a></h3>
+<p>Go cannot treat table entries as purely mechanical bytes. Keys and values may contain pointers, and pointer movement interacts with garbage collection and write barriers. Any redesign of map internals must preserve accurate pointer visibility and barrier behavior during insert, delete, grow, and iterator transitions.</p>
+<p>Segmented growth helps here too. Smaller relocation steps are easier to integrate with barriered writes and reduce the size of any single pointer-moving operation. This does not remove complexity, but it narrows blast radius and keeps runtime bookkeeping more tractable.</p>
+<p>Swiss-style metadata probing delivers the raw algorithmic win, but Go-specific adaptations — segmented growth, iterator-safe migration, and GC-barrier integration — are what make that win usable at scale in a garbage-collected, latency-sensitive runtime. The performance numbers in the next section reflect both layers working together.</p>
+<h2 id="performance-%26-memory-analysis-(deeper-dive)" tabindex="-1"><a class="header-anchor" href="#performance-%26-memory-analysis-(deeper-dive)">Performance &amp; Memory Analysis (Deeper Dive)</a></h2>
+<p>The easiest way to get misled by map benchmarks is to look only at a single synthetic test and assume that number transfers directly to production. For Swiss maps in Go, the public data tells a more nuanced story: the micro-level wins are real and often large, the application-level aggregate win is smaller but still positive, and a few workload shapes do regress enough to deserve attention.</p>
+<p>The official release notes for Go 1.24 report that runtime work, including the new Swiss map implementation, lowered CPU overhead by about 2 to 3 percent on average across a representative benchmark suite (<a href="https://go.dev/doc/go1.24#runtime">Go 1.24 release notes, Runtime section</a>). That is a whole-runtime number, not a map-only number, but it is useful as a reality check because it is measured across mixed workloads.</p>
+<p>For map-focused results, the most concrete summary from the runtime team is in Michael Pratt's closing comment on the Swiss map tracking issue: large-map access and assignment were reported around 30 to 35 percent faster, iteration about 10 percent faster overall and up to about 60 percent faster on low-load large maps, while full-application benchmarks in Sweet showed a geometric-mean speedup around 1.5 percent (<a href="https://github.com/golang/go/issues/54766#issuecomment-2542444404">golang/go#54766 comment</a>, <a href="https://cs.opensource.google/go/x/benchmarks/+/master:sweet/">Sweet benchmark suite</a>).</p>
+<p>That gap between &quot;30 percent here&quot; and &quot;1.5 percent there&quot; is exactly what we should expect. Microbenchmarks isolate map operations, keep code paths hot, and often stress one operation type at a time. Real services spend time in parsing, syscalls, RPC boundaries, scheduling, GC assists, and dozens of non-map code paths, so map wins are diluted unless maps dominate the profile.</p>
+<p>There is also evidence that benchmark design itself can exaggerate or mask effects. In a follow-up issue about map benchmarking quality, the Go team called out branch-predictor-friendly key patterns, power-of-two map sizes, and benchmark harness overhead as distortions, then showed that changing benchmark structure altered observed deltas substantially (<a href="https://github.com/golang/go/issues/70700">golang/go#70700</a>). One concrete data point from those follow-ups is that a small-map lookup fix for unpredictable keys improved hit latency by roughly 1.7x (about 25ns to about 14ns in the posted numbers), with misses also improving by about 1.3x in the same benchmark set (<a href="https://github.com/golang/go/issues/70700">CL 634396 summary in #70700</a>).</p>
+<p>On memory, two facts are well supported by public sources. First, Swiss-style probing can run at higher practical occupancy than the old overflow-chain design, which tends to reduce per-entry overhead in many cases (<a href="https://abseil.io/about/design/swisstables">Abseil Swiss table design</a>, <a href="https://github.com/golang/go/issues/54766">golang/go#54766</a>). Second, Go's early public Swiss-map benchmark summary reported memory reductions in a broad but workload-dependent range, described there as 0 to 25 percent in most cases, with specific notes about avoiding extra allocations when reusing fixed-size maps (<a href="https://github.com/golang/go/issues/54766">performance summary in #54766</a>).</p>
+<p>The cautionary side however, is equally important. The Go team and users tracked several regressions or edge cases after the 1.24 rollout, especially around cold-cache behavior and sparse-large-map patterns. The open cold-cache tracking issue explains why directory indirection and multiple allocations can increase miss costs and discusses layout experiments aimed at that problem (<a href="https://github.com/golang/go/issues/70835">golang/go#70835</a>). A concrete external report in that thread from Prometheus benchmarking showed higher <code>runtime.mapaccess1_fast64</code> CPU time on Go 1.24.2 versus 1.23 for that workload shape, which is exactly the kind of profile-specific behavior that can hide behind positive geomeans (<a href="https://github.com/golang/go/issues/70835">Prometheus report in #70835</a>).</p>
+<p><code>clear(m)</code> on large-capacity sparse maps is another example of non-uniform behavior. The issue discussion shows that clear cost can track allocated table size in some patterns, and runtime contributors discuss mitigations plus related CLs that skip unnecessary work on empty groups (<a href="https://github.com/golang/go/issues/70617">golang/go#70617</a>). In other words, Swiss maps improved many paths, but they did not erase every pathological corner on day one.</p>
+<p>The practical interpretation is straightforward: if your service is lookup- or insert-heavy with medium to large maps, Go 1.24+ likely gives you a free speedup and often better memory efficiency. If your profile is dominated by cold misses, very sparse huge maps, or tight clear/reuse loops, you should measure directly on your workload and watch ongoing runtime work, because those are active optimization areas rather than solved history.</p>
+<h2 id="practical-takeaways-for-go-developers" tabindex="-1"><a class="header-anchor" href="#practical-takeaways-for-go-developers">Practical Takeaways for Go Developers</a></h2>
+<p>Understanding where the new implementation earns its wins helps you make better profiling decisions, write map-friendly patterns, and calibrate what upgrading to 1.24+ will actually deliver for your specific service.</p>
+<h3 id="where-you-will-see-the-most-impact" tabindex="-1"><a class="header-anchor" href="#where-you-will-see-the-most-impact">Where you will see the most impact</a></h3>
+<p>The gains are largest when maps are the actual bottleneck. Large maps with frequent access are the clearest case: lookup and insert speed up most noticeably once a map has enough entries to expose pointer-chasing and cache-miss costs in the old implementation. A service that maintains large in-memory lookup tables, a cache keyed on structured identifiers, or a concurrent-access pattern over many sharded maps all stand to benefit measurably.</p>
+<p>Iteration over large but sparsely populated maps also improves significantly. The old design had to walk all buckets regardless of occupancy; Swiss-style control-byte metadata lets the runtime skip empty groups quickly. If your code uses <code>range</code> to scan or drain big maps, that path gets faster.</p>
+<p>Memory-constrained services are another case worth measuring. Higher load factors and the elimination of overflow bucket chains can reduce heap pressure from map storage, which in turn reduces GC frequency and can improve heap efficiency across the board.</p>
+<p>The gains are smallest for maps that are tiny (a handful of keys), dominated by cold access, or never escape the runtime's fast-path specialization for small integer and string keys. For those maps, the new design may be neutral or show small regressions in some microbenchmarks. In practice, if those maps are not showing up as hotspots in your profiles, the difference is rarely relevant.</p>
+<h3 id="profiling-map-behavior-in-your-service" tabindex="-1"><a class="header-anchor" href="#profiling-map-behavior-in-your-service">Profiling map behavior in your service</a></h3>
+<p>If maps do appear in CPU profiles, <code>runtime.mapaccess1</code>, <code>runtime.mapassign</code>, <code>runtime.mapiterinit</code>, and related symbols are the functions to watch. A large fraction of CPU time in those symbols combined with a flat or slowly improving heap is a good signal that you are in the &quot;before Swiss tables&quot; performance regime, or that some of the known cold-cache edge cases are affecting you.</p>
+<p>For memory, heap profiles can show whether map entries contribute disproportionately to live allocation. Go 1.24+ should help here in many workloads, but if you see large map allocations persisting after keys are deleted, it is worth remembering that Go maps still do not shrink their allocated backing storage after deletions. That has not changed.</p>
+<p>A quick way to probe whether maps contribute meaningfully to a benchmark or production workload is to compare <code>go tool pprof</code> profiles between Go 1.23 and 1.24+ builds. The runtime-level speedup is automatic, but quantifying it for your own code tells you whether it is worth emphasizing or ignoring.</p>
+<h3 id="delete-patterns-and-the-clear-idiom" tabindex="-1"><a class="header-anchor" href="#delete-patterns-and-the-clear-idiom">Delete patterns and the clear idiom</a></h3>
+<p>The one code-level pattern worth some thought involves heavy delete usage. If your hot path is a tight loop that repeatedly deletes and reinserts many keys, you are exercising the tombstone path inside each probe group. Swiss-style open addressing handles this correctly, but at high tombstone density probes lengthen until cleanup happens during growth or at table reorganization points. This is the same trade-off that exists in other open-addressing designs, and Go's implementation manages it without application involvement, but it does mean delete-dominated workloads may see less benefit than pure lookup or insert workloads.</p>
+<p>The <code>clear(m)</code> idiom used to wipe and reuse a map is something else to be aware of. Go maps do not shrink their backing storage when cleared, so calling <code>clear</code> on a map that previously grew large does not release that memory. The cost of <code>clear</code> itself is proportional to the number of allocated groups in the current design, which can be expensive for maps that were once large but now hold few entries.</p>
+<pre class="language-go"><code class="language-go"><span class="token comment">// This pattern is fine and common.</span>
+<span class="token comment">// clear(m) resets map entries without releasing backing storage.</span>
+<span class="token comment">// If the map previously held many keys, the next iteration of inserts</span>
+<span class="token comment">// skips re-allocation, which is the intent.</span>
+<span class="token literal-property property">m</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>map<span class="token punctuation">[</span>string<span class="token punctuation">]</span>int<span class="token punctuation">)</span>
+<span class="token keyword">for</span> <span class="token punctuation">{</span>
+    <span class="token function">populate</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span>
+    <span class="token function">process</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span>
+    <span class="token function">clear</span><span class="token punctuation">(</span>m<span class="token punctuation">)</span>   <span class="token comment">// fast if m is consistently sized; more expensive if m grew large once</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>If you use this pattern with maps that burst to large sizes and then shrink back, consider whether the cleared map's long-term backing size is actually appropriate, or whether creating a fresh map in those cases is preferable.</p>
+<h3 id="what-the-runtime-might-still-change" tabindex="-1"><a class="header-anchor" href="#what-the-runtime-might-still-change">What the runtime might still change</a></h3>
+<p>There is ongoing work around map cold-cache behavior. Runtime contributors are actively experimenting with memory layout changes, including separating keys from values within groups (the <code>GOEXPERIMENT=mapsplitgroup</code> experiment tracked in <a href="https://github.com/golang/go/issues/70835">#70835</a>), and the cold-cache issue itself remains open for Go 1.27. These are not user-facing API changes, but they mean the performance profile of maps will continue to evolve.</p>
+<p>SIMD-based control-byte scanning, which Abseil's C++ implementation uses on x86, is not currently part of Go's Swiss map path. As noted in the <a href="https://github.com/cockroachdb/swiss">CockroachDB swiss README</a>, implementing the probe loop in pure Go assembly with SIMD has non-trivial overhead from function call boundaries, and the Go team has taken a SWAR (SIMD Within A Register) approach instead. That may change in future versions as Go's assembly model and CPU support evolve.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Go 1.24's map redesign is a clear demonstration that significant improvements are still available in well-trodden code. The bucket-and-overflow model served Go programs reliably for years, and it was not replaced out of novelty but out of accumulated evidence that a Swiss Table-inspired layout could make the common case genuinely faster, with better memory efficiency, at production scale.</p>
+<p>The core design choices, tighter group-level metadata, faster candidate filtering before full key comparisons, and a flat probe path, come directly from Abseil's Swiss Tables. What Go added on top is the runtime infrastructure that makes those choices safe and compatible with garbage collection, iterator semantics, and latency-sensitive growth. That second layer is less visible but equally important.</p>
+<p>For developers, the change is mostly transparent. Upgrading to 1.24 or later is enough to pick up the improvements. The caveat is that aggregate production gains tend to be modest unless maps dominate your CPU profile, cold-access patterns can regress in specific shapes, and the runtime team is still iterating. Measure your actual workload rather than extrapolating from microbenchmark headlines.</p>
+<p>Go continues to treat its runtime as something that can be improved through careful, verified engineering. The Swiss map work is a good example of that discipline: a multi-year effort across proposal, design, implementation, and benchmarking that ultimately shipped without changing the language surface at all.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

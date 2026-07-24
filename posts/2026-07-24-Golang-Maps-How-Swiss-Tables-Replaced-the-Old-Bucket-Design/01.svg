@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="620" viewBox="0 0 1100 620" role="img" aria-labelledby="title desc">
+  <title id="title">Pre-1.24 Go map bucket and overflow layout</title>
+  <desc id="desc">A map points to a bucket array. Each bucket has eight slots and optional overflow pointers to chained buckets.</desc>
+
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .title { font: 700 28px Arial, sans-serif; fill: #20313a; }
+      .subtitle { font: 16px Arial, sans-serif; fill: #53646d; }
+      .label { font: 700 15px Arial, sans-serif; fill: #20313a; }
+      .small { font: 14px Arial, sans-serif; fill: #44565f; }
+      .slotTxt { font: 13px Arial, sans-serif; fill: #31434d; }
+    </style>
+  </defs>
+
+  <rect width="1100" height="620" fill="#f7f4ee"/>
+
+  <text x="550" y="54" text-anchor="middle" class="title">Go Map Internals Before 1.24</text>
+  <text x="550" y="82" text-anchor="middle" class="subtitle">Bucket array with 8 slots per bucket and overflow chaining</text>
+
+  <g filter="url(#shadow)">
+    <rect x="50" y="130" width="210" height="120" rx="10" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+  </g>
+  <text x="155" y="165" text-anchor="middle" class="label">hmap</text>
+  <text x="155" y="193" text-anchor="middle" class="small">count, B, hash seed...</text>
+  <text x="155" y="219" text-anchor="middle" class="small">buckets -> array</text>
+
+  <line x1="260" y1="190" x2="350" y2="190" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="350" y="110" width="520" height="170" rx="10" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+  </g>
+  <text x="610" y="138" text-anchor="middle" class="label">Bucket Array (index by low hash bits)</text>
+
+  <g>
+    <rect x="380" y="160" width="130" height="92" rx="8" fill="#eef4f7" stroke="#2f4858"/>
+    <text x="445" y="181" text-anchor="middle" class="slotTxt">bucket 0</text>
+    <text x="445" y="201" text-anchor="middle" class="slotTxt">8 slots</text>
+    <text x="445" y="221" text-anchor="middle" class="slotTxt">tophash[8]</text>
+    <text x="445" y="241" text-anchor="middle" class="slotTxt">overflow ptr</text>
+
+    <rect x="532" y="160" width="130" height="92" rx="8" fill="#eef4f7" stroke="#2f4858"/>
+    <text x="597" y="181" text-anchor="middle" class="slotTxt">bucket 1</text>
+    <text x="597" y="201" text-anchor="middle" class="slotTxt">8 slots</text>
+    <text x="597" y="221" text-anchor="middle" class="slotTxt">tophash[8]</text>
+    <text x="597" y="241" text-anchor="middle" class="slotTxt">overflow ptr</text>
+
+    <rect x="684" y="160" width="130" height="92" rx="8" fill="#eef4f7" stroke="#2f4858"/>
+    <text x="749" y="181" text-anchor="middle" class="slotTxt">bucket 2</text>
+    <text x="749" y="201" text-anchor="middle" class="slotTxt">8 slots</text>
+    <text x="749" y="221" text-anchor="middle" class="slotTxt">tophash[8]</text>
+    <text x="749" y="241" text-anchor="middle" class="slotTxt">overflow ptr</text>
+  </g>
+
+  <line x1="660" y1="285" x2="660" y2="340" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="677" y="320" class="small">overflow</text>
+
+  <g filter="url(#shadow)">
+    <rect x="130" y="350" width="840" height="210" rx="10" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+  </g>
+  <text x="550" y="380" text-anchor="middle" class="label">Detailed Bucket View (example: bucket 1 with overflow chain)</text>
+
+  <g>
+    <rect x="180" y="405" width="300" height="130" rx="8" fill="#f4faf0" stroke="#4e7a58" stroke-width="2"/>
+    <text x="330" y="430" text-anchor="middle" class="label">Primary bucket</text>
+
+    <g>
+      <rect x="200" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="230" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="260" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="290" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="320" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="350" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="380" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <rect x="410" y="445" width="30" height="24" fill="#d8e8d0" stroke="#4e7a58"/>
+      <text x="456" y="462" class="slotTxt">tophash[8]</text>
+    </g>
+
+    <g>
+      <rect x="200" y="478" width="120" height="24" fill="#ffffff" stroke="#4e7a58"/>
+      <text x="260" y="494" text-anchor="middle" class="slotTxt">keys[8]</text>
+      <rect x="320" y="478" width="120" height="24" fill="#ffffff" stroke="#4e7a58"/>
+      <text x="380" y="494" text-anchor="middle" class="slotTxt">values[8]</text>
+    </g>
+
+    <text x="330" y="525" text-anchor="middle" class="small">full bucket -> follow overflow pointer</text>
+  </g>
+
+  <line x1="480" y1="468" x2="560" y2="468" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="560" y="405" width="230" height="130" rx="8" fill="#fffaf0" stroke="#a67c52" stroke-width="2"/>
+    <text x="675" y="430" text-anchor="middle" class="label">Overflow bucket</text>
+    <rect x="585" y="445" width="30" height="24" fill="#f2e6d4" stroke="#a67c52"/>
+    <rect x="615" y="445" width="30" height="24" fill="#f2e6d4" stroke="#a67c52"/>
+    <rect x="645" y="445" width="30" height="24" fill="#f2e6d4" stroke="#a67c52"/>
+    <rect x="675" y="445" width="30" height="24" fill="#f2e6d4" stroke="#a67c52"/>
+    <rect x="705" y="445" width="30" height="24" fill="#f2e6d4" stroke="#a67c52"/>
+    <rect x="735" y="445" width="30" height="24" fill="#f2e6d4" stroke="#a67c52"/>
+    <text x="675" y="494" text-anchor="middle" class="small">extra entries after collisions</text>
+  </g>
+
+  <line x1="790" y1="468" x2="860" y2="468" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <g>
+    <rect x="860" y="405" width="90" height="130" rx="8" fill="#fffaf0" stroke="#a67c52" stroke-width="2"/>
+    <text x="905" y="430" text-anchor="middle" class="slotTxt">more</text>
+    <text x="905" y="450" text-anchor="middle" class="slotTxt">overflow</text>
+    <text x="905" y="470" text-anchor="middle" class="slotTxt">...</text>
+  </g>
+</svg>

@@ -1337,5 +1337,25 @@
         
       </item>
     
+      <item>
+        <title>Golang Maps: How Swiss Tables Replaced the Old Bucket Design</title>
+        <link>https://blog.gaborkoos.com/posts/2026-07-24-Golang-Maps-How-Swiss-Tables-Replaced-the-Old-Bucket-Design/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-07-24-Golang-Maps-How-Swiss-Tables-Replaced-the-Old-Bucket-Design/</guid>
+        <pubDate>Fri, 24 Jul 2026 00:00:00 GMT</pubDate>
+
+        <description>Go 1.24 replaces the old bucket-and-overflow map internals with a Swiss Table-inspired design to improve cache locality, lookup speed, and memory efficiency.</description>
+        
+        <category>tutorials</category>
+        
+        <category>golang</category>
+        
+        <category>runtime internals</category>
+        
+        <category>data structures</category>
+        
+        <category>performance</category>
+        
+      </item>
+    
   </channel>
 </rss>
