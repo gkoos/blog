@@ -294,4 +294,4 @@ The core design choices, tighter group-level metadata, faster candidate filterin
 
 For developers, the change is mostly transparent. Upgrading to 1.24 or later is enough to pick up the improvements. The honest caveat is that aggregate production gains tend to be modest unless maps dominate your CPU profile, cold-access patterns can regress in specific shapes, and the runtime team is still iterating. Measure your actual workload rather than extrapolating from microbenchmark headlines.
 
-Go continues to treat its runtime not as a frozen artifact but as something that can be improved through careful, verified engineering. The Swiss map work is a good example of that discipline: a multi-year effort across proposal, design, implementation, and benchmarking that ultimately shipped without changing the language surface at all.
+Go continues to treat its runtime as something that can be improved through careful, verified engineering. The Swiss map work is a good example of that discipline: a multi-year effort across proposal, design, implementation, and benchmarking that ultimately shipped without changing the language surface at all.
