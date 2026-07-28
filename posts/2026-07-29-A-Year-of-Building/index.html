@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>A Year of Building</title>
+  <meta name="description" content="How a layoff and a security clearance wait turned into a year of open source projects, technical writing, and discovering what happens when work and side projects align.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="A Year of Building">
+  <meta property="og:description" content="How a layoff and a security clearance wait turned into a year of open source projects, technical writing, and discovering what happens when work and side projects align.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="A Year of Building">
+  <meta name="twitter:description" content="How a layoff and a security clearance wait turned into a year of open source projects, technical writing, and discovering what happens when work and side projects align.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">A Year of Building</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-07-29T00:00:00.000Z">Wed Jul 29 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">personal</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">open source</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">technical writing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">career</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><img src="nechama-lock-1Wfe-zmHtGc-unsplash.jpg" alt=""></p>
+<p>Until July 2025, I was one of the laziest developers, but then something unique happened. Not long before that I got laid off, so I decided to pimp my CV and started working on some GitHub projects. I was lucky enough to get a new job soon, signed the contract, but then I had to wait for months to start, until my Security Clearance was approved. This put me in an odd situation: I technically had no job, but didn't have to prepare for interviews either, so I had a lot of free time. I was already working on projects that addressed my own pain points as a developer, made some good progress, so I didn't want to abandon them.</p>
+<h2 id="building-in-the-gap" tabindex="-1"><a class="header-anchor" href="#building-in-the-gap">Building in the Gap</a></h2>
+<p>This is when I created <a href="https://github.com/fetch-kit/ffetch">ffetch</a>, because every project I was working on we implemented our own resilience layer on top of fetch. One of the early feedbacks I got was &quot;yeah, that name is stupid&quot;. The first time I implemented a fetch wrapper at work, I had a colleague called Paul Ffrench, so it's named after him. Wherever you are Paul, I hope you're good.</p>
+<p>The next step was creating tools for testing <code>ffetch</code>, so <a href="https://github.com/fetch-kit/chaos-proxy">chaos-proxy</a> and <a href="https://github.com/fetch-kit/chaos-fetch">chaos-fetch</a> were born. Then, because I love golang but rarely had the opportunity to actually use it at work, I ported <code>chaos-proxy</code> to golang and created <a href="https://github.com/fetch-kit/chaos-proxy-go">chaos-proxy-go</a>.</p>
+<p>I had a solid foundation of projects, but I didn't want to work almost full time on my own stuff in complete obscurity. I needed a way to do some light promotion.</p>
+<h2 id="resurrecting-the-blog" tabindex="-1"><a class="header-anchor" href="#resurrecting-the-blog">Resurrecting the Blog</a></h2>
+<p>I had an abandoned blog, mostly about <a href="https://en.wikipedia.org/wiki/Matched_betting">matched betting</a> mathematics from 2017. I dusted it off and started writing. The idea was to promote my OSS work, but I wanted to start with a few more generic posts. The first pieces were about <a href="https://en.wikipedia.org/wiki/Skyline_operator">skyline queries</a>, a fascinating topic with surprising mathematical depth, then an old, never published writeup about hash tables.</p>
+<p>I slowly started to enjoy writing technical deep dives: go internals, network resilience, database engines. The research was engaging. The writing forced me to think clearly about complex topics. Articles on Reddit gained unexpected traction. Posts got picked up by newsletters and made it to the front page of Hacker News. People were reading things I wrote.</p>
+<p>During this time I also shipped <a href="https://nullmail.cc">nullmail</a>, an anonymous, disposable email service. It's still running with a few hundred daily users. It runs on Vercel's free tier, and I regularly get emails saying I'm constantly over 75% of the free tier allowance. I put a buymeacoffee link on it. So far one person paid $10. I'm in profit. 🙂</p>
+<h2 id="the-professional-turn" tabindex="-1"><a class="header-anchor" href="#the-professional-turn">The Professional Turn</a></h2>
+<p>For a short while I was working on technical deep dives and OSS projects in parallel. I pitched an article on <a href="https://www.freecodecamp.org/news/">freeCodeCamp</a> and it got accepted. Then one for <a href="https://www.infoq.com/">InfoQ</a>, where I experienced firsthand how much a good editor can improve your writing.</p>
+<p>I got more ambitious and pitched a whole book to Apress based on the blog series <em>Database Zoo</em>. It got <a href="https://link.springer.com/book/9798868827082">accepted</a>. By then I was already working a new job, so things got thick. They changed the title from <em>Database Zoo</em> to <em>Database Safari</em>. I managed to keep the deadlines, but if I thought the InfoQ editorial process was thorough, the book editorial process was meticulous. And they were right about everything, all the time. I learned not just from my own research, but from every piece of editorial feedback. Looking back, I enjoyed every minute of it, but hope I won't have to touch the damn thing ever again. 😄</p>
+<h2 id="when-work-aligned-with-what-i-built" tabindex="-1"><a class="header-anchor" href="#when-work-aligned-with-what-i-built">When Work Aligned with What I Built</a></h2>
+<p>Then at work the need for a RAG system came up. I was lucky enough to be the one who could implement it. <a href="https://github.com/gkoos/confluence2md">confluence2md</a> was born. I had to learn a lot about Confluence Cloud, Atlassian APIs, and how to properly structure a RAG pipeline. This wasn't a passion project squeezed into nights and weekends anymore. It was real work, and it felt natural because I'd been solving adjacent problems for months.</p>
+<p>I followed this with <a href="https://github.com/gkoos/confluence2md-indexer">confluence2md-indexer</a> for hybrid search, then <a href="https://github.com/gkoos/confluence2md-mcp">confluence2md-mcp</a> to make it accessible as a Model Context Protocol server. The professional requirement and the creative freedom converged, lucky me.</p>
+<h2 id="what-this-year-meant" tabindex="-1"><a class="header-anchor" href="#what-this-year-meant">What This Year Meant</a></h2>
+<p>Looking back, the whole thing was driven by accidental circumstances more than deliberate strategy. A bureaucratic delay gave me uninterrupted time when I didn't expect it, a real itch with fetch abstractions turned into a library. Wanting to not build in obscurity turned into a habit of writing, writing turned into a book deal I never planned for. A professional need at work landed squarely in territory I'd already mapped.</p>
+<p>The skills reinforced each other in ways I didn't anticipate. Writing about complex systems forced me to understand them more thoroughly than just implementing them would have. Implementing things gave me something concrete to write about rather than opinion pieces about trends. By the end of the year these felt less like separate activities and more like the same work approached from different angles.</p>
+<h2 id="what's-next" tabindex="-1"><a class="header-anchor" href="#what's-next">What's Next</a></h2>
+<p>There's a <a href="https://fetchkit.org/network-chaos-lab/">Network Chaos Lab</a> I built as a Three.js visualization for replaying historic network incidents and tuning client behavior to see how it changes outcomes. I abandoned it for a while and it deserves to be finished properly.</p>
+<p><a href="https://github.com/gkoos/confluence2md">confluence2md</a> also needs its own landing page. Right now it lives in a GitHub README, which works, but a proper home would give it more room to breathe.</p>
+<p>And there's a book to promote when it ships.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

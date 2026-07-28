@@ -1357,5 +1357,23 @@
         
       </item>
     
+      <item>
+        <title>A Year of Building</title>
+        <link>https://blog.gaborkoos.com/posts/2026-07-29-A-Year-of-Building/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-07-29-A-Year-of-Building/</guid>
+        <pubDate>Wed, 29 Jul 2026 00:00:00 GMT</pubDate>
+
+        <description>How a layoff and a security clearance wait turned into a year of open source projects, technical writing, and discovering what happens when work and side projects align.</description>
+        
+        <category>personal</category>
+        
+        <category>open source</category>
+        
+        <category>technical writing</category>
+        
+        <category>career</category>
+        
+      </item>
+    
   </channel>
 </rss>
