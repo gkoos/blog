@@ -79,7 +79,7 @@ function fib(n) {
 }
 ```
 
-Each call branches into two more calls, so the total number of calls grows as O(2ⁿ). `fib(30)` already makes over a million calls; `fib(50)` is in the tens of billions. In a browser this freezes the tab long before any stack limit is reached, which makes the failure mode look identical to a stack overflow but have a completely different root cause.
+Each call branches into two more calls, so the total number of calls grows as O(2ⁿ). (Well, more precisely, Θ(φⁿ) where φ ≈ 1.6, though it's usually approximated as O(2ⁿ) because both describe exponential growth.)  `fib(30)` already makes over a million calls; `fib(50)` is in the tens of billions. In a browser this freezes the tab long before any stack limit is reached, which makes the failure mode look identical to a stack overflow but have a completely different root cause.
 
 The tail-recursive version of Fibonacci:
 
