@@ -418,22 +418,27 @@
   
   <url>
     <loc>https://blog.gaborkoos.com/categories/</loc>
-    <lastmod>2026-07-29T00:25:40.885Z</lastmod>
+    <lastmod>2026-07-31T23:50:42.535Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/feed.xml</loc>
-    <lastmod>2026-07-29T00:25:40.885Z</lastmod>
+    <lastmod>2026-07-31T23:50:42.535Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/</loc>
-    <lastmod>2026-07-29T00:25:40.885Z</lastmod>
+    <lastmod>2026-07-31T23:50:42.535Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/publications/</loc>
-    <lastmod>2026-07-29T00:25:40.925Z</lastmod>
+    <lastmod>2026-07-31T23:50:42.580Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.gaborkoos.com/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/</loc>
+    <lastmod>2026-08-01T00:00:00.000Z</lastmod>
   </url>
   
 </urlset>

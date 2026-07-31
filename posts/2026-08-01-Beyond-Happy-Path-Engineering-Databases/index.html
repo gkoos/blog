@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Beyond Happy Path Engineering: Databases</title>
+  <meta name="description" content="Databases are where correctness becomes shared state: how invariants break under concurrency, when transactions help and when they don&#39;t, why reads go stale, and how to design for retries, migrations, and recovery.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Beyond Happy Path Engineering: Databases">
+  <meta property="og:description" content="Databases are where correctness becomes shared state: how invariants break under concurrency, when transactions help and when they don&#39;t, why reads go stale, and how to design for retries, migrations, and recovery.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Beyond Happy Path Engineering: Databases">
+  <meta name="twitter:description" content="Databases are where correctness becomes shared state: how invariants break under concurrency, when transactions help and when they don&#39;t, why reads go stale, and how to design for retries, migrations, and recovery.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Beyond Happy Path Engineering: Databases</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-08-01T00:00:00.000Z">Sat Aug 01 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">reliability</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">software architecture</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">databases</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">beyond happy path engineering</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>Most software is first built under unusually friendly conditions. On a developer machine, the database is nearby, the network is quiet, the service you need is running, the test user behaves sensibly, the clock moves forward, the queue drains, the deployment finishes, and the request succeeds. Those conditions are useful, they let us build the first version of a thing without having to worry about everything that can go wrong in production. Requests don't always succeed, networks are not always fast, databases don't always respond immediately, deployments are not instantaneous, users do not behave predictably, and dependencies have their own limits, maintenance windows, bugs, overloads, and bad days. A system designed only for the smooth path may work beautifully most of the time, but when reality bends away from that path, things fall apart.</em></p>
+<p><em>This series is about making your programs more resilient. Each post looks at one part of the system we take for granted: networks, time, databases, storage, users, dependencies, deployments, queues, and concurrency. The question is always the same: what assumptions are we making here, and what should we do when they stop being true?</em></p>
+<ul>
+<li><a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a></li>
+<li><a href="/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/">Beyond Happy Path Engineering: Time</a></li>
+<li><a href="/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/">Beyond Happy Path Engineering: Databases</a></li>
+</ul>
+<hr>
+<p>Databases often feel like the most dependable layer in an application. Once a transaction commits, the awkward work appears to be over: the system has made a decision, recorded it, and can move on.</p>
+<p>That model works well for simple cases, and it is one of the reasons databases are so useful. They give us transactions, constraints, indexes, and durable records. They let different parts of a system agree on shared state.</p>
+<p>Production however makes that shared state more complicated. The database is not only serving one request at a time. It is handling users, background jobs, admin tools, reports, migrations, retries, replicas, backups, and operational scripts. A query that was fast in development can become slow. Two correct-looking requests can race. A write can commit while the caller times out. A read can hit a replica that has not caught up yet. A schema change can be valid but still unsafe while old and new application versions are running together.</p>
+<p>This post is about these edges. We will look at databases as shared production systems, not just places to store data: how invariants are protected, when transactions help, what constraints enforce, how stale reads happen, why retries can duplicate writes, and why migrations and backfills need to be treated as live workflows.</p>
+<p>For scope, this post will mostly talk about relational databases. &quot;Database&quot; can mean a lot of things: document stores, graph databases, <a href="/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/">time-series databases</a>, <a href="/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/">vector databases</a>, columnar systems, event streams, search indexes, and more. You can write a <a href="https://link.springer.com/book/9798868827082">whole book</a> about that landscape. Here, we will stay closer to the kind of transactional relational database that sits behind many application backends, because it is where these happy-path assumptions show up most often.</p>
+<h2 id="the-happy-path" tabindex="-1"><a class="header-anchor" href="#the-happy-path">The happy path</a></h2>
+<p>Consider a checkout flow for an online store. A user clicks Buy, the application checks that the item is still in stock, creates an order, records the payment attempt, updates the inventory, and returns a confirmation page.</p>
+<p>The diagram below shows the happy path:</p>
+<p><img src="03-01.svg" alt="Diagram: checkout checks inventory, creates an order, records a payment attempt, updates inventory, and returns a confirmation"></p>
+<p>In a local test, this is usually straightforward: one request runs against a small database, with no competing checkout trying to buy the same item and no background job touching the same rows. The schema matches the code, the queries return quickly, and the confirmation page sees the state the checkout just created.</p>
+<p>The code might look something like this:</p>
+<pre class="language-text"><code class="language-text">if inventory.available(itemId) > 0:
+    order = orders.create(userId, itemId)
+    payments.recordAttempt(order.id)
+    inventory.decrement(itemId)
+    return confirmation(order.id)
+else:
+    return soldOut()
+</code></pre>
+<p>This follows the business process closely: check the stock, create the order, record the payment attempt, update the inventory, and tell the user what happened.</p>
+<h2 id="reality" tabindex="-1"><a class="header-anchor" href="#reality">Reality</a></h2>
+<p>Checkout is only one caller: account pages, admin searches, payment workers, reports, and migrations may all be using the same tables, indexes, connections, and cache.</p>
+<p>The diagram below shows the shape of that pressure:</p>
+<p><img src="03-02.svg" alt="Diagram: checkout, admin screens, workers, reports, and migrations all send work to the same database"></p>
+<p>Most production databases are built to handle many callers at once, but application boundaries do not isolate database resources. Code in different services, jobs, dashboards, and operational scripts can still compete for the same connections, locks, cache, disk, and replication bandwidth.</p>
+<p>A report that scans too much data can evict useful pages from cache, a long transaction can hold locks that checkout needs, a worker with an aggressive retry loop can consume connection slots, a migration can make ordinary writes wait behind schema work. Even an index added for one query can slow down another path, because every insert or update has extra bookkeeping to do.</p>
+<p>From the checkout handler's point of view, contention often looks like ordinary latency: a query takes longer, a transaction waits, the connection pool has no free connection, and the request times out while the original attempt may still be in progress. The database can be accepting queries and still be too congested to keep the product behavior healthy.</p>
+<p>Database work needs the same production thinking as network work: time is finite, capacity is shared, and slow paths can spread pressure into parts of the application that did not cause the original slowdown. The happy path shows that a sequence of queries can produce the right answer; production tests whether the same sequence still behaves well when the database is busy, the data is large, and other code is touching the same rows.</p>
+<h3 id="slow-queries-become-system-failures" tabindex="-1"><a class="header-anchor" href="#slow-queries-become-system-failures">Slow queries become system failures</a></h3>
+<p>A slow database operation is easy to underestimate because it still looks like progress. The query has not failed, the transaction has not rolled back, and the database may still be accepting new connections. From inside the request handler, the system appears to be waiting for one piece of work to finish.</p>
+<p>The wider system sees something else:</p>
+<p><img src="03-03.svg" alt="Diagram: slow database work keeps transactions open, fills the connection pool, queues API requests, and leads to retries"></p>
+<p>The cost of waiting is paid in resources. A checkout request waiting on the database may be holding an application worker, a database connection, memory, and possibly locks inside an open transaction. If enough requests reach the same slow point, the connection pool fills and new requests queue before they can even ask the database for anything useful.</p>
+<p>From the user's point of view, &quot;the database is slow&quot; often becomes &quot;checkout is down&quot;. The first slowdown may be a query plan change, a missing index, a lock wait, a large report, or a migration that ran at the wrong time. The visible failure arrives later, when requests time out and users submit the same action again because the page never gave them a clear answer.</p>
+<p>Retries can make the situation worse if the original request is still running. A second click on Buy may enter the application while the first attempt is waiting on the database. A client retry may take another worker and another connection. A background job retrying failed records may add more write pressure during the same window. The database did not need to disappear; it only needed to become slow enough that the rest of the system kept sending more work than it could drain.</p>
+<p>Treating slow queries as application failures changes how we look at database performance. Query latency and connection pool wait time are part of the user-facing behavior of the product, because every millisecond spent waiting inside a request is also a millisecond where the application is holding capacity it may need for the next request.</p>
+<h3 id="concurrency-makes-correct-looking-code-wrong" tabindex="-1"><a class="header-anchor" href="#concurrency-makes-correct-looking-code-wrong">Concurrency makes correct-looking code wrong</a></h3>
+<p>The checkout code in the happy path reads naturally because each line follows from the previous one. Check the stock, then create the order, then decrement inventory. Under concurrency, the gap between &quot;check&quot; and &quot;change&quot; is where the race appears.</p>
+<p>The last item in stock is a simple example:</p>
+<p><img src="03-04.svg" alt="Diagram: two checkout requests both read stock as one, create orders, and decrement inventory below zero"></p>
+<p>Request A reads the inventory row and sees one item available. Before A updates the row, request B reads the same value and reaches the same conclusion. Both requests can be acting on information that was true at the moment they read it, but neither read reserved the item. If both continue, the application may create two orders for one unit of stock.</p>
+<p>The problem is that each statement can look reasonable in isolation: the read worked, the comparison made sense, the insert succeeded, and the update changed a row. The failure lives <strong>between</strong> those statements, where another request can observe and change the same data before the first request finishes.</p>
+<p>The same thing happens when two requests create the same logical account, two workers pick up the same job, two updates overwrite each other from older copies of a row, or a cancellation races with payment completion. A retry arriving after the original request commits also belongs to the same family of problems: the code path is reasonable on its own, but it is no longer alone.</p>
+<p>Concurrency turns database correctness into a question about the whole operation, not just each statement. The important rule asks whether this request can reserve one unit of stock exactly once, even if another request is trying at the same time.</p>
+<h3 id="transactions-are-powerful%2C-not-magic" tabindex="-1"><a class="header-anchor" href="#transactions-are-powerful%2C-not-magic">Transactions are powerful, not magic</a></h3>
+<p>Transactions are the first tool many engineers reach for when several database changes need to be treated as one unit. That instinct is good, especially when checkout is creating an order and changing inventory in the same operation. The transaction gives those statements a shared boundary, but it does not decide whether the operation was safe to perform in the first place.</p>
+<p>A transaction can make a group of statements commit or roll back together. Depending on the database and isolation level, it can also change what another checkout request is allowed to see or update at the same time. But the transaction still needs to be built around the actual rule for the operation. In the inventory example, that rule is not simply &quot;run these three statements together&quot;, it's &quot;do not sell the same unit of stock twice&quot;.</p>
+<p>For the last item in stock, the rule is to reserve one unit only when one is still available. That condition has to be part of the write that consumes the stock, or part of a locking strategy with the same effect. Without it, the transaction may faithfully commit a sequence of statements after the wrong decision has already been made. Stronger isolation can reduce some of these races, but it also changes the cost profile: transactions may wait longer, block each other, or be aborted and retried by the application. Long transactions make those costs worse because they hold database resources while the application continues doing work.</p>
+<p>The practical lesson is to be precise about what the transaction is protecting. Atomicity protects a group of changes from being half-committed. Isolation controls how that group interacts with other groups. The business invariant still needs to be named in a form the database can enforce, such as a conditional update, a uniqueness constraint, a guarded state transition, or a deliberate lock.</p>
+<h3 id="constraints-are-production-code" tabindex="-1"><a class="header-anchor" href="#constraints-are-production-code">Constraints are production code</a></h3>
+<p>The previous section noted that a transaction can faithfully commit a wrong decision. A deeper version of that problem appears when the write comes from a path that never entered that transaction boundary in the first place. Admin endpoints can write directly to orders, workers can adjust inventory outside checkout, and migrations can bypass application checks entirely. Any one of those paths can commit the same bad state, so validation inside the checkout handler alone is not enough.</p>
+<p>This is the argument for moving invariants as close to the data as possible. A business rule expressed only in application code is only in force when that code path runs, whereas a rule expressed in the database applies whenever anything writes to the table.</p>
+<p>In our inventory example, checkout should check available stock early, and that can give the user a useful response before touching anything, but that check is advisory. The write that actually decrements stock is where the rule needs to live. Instead of reading the current value and then writing a new one separately, the update can express the condition directly:</p>
+<pre class="language-text"><code class="language-text">update inventory
+set available = available - 1
+where item_id = ? and available > 0
+</code></pre>
+<p>If the item has already sold out by the time this runs, the database updates zero rows instead of committing a negative quantity. The application checks the row count and treats zero as the failure. The constraint is not a separate check before the write, it is built into the write itself.</p>
+<p>The same logic applies to uniqueness. A retry or a network fault can send two requests with the same logical intent to the database. The application might try to guard against this with a check-then-insert, but that check has the same race window as any other read-then-write. A better approach is for the caller to include a stable identifier with the request — a client-generated order ID that represents this specific attempt — and for the database to enforce uniqueness on it. That way the database itself rejects the duplicate rather than the application having to detect it:</p>
+<pre class="language-text"><code class="language-text">unique(user_id, client_order_id)
+</code></pre>
+<p>The second insert fails instead of creating a second order. The application does not have to win the race against concurrent requests, it just has to handle the error when the database rejects the duplicate.</p>
+<p>Foreign keys, not-null columns, and check constraints follow the same principle. A foreign key on order items means an item cannot reference an order that was deleted or never created. A not-null constraint on a required column means a missing value is rejected before the row exists. A check constraint on a quantity means a negative value is caught at the database layer before any application code discovers it downstream.</p>
+<p>There's also a useful side effect: constrained failures hold extra context: a duplicate-key error says another request already created that logical record, a check constraint violation says the value broke a rule the database is enforcing. Those errors still need to be handled, but they are better than discovering later that two versions of the same order are both committed, or that a quantity has gone negative and no part of the system noticed until a report ran.</p>
+<h3 id="reads-are-not-always-fresh" tabindex="-1"><a class="header-anchor" href="#reads-are-not-always-fresh">Reads are not always fresh</a></h3>
+<p>Committing a write is not the same as making it visible everywhere. A single database instance can hide this: the writer and the reader talk to the same thing, and the answer comes back immediately. Add a replica, a cache, or an asynchronous read model, and the application can be reading from a copy that has not caught up yet.</p>
+<p>The simplest version of this problem is a read replica. Replicas exist for good reasons: they spread read load, reduce pressure on the primary, and can serve reports and analytics without competing with transactional writes. But replication has lag, an instance may be milliseconds behind the primary, or it may be seconds behind during a period of heavy write traffic. Any read that goes to the replica may see the world as it was some time ago, not as it is now.</p>
+<p>Our checkout flow creates this problem immediately:</p>
+<p><img src="03-05.svg" alt="Diagram: checkout creates an order on the primary, but the confirmation page reads from a replica that has not yet caught up"></p>
+<p>Checkout creates an order on the primary and returns a confirmation page. The confirmation page loads and reads the order back, but the read goes to a replica that has not yet replicated that row. The user sees a &quot;not found&quot; error for an order that genuinely exists. The write succeeded, the read just could not see it yet.</p>
+<p>This is the <strong>read-your-writes</strong> problem. Application code that writes to the primary and then reads from a replica cannot assume it will see its own recent changes. The assumption is natural - the same request just created the data - but the infrastructure does not guarantee it.</p>
+<p>Replicas are one source of stale reads, but not the only one. Caches can hold values that no longer match what the database contains. Search indexes update asynchronously, so a freshly created record may not appear in search results for several seconds. Read models built from event streams apply updates with some delay. Even within a single database, a long-running transaction reading from a snapshot may see a version of the data that predates commits other transactions have already made.</p>
+<p>Each of these is a different kind of lag with different characteristics. Replica lag depends on write throughput and network conditions, cache staleness depends on TTL settings and how invalidation is handled, index lag depends on the pipeline between the write path and the search layer. The important point is not which mechanism causes the gap, but that the gap exists, and the application has to decide which reads actually require freshness.</p>
+<p>Most reads do not. Historical data, aggregate counts, and dashboard metrics are usually fine with slightly stale values. But some reads carry an implicit promise: the user just did something, and they expect to see it. The confirmation page is one example. An inventory status page after an admin update is another. A worker that reads a record it is about to process is a third.</p>
+<p>When freshness matters, the options are to route the read to the primary, to use a mechanism that forces the replica to catch up before responding, or to design the read path so it does not need to round-trip to the database at all - for example by passing the just-written data forward rather than reading it back. The right answer depends on the read pattern, the architecture, and what the product is willing to accept. The starting point is recognizing that &quot;I just wrote it&quot; is not the same as &quot;I can read it back from anywhere&quot;.</p>
+<h3 id="commit-outcomes-can-be-ambiguous" tabindex="-1"><a class="header-anchor" href="#commit-outcomes-can-be-ambiguous">Commit outcomes can be ambiguous</a></h3>
+<p>Inside the database, commit vs rollback is clear, but outside the database, it often isn't. The request can time out, the connection can drop, or the process can crash after sending the write but before getting a reply. In that moment, the caller does not know what happened to the write.</p>
+<p>From the caller's perspective, any of these outcomes is possible:</p>
+<ul>
+<li>the database never received the write</li>
+<li>the database received it and rejected it</li>
+<li>the database committed it, but the response was lost</li>
+<li>the database is still processing while the caller has already retried</li>
+</ul>
+<p>The diagram below shows why the caller cannot know the write outcome yet:</p>
+<p><img src="03-06.svg" alt="Diagram: application sends a commit, times out waiting for a response, and cannot tell whether the database committed"></p>
+<p>From the caller's point of view, &quot;I got a timeout&quot; says only that waiting ended. It does not tell you whether the write failed, succeeded, or is still in progress.</p>
+<p>That is why retries are only safe when the write is <strong>idempotent</strong> (running it more than once produces the same result as running it once). Without that property, timeout handling turns into a duplication bug: the caller retries, the original write was already committed, and now there are two.</p>
+<p>That property covers individual writes, but a multi-step workflow can still stall partway through. The database may already contain a valid committed write while the steps around it are incomplete. Persisting one step safely does not guarantee the rest finished, so operation state checks and reconciliation jobs are still needed to close those gaps.</p>
+<h3 id="deadlocks%2C-lock-waits%2C-and-retries-are-normal" tabindex="-1"><a class="header-anchor" href="#deadlocks%2C-lock-waits%2C-and-retries-are-normal">Deadlocks, lock waits, and retries are normal</a></h3>
+<p>Not every database error means bad application logic. Under load, correct transactions can still collide. Example: transaction A updates <code>orders</code> then <code>inventory</code>. Transaction B updates <code>inventory</code> then <code>orders</code>. Each one holds a lock the other one needs. The diagram below shows that shape:</p>
+<p><img src="03-07.svg" alt="Diagram: two transactions lock rows in opposite order, wait on each other, and the database aborts one to resolve deadlock"></p>
+<p>The database resolves this by aborting one transaction.</p>
+<p>Lock waits are a softer version of the same problem. No cycle, just queueing. A valid transaction waits because another one got there first. Short waits are normal. Long waits are expensive.</p>
+<p>Retries help only for transient failures. Deadlock victim? Retry. Short lock timeout? Maybe retry. Constraint violation? Do not retry, it would never succeed.</p>
+<p>For checkout, the rule is simple: classify errors, retry only the safe ones, and cap retry count tightly. If every retry holds another worker and connection, a short lock spike quickly becomes user-visible downtime.</p>
+<h3 id="schema-changes-are-live-system-changes" tabindex="-1"><a class="header-anchor" href="#schema-changes-are-live-system-changes">Schema changes are live-system changes</a></h3>
+<p>Schema changes look harmless in development, but in production, they run while the application is live. During this transition, multiple app versions can run at once. Workers keep processing jobs. Admin screens and reports still hit the same tables. So one schema change can break several paths at the same time. The diagram below shows the shape of this live transition:</p>
+<p><img src="03-08.svg" alt="Diagram: version A, version B, and backfill worker all write to a schema that is currently in transition"></p>
+<p>The risk in this phase is change order. If strict constraints arrive before all writers are updated, requests fail immediately. If cleanup removes fields that some readers still expect, those code paths fail just as quickly. Even when compatibility is correct, backfill can still cause user-facing issues if it runs too fast and competes with checkout for locks and I/O.</p>
+<p>In all three cases, the SQL can be correct and still be unsafe in that transition window. The practical pattern is compatibility first, cleanup later:</p>
+<ol>
+<li>Add schema changes in a backward-compatible form.</li>
+<li>Deploy code that can read both old and new rows.</li>
+<li>Start writing the new shape.</li>
+<li>Backfill slowly with limits.</li>
+<li>Enforce constraints and remove old columns only after old reads and writes are gone.</li>
+</ol>
+<p>A successful migration command is necessary, but not sufficient: requests, workers, and admin workflows need to keep working while the schema change and cleanup are in progress.</p>
+<h3 id="durability-is-not-the-same-as-recoverability" tabindex="-1"><a class="header-anchor" href="#durability-is-not-the-same-as-recoverability">Durability is not the same as recoverability</a></h3>
+<p>Durability means the write is persisted, recoverability means that after an incident we can rebuild a correct business state and explain every critical transition that produced it.</p>
+<p>A system can satisfy the first and still fail the second. A durable current row may tell us the final value, while missing the history needed to verify money movement, reverse a bad change, or safely replay a workflow.</p>
+<p>The diagram below shows the difference:</p>
+<p><img src="03-09.svg" alt="Diagram: current status row versus event history needed to reconstruct and verify state"></p>
+<p>The left side is enough for normal reads. The right side is what recovery work needs.</p>
+<p>That is why incidents can become expensive even when data is technically durable, if recovery is not engineered properly. A backup can exist but still be unusable because it is too old or restore takes too long. The latest row can exist but still be insufficient because there is no reliable history to audit money movement or undo a bad change safely.</p>
+<p>Recovery has to be engineered explicitly: tested restore procedures, measured recovery time, and enough historical records to reconcile critical state transitions.</p>
+<h2 id="engineering-beyond-the-happy-path" tabindex="-1"><a class="header-anchor" href="#engineering-beyond-the-happy-path">Engineering beyond the happy path</a></h2>
+<p>The Reality section shows how database failures appear at the application boundary: timeouts, lock waits, stale reads, ambiguous outcomes, and unsafe migrations. Now let's turn those failure modes into design rules.</p>
+<h3 id="design-around-invariants-first" tabindex="-1"><a class="header-anchor" href="#design-around-invariants-first">Design around invariants first</a></h3>
+<p>Start from the business rule that must always hold, then pick SQL and transaction boundaries that enforce that rule under concurrency.</p>
+<p>For the checkout example, &quot;do not oversell&quot; is stronger than &quot;run these statements together.&quot; The practical shape is a guarded write that succeeds only when stock is still available, plus explicit handling for the zero-row case.</p>
+<p>The same pattern applies to duplicate creates and illegal transitions:</p>
+<ul>
+<li>use unique keys for logical uniqueness and idempotency</li>
+<li>use check constraints and foreign keys for data validity</li>
+<li>use guarded updates for state transitions that must not race</li>
+</ul>
+<p>Application checks still matter for user feedback, but the database must enforce the invariant where the write happens.</p>
+<h3 id="keep-transactions-short-and-intention-revealing" tabindex="-1"><a class="header-anchor" href="#keep-transactions-short-and-intention-revealing">Keep transactions short and intention-revealing</a></h3>
+<p>Open transactions consume scarce resources even while &quot;just waiting&quot;. Keep the transaction body focused on the minimum set of reads and writes needed to enforce one invariant.</p>
+<p>Avoid network calls, slow external I/O, and long application processing inside an open transaction. When that work must happen, do it before opening the transaction or after commit.</p>
+<p>When lock contention appears, optimize for predictability first:</p>
+<ul>
+<li>access shared tables in a consistent order across code paths</li>
+<li>avoid batch updates that lock large row sets during peak traffic</li>
+<li>classify retryable vs non-retryable failures explicitly</li>
+</ul>
+<p>Retries are a pressure multiplier, so retry budgets should be small and deliberate.</p>
+<h3 id="treat-retries-as-part-of-correctness" tabindex="-1"><a class="header-anchor" href="#treat-retries-as-part-of-correctness">Treat retries as part of correctness</a></h3>
+<p>A timeout from the caller does not prove the write failed. Design write APIs as if duplicate attempts are guaranteed.</p>
+<p>A practical baseline is:</p>
+<ol>
+<li>Require a stable operation ID from caller to storage.</li>
+<li>Enforce uniqueness for that ID in the database.</li>
+<li>Return the existing result when the same operation is repeated.</li>
+<li>Reconcile unfinished multi-step workflows asynchronously.</li>
+</ol>
+<p>This turns ambiguity from &quot;did it happen?&quot; into &quot;fetch and continue from known state&quot;.</p>
+<h3 id="design-explicit-freshness-contracts" tabindex="-1"><a class="header-anchor" href="#design-explicit-freshness-contracts">Design explicit freshness contracts</a></h3>
+<p>Not every read needs the newest data, but some reads carry a user promise. Make that promise explicit per endpoint.</p>
+<p>For each read path, define one of three modes:</p>
+<ul>
+<li>strong: must reflect the latest successful write</li>
+<li>bounded stale: may lag within a known window</li>
+<li>eventually consistent: stale data is acceptable</li>
+</ul>
+<p>Then route reads accordingly. Confirmation pages and immediate post-write views usually need strong or bounded-stale behavior; dashboards and historical aggregates usually do not. The main engineering mistake is leaving the mode undefined and discovering the requirement only during an incident.</p>
+<h3 id="run-schema-changes-as-production-workflows" tabindex="-1"><a class="header-anchor" href="#run-schema-changes-as-production-workflows">Run schema changes as production workflows</a></h3>
+<p>Migrations are not a single command; they are a sequence across app versions, workers, and data shape changes.</p>
+<p>Use a repeatable rollout protocol:</p>
+<ol>
+<li>Expand schema in backward-compatible form.</li>
+<li>Deploy dual-read or dual-write code where needed.</li>
+<li>Backfill in throttled batches with abort controls.</li>
+<li>Verify old readers and writers are gone.</li>
+<li>Contract schema by enforcing strict constraints and removing legacy fields.</li>
+</ol>
+<p>Treat every step as observable production work. If rollback is impossible for a step, stop and redesign that step before rollout.</p>
+<h3 id="engineer-for-recovery%2C-not-just-durability" tabindex="-1"><a class="header-anchor" href="#engineer-for-recovery%2C-not-just-durability">Engineer for recovery, not just durability</a></h3>
+<p>Durable bytes are a starting point. Recovery needs tested procedures and enough historical evidence to reconstruct critical business transitions.</p>
+<p>For critical workflows, teams should know in advance:</p>
+<ul>
+<li>target recovery time and tested restore time</li>
+<li>oldest acceptable backup point for business impact</li>
+<li>where transition history is stored and how it is reconciled</li>
+<li>which operations require compensation rather than blind replay</li>
+</ul>
+<p>A mature database architecture is not the one that never fails. It is the one that can explain state, recover safely, and return to normal operation without guesswork.</p>
+<h3 id="patterns-for-sharper-edges" tabindex="-1"><a class="header-anchor" href="#patterns-for-sharper-edges">Patterns for Sharper Edges</a></h3>
+<p>Constraints, guarded writes, short transactions, idempotency, explicit freshness contracts, careful migrations, and good observability will handle most production scenarios. Some systems, though, run into sharper edges: very hot rows, heavy cross-service workflows, strict audit requirements, or read workloads that compete with transactional traffic. The patterns below can help, but each one adds operational complexity and new failure modes.</p>
+<p><em>Transactional outbox</em> is the standard way to handle &quot;write committed, event not published&quot;. The business write and outbox row commit together, then a worker publishes asynchronously. This reduces lost-event risk, but it introduces backlog management, duplicate delivery handling, and cleanup failure modes.</p>
+<p><em>Append-only records</em> help when the latest row is not enough to explain money movement, inventory transitions, or permission changes. They improve auditability and reconciliation, but they make reads, compaction, and correction workflows more complex.</p>
+<p><em>Materialized read models</em> and <em>workload isolation</em> help when heavy reads threaten primary write traffic. They reduce pressure on the hot path, but they introduce lag, rebuild operations, and more coordination across data paths.</p>
+<p><em>Serializable isolation</em> and <em>advisory locking</em> are useful when anomalies are unacceptable in a critical workflow. They can simplify correctness reasoning for specific operations, but they usually increase contention cost and require tighter operational tuning.</p>
+<p>The rule is the same as in other chapters: exhaust the simpler controls first, then add sharper tools for a specific, measured pressure.</p>
+<h2 id="production-example" tabindex="-1"><a class="header-anchor" href="#production-example">Production example</a></h2>
+<p>These incidents show that database failure modes are common and expensive to recover from, even for mature teams.</p>
+<h3 id="atlassian-2022%3A-recovery-capability-became-the-bottleneck" tabindex="-1"><a class="header-anchor" href="#atlassian-2022%3A-recovery-capability-became-the-bottleneck">Atlassian 2022: recovery capability became the bottleneck</a></h3>
+<p>In 2022, Atlassian published a detailed post-incident review after maintenance work led to large-scale service disruption and a long restoration effort. The core engineering lesson was recoverability under pressure: how quickly and safely data and service state can be restored, and how prepared teams are to run that recovery process at scale.</p>
+<p>This maps directly to the section above on durability versus recoverability. Having bytes on disk is not the same as being able to return the business to a known, explainable state inside an acceptable time window.</p>
+<p>Source: <a href="https://www.atlassian.com/blog/atlassian-engineering/post-incident-review-april-2022-outage">Atlassian April 2022 incident review</a></p>
+<h3 id="github-2018%3A-short-disruption%2C-long-reconciliation" tabindex="-1"><a class="header-anchor" href="#github-2018%3A-short-disruption%2C-long-reconciliation">GitHub 2018: short disruption, long reconciliation</a></h3>
+<p>In 2018, GitHub published an incident analysis after a brief network partition between data centers caused database failover and a prolonged recovery period. The interruption itself was short; the recovery was long because data placement and consistency had to be reconciled carefully before all features could return to normal operation.</p>
+<p>This maps to several chapter themes at once: ambiguous outcomes across boundaries, stale or diverged read paths, and the need to prioritize data correctness over fast but unsafe recovery.</p>
+<p>Source: <a href="https://github.blog/news-insights/company-news/oct21-post-incident-analysis/">GitHub October 21 post-incident analysis</a></p>
+<p>The common pattern in both incidents is the same: database reliability is not one property, it's a stack of properties that must hold together under pressure: invariants, contention behavior, freshness contracts, migration discipline, and practiced recovery.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>The happy path shows that a database can store the right value, but a production system asks something harder: whether that value holds when requests race, replicas lag, callers time out, and migrations run alongside live traffic.</p>
+<p>Getting there requires more than correct SQL. It means enforcing invariants at the database boundary rather than only in application code, keeping transactions short and purposeful, designing writes to survive retries, being explicit about which reads require freshness, treating migrations as live workflows, and building recovery procedures before they are needed.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
