@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Stale read after a successful write</title>
+  <desc id="desc">Checkout creates an order on the primary database, but the confirmation page reads from a replica that has not yet caught up and sees no order.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <marker id="arrow-warn" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b45f45"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="46" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">A write that committed, a read that cannot see it</text>
+  <text x="480" y="74" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The order is real. The replica has not caught up yet.</text>
+
+  <!-- Left: write path -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="100" width="220" height="66" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="190" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">Checkout API</text>
+    <text x="190" y="153" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">creates order</text>
+  </g>
+
+  <line x1="190" y1="174" x2="190" y2="212" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="204" y="199" font-family="Arial, sans-serif" font-size="13" fill="#53646d">write</text>
+
+  <g filter="url(#shadow)">
+    <rect x="80" y="220" width="220" height="66" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="190" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">Primary DB</text>
+    <text x="190" y="273" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">order committed</text>
+  </g>
+
+  <!-- Right: read path -->
+  <g filter="url(#shadow)">
+    <rect x="660" y="100" width="220" height="66" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="770" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">Confirmation UI</text>
+    <text x="770" y="153" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#53646d">reads order back</text>
+  </g>
+
+  <line x1="770" y1="174" x2="770" y2="212" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="784" y="199" font-family="Arial, sans-serif" font-size="13" fill="#53646d">read</text>
+
+  <g filter="url(#shadow)">
+    <rect x="660" y="220" width="220" height="66" rx="8" fill="#f2ddd3" stroke="#b45f45" stroke-width="2"/>
+    <text x="770" y="250" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#7a2f23">Replica DB</text>
+    <text x="770" y="273" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#7a2f23">order not found yet</text>
+  </g>
+
+  <!-- Replication lag arrow between databases -->
+  <line x1="308" y1="253" x2="652" y2="253" stroke="#b45f45" stroke-width="2.5" stroke-dasharray="8 6" marker-end="url(#arrow-warn)"/>
+  <text x="480" y="244" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#b45f45">replication lag</text>
+
+  <!-- Summary -->
+  <g>
+    <rect x="80" y="322" width="800" height="50" rx="8" fill="#f2ddd3" stroke="#b45f45"/>
+    <text x="480" y="353" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#7a2f23">"I just wrote it" is not the same as "I can read it back from anywhere"</text>
+  </g>
+</svg>

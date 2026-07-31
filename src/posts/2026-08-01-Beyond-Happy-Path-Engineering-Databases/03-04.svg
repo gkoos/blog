@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430" role="img" aria-labelledby="title desc">
+  <title id="title">Two checkout requests racing for the last item</title>
+  <desc id="desc">Two checkout requests both read stock as one, both create an order, and both try to decrement inventory.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" fill="#f7f4ee"/>
+
+  <text x="480" y="48" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Two requests, one item left</text>
+  <text x="480" y="76" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The read was true when it happened, but it did not reserve anything</text>
+
+  <line x1="130" y1="150" x2="840" y2="150" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="130" y1="260" x2="840" y2="260" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <text x="86" y="156" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">A</text>
+  <text x="86" y="266" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">B</text>
+
+  <g filter="url(#shadow)">
+    <rect x="170" y="112" width="150" height="76" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="245" y="143" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">read stock</text>
+    <text x="245" y="166" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">available = 1</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="300" y="222" width="150" height="76" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="375" y="253" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">read stock</text>
+    <text x="375" y="276" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">available = 1</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="438" y="112" width="150" height="76" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="513" y="143" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">create order</text>
+    <text x="513" y="166" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">for request A</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="528" y="222" width="150" height="76" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="603" y="253" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">create order</text>
+    <text x="603" y="276" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">for request B</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="696" y="112" width="150" height="76" rx="8" fill="#f2ddd3" stroke="#b45f45" stroke-width="2"/>
+    <text x="771" y="143" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#7a2f23">decrement</text>
+    <text x="771" y="166" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7a2f23">stock = 0</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="740" y="222" width="150" height="76" rx="8" fill="#f2ddd3" stroke="#b45f45" stroke-width="2"/>
+    <text x="815" y="253" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#7a2f23">decrement</text>
+    <text x="815" y="276" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#7a2f23">stock = -1</text>
+  </g>
+
+  <g>
+    <rect x="130" y="346" width="700" height="44" rx="8" fill="#f2ddd3" stroke="#b45f45"/>
+    <text x="480" y="374" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#7a2f23">Both reads were plausible; the final state is not</text>
+  </g>
+</svg>

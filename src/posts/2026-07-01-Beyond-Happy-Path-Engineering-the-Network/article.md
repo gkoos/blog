@@ -19,6 +19,7 @@ tags:
 
 - [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/)
 - [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/)
+- [Beyond Happy Path Engineering: Databases](/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/)
 
 ---
 
@@ -85,7 +86,7 @@ We have seen what can go wrong at the network boundary: slow calls, ambiguous ou
 
 ### Timeouts are design decisions
 
-Once latency is part of the problem, timeouts become part of the design. A timeout is often treated as a small technical setting on an HTTP client, but it is really a decision about how long the caller is willing to keep waiting for this particular work. That decision affects user experience, capacity, correctness, and what the rest of the system is allowed to assume.
+Once latency is part of the problem, timeouts become part of the design. A timeout is often treated as a small technical setting on an HTTP client, but it is really a decision about how long the caller is willing to keep waiting for this particular work. (If you are working in JavaScript, [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/) covers the specific default behaviors that make this harder than it looks.) That decision affects user experience, capacity, correctness, and what the rest of the system is allowed to assume.
 
 ![Diagram: checkout request timeout budget split across app work, routing, payment authorization, inventory reservation, and buffer](01-03.svg)
 
