@@ -417,28 +417,33 @@
   </url>
   
   <url>
+    <loc>https://blog.gaborkoos.com/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/</loc>
+    <lastmod>2026-08-01T00:00:00.000Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.gaborkoos.com/posts/2026-08-03-Your-JSON-Is-Lying-to-You/</loc>
+    <lastmod>2026-08-03T00:00:00.000Z</lastmod>
+  </url>
+  
+  <url>
     <loc>https://blog.gaborkoos.com/categories/</loc>
-    <lastmod>2026-07-31T23:50:42.535Z</lastmod>
+    <lastmod>2026-08-03T01:35:46.198Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/feed.xml</loc>
-    <lastmod>2026-07-31T23:50:42.535Z</lastmod>
+    <lastmod>2026-08-03T01:35:46.198Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/</loc>
-    <lastmod>2026-07-31T23:50:42.535Z</lastmod>
+    <lastmod>2026-08-03T01:35:46.198Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/publications/</loc>
-    <lastmod>2026-07-31T23:50:42.580Z</lastmod>
-  </url>
-  
-  <url>
-    <loc>https://blog.gaborkoos.com/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/</loc>
-    <lastmod>2026-08-01T00:00:00.000Z</lastmod>
+    <lastmod>2026-08-03T01:35:46.241Z</lastmod>
   </url>
   
 </urlset>

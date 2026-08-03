@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your JSON Is Lying to You</title>
+  <meta name="description" content="JSON looks like a faithful representation of JavaScript data, but JSON.stringify and JSON.parse can silently alter or discard information at system boundaries.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your JSON Is Lying to You">
+  <meta property="og:description" content="JSON looks like a faithful representation of JavaScript data, but JSON.stringify and JSON.parse can silently alter or discard information at system boundaries.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Your JSON Is Lying to You">
+  <meta name="twitter:description" content="JSON looks like a faithful representation of JavaScript data, but JSON.stringify and JSON.parse can silently alter or discard information at system boundaries.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Your JSON Is Lying to You</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-08-03T00:00:00.000Z">Mon Aug 03 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">json</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">serialization</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">... is lying to you</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Run this in your browser console:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> payload <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">9007199254740993</span> <span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>payload<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"id":9007199254740992}</span>
+</code></pre>
+<p>The value ends in <code>3</code>, but the serialized result ends in <code>2</code>. Nothing throws, and the output remains valid JSON, so the change is easy to miss when the value is an identifier buried inside a larger payload.</p>
+<p>Now try a more varied object:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">9007199254740993</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">missing</span><span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">createdAt</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T12:00:00Z'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">score</span><span class="token operator">:</span> <span class="token number">NaN</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// {</span>
+<span class="token comment">//   id: 9007199254740992,</span>
+<span class="token comment">//   createdAt: "2026-07-21T12:00:00.000Z",</span>
+<span class="token comment">//   score: null</span>
+<span class="token comment">// }</span>
+</code></pre>
+<p>The number changed, the <code>missing</code> property disappeared, the <code>Date</code> became a string, and <code>NaN</code> became <code>null</code>. The object passed through the most familiar serialization round trip in JavaScript, yet the copy no longer carries the same data or types as the original.</p>
+<h2 id="how-we-got-here" tabindex="-1"><a class="header-anchor" href="#how-we-got-here">How We Got Here</a></h2>
+<p>JSON emerged around 2001 as a lightweight way to exchange structured data between browsers and servers. Douglas Crockford named and popularised the format, and <a href="https://www.rfc-editor.org/rfc/rfc4627">RFC 4627</a> formally specified it in 2006. The current standard is <a href="https://www.rfc-editor.org/rfc/rfc8259">RFC 8259</a>, published in 2017.</p>
+<p>At the time, XML dominated data exchange on the web. JSON offered a much smaller grammar based on syntax JavaScript developers already recognised from object and array literals. A JSON document could be produced and consumed with little machinery, which made it a natural fit for the increasingly interactive web applications of the early 2000s.</p>
+<p>That small grammar is still the source of JSON's appeal. It supports strings, numbers, booleans, <code>null</code>, arrays, and objects, giving different languages a common representation without importing one language's complete type system. Its design favours a minimal and portable wire format over exact preservation of every value available inside JavaScript.</p>
+<p>JavaScript contains many values that fall outside that model. It has <code>undefined</code>, <code>BigInt</code>, symbols, special numeric values, objects with prototypes, and built-in collections with their own internal state. <code>JSON.stringify</code> must change or reject values the format cannot represent, while <code>JSON.parse</code> receives too little information to reconstruct most original types.</p>
+<p>These differences become visible when a value leaves the process that created it. Writing it to a cache or database, sending it to another service, or reading it in another language can expose assumptions that remained hidden in JavaScript. The JSON can remain perfectly valid while the meaning changes on the way through.</p>
+<p>This article examines those changes and explains how to define a wire representation that preserves the information your application actually needs. The goal is to make JSON boundaries explicit, so a convenient encoding does not quietly become an accidental data contract.</p>
+<h2 id="the-number-may-be-wrong-before-json-sees-it" tabindex="-1"><a class="header-anchor" href="#the-number-may-be-wrong-before-json-sees-it">The Number May Be Wrong Before JSON Sees It</a></h2>
+<p>The opening example reveals the changed value during serialization, but the precision loss happens earlier. JavaScript rounds <code>9007199254740993</code> while evaluating the number literal, before <code>JSON.stringify</code> receives it.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> id <span class="token operator">=</span> <span class="token number">9007199254740993</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span>
+<span class="token comment">// 9007199254740992</span>
+</code></pre>
+<p>JavaScript stores ordinary numbers using the IEEE 754 binary64 format described by the ECMAScript <a href="https://tc39.es/ecma262/#sec-ecmascript-language-types-number-type"><code>Number</code> type</a>. This format can represent integers exactly from <code>Number.MIN_SAFE_INTEGER</code> through <code>Number.MAX_SAFE_INTEGER</code>, which is <code>-(2^53 - 1)</code> through <code>2^53 - 1</code>. Beyond that range, adjacent integers can map to the same stored value.</p>
+<p>JSON has a different contract: <a href="https://www.rfc-editor.org/rfc/rfc8259#section-6">number grammar</a> describes how a number is written as decimal text, but it does not prescribe one in-memory numeric type for every implementation. A system with a wider integer type can therefore produce valid JSON containing a value that JavaScript cannot store exactly.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> text <span class="token operator">=</span> <span class="token string">'{"id":9007199254740993}'</span>
+<span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">.</span>id<span class="token punctuation">)</span>
+<span class="token comment">// 9007199254740992</span>
+</code></pre>
+<p>Here the text still contains the exact integer. Precision is lost when <code>JSON.parse</code> converts that text into a JavaScript <code>Number</code>. If the parsed value is later serialized again, the rounded result becomes part of the outgoing data.</p>
+<p>This matters for database identifiers, account numbers, invoice totals, and monetary values represented in minor units. A producer may send the correct digits while the receiving JavaScript program silently stores a different number. Validation performed after parsing cannot recover the original value because the distinction has already disappeared.</p>
+<p><code>BigInt</code> can hold integers beyond the safe <code>Number</code> range, but JSON has no corresponding value type. JavaScript rejects the conversion instead of choosing an encoding automatically.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> id <span class="token operator">=</span> <span class="token number">9007199254740993n</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span>
+<span class="token comment">// 9007199254740993n</span>
+
+<span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> id <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token comment">// TypeError: Do not know how to serialize a BigInt</span>
+</code></pre>
+<p>Exact integers need an agreed representation before they cross the wire. A decimal string is often the simplest choice because JSON implementations can preserve its digits exactly.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token string">'9007199254740993'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">.</span>id<span class="token punctuation">)</span>
+<span class="token comment">// "9007199254740993"</span>
+</code></pre>
+<p>The schema must state that <code>id</code> is a decimal string rather than an ordinary number. The receiving program can keep it as an identifier or convert it to <code>BigInt</code> when arithmetic is required. Other encodings can work as well, provided that the producer and consumer agree on them explicitly.</p>
+<h2 id="undefined-can-mean-multiple-things" tabindex="-1"><a class="header-anchor" href="#undefined-can-mean-multiple-things"><code>undefined</code> Can Mean Multiple Things</a></h2>
+<p>JavaScript distinguishes between a missing property and a property whose value is <code>undefined</code>. Both produce <code>undefined</code> when read directly, but property checks reveal the difference:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">present</span><span class="token operator">:</span> <span class="token keyword">undefined</span> <span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>present<span class="token punctuation">)</span>          <span class="token comment">// undefined</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>missing<span class="token punctuation">)</span>          <span class="token comment">// undefined</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'present'</span> <span class="token keyword">in</span> value<span class="token punctuation">)</span>     <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'missing'</span> <span class="token keyword">in</span> value<span class="token punctuation">)</span>     <span class="token comment">// false</span>
+</code></pre>
+<p>That distinction can be relevant in application code. A missing property may mean that no update was requested, while a present property may mean that a caller supplied a value which still needs to be interpreted (although you can argue this is not good application design). This distinction disappears when an object property containing <code>undefined</code> is serialized.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Alice'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">nickname</span><span class="token operator">:</span> <span class="token keyword">undefined</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+<span class="token comment">// {"name":"Alice"}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'nickname'</span> <span class="token keyword">in</span> copy<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>JSON has no <code>undefined</code> value, so <code>JSON.stringify</code> omits the property. This behavior often looks reasonable for a normal response payload, but it can change the meaning of partial updates, configuration overlays, form submissions, and cached state.</p>
+<p>Consider an endpoint that uses <code>null</code> to clear a nickname and omission to leave it unchanged:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> leaveUnchanged <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token keyword">const</span> clearNickname <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">nickname</span><span class="token operator">:</span> <span class="token keyword">null</span> <span class="token punctuation">}</span>
+<span class="token keyword">const</span> ambiguousUpdate <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">nickname</span><span class="token operator">:</span> <span class="token keyword">undefined</span> <span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>leaveUnchanged<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>clearNickname<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"nickname":null}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>ambiguousUpdate<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {}</span>
+</code></pre>
+<p>The first and third objects become identical JSON even though they were distinguishable in JavaScript. Once serialized, the receiver cannot determine whether the property was absent from the start or removed because its value was <code>undefined</code>.</p>
+<p>Arrays follow a different rule. Removing an array entry would shift every later position, so unsupported values become <code>null</code> instead.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> values <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'first'</span><span class="token punctuation">,</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span> <span class="token string">'third'</span><span class="token punctuation">]</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>values<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// ["first",null,"third"]</span>
+</code></pre>
+<p>At the top level, <code>JSON.stringify(undefined)</code> produces JavaScript <code>undefined</code>. It does not return JSON text, which can be surprising when code assumes that every successful call returns a string.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token keyword">undefined</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span>        <span class="token comment">// undefined</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">typeof</span> result<span class="token punctuation">)</span> <span class="token comment">// "undefined"</span>
+</code></pre>
+<p>Functions and symbols follow the same context-dependent pattern. They are omitted from objects and converted to <code>null</code> inside arrays, while top-level serialization returns <code>undefined</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token function-variable function">fn</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token number">42</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> fn <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">[</span>fn<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// [null]</span>
+</code></pre>
+<p>An API contract should define omission and <code>null</code> directly, because those are the states JSON can carry. If JavaScript code needs an additional state, it must encode that state explicitly before serialization rather than relying on <code>undefined</code> to survive the trip.</p>
+<h2 id="object-order-survives-until-it-crosses-a-boundary" tabindex="-1"><a class="header-anchor" href="#object-order-survives-until-it-crosses-a-boundary">Object Order Survives Until It Crosses a Boundary</a></h2>
+<p>Modern JavaScript gives <code>JSON.stringify</code> a stable property order. Serializing the same plain object repeatedly produces the same sequence of keys, provided that the object itself does not change.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">z</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">a</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token literal-property property">m</span><span class="token operator">:</span> <span class="token number">3</span> <span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"z":1,"a":2,"m":3}</span>
+</code></pre>
+<p>This behavior is defined by ECMAScript. <a href="https://tc39.es/ecma262/#sec-json.stringify"><code>JSON.stringify</code></a> visits enumerable own string-keyed properties using the same stable ordering rules as <code>Object.keys()</code>. Integer-index keys come first in ascending numeric order, followed by other string keys in creation order.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+value<span class="token punctuation">.</span>b <span class="token operator">=</span> <span class="token string">'second'</span>
+value<span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'ten'</span>
+value<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'two'</span>
+value<span class="token punctuation">.</span>a <span class="token operator">=</span> <span class="token string">'first'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"2":"two","10":"ten","b":"second","a":"first"}</span>
+</code></pre>
+<p>The result is predictable inside JavaScript, but JSON gives object members a weaker meaning. <a href="https://www.rfc-editor.org/rfc/rfc8259#section-4">RFC 8259 defines an object as an unordered collection</a> and notes that parsing libraries differ in whether they expose member ordering to calling code.</p>
+<p>A JavaScript service may send the following document. Its textual order is visible, which can make that order look like part of the contract:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span><span class="token property">"z"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span><span class="token property">"a"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">,</span><span class="token property">"m"</span><span class="token operator">:</span><span class="token number">3</span><span class="token punctuation">}</span>
+</code></pre>
+<p>A Go service can decode that object into a <code>map[string]any</code>. The <a href="https://go.dev/ref/spec#For_statements">Go language specification</a> leaves map iteration order unspecified, so code that loops over the decoded map cannot rely on receiving <code>z</code>, <code>a</code>, and <code>m</code> in source order. Another parser or serializer may also expose a different order while preserving the same JSON object.</p>
+<p>This matters when an application gives position a meaning that the data model does not carry. A workflow may process the first property as the highest priority, or a test may compare raw JSON strings even though their objects contain the same members. Both designs depend on an ordering guarantee that can disappear when another runtime handles the document.</p>
+<p>When order carries meaning, represent it with an array. The sequence then becomes part of the data model:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">[</span>
+  <span class="token punctuation">{</span><span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"z"</span><span class="token punctuation">,</span><span class="token property">"value"</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span><span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"a"</span><span class="token punctuation">,</span><span class="token property">"value"</span><span class="token operator">:</span><span class="token number">2</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span><span class="token property">"name"</span><span class="token operator">:</span><span class="token string">"m"</span><span class="token punctuation">,</span><span class="token property">"value"</span><span class="token operator">:</span><span class="token number">3</span><span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+</code></pre>
+<p>Arrays are ordered by the JSON specification, so every compliant parser preserves the sequence. The extra structure makes the intended contract visible to readers and implementations.</p>
+<p>Hashes, signatures, cache keys, and content-addressed identifiers need a separate solution. Two JSON texts can represent the same object while differing in property order or whitespace, which gives them different byte sequences.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> first <span class="token operator">=</span> <span class="token string">'{"a":1,"b":2}'</span>
+<span class="token keyword">const</span> second <span class="token operator">=</span> <span class="token string">'{ "b": 2, "a": 1 }'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>first<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// { a: 1, b: 2 }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>second<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// { b: 2, a: 1 }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>first <span class="token operator">===</span> second<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>Systems that sign or hash JSON need an agreed canonical representation before computing bytes. <code>JSON.stringify</code> produces repeatable output when it receives the same object with the same property order, but two objects with identical members can still produce different strings when those properties were created in a different order. A canonicalization scheme defines one representation for equivalent data, independent of how each producer constructed it.</p>
+<h2 id="json-erases-types" tabindex="-1"><a class="header-anchor" href="#json-erases-types">JSON Erases Types</a></h2>
+<p>A JSON document has a smaller type system than JavaScript. Values that fit its model can cross the boundary directly, while other values must be converted into something JSON can represent. The resulting document carries the converted value without recording its original JavaScript type.</p>
+<p><code>Date</code> is a common example. During serialization, a valid <code>Date</code> produces an ISO timestamp string through its <code>toJSON()</code> method.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> createdAt <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T12:00:00Z'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> createdAt <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+<span class="token comment">// {"createdAt":"2026-07-21T12:00:00.000Z"}</span>
+</code></pre>
+<p>The JSON contains an ordinary string. When it is parsed, there is no type marker telling JavaScript that the value came from a <code>Date</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">typeof</span> copy<span class="token punctuation">.</span>createdAt<span class="token punctuation">)</span>
+<span class="token comment">// "string"</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>createdAt <span class="token keyword">instanceof</span> <span class="token class-name">Date</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>This ambiguity prevents <code>JSON.parse</code> from restoring the type automatically. A timestamp-looking value may have started as a <code>Date</code>, or it may have been a string from the beginning. Converting every matching string into a <code>Date</code> would change legitimate text and introduce a different kind of data error.</p>
+<p>Serialization also removes the original timezone context. A <code>Date</code> stores an instant and emits it in UTC, so an input offset such as <code>-04:00</code> does not survive the conversion.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> scheduledAt <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T09:00:00-04:00'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span> scheduledAt <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"scheduledAt":"2026-07-21T13:00:00.000Z"}</span>
+</code></pre>
+<p>The instant remains the same, but the original wall-clock time and offset have disappeared. <a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/">Your JS Date Is Lying to You</a> covers this loss of date and timezone intent in more detail.</p>
+<p>Other built-in types lose even more information. <code>Map</code>, <code>Set</code>, <code>RegExp</code>, and <code>Error</code> store their meaningful state internally or in non-enumerable properties, so their default JSON representations are empty objects.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">tags</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token string">'json'</span><span class="token punctuation">,</span> <span class="token string">'js'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">lookup</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token string">'answer'</span><span class="token punctuation">,</span> <span class="token number">42</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">pattern</span><span class="token operator">:</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">json</span><span class="token regex-delimiter">/</span><span class="token regex-flags">i</span></span><span class="token punctuation">,</span>
+  <span class="token literal-property property">error</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'failed'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// { tags: {}, lookup: {}, pattern: {}, error: {} }</span>
+</code></pre>
+<p>Nothing in the result identifies the original type of each empty object. Their contents have also been discarded, so the receiver cannot reconstruct them from the JSON alone.</p>
+<p>Special numeric values follow another conversion rule. JSON numbers cannot represent <code>NaN</code> or either sign of infinity, so <code>JSON.stringify</code> writes <code>null</code> for them.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> measurements <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">current</span><span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">upper</span><span class="token operator">:</span> <span class="token number">Infinity</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">lower</span><span class="token operator">:</span> <span class="token operator">-</span><span class="token number">Infinity</span>
+<span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>measurements<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"current":null,"upper":null,"lower":null}</span>
+</code></pre>
+<p>This conversion is especially easy to overlook because <code>null</code> is valid JSON and parsing succeeds. Downstream code can no longer distinguish an unavailable measurement from a calculation that produced <code>NaN</code>, or an unbounded value represented by infinity.</p>
+<p>Typed arrays retain their indexed values but lose their type and binary interpretation. Their enumerable indices become ordinary object properties.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> bytes <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">30</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>bytes<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// { 0: 10, 1: 20, 2: 30 }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>Class instances behave in a similar way. Enumerable data fields may survive, but the parsed object has no connection to the original class, its prototype, or its private state.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
+  #role <span class="token operator">=</span> <span class="token string">'admin'</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">name</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name
+  <span class="token punctuation">}</span>
+
+  <span class="token function">greet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Hello, </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token string">'Alice'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// { name: "Alice" }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">User</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">typeof</span> copy<span class="token punctuation">.</span>greet<span class="token punctuation">)</span>
+<span class="token comment">// "undefined"</span>
+</code></pre>
+<p>These conversions can remain hidden until code uses the parsed value. A string looks plausible where a <code>Date</code> was expected, an empty object passes a broad object check, <code>null</code> can travel through several layers, and a plain object can resemble decoded binary data until a later operation fails. The safest approach is to define the serialized form of every non-JSON type explicitly and restore it only through a contract understood by both sides.</p>
+<h2 id="serialization-executes-code" tabindex="-1"><a class="header-anchor" href="#serialization-executes-code">Serialization Executes Code</a></h2>
+<p><code>JSON.stringify</code> does more than inspect stored values: it calls serialization hooks and reads properties through normal JavaScript operations, which means converting an object to JSON can execute application or library code.</p>
+<p>The most direct hook is <code>toJSON()</code>. When an object provides this method, <code>JSON.stringify</code> calls it and serializes the returned value in place of the original object.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Alice'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">password</span><span class="token operator">:</span> <span class="token string">'secret'</span><span class="token punctuation">,</span>
+
+  <span class="token function">toJSON</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"name":"Alice"}</span>
+</code></pre>
+<p>The password disappears because <code>toJSON()</code> returns a new object containing only the name. This can be a useful way to define a public representation, but the output now depends on behavior that is easy to miss when reading the object at the call site.</p>
+<p><code>Date</code> uses the same mechanism. Its <code>toJSON()</code> method calls <code>toISOString()</code>, which is why the previous section produced a UTC string instead of an object with date fields.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> date <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T12:00:00Z'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>date<span class="token punctuation">.</span><span class="token function">toJSON</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// "2026-07-21T12:00:00.000Z"</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>date<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// "2026-07-21T12:00:00.000Z"</span>
+</code></pre>
+<p>A custom method can perform any work available to ordinary JavaScript. It may calculate values, mutate state, access external state, or throw an exception, and each of those behaviours becomes part of serialization.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">let</span> serializations <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token keyword">const</span> report <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+
+  <span class="token function">toJSON</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    serializations <span class="token operator">+=</span> <span class="token number">1</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span> <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>value <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>report<span class="token punctuation">)</span>
+<span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>report<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>serializations<span class="token punctuation">)</span>
+<span class="token comment">// 2</span>
+</code></pre>
+<p>Getters create a similar effect without defining <code>toJSON()</code>. When an enumerable property is backed by a getter, reading that property during serialization invokes the getter.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> invoice <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">subtotal</span><span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span>
+
+  <span class="token keyword">get</span> <span class="token function">total</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'calculating total'</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>subtotal <span class="token operator">*</span> <span class="token number">1.2</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>invoice<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// logs "calculating total"</span>
+<span class="token comment">// then {"subtotal":100,"total":120}</span>
+</code></pre>
+<p>The serialized value contains the getter's result even though <code>total</code> was never stored as a data property. A getter that throws will also make <code>JSON.stringify</code> throw, which can turn logging or error reporting into another failure path.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token keyword">get</span> <span class="token function">secret</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'secret is unavailable'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token comment">// Error: secret is unavailable</span>
+</code></pre>
+<p>Callers can add another layer of behavior through a replacer, the optional second argument to <code>JSON.stringify</code>. A replacer function is called for the root value and then for each visited property, and its return value determines what gets serialized.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Alice'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">password</span><span class="token operator">:</span> <span class="token string">'secret'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">lastLogin</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T12:00:00Z'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>user<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">key<span class="token punctuation">,</span> value</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">===</span> <span class="token string">'password'</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token keyword">undefined</span>
+  <span class="token keyword">return</span> value
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+<span class="token comment">// {"name":"Alice","lastLogin":"2026-07-21T12:00:00.000Z"}</span>
+</code></pre>
+<p>Returning <code>undefined</code> removes the <code>password</code> property, following the object rule covered earlier. The replacer receives <code>lastLogin</code> after the <code>Date</code> object's <code>toJSON()</code> method has converted it, so the callback sees the ISO string rather than the original <code>Date</code> instance.</p>
+<p>The replacer can also be an array of property names. In that form it acts as an allowlist for object properties.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Alice'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">email</span><span class="token operator">:</span> <span class="token string">'alice@example.com'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">password</span><span class="token operator">:</span> <span class="token string">'secret'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">role</span><span class="token operator">:</span> <span class="token string">'admin'</span>
+<span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>user<span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token string">'name'</span><span class="token punctuation">,</span> <span class="token string">'role'</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"name":"Alice","role":"admin"}</span>
+</code></pre>
+<p>These hooks make <code>JSON.stringify</code> flexible enough to support deliberate transport shapes and custom encodings. They also mean that the output cannot always be predicted from the visible fields alone, especially when the value comes from a dependency or a class whose implementation is elsewhere. Code that serializes unfamiliar objects should treat the operation as executable behavior and expect it to transform values or throw.</p>
+<h2 id="some-objects-simply-cannot-make-the-trip" tabindex="-1"><a class="header-anchor" href="#some-objects-simply-cannot-make-the-trip">Some Objects Simply Cannot Make the Trip</a></h2>
+<p>JSON can describe nested objects and arrays, but it has no way to describe object identity. If two properties point to the same object, the JSON representation contains two independent copies of that object's data. If an object points back to itself, serialization cannot continue at all.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> shared <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Alice'</span> <span class="token punctuation">}</span>
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">owner</span><span class="token operator">:</span> shared<span class="token punctuation">,</span>
+  <span class="token literal-property property">reviewer</span><span class="token operator">:</span> shared
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>original<span class="token punctuation">.</span>owner <span class="token operator">===</span> original<span class="token punctuation">.</span>reviewer<span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>owner <span class="token operator">===</span> copy<span class="token punctuation">.</span>reviewer<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>The two properties share one object before serialization. After parsing, they contain separate objects with the same fields because JSON records values rather than references.</p>
+<p>A circular reference reaches the hard limit of this model: the serializer detects the cycle and throws a <code>TypeError</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'loop'</span> <span class="token punctuation">}</span>
+value<span class="token punctuation">.</span>self <span class="token operator">=</span> value
+
+<span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token comment">// TypeError: Converting circular structure to JSON</span>
+</code></pre>
+<p>Circular structures appear naturally in parent links, graphs, caches, and framework objects. The exception often surfaces far from the code that created the cycle because serialization happens later during logging, persistence, or an HTTP response.</p>
+<p>Removing the circular property with a replacer can make the value serializable, but that choice changes the data model. A graph that must preserve identity needs an explicit reference format, such as generated IDs with fields that point to those IDs.</p>
+<p>Property visibility creates another limit. For ordinary objects, <code>JSON.stringify</code> considers enumerable own properties whose keys are strings. Inherited properties, non-enumerable properties, symbol-keyed properties, and private fields stay outside the JSON representation.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> inherited <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">inherited</span><span class="token operator">:</span> <span class="token string">'from prototype'</span> <span class="token punctuation">}</span>
+<span class="token keyword">const</span> value <span class="token operator">=</span> Object<span class="token punctuation">.</span><span class="token function">create</span><span class="token punctuation">(</span>inherited<span class="token punctuation">)</span>
+
+value<span class="token punctuation">.</span>visible <span class="token operator">=</span> <span class="token string">'included'</span>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> <span class="token string">'hidden'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token string">'non-enumerable'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+value<span class="token punctuation">[</span><span class="token function">Symbol</span><span class="token punctuation">(</span><span class="token string">'internal'</span><span class="token punctuation">)</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token string">'symbol value'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"visible":"included"}</span>
+</code></pre>
+<p>Each omitted property is accessible in JavaScript, but none qualifies as an enumerable own string-keyed property. Serialization therefore follows the object's property descriptors rather than copying everything that code can read from it.</p>
+<p>Class instances expose the same boundary. Constructor-assigned public fields are usually enumerable and survive, while prototype methods and private fields do not.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">User</span> <span class="token punctuation">{</span>
+  #role <span class="token operator">=</span> <span class="token string">'admin'</span>
+
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">name</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>name <span class="token operator">=</span> name
+  <span class="token punctuation">}</span>
+
+  <span class="token function">greet</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">Hello, </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token keyword">this</span><span class="token punctuation">.</span>name<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">User</span><span class="token punctuation">(</span><span class="token string">'Bob'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+<span class="token comment">// {"name":"Bob"}</span>
+</code></pre>
+<p>Parsing that text produces a plain object with a <code>name</code> property. It carries no <code>User</code> prototype, cannot call <code>greet()</code>, and contains no private role.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">User</span><span class="token punctuation">)</span> <span class="token comment">// false</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">typeof</span> copy<span class="token punctuation">.</span>greet<span class="token punctuation">)</span>    <span class="token comment">// "undefined"</span>
+</code></pre>
+<p>This behavior makes arbitrary domain objects a fragile source for transport data. Constructing a plain transport object at the boundary makes every serialized field deliberate and keeps internal implementation details separate from the external contract.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">toUserResponse</span><span class="token punctuation">(</span><span class="token parameter">user</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">name</span><span class="token operator">:</span> user<span class="token punctuation">.</span>name
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token function">toUserResponse</span><span class="token punctuation">(</span>user<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>response<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"name":"Bob"}</span>
+</code></pre>
+<p>The output happens to match the implicit class serialization in this example, but the intent is now visible in code. Changes to enumerability, prototypes, or private implementation details cannot silently redefine the response shape.</p>
+<h2 id="parsing-is-safe%2C-what-you-do-next-may-not-be" tabindex="-1"><a class="header-anchor" href="#parsing-is-safe%2C-what-you-do-next-may-not-be">Parsing Is Safe, What You Do Next May Not Be</a></h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/Prototype_pollution">Prototype pollution</a> is often described as a <code>JSON.parse</code> problem because malicious payloads commonly arrive as JSON. Parsing alone does not change <code>Object.prototype</code>. A <code>&quot;__proto__&quot;</code> member in JSON becomes an own data property with that name.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token string">'{"__proto__":{"admin":true}}'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">hasOwn</span><span class="token punctuation">(</span>value<span class="token punctuation">,</span> <span class="token string">'__proto__'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>__proto__<span class="token punctuation">)</span>
+<span class="token comment">// { admin: true }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token punctuation">}</span><span class="token punctuation">.</span>admin<span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+</code></pre>
+<p>The parsed object contains untrusted data, but other objects remain unchanged. The danger appears when later code interprets that data as instructions for modifying another object.</p>
+<p>A recursive merge helper might walk every key from the parsed value and descend into matching properties on its target. Special names such as <code>__proto__</code> and <code>constructor</code> can lead that traversal into a prototype instead of an ordinary application-owned object. Assignments made there may then become visible through inheritance.</p>
+<p>The flow separates the harmless parsing step from the unsafe use that follows it. The relevant sequence is:</p>
+<pre class="language-text"><code class="language-text">untrusted JSON
+    ↓
+own properties on the parsed object
+    ↓
+unsafe recursive merge
+    ↓
+prototype mutation
+</code></pre>
+<p>The parser creates the own property shown in the second step. The merge operation gives that property dangerous meaning, so protections belong where untrusted keys are accepted and copied.</p>
+<p>Schema validation provides one useful defence because it allows only the fields expected by the application. A user update containing <code>name</code> and <code>email</code>, for example, has no reason to accept <code>__proto__</code>, <code>constructor</code>, or any other unexpected key. Merge utilities should also document protections against prototype pollution, especially when they recursively process configuration or request data.</p>
+<p>Object spread has different semantics from many older merge patterns. Spreading the parsed value creates an own <code>__proto__</code> property on the new object rather than invoking the legacy prototype setter.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token string">'{"__proto__":{"admin":true}}'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token operator">...</span>parsed <span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">hasOwn</span><span class="token punctuation">(</span>copy<span class="token punctuation">,</span> <span class="token string">'__proto__'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">getPrototypeOf</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span> <span class="token operator">===</span> <span class="token class-name">Object</span><span class="token punctuation">.</span>prototype<span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+</code></pre>
+<p>This does not make every use of object spread safe. It means the specific <code>__proto__</code> setter behaviour differs from assignment and from recursive merge implementations. Validation remains necessary because unexpected keys can still affect application logic without altering a prototype.</p>
+<p>Resource exhaustion is a separate parsing concern. A valid JSON document can consume substantial memory and CPU when it contains a large amount of data or extreme nesting, and parsing usually happens before application-level validation can inspect the resulting value.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> deeplyNested <span class="token operator">=</span> <span class="token string">'['</span><span class="token punctuation">.</span><span class="token function">repeat</span><span class="token punctuation">(</span><span class="token number">100_000</span><span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token string">']'</span><span class="token punctuation">.</span><span class="token function">repeat</span><span class="token punctuation">(</span><span class="token number">100_000</span><span class="token punctuation">)</span>
+<span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>deeplyNested<span class="token punctuation">)</span>
+</code></pre>
+<p>The exact limit and failure mode depend on the runtime. An HTTP server should reject oversized request bodies before parsing them, while systems that accept complex JSON may also need limits on nesting, collection sizes, or total processing time.</p>
+<p>Reviver functions can add more work because <code>JSON.parse</code> invokes them across the parsed structure. A computationally expensive reviver multiplies its cost with the number of values in an untrusted document, so the callback should remain small and predictable.</p>
+<p>Safe JSON handling therefore extends beyond checking syntax. Limit the input before parsing and validate the resulting shape against an allowlist. Merge code should treat untrusted property names as data rather than as paths through an object graph.</p>
+<h2 id="revivers-do-not-restore-types-automatically" tabindex="-1"><a class="header-anchor" href="#revivers-do-not-restore-types-automatically">Revivers Do Not Restore Types Automatically</a></h2>
+<p><code>JSON.parse</code> accepts an optional reviver function as its second argument. After parsing the text, it walks through the resulting structure and gives the callback an opportunity to replace or remove each value.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token string">'{"name":"Alice","score":"42"}'</span>
+
+<span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">key<span class="token punctuation">,</span> value</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>key <span class="token operator">===</span> <span class="token string">'score'</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token function">Number</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> value
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">)</span>
+<span class="token comment">// { name: "Alice", score: 42 }</span>
+</code></pre>
+<p>The reviver receives child values before their containing objects, then receives the root value under an empty-string key. Returning a replacement changes the value stored at that location, while returning <code>undefined</code> removes an object property or creates a hole in an array.</p>
+<p>This hook can restore types when the serialized representation contains enough information. A tagged object makes the intended conversion explicit:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">createdAt</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">$type</span><span class="token operator">:</span> <span class="token string">'Date'</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token string">'2026-07-21T12:00:00.000Z'</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">key<span class="token punctuation">,</span> value</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>value<span class="token operator">?.</span>$type <span class="token operator">===</span> <span class="token string">'Date'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> value
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">.</span>createdAt <span class="token keyword">instanceof</span> <span class="token class-name">Date</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+</code></pre>
+<p>The <code>$type</code> field is part of a small serialization protocol shared by the producer and consumer. The producer records the original type, and the consumer decides how that type should be reconstructed.</p>
+<p>A common shortcut is to treat every ISO-looking string as a <code>Date</code>. That approach changes strings which were intended to remain text.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">createdAt</span><span class="token operator">:</span> <span class="token string">'2026-07-21T12:00:00.000Z'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">searchQuery</span><span class="token operator">:</span> <span class="token string">'2026-07-21T12:00:00.000Z'</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> parsed <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">key<span class="token punctuation">,</span> value</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> value <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">&amp;&amp;</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^\d{4}-\d{2}-\d{2}T</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> value
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">.</span>createdAt <span class="token keyword">instanceof</span> <span class="token class-name">Date</span><span class="token punctuation">)</span>  <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>parsed<span class="token punctuation">.</span>searchQuery <span class="token keyword">instanceof</span> <span class="token class-name">Date</span><span class="token punctuation">)</span> <span class="token comment">// true</span>
+</code></pre>
+<p>The callback has no evidence that <code>searchQuery</code> represents a date. It only recognises the shape of the string, so valid text is converted into a mutable object with different behaviour.</p>
+<p>Replacers and revivers are most reliable when they implement the same explicit contract. The replacer can emit tagged values before serialization, and the reviver can recognise those tags after parsing.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">requestId</span><span class="token operator">:</span> <span class="token number">9007199254740993n</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> json <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>original<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">key<span class="token punctuation">,</span> value</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> value <span class="token operator">===</span> <span class="token string">'bigint'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span> <span class="token literal-property property">$type</span><span class="token operator">:</span> <span class="token string">'BigInt'</span><span class="token punctuation">,</span> <span class="token literal-property property">value</span><span class="token operator">:</span> value<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> value
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>json<span class="token punctuation">,</span> <span class="token punctuation">(</span><span class="token parameter">key<span class="token punctuation">,</span> value</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>value<span class="token operator">?.</span>$type <span class="token operator">===</span> <span class="token string">'BigInt'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token function">BigInt</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>value<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> value
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>requestId<span class="token punctuation">)</span>
+<span class="token comment">// 9007199254740993n</span>
+</code></pre>
+<p>The tag avoids the precision loss discussed earlier because the digits travel as a string. It also makes the conversion visible in the JSON instead of assigning hidden meaning to every decimal string.</p>
+<p>A reviver runs code across the entire parsed structure, including data supplied by an untrusted source. It should accept only known tags and validate the associated payload. Keep per-value work inexpensive; for larger contracts, a dedicated codec or schema transformation is usually easier to test than a growing collection of conditions inside one callback.</p>
+<h2 id="practical-rules-for-json-boundaries" tabindex="-1"><a class="header-anchor" href="#practical-rules-for-json-boundaries">Practical Rules for JSON Boundaries</a></h2>
+<p>The problems in the previous sections share one cause: an implicit contract. The sender serializes whatever object it has, while the receiver assumes that the parsed result carries the same meaning. A reliable boundary makes that meaning explicit before data leaves the process.</p>
+<h3 id="define-the-wire-shape" tabindex="-1"><a class="header-anchor" href="#define-the-wire-shape">Define the Wire Shape</a></h3>
+<p>Build a transport object from the fields the receiver needs. This keeps class internals, temporary state, computed fields, and incidental enumerable properties out of the external representation.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">toUserResponse</span><span class="token punctuation">(</span><span class="token parameter">user</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">id</span><span class="token operator">:</span> user<span class="token punctuation">.</span>id<span class="token punctuation">.</span><span class="token function">toString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">name</span><span class="token operator">:</span> user<span class="token punctuation">.</span>name<span class="token punctuation">,</span>
+    <span class="token literal-property property">createdAt</span><span class="token operator">:</span> user<span class="token punctuation">.</span>createdAt<span class="token punctuation">.</span><span class="token function">toISOString</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">roles</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token operator">...</span>user<span class="token punctuation">.</span>roles<span class="token punctuation">]</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The conversion also documents exceptional types. The identifier travels as a decimal string, the date travels as a UTC timestamp, and the set of roles becomes an ordered JSON array. Future changes to the <code>User</code> class do not alter this response unless the conversion function changes with them.</p>
+<h3 id="validate-after-parsing" tabindex="-1"><a class="header-anchor" href="#validate-after-parsing">Validate After Parsing</a></h3>
+<p><code>JSON.parse</code> checks syntax and returns JavaScript values. It does not verify that an object contains the fields your application expects or that those fields satisfy domain constraints.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token string">'{"name":42,"createdAt":"yesterday"}'</span><span class="token punctuation">)</span>
+<span class="token comment">// valid JSON, invalid user data</span>
+</code></pre>
+<p>TypeScript cannot provide this check because its types are removed during compilation. A static annotation may describe the value expected by the program, but it does not inspect bytes received at runtime.</p>
+<p>Schema libraries such as <a href="https://zod.dev/">Zod</a>, <a href="https://valibot.dev/">Valibot</a>, and <a href="https://github.com/sinclairzx81/typebox">TypeBox</a> let an application define runtime rules for parsed data. The exact API differs, but the purpose is the same: reject an invalid value before business code treats it as trusted.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> z <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'zod'</span>
+
+<span class="token keyword">const</span> UserResponse <span class="token operator">=</span> z<span class="token punctuation">.</span><span class="token function">object</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token literal-property property">id</span><span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">regex</span><span class="token punctuation">(</span><span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^\d+$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">name</span><span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">createdAt</span><span class="token operator">:</span> z<span class="token punctuation">.</span>iso<span class="token punctuation">.</span><span class="token function">datetime</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">roles</span><span class="token operator">:</span> z<span class="token punctuation">.</span><span class="token function">array</span><span class="token punctuation">(</span>z<span class="token punctuation">.</span><span class="token function">string</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> user <span class="token operator">=</span> UserResponse<span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Validation cannot restore information already lost during parsing. If a large integer entered JavaScript as a JSON number, the schema sees the rounded result. The wire representation must preserve the value first, after which validation can check its shape and meaning.</p>
+<h3 id="give-exceptional-values-an-explicit-representation" tabindex="-1"><a class="header-anchor" href="#give-exceptional-values-an-explicit-representation">Give Exceptional Values an Explicit Representation</a></h3>
+<p>Large integers and binary data need a documented encoding because JSON cannot represent them directly. Dates and other typed values also need an explicit convention when their original type must survive.</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"requestId"</span><span class="token operator">:</span> <span class="token string">"9007199254740993"</span><span class="token punctuation">,</span>
+  <span class="token property">"createdAt"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"$type"</span><span class="token operator">:</span> <span class="token string">"Date"</span><span class="token punctuation">,</span>
+    <span class="token property">"value"</span><span class="token operator">:</span> <span class="token string">"2026-07-21T12:00:00.000Z"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token property">"avatarBase64"</span><span class="token operator">:</span> <span class="token string">"iVBORw0KGgoAAAANSUhEUgAA..."</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The contract should explain how each representation is validated and decoded. A field name or type tag is preferable to guessing from the shape of a string.</p>
+<h3 id="use-arrays-when-order-matters" tabindex="-1"><a class="header-anchor" href="#use-arrays-when-order-matters">Use Arrays When Order Matters</a></h3>
+<p>Object member order should not carry workflow or priority semantics across systems. Put ordered values in an array and make each element's meaning explicit.</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"steps"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"validate"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"charge"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"confirm"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"notify"</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">]</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Byte-level comparisons require canonicalization rather than an array conversion. Signing, hashing, deduplicating, or generating cache keys from JSON should use a documented canonical form shared by every producer.</p>
+<h3 id="limit-untrusted-input" tabindex="-1"><a class="header-anchor" href="#limit-untrusted-input">Limit Untrusted Input</a></h3>
+<p>Reject oversized bodies before calling <code>JSON.parse</code>, because application-level validation runs after allocation and parsing have already begun. Systems that accept deeply structured documents may also need limits for nesting and collection size.</p>
+<p>Revivers deserve the same attention. Their work runs for values throughout the parsed structure, so a small amount of unnecessary processing can become expensive on large input.</p>
+<h3 id="test-the-receiving-side" tabindex="-1"><a class="header-anchor" href="#test-the-receiving-side">Test the Receiving Side</a></h3>
+<p>A serializer test proves only what one producer emits. A boundary test should also parse the representation with the receiving implementation and verify the meaning that survives.</p>
+<p>For example, a JavaScript client and a Go service should test large identifiers as they move through both runtimes. Tests for signed JSON should construct equivalent objects in different property orders and confirm that canonicalization produces the same bytes.</p>
+<h3 id="choose-another-format-when-the-data-model-requires-it" tabindex="-1"><a class="header-anchor" href="#choose-another-format-when-the-data-model-requires-it">Choose Another Format When the Data Model Requires It</a></h3>
+<p>JSON remains a strong default for readable and widely interoperable data. A different format can be a better fit when compact binary output, typed byte strings, a wider numeric model, or an extension mechanism is part of the contract.</p>
+<p><a href="https://msgpack.org/">MessagePack</a> provides a compact binary representation and supports extension types for values outside its core model. <a href="https://www.rfc-editor.org/rfc/rfc8949.html">CBOR</a> distinguishes text from byte strings and provides tags for additional semantics, along with support for a wider range of numeric representations.</p>
+<p>Neither format automatically preserves arbitrary JavaScript objects. Producers and consumers still need to agree on extensions, tags, numeric handling, and the schema applied after decoding. Changing formats expands the available vocabulary; it does not remove the need for a contract.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>The object from the introduction changed in several ways, but each result followed a defined rule. JavaScript rounded the large integer before serialization, <code>undefined</code> had no JSON representation, <code>Date</code> supplied a string through <code>toJSON()</code>, and <code>NaN</code> became <code>null</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">9007199254740993</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">missing</span><span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">createdAt</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-07-21T12:00:00Z'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">score</span><span class="token operator">:</span> <span class="token number">NaN</span>
+<span class="token punctuation">}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {</span>
+<span class="token comment">//   id: 9007199254740992,</span>
+<span class="token comment">//   createdAt: "2026-07-21T12:00:00.000Z",</span>
+<span class="token comment">//   score: null</span>
+<span class="token comment">// }</span>
+</code></pre>
+<p>JSON remains useful because its data model is small and widely understood. JSON is not broken. The mistake is treating a deliberately tiny interchange format as a lossless snapshot of JavaScript state. A JavaScript object and its JSON representation should be treated as different data models connected by an explicit conversion.</p>
+<p>The reliable approach is to decide which information must survive before serialization begins. Large integers need an exact encoding, typed values need a documented representation, ordered data belongs in arrays, and untrusted input needs validation after parsing. Tests should cover the complete path through the producer and receiver rather than stopping at the generated string.</p>
+<p><code>JSON.parse(JSON.stringify(value))</code> is therefore a conversion rather than a general-purpose clone. It works when the value has already been designed for JSON, and it becomes unreliable when application types are allowed to cross the boundary by accident.</p>
+<p>Define the wire shape and its exceptional encodings, then verify the result on the receiving side. Once those decisions are visible in code and schemas, JSON becomes predictable again because the application asks it to carry only what it can represent.</p>
+<p>JSON shares this hidden-assumption pattern with the other posts in the series. <a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/">Your JS Date Is Lying to You</a> explores the date and timezone intent lost during serialization, while <a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your console.log Is Lying to You</a> explains why JSON cloning is also an incomplete debugging snapshot.</p>
+<p>The remaining posts apply the same idea to other familiar abstractions. Each one examines the gap between the guarantee developers assume and the behavior the tool actually provides:</p>
+<ul>
+<li><a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a></li>
+<li><a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a></li>
+<li><a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a></li>
+<li><a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a></li>
+<li><a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a></li>
+</ul>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

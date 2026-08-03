@@ -1397,5 +1397,25 @@
         
       </item>
     
+      <item>
+        <title>Your JSON Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-03-Your-JSON-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-03-Your-JSON-Is-Lying-to-You/</guid>
+        <pubDate>Mon, 03 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>JSON looks like a faithful representation of JavaScript data, but JSON.stringify and JSON.parse can silently alter or discard information at system boundaries.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>json</category>
+        
+        <category>serialization</category>
+        
+        <category>... is lying to you</category>
+        
+      </item>
+    
   </channel>
 </rss>
