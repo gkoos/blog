@@ -435,3 +435,4 @@ Dates are not the only things lying to you in JavaScript. Other posts in the ser
 - [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/)
 - [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/)
 - [Your console.log Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)
+- [Your JSON Is Lying to You](/posts/2026-08-02-Your-JSON-Is-Lying-to-You/)

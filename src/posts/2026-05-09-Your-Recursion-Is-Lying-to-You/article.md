@@ -161,3 +161,5 @@ A useful rule of thumb is to keep recursion for small, bounded depths that you c
 Recursion itself is not the enemy, unverified runtime assumptions are. Tail-recursive shape does not automatically make JavaScript stack-safe, and that gap is where many "works on my machine" surprises come from in production.
 
 Use recursion where it improves clarity and depth is genuinely bounded. When depth can grow or input is outside your control, prefer iterative designs that make stack behavior explicit and portable.
+
+The same gap between a familiar abstraction and its operational limits appears when data leaves the call stack entirely. [Your JSON Is Lying to You](/posts/2026-08-02-Your-JSON-Is-Lying-to-You/) explains how serialization changes values and loses types when JavaScript data crosses a system boundary.
