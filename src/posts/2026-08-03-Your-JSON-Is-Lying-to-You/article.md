@@ -12,7 +12,7 @@ tags:
 - serialization
 - "... is lying to you"
 ---
-*Featured in [TLDR IT - 2026-08-04](https://tldr.tech/it/2026-08-04)*
+*Featured in [TLDR IT - 2026-08-04](https://tldr.tech/it/2026-08-04) and in [Javascript Weekly - 2026-08-04](https://javascriptweekly.com/issues/797)*
 
 Run this in your browser console:
 
