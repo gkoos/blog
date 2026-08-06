@@ -12,6 +12,7 @@ export default function (eleventyConfig) {
   prismSetup(eleventyConfig);
   eleventyConfig.setLibrary('md', md);
   eleventyConfig.addPlugin(rssPlugin);
+  eleventyConfig.addGlobalData('buildVersion', Date.now());
   // Add a 'filterTags' filter to remove system tags
   eleventyConfig.addFilter('filterTags', function(tags, systemTags = ["posts", "all", "page"]) {
     if (!Array.isArray(tags)) return [];
