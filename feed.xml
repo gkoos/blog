@@ -1417,5 +1417,27 @@
         
       </item>
     
+      <item>
+        <title>Beyond Happy Path Engineering: Storage</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-11-Beyond-Happy-Path-Engineering-Storage/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-11-Beyond-Happy-Path-Engineering-Storage/</guid>
+        <pubDate>Tue, 11 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>Object storage is separate from application state: how partial uploads, stale URLs, key collisions, CDN caches, and deletion create inconsistencies, and how to design for cleanup and recovery.</description>
+        
+        <category>tutorials</category>
+        
+        <category>reliability</category>
+        
+        <category>distributed systems</category>
+        
+        <category>software architecture</category>
+        
+        <category>storage</category>
+        
+        <category>beyond happy path engineering</category>
+        
+      </item>
+    
   </channel>
 </rss>

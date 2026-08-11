@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="310" viewBox="0 0 960 310" role="img" aria-labelledby="title desc">
+  <title id="title">Concurrent writes to the same key</title>
+  <desc id="desc">Two requests race to write the same storage key. Both succeed. The second overwrites the first silently, with no error or conflict signal.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="310" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Concurrent writes to the same key</text>
+  <text x="480" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Last write wins with no conflict detection; the first write is silently replaced</text>
+
+  <!-- Request A row (center y=125, boxes y=96-160) -->
+  <text x="74" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#53646d">Request A</text>
+  <g filter="url(#shadow)">
+    <rect x="148" y="96" width="260" height="64" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="278" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">write /docs/user-7/contract.pdf</text>
+    <text x="278" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">A's content</text>
+  </g>
+  <line x1="408" y1="128" x2="456" y2="128" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="456" y="96" width="180" height="64" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="546" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#34533a">success</text>
+    <text x="546" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#34533a">A's bytes stored</text>
+  </g>
+
+  <!-- Request B row (center y=210, boxes y=181-245) -->
+  <text x="74" y="213" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#53646d">Request B</text>
+  <g filter="url(#shadow)">
+    <rect x="168" y="181" width="260" height="64" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="298" y="209" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">write /docs/user-7/contract.pdf</text>
+    <text x="298" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">B's content (retry / race)</text>
+  </g>
+  <line x1="428" y1="213" x2="476" y2="213" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="476" y="181" width="240" height="64" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="596" y="205" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#654d23">success</text>
+    <text x="596" y="223" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#654d23">B's bytes stored</text>
+    <text x="596" y="239" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#654d23">A's bytes overwritten silently</text>
+  </g>
+
+  <!-- Bottom callout -->
+  <rect x="72" y="262" width="816" height="36" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+  <text x="480" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">No error, no conflict signal, no notification; the URL now serves B's content only</text>
+</svg>
