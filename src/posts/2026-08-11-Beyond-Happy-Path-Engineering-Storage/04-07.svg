@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="380" viewBox="0 0 960 380" role="img" aria-labelledby="title desc">
+  <title id="title">Storage-first vs database-first upload ordering</title>
+  <desc id="desc">Two rows showing the two upload orderings. Storage-first writes the object then inserts the record; failure leaves an orphaned object. Database-first inserts a pending record then writes the object; failure leaves a stuck pending record.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c07070"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="380" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Choose the upload order that fails safely</text>
+  <text x="480" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Neither ordering is atomic; choose the failure residue that is easier to detect and repair</text>
+
+  <!-- Storage-first row -->
+  <text x="74" y="132" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">storage-first</text>
+
+  <g filter="url(#shadow)">
+    <rect x="148" y="102" width="148" height="60" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="222" y="129" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">write object</text>
+    <text x="222" y="149" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">to storage</text>
+  </g>
+  <line x1="296" y1="132" x2="328" y2="132" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="328" y="102" width="148" height="60" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="402" y="129" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">insert record</text>
+    <text x="402" y="149" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">in database</text>
+  </g>
+  <line x1="476" y1="132" x2="508" y2="132" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="508" y="102" width="120" height="60" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="568" y="137" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">success</text>
+  </g>
+
+  <!-- Storage-first failure branch -->
+  <circle cx="402" cy="132" r="5" fill="#c07070"/>
+  <line x1="402" y1="162" x2="402" y2="175" stroke="#c07070" stroke-width="2" stroke-dasharray="5 3"/>
+  <g filter="url(#shadow)">
+    <rect x="290" y="175" width="296" height="54" rx="8" fill="#f2ddd3" stroke="#c07070" stroke-width="2"/>
+    <text x="438" y="199" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#8b3030">DB insert fails: orphaned object in storage</text>
+    <text x="438" y="217" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#8b3030">no broken URL, but object never cleaned up</text>
+  </g>
+
+  <!-- Database-first row -->
+  <text x="74" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">database-first</text>
+
+  <g filter="url(#shadow)">
+    <rect x="148" y="254" width="160" height="60" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="228" y="279" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">insert pending</text>
+    <text x="228" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">record in database</text>
+  </g>
+  <line x1="308" y1="284" x2="340" y2="284" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="340" y="254" width="148" height="60" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="414" y="279" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#20313a">write object</text>
+    <text x="414" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">to storage</text>
+  </g>
+  <line x1="488" y1="284" x2="520" y2="284" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <g filter="url(#shadow)">
+    <rect x="520" y="254" width="148" height="60" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="594" y="279" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">mark uploaded</text>
+    <text x="594" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#34533a">record updated</text>
+  </g>
+
+  <!-- Database-first failure branch -->
+  <circle cx="414" cy="284" r="5" fill="#c07070"/>
+  <line x1="414" y1="314" x2="414" y2="327" stroke="#c07070" stroke-width="2" stroke-dasharray="5 3"/>
+  <g filter="url(#shadow)">
+    <rect x="290" y="327" width="296" height="44" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="438" y="349" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#654d23">storage fails: stuck pending record</text>
+    <text x="438" y="364" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#654d23">visible, queryable, worker can retry</text>
+  </g>
+</svg>

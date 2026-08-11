@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="580" viewBox="0 0 960 580" role="img" aria-labelledby="title desc">
+  <title id="title">Evolved upload architecture</title>
+  <desc id="desc">Sequence diagram showing the full evolved upload flow: pending record creation, direct upload via presigned URL, confirmation with ETag verification, worker processing, and download via fresh presigned URL. Cleanup worker and reconciliation shown as footer notes.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="580" fill="#f7f4ee"/>
+
+  <text x="480" y="36" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Evolved upload architecture</text>
+  <text x="480" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Application owns both systems; state reflects reality at every step</text>
+
+  <!-- Actor boxes (y=68-112) -->
+  <g filter="url(#shadow)">
+    <rect x="20" y="68" width="120" height="44" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="80" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Client</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="240" y="68" width="150" height="44" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="315" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Upload API</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="510" y="68" width="160" height="44" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="590" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Object Storage</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="780" y="68" width="160" height="44" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="860" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Documents DB</text>
+  </g>
+
+  <!-- Lifelines -->
+  <line x1="80"  y1="112" x2="80"  y2="460" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+  <line x1="315" y1="112" x2="315" y2="460" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+  <line x1="590" y1="112" x2="590" y2="460" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+  <line x1="860" y1="112" x2="860" y2="460" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+
+  <!-- 1. Client → API: request upload -->
+  <line x1="80" y1="145" x2="307" y2="145" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="194" y="138" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">1. request upload</text>
+
+  <!-- 2. API → DB: insert pending record -->
+  <line x1="315" y1="175" x2="852" y2="175" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="584" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">2. insert pending record</text>
+
+  <!-- 3. API → Client: presigned URL -->
+  <line x1="315" y1="205" x2="88" y2="205" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="194" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">3. presigned URL + doc ID</text>
+
+  <!-- 4. Client → Storage: upload bytes directly (thick) -->
+  <line x1="80" y1="250" x2="582" y2="250" stroke="#2f4858" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="334" y="241" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">4. upload bytes directly   (large file, API not involved)</text>
+
+  <!-- 5. Client → API: confirm complete -->
+  <line x1="80" y1="290" x2="307" y2="290" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="194" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">5. confirm complete</text>
+
+  <!-- 6. API → Storage: verify ETag -->
+  <line x1="315" y1="320" x2="582" y2="320" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="450" y="313" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">6. verify ETag</text>
+
+  <!-- 7. API → DB: mark confirmed -->
+  <line x1="315" y1="350" x2="852" y2="350" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="584" y="343" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">7. mark confirmed</text>
+
+  <!-- Divider -->
+  <line x1="40" y1="376" x2="920" y2="376" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="480" y="391" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">download path</text>
+
+  <!-- 8. Client → API: download request -->
+  <line x1="80" y1="408" x2="307" y2="408" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="194" y="401" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">8. download request</text>
+
+  <!-- 9. API → Client: short-lived presigned URL -->
+  <line x1="315" y1="438" x2="88" y2="438" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="194" y="431" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">9. short-lived presigned URL</text>
+  <text x="490" y="452" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">client fetches bytes directly from CDN / Object Storage</text>
+
+  <!-- Footer: cleanup + reconciliation -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="474" width="280" height="44" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="180" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#654d23">Cleanup worker</text>
+    <text x="180" y="511" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#654d23">deletes objects for soft-deleted records</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="340" y="474" width="280" height="44" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="480" y="495" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#654d23">Reconciliation</text>
+    <text x="480" y="511" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#654d23">scans for orphans and stuck pending records</text>
+  </g>
+</svg>

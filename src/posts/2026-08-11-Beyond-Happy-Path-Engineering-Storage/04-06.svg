@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title desc">
+  <title id="title">Storage latency occupying worker slots</title>
+  <desc id="desc">Three worker slots shown as horizontal bars. Two fast requests complete quickly. One large document upload holds its slot for the full transfer duration while other requests queue behind it.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="360" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Storage latency is application latency</text>
+  <text x="480" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">A large upload occupies a worker slot for the full transfer duration</text>
+
+  <!-- Time axis -->
+  <line x1="148" y1="260" x2="920" y2="260" stroke="#b9c1c7" stroke-width="2"/>
+  <text x="148" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">0</text>
+  <text x="920" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">time →</text>
+  <!-- Tick marks -->
+  <line x1="270" y1="256" x2="270" y2="264" stroke="#b9c1c7" stroke-width="1"/>
+  <text x="270" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#53646d">30ms</text>
+  <line x1="220" y1="256" x2="220" y2="264" stroke="#b9c1c7" stroke-width="1"/>
+  <text x="220" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#53646d">15ms</text>
+
+  <!-- Row labels -->
+  <text x="70" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">Slot 1</text>
+  <text x="70" y="175" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">Slot 2</text>
+  <text x="70" y="235" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">Slot 3</text>
+
+  <!-- Slot 1: checkout 30ms (fast) -->
+  <g filter="url(#shadow)">
+    <rect x="148" y="96" width="122" height="38" rx="6" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="209" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#34533a">checkout · 30ms</text>
+  </g>
+  <text x="278" y="120" text-anchor="start" font-family="Arial, sans-serif" font-size="13" fill="#34533a">done</text>
+
+  <!-- Slot 2: order status 15ms (fast) -->
+  <g filter="url(#shadow)">
+    <rect x="148" y="156" width="100" height="38" rx="6" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="198" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#34533a">status · 15ms</text>
+  </g>
+  <text x="256" y="180" text-anchor="start" font-family="Arial, sans-serif" font-size="13" fill="#34533a">done</text>
+
+  <!-- Slot 3: document upload (slow, spans almost full width) -->
+  <g filter="url(#shadow)">
+    <rect x="148" y="216" width="720" height="38" rx="6" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="508" y="238" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#654d23">document upload · holds worker slot for full transfer duration (~8s)</text>
+  </g>
+  <text x="878" y="238" text-anchor="start" font-family="Arial, sans-serif" font-size="18" font-weight="700" fill="#b08f54">...</text>
+
+  <!-- Queued requests annotation -->
+  <rect x="72" y="306" width="816" height="36" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+  <text x="480" y="329" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">Fast requests queue behind the upload, storage throughput becomes application throughput</text>
+</svg>

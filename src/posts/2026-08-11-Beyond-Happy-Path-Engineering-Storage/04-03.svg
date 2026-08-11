@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="360" viewBox="0 0 960 360" role="img" aria-labelledby="title desc">
+  <title id="title">Multipart upload lifecycle</title>
+  <desc id="desc">The happy path shows an upload moving from initiated through parts uploading to a completion request and a created object. A failure branch shows that when the completion step never arrives, parts remain in storage with no object and no application record.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c07070"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="360" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Multipart upload lifecycle</text>
+  <text x="480" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The object does not exist until the explicit completion step succeeds</text>
+
+  <!-- Happy path boxes (center y=133) -->
+  <g filter="url(#shadow)">
+    <rect x="20" y="96" width="140" height="74" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="90" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">Initiated</text>
+    <text x="90" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">upload begins</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="204" y="96" width="196" height="74" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="302" y="124" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">Parts uploading</text>
+    <text x="302" y="146" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">bytes sent in chunks</text>
+    <text x="302" y="163" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">parts stored individually</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="452" y="96" width="196" height="74" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="550" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">Completion sent</text>
+    <text x="550" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">finalize request</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="700" y="96" width="200" height="74" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="800" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#34533a">Object exists</text>
+    <text x="800" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#34533a">bytes accessible at key</text>
+  </g>
+
+  <!-- Happy path arrows -->
+  <line x1="160" y1="133" x2="204" y2="133" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <line x1="648" y1="133" x2="700" y2="133" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Fork between Parts and Completion -->
+  <line x1="400" y1="133" x2="418" y2="133" stroke="#2f4858" stroke-width="3"/>
+  <circle cx="422" cy="133" r="5" fill="#2f4858"/>
+  <line x1="422" y1="133" x2="452" y2="133" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Branch down to failure -->
+  <line x1="422" y1="133" x2="422" y2="178" stroke="#c07070" stroke-width="2" stroke-dasharray="6 3"/>
+  <line x1="422" y1="178" x2="360" y2="232" stroke="#c07070" stroke-width="2" stroke-dasharray="6 3" marker-end="url(#arrow-red)"/>
+  <text x="406" y="210" text-anchor="start" font-family="Arial, sans-serif" font-size="13" fill="#c07070">connection drops / process crashes</text>
+
+  <!-- Failure box -->
+  <g filter="url(#shadow)">
+    <rect x="90" y="232" width="500" height="82" rx="8" fill="#f2ddd3" stroke="#c07070" stroke-width="2"/>
+    <text x="340" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#8b3030">Parts stored, completion never sent</text>
+    <text x="340" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">No object created · No application record</text>
+    <text x="340" y="299" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">Parts accumulate until explicitly cleaned up</text>
+  </g>
+
+  <!-- Bottom callout -->
+  <rect x="72" y="326" width="816" height="28" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+  <text x="480" y="345" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">Object stores do not clean up incomplete multipart uploads automatically</text>
+</svg>

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="380" viewBox="0 0 960 380" role="img" aria-labelledby="title desc">
+  <title id="title">Soft-delete coordination between database and object store</title>
+  <desc id="desc">Phase 1: user deletes a document, DB record is soft-deleted with status deleted and objectDeletedAt null. Phase 2: cleanup worker finds the pending deletion, deletes the object from storage, then sets objectDeletedAt to mark completion.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="380" fill="#f7f4ee"/>
+
+  <text x="480" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Soft-delete coordination</text>
+  <text x="480" y="64" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Deleting the record and deleting the object are two separate steps the application owns</text>
+
+  <!-- Phase 1 label -->
+  <text x="240" y="96" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#53646d">Phase 1 — user deletes</text>
+
+  <!-- Phase 1: User box -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="108" width="120" height="56" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="100" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">User</text>
+    <text x="100" y="154" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">deletes doc</text>
+  </g>
+  <line x1="160" y1="136" x2="216" y2="136" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+
+  <!-- Phase 1: DB record (soft-deleted) -->
+  <g filter="url(#shadow)">
+    <rect x="216" y="100" width="268" height="72" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="350" y="126" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#654d23">DB record</text>
+    <text x="350" y="148" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#654d23">status: deleted</text>
+    <text x="350" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#654d23">objectDeletedAt: null</text>
+  </g>
+  <!-- Object still in storage note -->
+  <g filter="url(#shadow)">
+    <rect x="560" y="108" width="200" height="56" rx="8" fill="#ffffff" stroke="#b9c1c7" stroke-width="2"/>
+    <text x="660" y="134" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#53646d">Object Storage</text>
+    <text x="660" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">object still exists</text>
+  </g>
+
+  <!-- Divider -->
+  <line x1="40" y1="200" x2="920" y2="200" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+
+  <!-- Phase 2 label -->
+  <text x="240" y="222" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#53646d">Phase 2 — cleanup worker</text>
+
+  <!-- Phase 2: Cleanup worker -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="234" width="176" height="72" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="128" y="263" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Cleanup worker</text>
+    <text x="128" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">runs on a schedule</text>
+  </g>
+
+  <!-- Worker -> storage delete -->
+  <line x1="216" y1="260" x2="556" y2="260" stroke="#2f4858" stroke-width="3" marker-end="url(#arrow)"/>
+  <text x="386" y="252" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">delete object</text>
+
+  <!-- Phase 2: Object Storage (deleted) -->
+  <g filter="url(#shadow)">
+    <rect x="560" y="234" width="200" height="72" rx="8" fill="#f2ddd3" stroke="#c07070" stroke-width="2"/>
+    <text x="660" y="263" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#8b3030">Object Storage</text>
+    <text x="660" y="283" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">object deleted</text>
+  </g>
+
+  <!-- Worker -> DB: set objectDeletedAt -->
+  <line x1="128" y1="306" x2="128" y2="328" stroke="#2f4858" stroke-width="2" stroke-dasharray="5 3" marker-end="url(#arrow)"/>
+  <text x="148" y="320" text-anchor="start" font-family="Arial, sans-serif" font-size="13" fill="#53646d">set objectDeletedAt</text>
+
+  <!-- Phase 2: updated DB record -->
+  <g filter="url(#shadow)">
+    <rect x="40" y="328" width="268" height="36" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="174" y="351" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#34533a">objectDeletedAt: now()   ·   both steps done</text>
+  </g>
+</svg>
+

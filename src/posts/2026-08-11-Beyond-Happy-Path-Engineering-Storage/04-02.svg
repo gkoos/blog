@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="420" viewBox="0 0 960 420" role="img" aria-labelledby="title desc">
+  <title id="title">Two-system divergence states</title>
+  <desc id="desc">Three rows comparing DB record and Object store state. Happy path: both exist. DB insert fails: record missing, object exists as an orphan. Storage write fails: record exists but object is missing, causing a 404.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="420" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Two separate systems, three possible states</text>
+  <text x="480" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Either write can succeed while the other fails</text>
+
+  <!-- Column headers -->
+  <text x="295" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">DB record</text>
+  <text x="583" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Object store</text>
+  <line x1="168" y1="108" x2="712" y2="108" stroke="#b9c1c7" stroke-width="1"/>
+  <line x1="168" y1="108" x2="168" y2="360" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="4 4"/>
+
+  <!-- Row 1: Happy path -->
+  <text x="84" y="152" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">both succeed</text>
+  <g filter="url(#shadow)">
+    <rect x="178" y="118" width="234" height="68" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="295" y="147" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#34533a">exists</text>
+    <text x="295" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#34533a">record and key match</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="466" y="118" width="234" height="68" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="583" y="147" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#34533a">exists</text>
+    <text x="583" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#34533a">bytes at key</text>
+  </g>
+  <text x="718" y="148" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">consistent</text>
+
+  <!-- Row 2: DB insert fails -->
+  <text x="84" y="236" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">DB insert fails</text>
+  <g filter="url(#shadow)">
+    <rect x="178" y="202" width="234" height="68" rx="8" fill="#f2ddd3" stroke="#c07070" stroke-width="2"/>
+    <text x="295" y="231" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#8b3030">missing</text>
+    <text x="295" y="252" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">no record exists</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="466" y="202" width="234" height="68" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="583" y="231" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#654d23">exists</text>
+    <text x="583" y="252" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#654d23">bytes stored, unreferenced</text>
+  </g>
+  <text x="718" y="228" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#8b3030">orphaned object</text>
+  <text x="718" y="246" text-anchor="start" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">never cleaned up</text>
+
+  <!-- Row 3: Storage write fails -->
+  <text x="84" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">storage write fails</text>
+  <g filter="url(#shadow)">
+    <rect x="178" y="286" width="234" height="68" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="295" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#654d23">exists</text>
+    <text x="295" y="336" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#654d23">record points to a key</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="466" y="286" width="234" height="68" rx="8" fill="#f2ddd3" stroke="#c07070" stroke-width="2"/>
+    <text x="583" y="315" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#8b3030">missing</text>
+    <text x="583" y="336" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">nothing at that key</text>
+  </g>
+  <text x="718" y="312" text-anchor="start" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#8b3030">URL returns 404</text>
+  <text x="718" y="330" text-anchor="start" font-family="Arial, sans-serif" font-size="13" fill="#8b3030">user-visible error</text>
+
+  <!-- Bottom callout -->
+  <rect x="72" y="374" width="816" height="36" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+  <text x="480" y="397" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">The application owns the consistency between these two independent systems</text>
+</svg>

@@ -20,6 +20,7 @@ tags:
 - [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/)
 - [Beyond Happy Path Engineering: Time](/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/)
 - [Beyond Happy Path Engineering: Databases](/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/)
+- [Beyond Happy Path Engineering: Storage](/posts/2026-08-11-Beyond-Happy-Path-Engineering-Storage/)
 
 ---
 

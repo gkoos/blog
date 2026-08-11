@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" role="img" aria-labelledby="title desc">
+  <title id="title">Direct client-to-storage upload using presigned URL</title>
+  <desc id="desc">Sequence diagram: client requests upload URL from API; API creates pending record and returns presigned URL; client uploads bytes directly to object storage; client notifies API of completion; API verifies ETag and marks record confirmed.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="440" fill="#f7f4ee"/>
+
+  <text x="480" y="36" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">Direct upload: client to object storage</text>
+  <text x="480" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">The application authorizes and records; the bytes never pass through it</text>
+
+  <!-- Actor boxes (y=72-120) -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="72" width="140" height="52" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="130" y="101" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">Client</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="390" y="72" width="180" height="52" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="480" y="101" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">Upload API</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="720" y="72" width="180" height="52" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="810" y="101" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">Object Storage</text>
+  </g>
+
+  <!-- Lifelines -->
+  <line x1="130" y1="124" x2="130" y2="390" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+  <line x1="480" y1="124" x2="480" y2="390" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+  <line x1="810" y1="124" x2="810" y2="390" stroke="#b9c1c7" stroke-width="1" stroke-dasharray="6 4"/>
+
+  <!-- Step 1: client -> API: request upload URL (y=155) -->
+  <line x1="130" y1="155" x2="472" y2="155" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="305" y="148" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">1. request upload URL</text>
+
+  <!-- Step 2: API -> client: presigned URL + doc ID (y=195) -->
+  <line x1="480" y1="195" x2="138" y2="195" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="305" y="188" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">2. presigned URL + doc ID</text>
+  <!-- API side note -->
+  <text x="490" y="188" text-anchor="start" font-family="Arial, sans-serif" font-size="12" fill="#b08f54">(creates pending record)</text>
+
+  <!-- Step 3: client -> storage: upload bytes directly (y=250, thick) -->
+  <line x1="130" y1="250" x2="802" y2="250" stroke="#2f4858" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="470" y="241" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">3. upload bytes directly   (~large file, API not involved)</text>
+
+  <!-- Step 4: client -> API: upload complete (y=305) -->
+  <line x1="130" y1="305" x2="472" y2="305" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="305" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">4. upload complete</text>
+
+  <!-- Step 5: API -> storage: verify ETag (y=345) -->
+  <line x1="480" y1="345" x2="802" y2="345" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="645" y="338" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">5. verify ETag / checksum</text>
+  <!-- API side note -->
+  <text x="490" y="362" text-anchor="start" font-family="Arial, sans-serif" font-size="12" fill="#34533a">(marks record confirmed)</text>
+
+  <!-- Bottom callout -->
+  <rect x="72" y="395" width="816" height="32" rx="8" fill="#e7efe8" stroke="#7a9a7e"/>
+  <text x="480" y="416" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">Steps 1, 2, 4, 5 are fast API calls; step 3 is the large transfer and bypasses the server entirely</text>
+</svg>
+
