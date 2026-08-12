@@ -1439,5 +1439,47 @@
         
       </item>
     
+      <item>
+        <title>What Does a Text Watermark Actually Prove?</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-12-What-Does-a-Text-Watermark-Actually-Prove/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-12-What-Does-a-Text-Watermark-Actually-Prove/</guid>
+        <pubDate>Wed, 12 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>A reliable text-watermark detector can find an engineered statistical signal, but that result alone cannot reconstruct authorship, intent, or policy compliance.</description>
+        
+        <category>artificial intelligence</category>
+        
+        <category>language models</category>
+        
+        <category>text watermarking</category>
+        
+        <category>provenance</category>
+        
+        <category>ai detection</category>
+        
+      </item>
+    
+      <item>
+        <title>Text Watermarking for Non-Academics</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-12-Text-Watermarking-for-Non-Academics/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-12-Text-Watermarking-for-Non-Academics/</guid>
+        <pubDate>Wed, 12 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>How statistical text watermarks encode machine-readable signals in ordinary prose, how detectors recover them, and how copying, editing, and rewriting affect the result.</description>
+        
+        <category>tutorials</category>
+        
+        <category>artificial intelligence</category>
+        
+        <category>language models</category>
+        
+        <category>text watermarking</category>
+        
+        <category>provenance</category>
+        
+        <category>AI detection</category>
+        
+      </item>
+    
   </channel>
 </rss>
