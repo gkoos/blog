@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 260" role="img" aria-labelledby="title desc">
+  <title id="title">How editing weakens a statistical text watermark</title>
+  <desc id="desc">A continuous scale from retained original wording and a stronger expected signal to replaced wording and a weaker expected signal, with unedited text, light edits, heavy rewrite, and new paraphrase marked along the scale.</desc>
+
+  <defs>
+    <linearGradient id="signal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="55%" stop-color="#7c8da6"/>
+      <stop offset="100%" stop-color="#d1d5db"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1000" height="260" rx="16" fill="#f8fafc"/>
+
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" fill="#172033">
+    <text x="70" y="42" font-size="20" font-weight="600">More original wording retained</text>
+    <text x="930" y="42" font-size="20" font-weight="600" text-anchor="end">More original wording replaced</text>
+
+    <rect x="70" y="82" width="860" height="16" rx="8" fill="url(#signal)"/>
+
+    <g font-size="17" text-anchor="middle">
+      <circle cx="90" cy="90" r="9" fill="#ffffff" stroke="#172033" stroke-width="3"/>
+      <line x1="90" y1="102" x2="90" y2="126" stroke="#94a3b8" stroke-width="2"/>
+      <text x="90" y="151">Unedited text</text>
+
+      <circle cx="350" cy="90" r="9" fill="#ffffff" stroke="#172033" stroke-width="3"/>
+      <line x1="350" y1="102" x2="350" y2="126" stroke="#94a3b8" stroke-width="2"/>
+      <text x="350" y="151">Light edits</text>
+
+      <circle cx="650" cy="90" r="9" fill="#ffffff" stroke="#172033" stroke-width="3"/>
+      <line x1="650" y1="102" x2="650" y2="126" stroke="#94a3b8" stroke-width="2"/>
+      <text x="650" y="151">Heavy rewrite</text>
+
+      <circle cx="910" cy="90" r="9" fill="#ffffff" stroke="#172033" stroke-width="3"/>
+      <line x1="910" y1="102" x2="910" y2="126" stroke="#94a3b8" stroke-width="2"/>
+      <text x="910" y="151">New paraphrase</text>
+    </g>
+
+    <text x="70" y="220" font-size="18" font-weight="600" fill="#2563eb">Stronger expected signal</text>
+    <text x="930" y="220" font-size="18" font-weight="600" fill="#64748b" text-anchor="end">Weaker expected signal</text>
+  </g>
+</svg>
