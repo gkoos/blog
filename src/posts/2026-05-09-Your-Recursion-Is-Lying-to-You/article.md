@@ -162,4 +162,4 @@ Recursion itself is not the enemy, unverified runtime assumptions are. Tail-recu
 
 Use recursion where it improves clarity and depth is genuinely bounded. When depth can grow or input is outside your control, prefer iterative designs that make stack behavior explicit and portable.
 
-The same gap between a familiar abstraction and its operational limits appears when data leaves the call stack entirely. [Your JSON Is Lying to You](/posts/2026-08-02-Your-JSON-Is-Lying-to-You/) explains how serialization changes values and loses types when JavaScript data crosses a system boundary.
+The same gap between a familiar abstraction and its operational limits appears when data leaves the call stack entirely. [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/) explains how serialization changes values and loses types when JavaScript data crosses a system boundary. [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/) follows the same pattern through module resolution, evaluation, caching, and CommonJS/ESM interop.

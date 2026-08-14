@@ -897,3 +897,4 @@ The remaining posts apply the same idea to other familiar abstractions. Each one
 - [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/)
 - [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/)
 - [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/)
+- [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/)
