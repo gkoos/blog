@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Your Modules Are Lying to You</title>
+  <meta name="description" content="ESM and CommonJS expose values through different contracts. Learn how bindings, object references, evaluation order, caching, cycles, and interop shape module behavior in Node.js.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Your Modules Are Lying to You">
+  <meta property="og:description" content="ESM and CommonJS expose values through different contracts. Learn how bindings, object references, evaluation order, caching, cycles, and interop shape module behavior in Node.js.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Your Modules Are Lying to You">
+  <meta name="twitter:description" content="ESM and CommonJS expose values through different contracts. Learn how bindings, object references, evaluation order, caching, cycles, and interop shape module behavior in Node.js.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1786666042597" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Your Modules Are Lying to You</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-08-14T00:00:00.000Z">Fri Aug 14 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">nodejs</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">modules</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">esm</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">commonjs</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">... is lying to you</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Consider this small ES module:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// state.mjs</span>
+<span class="token keyword">export</span> <span class="token keyword">let</span> status <span class="token operator">=</span> <span class="token string">'starting'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  status <span class="token operator">=</span> <span class="token string">'ready'</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Import its two exports, call the function, and the imported <code>status</code> changes:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> status<span class="token punctuation">,</span> start <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./state.mjs'</span>
+
+<span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span> <span class="token comment">// ready</span>
+</code></pre>
+<p>The CommonJS version looks equivalent:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// state.cjs</span>
+module<span class="token punctuation">.</span>exports<span class="token punctuation">.</span>status <span class="token operator">=</span> <span class="token string">'starting'</span>
+
+module<span class="token punctuation">.</span>exports<span class="token punctuation">.</span><span class="token function-variable function">start</span> <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  module<span class="token punctuation">.</span>exports<span class="token punctuation">.</span>status <span class="token operator">=</span> <span class="token string">'ready'</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The same-looking consumer produces a different result:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.cjs</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> status<span class="token punctuation">,</span> start <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./state.cjs'</span><span class="token punctuation">)</span>
+
+<span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span> <span class="token comment">// starting</span>
+</code></pre>
+<p>The function changed <code>module.exports.status</code> to <code>'ready'</code>, yet the local <code>status</code> remained <code>'starting'</code>. Keeping the object returned by <code>require()</code> changes the result again:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.cjs</span>
+<span class="token keyword">const</span> state <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./state.cjs'</span><span class="token punctuation">)</span>
+
+state<span class="token punctuation">.</span><span class="token function">start</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>state<span class="token punctuation">.</span>status<span class="token punctuation">)</span> <span class="token comment">// ready</span>
+</code></pre>
+<p>All three results follow from the module systems' contracts. An ESM named import refers to a binding owned by the exporting module. When that module assigns a new value to the binding, the importer observes it. CommonJS returns the value of <code>module.exports</code>, which is an ordinary object in this example. Destructuring reads one property from that object and stores its current value in a local variable. Keeping the object preserves the shared reference, so later property mutations remain visible.</p>
+<p>This distinction reaches far beyond destructuring. <code>import</code> and <code>require</code> hide several operations behind the familiar idea of bringing code into a file: resolving a module, creating or retrieving its module instance, evaluating its code, and exposing something to another module. ESM and CommonJS make different decisions at each stage. Those decisions determine when side effects run, what a circular dependency can observe, whether two consumers share state, and why a package can work through <code>import</code> while failing through <code>require</code>.</p>
+<p>The examples in this article use native module behavior in current Node.js. Browsers support ESM without CommonJS, while bundlers and transpilers can generate interop wrappers with behavior of their own. Code transformed by a build tool may demonstrate behavior that the Node.js loaders do not guarantee, so each environment should be treated separately.</p>
+<h2 id="bindings%2C-values%2C-and-objects" tabindex="-1"><a class="header-anchor" href="#bindings%2C-values%2C-and-objects">Bindings, Values, and Objects</a></h2>
+<p>An ESM export connects a local name in one module to an imported name in another. The imported name provides a read-only view of the exporter's binding rather than storing a private copy of its value.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// counter.mjs</span>
+<span class="token keyword">export</span> <span class="token keyword">let</span> count <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  count<span class="token operator">++</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> count<span class="token punctuation">,</span> increment <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./counter.mjs'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span> <span class="token comment">// 0</span>
+<span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span> <span class="token comment">// 1</span>
+</code></pre>
+<p>Only the exporting module can assign to <code>count</code>. The importing module observes each assignment, but cannot perform one itself:</p>
+<pre class="language-js"><code class="language-js">count <span class="token operator">=</span> <span class="token number">10</span>
+<span class="token comment">// TypeError: Assignment to constant variable.</span>
+</code></pre>
+<p>The error mentions a constant because the imported name is read-only in this module. The exporter may declare the same binding with <code>let</code> and update it whenever its own code permits.</p>
+<p>Live bindings also say nothing about object immutability. An exported <code>const</code> prevents the exporter from assigning another object to that name, while the object itself may remain mutable:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// settings.mjs</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> settings <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">mode</span><span class="token operator">:</span> <span class="token string">'development'</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">enableProduction</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  settings<span class="token punctuation">.</span>mode <span class="token operator">=</span> <span class="token string">'production'</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Every importer holding <code>settings</code> can observe the property mutation. Unless the object is frozen or protected behind an API, importers can mutate it as well. The binding is read-only from the importer's perspective; the value stored in that binding may still contain mutable state.</p>
+<p>A live binding does not notify dependent code when it changes. Code reads its current value when an expression accesses the imported name, and nothing runs merely because the exporter changed it. Treating an exported binding as application state can therefore create the same coordination problems as any other global mutable state.</p>
+<p>CommonJS begins from a different primitive: a module can assign any JavaScript value to <code>module.exports</code>, and <code>require()</code> returns that value. Objects are common, but the export can also be a function, class, string, or promise.</p>
+<p>The opening used a mutable property on the exported object. A getter can expose private module state while keeping the same object-based contract:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// counter.cjs</span>
+<span class="token keyword">let</span> count <span class="token operator">=</span> <span class="token number">0</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token keyword">get</span> <span class="token function">count</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> count
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    count<span class="token operator">++</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Compare repeated property access with a destructured value:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.cjs</span>
+<span class="token keyword">const</span> counter <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./counter.cjs'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> count<span class="token punctuation">,</span> increment <span class="token punctuation">}</span> <span class="token operator">=</span> counter
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>counter<span class="token punctuation">.</span>count<span class="token punctuation">)</span> <span class="token comment">// 0</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span>         <span class="token comment">// 0</span>
+
+<span class="token function">increment</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>counter<span class="token punctuation">.</span>count<span class="token punctuation">)</span> <span class="token comment">// 1</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>count<span class="token punctuation">)</span>         <span class="token comment">// 0</span>
+</code></pre>
+<p>This can resemble an ESM live binding in use, but it comes from ordinary object semantics: <code>counter</code> refers to the exported object, and each <code>counter.count</code> expression invokes its getter. Destructuring invokes the getter once and stores the returned number.</p>
+<p>Reassigning <code>module.exports</code> introduces another boundary. A mutation changes the existing object, while an assignment makes the module export a different value:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// mutation</span>
+module<span class="token punctuation">.</span>exports<span class="token punctuation">.</span>status <span class="token operator">=</span> <span class="token string">'ready'</span>
+
+<span class="token comment">// replacement</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">status</span><span class="token operator">:</span> <span class="token string">'ready'</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>Consumers holding the original object observe the mutation. They cannot be redirected to the replacement object. This becomes particularly dangerous when a module replaces its export after asynchronous initialization:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// client.cjs</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">ready</span><span class="token operator">:</span> <span class="token boolean">false</span> <span class="token punctuation">}</span>
+
+<span class="token function">initializeClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">client</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  module<span class="token punctuation">.</span>exports <span class="token operator">=</span> client
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>A consumer that calls <code>require('./client.cjs')</code> before initialization finishes retains <code>{ ready: false }</code>. A later consumer may receive <code>client</code> from the cached module record. The process now contains two exported objects from one module, and the first one will never become ready.</p>
+<p>Asynchronous initialization should be visible in the exported contract. The module can export the promise itself:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// client.cjs</span>
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token function">initializeClient</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Consumers must then handle asynchronous readiness explicitly:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.cjs</span>
+<span class="token keyword">const</span> clientPromise <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./client.cjs'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">run</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> client <span class="token operator">=</span> <span class="token keyword">await</span> clientPromise
+  <span class="token keyword">return</span> client<span class="token punctuation">.</span><span class="token function">query</span><span class="token punctuation">(</span><span class="token string">'SELECT 1'</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>An exported initialization function can provide more control over retries and shutdown. A deliberately shared object can also work when its identity must remain stable, provided that the module mutates documented properties instead of replacing the object. Each design tells consumers when the resource becomes usable and which value they will share.</p>
+<p>ESM named imports remain connected to bindings controlled by the exporting module. CommonJS consumers receive an exported value, and ordinary JavaScript rules determine whether they retain an object reference or copy one of its properties. This explains the different results in the examples without treating either module system as special state-management machinery.</p>
+<h2 id="evaluation-order-and-caching" tabindex="-1"><a class="header-anchor" href="#evaluation-order-and-caching">Evaluation Order and Caching</a></h2>
+<p>Static ESM imports participate in a dependency graph that is built before the entry module begins evaluating. Their position in the source file does not delay them until execution reaches that line.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// setup.mjs</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'setup'</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.mjs</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'app: before import'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">import</span> <span class="token string">'./setup.mjs'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'app: after import'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Running <code>node app.mjs</code> prints:</p>
+<pre class="language-text"><code class="language-text">setup
+app: before import
+app: after import
+</code></pre>
+<p>The import appears between the two calls in <code>app.mjs</code>, but <code>setup.mjs</code> runs first. Node resolves and links the graph, then evaluates the dependency before continuing with the body of the importing module. Moving the declaration to the bottom of <code>app.mjs</code> would produce the same output.</p>
+<p>This behavior is often described as import hoisting. That description is useful for syntax, since an imported name can appear in code above its declaration. Evaluation involves more than moving a declaration to the top of a file, however. The runtime resolves every static dependency and creates module records with connected bindings before evaluating the graph in dependency order.</p>
+<p>Side-effect imports make the ordering especially visible:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token string">'./register-hooks.mjs'</span>
+</code></pre>
+<p>This form imports no names. Its purpose is the evaluation of <code>register-hooks.mjs</code>, perhaps to install instrumentation or populate a registry. That work happens before the importing module's body. Source placement cannot be used to schedule it between two statements.</p>
+<p>CommonJS follows ordinary execution order. <code>require()</code> is a function available inside the CommonJS wrapper, so Node calls it when control flow reaches it:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// setup.cjs</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'setup'</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.cjs</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'app: before require'</span><span class="token punctuation">)</span>
+
+<span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./setup.cjs'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'app: after require'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The output now follows the source:</p>
+<pre class="language-text"><code class="language-text">app: before require
+setup
+app: after require
+</code></pre>
+<p>The first call to <code>require('./setup.cjs')</code> resolves the file and evaluates it synchronously. Node stores the module in its CommonJS cache. A later <code>require()</code> that resolves to the same file returns the cached export instead of evaluating the file again.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// sequence.cjs</span>
+<span class="token keyword">let</span> value <span class="token operator">=</span> <span class="token number">0</span>
+
+value<span class="token operator">++</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'evaluated'</span><span class="token punctuation">)</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span> value <span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.cjs</span>
+<span class="token keyword">const</span> first <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./sequence.cjs'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> second <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./sequence.cjs'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>first<span class="token punctuation">.</span>value<span class="token punctuation">)</span>    <span class="token comment">// 1</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>second<span class="token punctuation">.</span>value<span class="token punctuation">)</span>   <span class="token comment">// 1</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>first <span class="token operator">===</span> second<span class="token punctuation">)</span> <span class="token comment">// true</span>
+</code></pre>
+<p><code>evaluated</code> is printed once. Both variables receive the same exported object from the cached module record.</p>
+<p>The cache key follows the resolved module identity rather than the spelling of the request alone. Two requests that resolve to the same file normally share one module instance. Requests that resolve to different files can produce separate instances even when they use the same package name. This becomes important with nested dependencies, symlinks, conditional package entry points, and packages that publish separate ESM and CommonJS implementations.</p>
+<p>ESM modules are also evaluated once per module instance and reused by later imports. ESM uses its own loader and module cache rather than <code>require.cache</code>. The exact identity comes from the resolved module URL, which is why changing a URL query or fragment can cause Node to load the same file as another module instance:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token string">'./config.mjs?mode=one'</span>
+<span class="token keyword">import</span> <span class="token string">'./config.mjs?mode=two'</span>
+</code></pre>
+<p>Each specifier resolves to a distinct URL, so <code>config.mjs</code> is evaluated twice. This is occasionally useful in tests, but it can split state that callers expected to share.</p>
+<p>When loading must happen at a particular point in execution, JavaScript provides dynamic <code>import()</code>:</p>
+<pre class="language-js"><code class="language-js">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'before'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> formatter <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./formatter.mjs'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'after'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Unlike a static declaration, <code>import()</code> is an expression. Execution reaches it at runtime, and the expression returns a promise for the module namespace object. It can appear inside a condition or function, which makes it suitable for optional features and expensive code that should load only when needed.</p>
+<p>Dynamic import also provides the usual asynchronous bridge from CommonJS to ESM:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// report.cjs</span>
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">createReport</span><span class="token punctuation">(</span><span class="token parameter">data</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> <span class="token punctuation">{</span> format <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./formatter.mjs'</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token function">format</span><span class="token punctuation">(</span>data<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span> createReport <span class="token punctuation">}</span>
+</code></pre>
+<p>The interop section will examine the namespace object returned across this boundary. For evaluation timing, the important part is that <code>formatter.mjs</code> is requested when <code>createReport()</code> runs, and the caller must wait for the resulting promise.</p>
+<p>Top-level <code>await</code> extends asynchronous evaluation to an entire ESM module:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// configuration.mjs</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'https://example.com/config.json'</span><span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> configuration <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Any module that statically imports <code>configuration.mjs</code> waits for that module to finish before its own body runs. The delay propagates through the dependency graph, so one top-level <code>await</code> can postpone modules that never use <code>await</code> themselves.</p>
+<p>Static imports express dependencies that must be linked before evaluation. Dynamic imports express dependencies requested during execution. CommonJS <code>require()</code> also runs during execution, but it loads through a synchronous, separately cached module system. Reading the syntax alone is therefore insufficient when initialization order or shared state depends on which loader created the module instance.</p>
+<h2 id="circular-dependencies-and-partial-initialization" tabindex="-1"><a class="header-anchor" href="#circular-dependencies-and-partial-initialization">Circular Dependencies and Partial Initialization</a></h2>
+<p>A circular dependency exists when following imports eventually leads back to a module already in the chain. The smallest cycle contains two modules: <code>a</code> loads <code>b</code>, and <code>b</code> loads <code>a</code>.</p>
+<p>CommonJS permits this by returning an export before the module has finished evaluating. Consider these two files:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// a.cjs</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a: starting'</span><span class="token punctuation">)</span>
+exports<span class="token punctuation">.</span>ready <span class="token operator">=</span> <span class="token boolean">false</span>
+
+<span class="token keyword">const</span> b <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./b.cjs'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a: b.ready ='</span><span class="token punctuation">,</span> b<span class="token punctuation">.</span>ready<span class="token punctuation">)</span>
+exports<span class="token punctuation">.</span>ready <span class="token operator">=</span> <span class="token boolean">true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a: finished'</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// b.cjs</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'b: starting'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> a <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./a.cjs'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'b: a.ready ='</span><span class="token punctuation">,</span> a<span class="token punctuation">.</span>ready<span class="token punctuation">)</span>
+exports<span class="token punctuation">.</span>ready <span class="token operator">=</span> <span class="token boolean">true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'b: finished'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Running <code>node a.cjs</code> produces:</p>
+<pre class="language-text"><code class="language-text">a: starting
+b: starting
+b: a.ready = false
+b: finished
+a: b.ready = true
+a: finished
+</code></pre>
+<p>Evaluation starts in <code>a.cjs</code>, which sets <code>exports.ready</code> to <code>false</code> before requiring <code>b.cjs</code>. Evaluation then moves into <code>b.cjs</code>. Its call to <code>require('./a.cjs')</code> finds a module that is already being evaluated, so Node returns the export object in its current state. The object contains <code>ready: false</code>; the assignment to <code>true</code> has not happened yet.</p>
+<p>If <code>a.cjs</code> assigned the property after loading <code>b.cjs</code>, then <code>b.cjs</code> would read <code>undefined</code> instead. CommonJS provides access to the partially constructed export rather than waiting for the cycle to complete. Code inside the cycle can therefore observe a state that no consumer sees after startup.</p>
+<p>The earlier distinction between mutation and replacement also applies here: <code>exports.ready = true</code> mutates the object already returned to <code>b.cjs</code>, so a later read through <code>a.ready</code> sees the update. Replacing <code>module.exports</code> would leave <code>b.cjs</code> holding the original object while later consumers receive the replacement.</p>
+<p>ESM handles the graph differently. Its linker creates the imported bindings before either module body runs. A binding can exist at that stage without having been initialized by its declaration.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// a.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> b <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./b.mjs'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> a <span class="token operator">=</span> <span class="token string">'a'</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a: b ='</span><span class="token punctuation">,</span> b<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// b.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> a <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./a.mjs'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'b: a ='</span><span class="token punctuation">,</span> a<span class="token punctuation">)</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> b <span class="token operator">=</span> <span class="token string">'b'</span>
+</code></pre>
+<p>Running <code>node a.mjs</code> fails while evaluating <code>b.mjs</code>:</p>
+<pre class="language-text"><code class="language-text">ReferenceError: Cannot access 'a' before initialization
+</code></pre>
+<p>Node begins with the dependency of <code>a.mjs</code>, so it evaluates <code>b.mjs</code> first. The binding for <code>a</code> has already been created, but execution has not reached <code>export const a = 'a'</code>. Reading it from <code>b.mjs</code> crosses the temporal dead zone and stops evaluation of the graph.</p>
+<p>This ESM graph fails when <code>b.mjs</code> reads <code>a</code> before initialization. Deferring that read allows both modules to finish initializing:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// a.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> b <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./b.mjs'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> a <span class="token operator">=</span> <span class="token string">'a'</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'a: b ='</span><span class="token punctuation">,</span> b<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// b.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> a <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./a.mjs'</span>
+
+<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'b: a ='</span><span class="token punctuation">,</span> a<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+
+<span class="token keyword">export</span> <span class="token keyword">const</span> b <span class="token operator">=</span> <span class="token string">'b'</span>
+</code></pre>
+<p>This version prints:</p>
+<pre class="language-text"><code class="language-text">a: b = b
+b: a = a
+</code></pre>
+<p><code>b.mjs</code> schedules the callback and initializes <code>b</code>. Evaluation returns to <code>a.mjs</code>, which can now read <code>b</code> and initialize <code>a</code>. The timer reads the live binding only after both module bodies have completed.</p>
+<p>Declaration type also affects what an early ESM read can observe. Lexical declarations such as <code>let</code>, <code>const</code>, and <code>class</code> remain uninitialized until evaluation reaches them, so an early read throws. An exported <code>var</code> is initialized to <code>undefined</code> during instantiation, and an exported function may already be callable. Changing the declaration can therefore change the symptom while leaving the cycle intact.</p>
+<p>Delaying a read can make a small cycle run, but it leaves initialization order coupled across files. A later refactor can move one access earlier and turn a working graph into a startup failure. Larger cycles are harder to inspect because the dependency that closes the loop may sit several modules away.</p>
+<p>The durable fix is to change the graph. Shared definitions or state can move into a lower-level module that both sides depend on. Closely related responsibilities may belong in one module. Where one side needs runtime behavior from the other, passing that dependency through a function or constructor keeps the connection out of module initialization.</p>
+<p>CommonJS cycles expose exports while they are still being constructed. ESM cycles connect bindings before evaluation and may expose them before initialization. Both behaviors follow their respective loading models, and both make correctness depend on timing across module boundaries.</p>
+<h2 id="crossing-the-commonjs-and-esm-boundary" tabindex="-1"><a class="header-anchor" href="#crossing-the-commonjs-and-esm-boundary">Crossing the CommonJS and ESM Boundary</a></h2>
+<p>Node.js allows the two module systems to load each other, but it has to translate between an arbitrary CommonJS export value and an ESM namespace built from declared bindings. That translation determines how default and named exports appear on the resulting namespace object.</p>
+<h3 id="importing-commonjs-from-esm" tabindex="-1"><a class="header-anchor" href="#importing-commonjs-from-esm">Importing CommonJS from ESM</a></h3>
+<p>When ESM imports a CommonJS module, Node exposes the value of <code>module.exports</code> as the default export. This is the dependable path when properties of a CommonJS export object may change at runtime.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// status.cjs</span>
+exports<span class="token punctuation">.</span>status <span class="token operator">=</span> <span class="token string">'starting'</span>
+
+<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  exports<span class="token punctuation">.</span>status <span class="token operator">=</span> <span class="token string">'ready'</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.mjs</span>
+<span class="token keyword">import</span> statusModule <span class="token keyword">from</span> <span class="token string">'./status.cjs'</span>
+
+<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>statusModule<span class="token punctuation">.</span>status<span class="token punctuation">)</span> <span class="token comment">// ready</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">200</span><span class="token punctuation">)</span>
+</code></pre>
+<p><code>statusModule</code> refers to the object assigned to <code>module.exports</code>, so the later property mutation is visible.</p>
+<p>Node also tries to make familiar CommonJS patterns available as ESM named imports. It analyzes the CommonJS source before evaluation and creates named exports for properties it can recognize:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.mjs</span>
+<span class="token keyword">import</span> statusModule<span class="token punctuation">,</span> <span class="token punctuation">{</span> status <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./status.cjs'</span>
+
+<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>statusModule<span class="token punctuation">.</span>status<span class="token punctuation">)</span> <span class="token comment">// ready</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>status<span class="token punctuation">)</span>              <span class="token comment">// starting</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">200</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The named <code>status</code> export is copied from <code>module.exports</code> when Node constructs the ESM namespace. Later updates to the CommonJS property are not detected. The default import still refers to the exported object and observes its mutation.</p>
+<p>Named-export detection is a compatibility convenience based on static analysis. CommonJS can compute property names or replace its export with the result of a function. Source analysis cannot reliably infer every shape that such code may produce. A named import that works for one CommonJS package can fail for another even when the property exists at runtime.</p>
+<p>For that reason, native ESM code consuming an unfamiliar CommonJS module should normally use its default export and read properties from that value:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> packageApi <span class="token keyword">from</span> <span class="token string">'commonjs-package'</span>
+
+packageApi<span class="token punctuation">.</span><span class="token function">doWork</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>This matches the CommonJS module's actual export model and avoids depending on Node's detection heuristics.</p>
+<h3 id="loading-esm-from-commonjs" tabindex="-1"><a class="header-anchor" href="#loading-esm-from-commonjs">Loading ESM from CommonJS</a></h3>
+<p>Dynamic <code>import()</code> works inside CommonJS and can load any ESM graph that Node can evaluate, including one that uses top-level <code>await</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// formatter.mjs</span>
+<span class="token keyword">export</span> <span class="token keyword">const</span> version <span class="token operator">=</span> <span class="token string">'2.0'</span>
+
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">format</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">String</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toUpperCase</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// report.cjs</span>
+<span class="token keyword">async</span> <span class="token keyword">function</span> <span class="token function">createReport</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> formatter <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token keyword">import</span><span class="token punctuation">(</span><span class="token string">'./formatter.mjs'</span><span class="token punctuation">)</span>
+
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>formatter<span class="token punctuation">.</span>version<span class="token punctuation">)</span> <span class="token comment">// 2.0</span>
+  <span class="token keyword">return</span> formatter<span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span> createReport <span class="token punctuation">}</span>
+</code></pre>
+<p>The promise resolves to an ESM namespace object. Named exports appear as properties with the same names, while the default export appears under <code>.default</code>. Dynamic import always has this asynchronous shape, even when the imported module contains no asynchronous code.</p>
+<p>Current Node.js can also load a synchronous ESM graph through <code>require()</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// report.cjs</span>
+<span class="token keyword">const</span> formatter <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./formatter.mjs'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>formatter<span class="token punctuation">.</span>version<span class="token punctuation">)</span>       <span class="token comment">// 2.0</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>formatter<span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span><span class="token string">'ok'</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// OK</span>
+</code></pre>
+<p>Here <code>require()</code> returns the module namespace object synchronously. It does not unwrap the default export into the direct return value, so code written as though <code>require('./formatter.mjs')</code> returns the default function will fail:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> format <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./formatter.mjs'</span><span class="token punctuation">)</span>
+
+<span class="token function">format</span><span class="token punctuation">(</span><span class="token string">'ok'</span><span class="token punctuation">)</span>
+<span class="token comment">// TypeError: format is not a function</span>
+</code></pre>
+<p>Synchronous loading is available only when the complete ESM graph can finish without top-level <code>await</code>. If <code>formatter.mjs</code> or one of its dependencies awaits at the top level, <code>require()</code> throws instead of turning the operation into an asynchronous one. Dynamic <code>import()</code> is the appropriate CommonJS entry point for that graph.</p>
+<p>This behavior has changed across Node.js releases. Libraries supporting older Node versions cannot assume that <code>require()</code> can load ESM at all. Their supported runtime range and published package entry points determine whether synchronous interop is available.</p>
+<h3 id="why-.default-and-__esmodule-appear" tabindex="-1"><a class="header-anchor" href="#why-.default-and-__esmodule-appear">Why <code>.default</code> and <code>__esModule</code> Appear</a></h3>
+<p>An ESM default export is still a named binding in the module namespace, using the special name <code>default</code>. CommonJS has one exported value in <code>module.exports</code>. Converting between those shapes requires a convention for deciding whether a CommonJS value represents the namespace or the default value inside it.</p>
+<p>Transpilers have long marked generated ESM-shaped CommonJS output with an <code>__esModule</code> property. A simplified transformation looks like this:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// original ESM</span>
+<span class="token keyword">export</span> <span class="token keyword">default</span> <span class="token keyword">function</span> <span class="token function">format</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">String</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// simplified CommonJS output</span>
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>exports<span class="token punctuation">,</span> <span class="token string">'__esModule'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+exports<span class="token punctuation">.</span><span class="token function-variable function">default</span> <span class="token operator">=</span> <span class="token keyword">function</span> <span class="token function">format</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token function">String</span><span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>A direct CommonJS <code>require()</code> receives the generated exports object:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> formatter <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./formatter.cjs'</span><span class="token punctuation">)</span>
+
+formatter<span class="token punctuation">.</span><span class="token function">default</span><span class="token punctuation">(</span><span class="token string">'value'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Compiler-generated helper code may inspect <code>__esModule</code> and decide whether to use the object directly or wrap it in <code>{ default: value }</code>. Compilers and bundlers do not all apply identical helpers under every configuration. The same source import can therefore receive a function in one build and an object containing <code>.default</code> in another.</p>
+<p><code>__esModule</code> began as a tooling convention rather than an ESM language feature. Modern Node.js also uses it on some namespace objects for compatibility with code generated by those tools. Its presence describes an interop shape; it does not turn CommonJS properties into native live bindings.</p>
+<p>Interop bugs often appear when development and production use different loaders. Tests may transpile both formats into CommonJS or run against bundled output. Production Node.js may then load the published files directly, leaving the native boundary untested until deployment.</p>
+<p>At each boundary, inspect the value the active loader actually returns. A CommonJS module imported into ESM is reliably available through the default import. An ESM module loaded through dynamic <code>import()</code> or synchronous <code>require()</code> normally arrives as a namespace object. Generated <code>__esModule</code> wrappers follow the rules of the tool that created them.</p>
+<h2 id="publishing-for-both-module-systems" tabindex="-1"><a class="header-anchor" href="#publishing-for-both-module-systems">Publishing for Both Module Systems</a></h2>
+<p>Application code usually has one module format chosen by the project. A library has less control over its consumers. Some users load packages through ESM, while existing applications and tools still call <code>require()</code>. Supporting both means publishing files and entry points that expose consistent runtime behavior.</p>
+<h3 id="declaring-the-format-of-each-file" tabindex="-1"><a class="header-anchor" href="#declaring-the-format-of-each-file">Declaring the Format of Each File</a></h3>
+<p>Node determines the format of a JavaScript file from its extension and the nearest parent <code>package.json</code>. The explicit extensions always win:</p>
+<ul>
+<li><code>.mjs</code> is ESM.</li>
+<li><code>.cjs</code> is CommonJS.</li>
+</ul>
+<p>A <code>.js</code> file inherits its interpretation from the nearest package scope. With <code>&quot;type&quot;: &quot;module&quot;</code>, Node treats <code>.js</code> files as ESM. With <code>&quot;type&quot;: &quot;commonjs&quot;</code>, it treats them as CommonJS.</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"formatter"</span><span class="token punctuation">,</span>
+  <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"module"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Inside this package, <code>index.js</code> is ESM and <code>legacy.cjs</code> remains CommonJS. Changing <code>&quot;type&quot;</code> can therefore change how every <code>.js</code> file in that package scope is parsed without changing the files themselves.</p>
+<p>This is easy to miss in monorepos and generated output. A source file may live below one <code>package.json</code>, then a build step copies it below another. Syntax that worked in the source tree can fail from <code>dist</code> because the nearest package scope changed. Published files should use extensions and package metadata that remain unambiguous after packing.</p>
+<p>Relative ESM specifiers also require explicit file extensions:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> format <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'./format.js'</span>
+</code></pre>
+<p>Node does not add <code>.js</code> or search for an <code>index.js</code> file for relative ESM imports. A build that rewrites file locations without updating specifiers can emit valid JavaScript that the ESM resolver cannot load.</p>
+<h3 id="conditional-exports" tabindex="-1"><a class="header-anchor" href="#conditional-exports">Conditional Exports</a></h3>
+<p>The <code>&quot;exports&quot;</code> field defines the public entry points of a package. Conditions can direct ESM and CommonJS consumers to different files:</p>
+<pre class="language-json"><code class="language-json"><span class="token punctuation">{</span>
+  <span class="token property">"name"</span><span class="token operator">:</span> <span class="token string">"formatter"</span><span class="token punctuation">,</span>
+  <span class="token property">"type"</span><span class="token operator">:</span> <span class="token string">"module"</span><span class="token punctuation">,</span>
+  <span class="token property">"exports"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token property">"."</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"import"</span><span class="token operator">:</span> <span class="token string">"./dist/index.js"</span><span class="token punctuation">,</span>
+      <span class="token property">"require"</span><span class="token operator">:</span> <span class="token string">"./dist/index.cjs"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token property">"./colors"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token property">"import"</span><span class="token operator">:</span> <span class="token string">"./dist/colors.js"</span><span class="token punctuation">,</span>
+      <span class="token property">"require"</span><span class="token operator">:</span> <span class="token string">"./dist/colors.cjs"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>An ESM import of <code>formatter</code> selects <code>./dist/index.js</code>. A CommonJS call to <code>require('formatter')</code> selects <code>./dist/index.cjs</code>. The <code>formatter/colors</code> subpath has its own pair of targets. Other files inside the package become private unless the export map exposes them.</p>
+<p>The map describes availability; it does not verify the targets. A published package can contain an <code>&quot;import&quot;</code> path that works and a missing <code>&quot;require&quot;</code> file. Both files may exist while exporting different names. One target may also have an extension or surrounding <code>&quot;type&quot;</code> that makes Node interpret it in the wrong format.</p>
+<p>Conditional exports are resolved by the active loader. Testing <code>src/index.js</code> directly bypasses this decision, as does importing <code>dist/index.js</code> by relative path. Those tests can pass while the public package name selects a broken target.</p>
+<h3 id="the-dual-package-instance-hazard" tabindex="-1"><a class="header-anchor" href="#the-dual-package-instance-hazard">The Dual-Package Instance Hazard</a></h3>
+<p>Separate <code>&quot;import&quot;</code> and <code>&quot;require&quot;</code> targets often contain separate builds of the same source. Node treats those target files as separate modules with separate caches. If one process reaches the package through both conditions, it receives two module instances.</p>
+<p>Suppose the ESM build exports a class:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// dist/index.js</span>
+<span class="token keyword">export</span> <span class="token keyword">class</span> <span class="token class-name">Token</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>value <span class="token operator">=</span> value
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The CommonJS build contains the equivalent class:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// dist/index.cjs</span>
+<span class="token keyword">class</span> <span class="token class-name">Token</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>value <span class="token operator">=</span> value
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+module<span class="token punctuation">.</span>exports <span class="token operator">=</span> <span class="token punctuation">{</span> Token <span class="token punctuation">}</span>
+</code></pre>
+<p>An ESM application can still load both package conditions when one of its dependencies uses <code>require()</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// app.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> createRequire <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:module'</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Token <span class="token keyword">as</span> ImportedToken <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'formatter'</span>
+
+<span class="token keyword">const</span> require <span class="token operator">=</span> <span class="token function">createRequire</span><span class="token punctuation">(</span><span class="token keyword">import</span><span class="token punctuation">.</span>meta<span class="token punctuation">.</span>url<span class="token punctuation">)</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> <span class="token literal-property property">Token</span><span class="token operator">:</span> RequiredToken <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'formatter'</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> token <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ImportedToken</span><span class="token punctuation">(</span><span class="token string">'abc'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>token <span class="token keyword">instanceof</span> <span class="token class-name">ImportedToken</span><span class="token punctuation">)</span> <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>token <span class="token keyword">instanceof</span> <span class="token class-name">RequiredToken</span><span class="token punctuation">)</span> <span class="token comment">// false</span>
+</code></pre>
+<p>The class definitions have identical source, but JavaScript compares their identities rather than their text. The same split affects shared state, including registries and module-level counters. Configuration applied to one instance does not reach the other.</p>
+<p>Bundlers can conceal this problem by deduplicating the package or selecting one condition for the complete build. Native Node.js preserves the two entry points, so a package that behaves as one instance in a bundled application may split when loaded directly.</p>
+<p>One way to preserve identity is to keep the stateful implementation in CommonJS and make the ESM entry point re-export that same value. Another design keeps state outside both wrappers and passes it into stateless format-specific entry points. A package can also publish one format and let the other system use Node's native interop when its supported Node versions permit it. Each option has compatibility costs, but each avoids silently maintaining two independent implementations of shared state.</p>
+<h3 id="test-the-installed-package" tabindex="-1"><a class="header-anchor" href="#test-the-installed-package">Test the Installed Package</a></h3>
+<p>Package tests should exercise the artifact selected by the public package name. Build the project, create the tarball, then install it into a small consumer project:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> pack
+</code></pre>
+<p>The consumer should contain separate ESM and CommonJS smoke tests:</p>
+<pre class="language-js"><code class="language-js"><span class="token comment">// smoke.mjs</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> Token <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'formatter'</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Token</span><span class="token punctuation">(</span><span class="token string">'esm'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-js"><code class="language-js"><span class="token comment">// smoke.cjs</span>
+<span class="token keyword">const</span> <span class="token punctuation">{</span> Token <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'formatter'</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Token</span><span class="token punctuation">(</span><span class="token string">'commonjs'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Run both tests against the packed tarball rather than a workspace link. Packing reveals missing build files and entry points that still refer to the source tree. The smoke tests should cover every documented subpath and compare the public API exposed by both conditions.</p>
+<p>Libraries that advertise synchronous <code>require()</code> support also need a test that loads their complete ESM dependency graph. A transitive top-level <code>await</code> is enough to break that promise. Type declarations require the same boundary testing when ESM and CommonJS consumers receive different declaration files or export shapes.</p>
+<p>Consumers load the published artifact through the paths advertised in <code>&quot;exports&quot;</code>. Source imports and bundler tests exercise useful development paths, but they do not prove that Node can resolve those paths. Packing the library and loading it through both public interfaces exercises the same files and loader decisions used after installation.</p>
+<h2 id="practical-rules-for-module-boundaries" tabindex="-1"><a class="header-anchor" href="#practical-rules-for-module-boundaries">Practical Rules for Module Boundaries</a></h2>
+<p>The mechanics described above lead to a small set of rules that keep module behavior visible in code and package metadata.</p>
+<ol>
+<li>
+<p><strong>Use ESM for new Node.js applications unless a dependency or deployment target requires CommonJS.</strong></p>
+<p>ESM is the language-standard module system and matches the model used by browsers. A project-wide <code>&quot;type&quot;: &quot;module&quot;</code> keeps ordinary <code>.js</code> files consistent, while <code>.cjs</code> provides an explicit boundary for legacy code. Existing CommonJS applications do not need a format migration merely for syntax; migrate when ESM solves a concrete compatibility or tooling problem.</p>
+</li>
+<li>
+<p><strong>Prefer named ESM exports for a stable library API.</strong></p>
+<p>Named exports make the public surface visible to editors and static analysis without default-export conventions. They also reduce ambiguity when CommonJS interop produces a namespace with a <code>.default</code> property. A default export remains appropriate when the module clearly represents one primary value, but package documentation should show the exact import shape consumers receive.</p>
+</li>
+<li>
+<p><strong>Treat mutable exports as shared process state.</strong></p>
+<p>An exported object can be changed by every importer that receives it. An exported <code>let</code> can change underneath code that reads its live binding. Keep mutable state private when callers only need operations over it:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">let</span> enabled <span class="token operator">=</span> <span class="token boolean">false</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">enable</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  enabled <span class="token operator">=</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">export</span> <span class="token keyword">function</span> <span class="token function">isEnabled</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> enabled
+<span class="token punctuation">}</span>
+</code></pre>
+<p>This API controls writes and makes reads explicit. It still represents shared state, so tests and initialization code must reset or configure it deliberately.</p>
+</li>
+<li>
+<p><strong>Keep the CommonJS export object when its properties are expected to change.</strong></p>
+<p>Destructuring a CommonJS property stores its current value:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> <span class="token punctuation">{</span> status <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./service.cjs'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Retain the object when later reads should observe mutations:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> service <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'./service.cjs'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>service<span class="token punctuation">.</span>status<span class="token punctuation">)</span>
+</code></pre>
+<p>When ESM consumes an unfamiliar CommonJS package, use the default import and read from that object. Synthetic named exports depend on static detection and do not receive later CommonJS property updates.</p>
+</li>
+<li>
+<p><strong>Remove cycles instead of arranging code around their current evaluation order.</strong></p>
+<p>A delayed read can make a cycle work today while preserving a hidden dependency on startup timing. Replacing a static import with dynamic <code>import()</code> may postpone one side of the cycle, but it leaves the dependency graph fragile. Move shared definitions into a lower-level module, combine responsibilities that initialize together, or pass runtime dependencies through functions. Tests should fail on an accidental cycle before production startup discovers an early read.</p>
+</li>
+<li>
+<p><strong>Use dynamic <code>import()</code> when loading is genuinely conditional or deferred.</strong></p>
+<p>Dynamic import is appropriate for optional features or large modules needed on one path. It also provides the asynchronous route from CommonJS into ESM, with the returned promise making that boundary explicit.</p>
+</li>
+<li>
+<p><strong>Make every file format explicit at package boundaries.</strong></p>
+<p>Use <code>&quot;type&quot;</code> for the package default and <code>.mjs</code> or <code>.cjs</code> for exceptions. Include extensions in relative ESM specifiers. Inspect the built directory with its own nearest <code>package.json</code>; the source tree's package scope does not determine how published files are interpreted.</p>
+</li>
+<li>
+<p><strong>Assume separate export targets create separate instances.</strong></p>
+<p>When <code>&quot;import&quot;</code> and <code>&quot;require&quot;</code> select different files, design them as independent modules unless they deliberately share one underlying implementation. Avoid module-local singletons whose correctness depends on both targets receiving the same cache entry. Test class identity and shared configuration when consumers can reach the package through both loaders.</p>
+</li>
+<li>
+<p><strong>Test the package name rather than its source path.</strong></p>
+<p>Pack the library and install the tarball into a clean consumer. Run one ESM smoke test and one CommonJS smoke test when both conditions are published. Exercise documented subpaths and compare their public APIs. This catches missing output and conditional targets whose paths or formats are wrong.</p>
+</li>
+</ol>
+<p>These rules keep module identity and evaluation timing in places where developers can inspect them. Explicit formats make export shapes easier to follow, while tests that enter through the public package paths exercise the same boundaries as consumers.</p>
+<h2 id="practical-debugging-checklist" tabindex="-1"><a class="header-anchor" href="#practical-debugging-checklist">Practical Debugging Checklist</a></h2>
+<p>When an imported value is <code>undefined</code>, stale, wrapped in an unexpected object, or different from the value seen elsewhere in the process, check the boundary in this order:</p>
+<ol>
+<li>
+<p><strong>Identify the format of the importing file.</strong> Check its extension and the nearest <code>package.json</code> <code>&quot;type&quot;</code> field. Do not infer the active loader from whether the source happens to contain <code>import()</code> or a generated <code>require()</code> call.</p>
+</li>
+<li>
+<p><strong>Resolve the package entry point.</strong> Inspect the package's <code>&quot;exports&quot;</code> map and determine which condition the current loader selects. Confirm that the selected file exists in the installed package and has the expected format.</p>
+</li>
+<li>
+<p><strong>Inspect the returned shape.</strong> Determine whether the value is an ESM namespace, a CommonJS export object, or a wrapper generated by a compiler. Check <code>.default</code> only after establishing why a namespace or wrapper is present.</p>
+</li>
+<li>
+<p><strong>Determine what the local variable holds.</strong> An ESM named import is a live binding. A CommonJS object may be shared, while a destructured property is a copied value. A getter stays current only when code continues to read the property.</p>
+</li>
+<li>
+<p><strong>Check whether evaluation has finished.</strong> Side effects in an ESM dependency run before the importer body. A CommonJS cycle can return a partially constructed export, while an ESM lexical binding can still be uninitialized.</p>
+</li>
+<li>
+<p><strong>Trace the complete dependency cycle.</strong> The module that closes the loop may be several files away. Look for reads performed during module initialization, especially construction and registration code.</p>
+</li>
+<li>
+<p><strong>Compare module identity.</strong> Confirm that other parts of the process resolved the same file or URL. Mixed <code>import</code> and <code>require</code> paths, URL query strings, duplicate package installations, or separate conditional-export targets can create another instance.</p>
+</li>
+<li>
+<p><strong>Remove transformations from one test path.</strong> Run the published files directly in a supported Node.js version. A test runner or bundler may add default-export wrappers and hide a native-loader failure.</p>
+</li>
+<li>
+<p><strong>Reproduce through the packed package.</strong> Install the tarball into a clean directory and load it by package name. Test every public entry point through each module system the package claims to support.</p>
+</li>
+</ol>
+<p>This sequence usually locates the mismatch before changes to import syntax obscure it further. Start with the resolved file and the loader that created its instance. Then inspect the exact value returned across the boundary.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>The opening examples diverged even though each appeared to perform the same operation. The ESM import observed <code>'ready'</code> through a live binding. In CommonJS, the destructured variable kept <code>'starting'</code>, while the consumer holding the exported object observed <code>'ready'</code> through its shared reference.</p>
+<p>Those results establish the distinction that runs through the rest of the module system. ESM links declared bindings across a dependency graph before evaluation. CommonJS evaluates a module when <code>require()</code> reaches it and returns the value of <code>module.exports</code>. Both loaders cache module instances, although they maintain separate caches and derive identity through different resolution rules.</p>
+<p>Circular dependencies expose the consequences during initialization. CommonJS can return an export object before its module has finished constructing it. ESM can connect a lexical binding before its declaration has initialized it, causing an early read to throw. Delaying the read changes the timing, while removing the cycle changes the dependency structure and produces a more durable result.</p>
+<p>Interop adds a translation layer between these models. Importing CommonJS from ESM reliably exposes <code>module.exports</code> as the default value, while detected named exports may be copied snapshots. Loading ESM from CommonJS normally produces a namespace object, either asynchronously through <code>import()</code> or synchronously through <code>require()</code> when the complete graph contains no top-level <code>await</code>. Transpilers can add another shape through <code>.default</code> wrappers and the <code>__esModule</code> convention.</p>
+<p>Published packages make every one of these choices operational. Package scope and file extensions determine a file's format, while conditional exports select the path presented to each loader. Separate <code>&quot;import&quot;</code> and <code>&quot;require&quot;</code> targets can expose equivalent APIs while creating independent classes or shared-state instances. Tests that import source files cannot reveal a broken path in the packed artifact.</p>
+<p>When module behavior looks impossible, identify the resolved file and the loader that created it. For ESM, establish which binding crossed the boundary. For CommonJS, determine whether the consumer retained the exported value or copied one of its properties. Then verify that evaluation has completed and that the rest of the process holds the same module instance. These questions connect unexpected behavior to visible loader decisions.</p>
+<p>Modules hide resolution and evaluation behind compact syntax. Once those stages are separated, <code>import</code> and <code>require</code> stop looking like interchangeable spellings and start describing different ways to connect code.</p>
+<p>The same hidden-assumption pattern appears elsewhere in JavaScript tooling and data boundaries:</p>
+<ul>
+<li><a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a> covers the gap between controlling call frequency and controlling asynchronous work.</li>
+<li><a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a> shows how naive throttling can discard the final state.</li>
+<li><a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a> examines the interactions between retries, timeouts, rate limits, and tail latency.</li>
+<li><a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a> separates language-level structure from runtime guarantees.</li>
+<li><a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a> examines how install layout changes which modules can be resolved.</li>
+<li><a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your Console Is Lying to You</a> covers live object inspection and timing-sensitive output.</li>
+<li><a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/">Your JS Date Is Lying to You</a> explores parsing, mutation, timezones, and normalization.</li>
+<li><a href="/posts/2026-08-03-Your-JSON-Is-Lying-to-You/">Your JSON Is Lying to You</a> follows values that change shape while crossing a serialization boundary.</li>
+</ul>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

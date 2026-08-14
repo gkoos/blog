@@ -1481,5 +1481,29 @@
         
       </item>
     
+      <item>
+        <title>Your Modules Are Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-14-Your-Modules-Are-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-14-Your-Modules-Are-Lying-to-You/</guid>
+        <pubDate>Fri, 14 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>ESM and CommonJS expose values through different contracts. Learn how bindings, object references, evaluation order, caching, cycles, and interop shape module behavior in Node.js.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>nodejs</category>
+        
+        <category>modules</category>
+        
+        <category>esm</category>
+        
+        <category>commonjs</category>
+        
+        <category>... is lying to you</category>
+        
+      </item>
+    
   </channel>
 </rss>
