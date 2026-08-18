@@ -23,6 +23,7 @@
     "tailwindcss": "^4.1.11"
   },
   "dependencies": {
+    "markdown-it-mathjax3": "^5.2.0",
     "prismjs": "^1.30.0"
   }
 }

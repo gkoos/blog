@@ -4,6 +4,11 @@
   {% if canonical %}
     <link rel="canonical" href="{{ canonical }}">
   {% endif %}
+
+{% endblock %}
+
+{% block afterStyles %}
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
 {% endblock %}
 {% block content %}
 <article>

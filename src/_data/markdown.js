@@ -2,6 +2,7 @@ import markdownIt from "markdown-it";
 import prism from "prismjs";
 import anchor from "markdown-it-anchor";
 import toc from "markdown-it-toc-done-right";
+import mathjax3 from "markdown-it-mathjax3";
 import "prismjs/components/prism-jsx.js";
 import "prismjs/components/prism-typescript.js";
 import "prismjs/components/prism-bash.js";
@@ -18,6 +19,13 @@ const md = markdownIt({
   }
 })
 .use(anchor, { permalink: anchor.permalink.headerLink() })
-.use(toc);
+.use(toc)
+.use(mathjax3);
+
+const originalRender = md.render.bind(md);
+md.render = (src, env) => {
+  const result = originalRender(src, env);
+  return result.replace(/<mjx-assistive-mml[^>]*>[\s\S]*?<\/mjx-assistive-mml>/g, '');
+};
 
 export default md;
