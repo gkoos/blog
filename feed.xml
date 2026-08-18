@@ -1505,5 +1505,19 @@
         
       </item>
     
+      <item>
+        <title>The Blog Now Has Formulas</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-18-The-Blog-Now-Has-Formulas/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-18-The-Blog-Now-Has-Formulas/</guid>
+        <pubDate>Tue, 18 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>Mathematical formula rendering is now supported on this blog, powered by MathJax. Inline and block math expressions work in all posts.</description>
+        
+        <category>announcements</category>
+        
+        <category>meta</category>
+        
+      </item>
+    
   </channel>
 </rss>

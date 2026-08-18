@@ -1,0 +1,12 @@
+/* Tailwind preflight sets svg { display: block } which breaks MathJax inline rendering.
+   Inline MathJax containers must be inline-block, not block. */
+mjx-container:not([display="true"]) {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Hide the invisible assistive MathML copy that MathJax injects for screen readers.
+   Without this, Ctrl+A selection shows every formula twice. */
+mjx-assistive-mml {
+  display: none !important;
+}
