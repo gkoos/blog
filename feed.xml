@@ -1539,5 +1539,25 @@
         
       </item>
     
+      <item>
+        <title>Four fetch-kit releases: ffetch 5.6.1 and the chaos tools</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-23-Four-fetch-kit-Releases/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-23-Four-fetch-kit-Releases/</guid>
+        <pubDate>Sun, 23 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>Four fetch-kit releases with new fuzz tests, bug fixes, hardened CI and release pipelines, and OpenSSF Scorecards.</description>
+        
+        <category>announcements</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>go</category>
+        
+        <category>fetch-kit</category>
+        
+      </item>
+    
   </channel>
 </rss>

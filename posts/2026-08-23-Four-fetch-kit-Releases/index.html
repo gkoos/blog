@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>chaos-proxy 3.4.0 and chaos-proxy-go 0.6.0, plus CI upgrades across fetch-kit</title>
-  <meta name="description" content="Both chaos proxies gain structured --verbose observability, and every fetch-kit repo moves its release automation to a GitHub App with fixed Discord announcements.">
+  <title>Four fetch-kit releases: ffetch 5.6.1 and the chaos tools</title>
+  <meta name="description" content="Four fetch-kit releases with new fuzz tests, bug fixes, hardened CI and release pipelines, and OpenSSF Scorecards.">
   <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="chaos-proxy 3.4.0 and chaos-proxy-go 0.6.0, plus CI upgrades across fetch-kit">
-  <meta property="og:description" content="Both chaos proxies gain structured --verbose observability, and every fetch-kit repo moves its release automation to a GitHub App with fixed Discord announcements.">
+  <meta property="og:title" content="Four fetch-kit releases: ffetch 5.6.1 and the chaos tools">
+  <meta property="og:description" content="Four fetch-kit releases with new fuzz tests, bug fixes, hardened CI and release pipelines, and OpenSSF Scorecards.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="chaos-proxy 3.4.0 and chaos-proxy-go 0.6.0, plus CI upgrades across fetch-kit">
-  <meta name="twitter:description" content="Both chaos proxies gain structured --verbose observability, and every fetch-kit repo moves its release automation to a GitHub App with fixed Discord announcements.">
+  <meta name="twitter:title" content="Four fetch-kit releases: ffetch 5.6.1 and the chaos tools">
+  <meta name="twitter:description" content="Four fetch-kit releases with new fuzz tests, bug fixes, hardened CI and release pipelines, and OpenSSF Scorecards.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
@@ -87,9 +87,9 @@
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
 <article>
-  <h1 class="text-3xl font-bold mb-4">chaos-proxy 3.4.0 and chaos-proxy-go 0.6.0, plus CI upgrades across fetch-kit</h1>
+  <h1 class="text-3xl font-bold mb-4">Four fetch-kit releases: ffetch 5.6.1 and the chaos tools</h1>
   <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-    <time datetime="2026-07-20T00:00:00.000Z">Mon Jul 20 2026</time>
+    <time datetime="2026-08-23T00:00:00.000Z">Sun Aug 23 2026</time>
     
     
       <span class="text-gray-300">•</span>
@@ -109,25 +109,21 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p>Two releases and a round of release-pipeline work across the fetch-kit ecosystem.</p>
-<h2 id="structured---verbose-in-both-chaos-proxies" tabindex="-1"><a class="header-anchor" href="#structured---verbose-in-both-chaos-proxies">Structured <code>--verbose</code> in both chaos proxies</a></h2>
-<p>Both the Node.js and Go chaos proxies now ship the same structured observability model behind <code>--verbose</code>.</p>
+    <p>Four fetch-kit releases are out:</p>
 <ul>
-<li><strong><a href="https://github.com/fetch-kit/chaos-proxy">chaos-proxy 3.4.0</a></strong> (<code>@fetchkit/chaos-proxy</code>) adds a verbose logging utility with structured events and automatic redaction of sensitive data.</li>
-<li><strong><a href="https://github.com/fetch-kit/chaos-proxy-go">chaos-proxy-go 0.6.0</a></strong> adds structured <code>--verbose</code> observability logging: <code>key=value</code> events for startup, request begin/end, config reloads, proxy errors, and shutdown. Sensitive query-string values are redacted and control characters are sanitized. Warnings and errors go to stderr, info and debug to stdout.</li>
+<li><a href="https://www.npmjs.com/package/@fetchkit/ffetch"><code>@fetchkit/ffetch</code> 5.6.1</a></li>
+<li><a href="https://www.npmjs.com/package/@fetchkit/chaos-fetch"><code>@fetchkit/chaos-fetch</code> 1.2.3</a></li>
+<li><a href="https://www.npmjs.com/package/@fetchkit/chaos-proxy"><code>@fetchkit/chaos-proxy</code> 3.4.2</a></li>
+<li><a href="https://github.com/fetch-kit/chaos-proxy-go/releases/tag/v0.6.1"><code>chaos-proxy-go</code> 0.6.1</a></li>
 </ul>
-<p>The result is that both runtimes emit consistent, greppable event lines you can pipe straight into your log tooling while chaos-testing.</p>
-<h2 id="release-automation-moved-to-a-github-app" tabindex="-1"><a class="header-anchor" href="#release-automation-moved-to-a-github-app">Release automation moved to a GitHub App</a></h2>
-<p>Behind the scenes, every fetch-kit repository moved its release automation off an expired personal access token and onto a dedicated GitHub App that mints short-lived installation tokens. This is more secure - no long-lived PAT sitting in secrets - and no longer breaks when a token expires.</p>
-<p>That migration also fixed a subtle bug: release announcements to Discord had gone quiet. Tag-triggered announcement workflows weren't firing because pushes made with the built-in <code>GITHUB_TOKEN</code> deliberately do <strong>not</strong> dispatch downstream workflows. Pushing the release tag with an App installation token restores the trigger, so announcements flow again on:</p>
-<ul>
-<li><code>@fetchkit/ffetch</code></li>
-<li><code>@fetchkit/chaos-fetch</code></li>
-<li><code>@fetchkit/chaos-proxy</code></li>
-<li><code>chaos-proxy-go</code> - which now posts release announcements for the first time</li>
-</ul>
-<p>chaos-proxy-go's release workflow also bumped its Go runtime to <code>1.25.12</code> to clear a standard-library advisory.</p>
-<p>As always, feedback and contributions are welcome in the <a href="https://github.com/fetch-kit">fetch-kit</a> repositories.</p>
+<p>These are patch releases, but the maintenance pass behind them was much larger than the version numbers suggest.</p>
+<h2 id="fuzzing-and-bug-fixes" tabindex="-1"><a class="header-anchor" href="#fuzzing-and-bug-fixes">Fuzzing and bug fixes</a></h2>
+<p>All four projects now have fuzz or property-based tests around their important state machines and boundaries: retries and hedging in <code>ffetch</code>; middleware, routing, streams, and telemetry in the chaos tools; and native Go fuzz targets in <code>chaos-proxy-go</code>.</p>
+<p>The generated tests found real bugs, including cancellation and lifecycle leaks, rate-limit boundary errors, incorrect global fetch restoration, malformed configuration handling, broken empty proxy responses, and configuration values that could panic the Go proxy. The fixes are included in these releases and preserved as regression tests.</p>
+<h2 id="ci-and-security" tabindex="-1"><a class="header-anchor" href="#ci-and-security">CI and security</a></h2>
+<p>I also brought the repositories onto the same CI and security baseline: upgraded and pinned GitHub Actions, narrowly scoped workflow permissions, dependency and vulnerability checks, CodeQL, secret scanning, private vulnerability reporting, and OpenSSF Scorecard workflows.</p>
+<p>The JavaScript projects now use the current Changesets release flow, while <code>chaos-proxy-go</code> uses Release Please and GoReleaser. Release versions and artifacts are aligned again, and <code>ffetch</code> releases now include verified provenance and an SBOM.</p>
+<p>You can find the full ecosystem at <a href="https://fetchkit.org">fetchkit.org</a> and the source code under the <a href="https://github.com/fetch-kit">fetch-kit GitHub organization</a>.</p>
 
   </div>
 </article>
