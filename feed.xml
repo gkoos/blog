@@ -1519,5 +1519,25 @@
         
       </item>
     
+      <item>
+        <title>The Structured Clone Algorithm: What JavaScript Can and Cannot Move Between Boundaries</title>
+        <link>https://blog.gaborkoos.com/posts/2026-08-22-The-Structured-Clone-Algorithm-What-JavaScript-Can-and-Cannot-Move-Between-Boundaries/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-08-22-The-Structured-Clone-Algorithm-What-JavaScript-Can-and-Cannot-Move-Between-Boundaries/</guid>
+        <pubDate>Sat, 22 Aug 2026 00:00:00 GMT</pubDate>
+
+        <description>JavaScript&#39;s structured clone algorithm preserves cycles, shared references, and many built-in types, but it still rejects or transforms values when data crosses a boundary.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>structured-clone</category>
+        
+        <category>serialization</category>
+        
+        <category>web-workers</category>
+        
+      </item>
+    
   </channel>
 </rss>

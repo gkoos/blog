@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>The Structured Clone Algorithm: What JavaScript Can and Cannot Move Between Boundaries</title>
+  <meta name="description" content="JavaScript&#39;s structured clone algorithm preserves cycles, shared references, and many built-in types, but it still rejects or transforms values when data crosses a boundary.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="The Structured Clone Algorithm: What JavaScript Can and Cannot Move Between Boundaries">
+  <meta property="og:description" content="JavaScript&#39;s structured clone algorithm preserves cycles, shared references, and many built-in types, but it still rejects or transforms values when data crosses a boundary.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="The Structured Clone Algorithm: What JavaScript Can and Cannot Move Between Boundaries">
+  <meta name="twitter:description" content="JavaScript&#39;s structured clone algorithm preserves cycles, shared references, and many built-in types, but it still rejects or transforms values when data crosses a boundary.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1787356812440" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">The Structured Clone Algorithm: What JavaScript Can and Cannot Move Between Boundaries</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-08-22T00:00:00.000Z">Sat Aug 22 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">structured-clone</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">serialization</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">web-workers</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>When JavaScript developers need to copy some data or move it across a boundary, they often reach for JSON. Convert the value with <code>JSON.stringify()</code>, send or store the resulting text wherever it needs to go, and reconstruct it with <code>JSON.parse()</code>. That works until the value contains something JSON cannot describe: a <code>Date</code> becomes a string, a <code>Map</code> becomes an empty object, a cyclic object throws instead of producing a copy. <a href="/posts/2026-08-03-Your-JSON-Is-Lying-to-You/">Your JSON Is Lying to You</a> examines the quirks of JSON serialization.</p>
+<p>There is another mechanism for moving data: the <a href="https://html.spec.whatwg.org/multipage/structured-data.html#structured-cloning">structured clone algorithm</a> had already powered APIs such as <code>postMessage()</code> and IndexedDB for years when it became directly available through the global <code>structuredClone()</code> function in 2021 and 2022. Browsers implemented the API, and Node.js added its WHATWG-compatible global in version 17. The HTML Standard defines the API and its underlying serialization algorithm, while the <a href="https://nodejs.org/api/globals.html#structuredclonevalue-options">Node.js documentation describes its server-side implementation</a>.</p>
+<p>It handles many of the cases that break a JSON clone:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> shared <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">status</span><span class="token operator">:</span> <span class="token string">'ready'</span> <span class="token punctuation">}</span>
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">createdAt</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-08-22T10:00:00Z'</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">metadata</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token string">'attempts'</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">primary</span><span class="token operator">:</span> shared<span class="token punctuation">,</span>
+  <span class="token literal-property property">secondary</span><span class="token operator">:</span> shared
+<span class="token punctuation">}</span>
+original<span class="token punctuation">.</span>self <span class="token operator">=</span> original
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>createdAt <span class="token keyword">instanceof</span> <span class="token class-name">Date</span><span class="token punctuation">)</span>       <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>metadata <span class="token keyword">instanceof</span> <span class="token class-name">Map</span><span class="token punctuation">)</span>         <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>primary <span class="token operator">===</span> copy<span class="token punctuation">.</span>secondary<span class="token punctuation">)</span>      <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>self <span class="token operator">===</span> copy<span class="token punctuation">)</span>                   <span class="token comment">// true</span>
+</code></pre>
+<p><code>Date</code> remains a <code>Date</code>, <code>Map</code> keeps its entries, the cycle survives, and both references to <code>shared</code> still point to one object inside the cloned graph. This is much closer to what we usually mean when we ask for a deep copy.</p>
+<p>For large binary payloads, structured clone can transfer the underlying storage instead of duplicating it:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayBuffer</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>buffer<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>buffer<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 1024</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>buffer<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 0</span>
+</code></pre>
+<p>The bytes move to <code>copy</code>, leaving the original buffer detached. This gives worker code a way to hand off data without paying for another copy.</p>
+<p>The broader type support stops at the types built into the algorithm. An application-defined class loses the behaviour that made it useful:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">Session</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">user<span class="token punctuation">,</span> token</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>user <span class="token operator">=</span> user
+    <span class="token keyword">this</span><span class="token punctuation">.</span>token <span class="token operator">=</span> token
+  <span class="token punctuation">}</span>
+
+  <span class="token function">isAuthenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>token <span class="token operator">!==</span> <span class="token keyword">null</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Session</span><span class="token punctuation">(</span><span class="token string">'Alice'</span><span class="token punctuation">,</span> <span class="token string">'secret'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// { user: "Alice", token: "secret" }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">Session</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+
+copy<span class="token punctuation">.</span><span class="token function">isAuthenticated</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// TypeError: copy.isAuthenticated is not a function</span>
+</code></pre>
+<p>The data arrives, but the <code>Session</code> prototype and its methods stay behind. The receiving code gets a plain object with the same enumerable fields.</p>
+<p>Structured clone can preserve object graphs that JSON cannot represent and move resources that would be expensive to copy. It can also flatten application-defined types, reject unsupported values, and expose differences between environments. This article examines those rules and the contracts needed around worker messages, stored records, and other structured clone boundaries.</p>
+<h2 id="what-the-structured-clone-algorithm-actually-does" tabindex="-1"><a class="header-anchor" href="#what-the-structured-clone-algorithm-actually-does">What the Structured Clone Algorithm Actually Does</a></h2>
+<p>The name suggests a recursive copy operation, but the <a href="https://html.spec.whatwg.org/multipage/structured-data.html#safe-passing-of-structured-data">HTML Standard describes structured cloning</a> as a pair of operations: <em>serialization</em> turns a JavaScript value into a realm-independent internal representation, <em>deserialization</em> uses that representation to create a value in the target realm. Most APIs perform these steps at different times, while <code>structuredClone()</code> <strong>runs them together and returns the reconstructed value immediately</strong>.</p>
+<p>Worker messaging places those two operations on opposite sides of a thread boundary. Workers run with separate JavaScript heaps, so the sending thread cannot pass an ordinary object reference to the receiving thread. postMessage() serializes the value, and the worker later reconstructs it in its own realm. A received array uses the worker's Array.prototype, and a received Map uses the worker's Map.prototype. Application-defined prototypes from the sending realm do not cross the boundary.</p>
+<p>The algorithm decides how to represent a value from information defined by the platform. A <code>Date</code> has a date value that can be recorded. A <code>Map</code> has an ordered list of entries, so its keys and values can be serialized in that order. Serializable Web API objects define their own serialization and deserialization steps. An ordinary object contributes its enumerable own string-keyed properties. This fixed set of rules explains why a class instance can lose its prototype even though its public fields survive: the algorithm does not know how to serialize the class itself, so it falls back to the default object representation.</p>
+<p>While traversing the value, the serializer keeps a map of objects it has already visited. When it reaches the same object again, it reuses the existing serialized record instead of serializing that object for a second time. This preserves cycles and repeated references within the graph:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> user <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">name</span><span class="token operator">:</span> <span class="token string">'Alice'</span> <span class="token punctuation">}</span>
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">owner</span><span class="token operator">:</span> user<span class="token punctuation">,</span>
+  <span class="token literal-property property">reviewer</span><span class="token operator">:</span> user
+<span class="token punctuation">}</span>
+original<span class="token punctuation">.</span>self <span class="token operator">=</span> original
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>owner <span class="token operator">===</span> copy<span class="token punctuation">.</span>reviewer<span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>self <span class="token operator">===</span> copy<span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>owner <span class="token operator">===</span> user<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>The first two comparisons show identity preserved inside the new graph, while the last comparison marks the boundary between the graphs: none of the cloned objects is the object that existed on the sending side. Several APIs use this technique because they need values to outlive a call or appear in another execution context. Messages sent through workers, windows, <code>MessagePort</code>, and <code>BroadcastChannel</code> pass through structured serialization. IndexedDB uses a storage-oriented variant when writing records, and the History API applies structured serialization to state passed to <code>pushState()</code> and <code>replaceState()</code>. The surrounding API still controls when the value is read, where it may travel, and whether it can be stored, Structured clone only defines how the value is represented across that boundary.</p>
+<p>JSON solves a different problem. It produces text with a small, language-independent type system, which makes the result suitable for files, HTTP bodies, logs, and programs written in other languages. Structured serialization creates an internal platform representation rather than a portable wire format. There is no structured-clone document that can be saved as text or decoded by a Go service. The conversion rules also differ. JSON calls <code>toJSON()</code> methods and can be customized with replacer and reviver functions. Structured clone has no corresponding hook for application-defined types. JSON duplicates repeated objects and rejects cycles, while structured clone preserves both relationships through its memory map. Unsupported values usually cause structured clone to throw a <code>DataCloneError</code>, so one function or proxy nested deep inside a message can prevent the entire graph from crossing.</p>
+<p>These properties make structured clone suitable for richer data moving inside the web platform or a compatible runtime such as Node.js, but they do not turn it into a universal object copier. Its contract is the set of types and reconstruction steps defined by the platform, and the next question is which JavaScript values that contract preserves.</p>
+<h2 id="what-survives%2C-and-in-what-form" tabindex="-1"><a class="header-anchor" href="#what-survives%2C-and-in-what-form">What Survives, and in What Form</a></h2>
+<p>Each supported type has its own serialization steps. Primitive values such as <code>undefined</code>, <code>null</code>, booleans, strings, numbers, and <code>BigInt</code> cross without being converted to another type. This includes numeric values that JSON cannot represent faithfully:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">missing</span><span class="token operator">:</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">large</span><span class="token operator">:</span> <span class="token number">9007199254740993n</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">invalid</span><span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">upper</span><span class="token operator">:</span> <span class="token number">Infinity</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">lower</span><span class="token operator">:</span> <span class="token operator">-</span><span class="token number">Infinity</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">negativeZero</span><span class="token operator">:</span> <span class="token operator">-</span><span class="token number">0</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>missing<span class="token punctuation">)</span>                   <span class="token comment">// undefined</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>large<span class="token punctuation">)</span>                     <span class="token comment">// 9007199254740993n</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Number<span class="token punctuation">.</span><span class="token function">isNaN</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>invalid<span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">// true</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>upper<span class="token punctuation">)</span>                     <span class="token comment">// Infinity</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>lower<span class="token punctuation">)</span>                     <span class="token comment">// -Infinity</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">is</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>negativeZero<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">0</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">// true</span>
+</code></pre>
+<p>JSON omits <code>undefined</code> object properties, rejects <code>BigInt</code>, and converts the non-finite numbers to <code>null</code>, structured clone records these values directly.</p>
+<p>Arrays and ordinary objects become new arrays and objects populated from their enumerable own string-keyed properties. Nested values go through the same algorithm, so a supported value remains supported regardless of its depth in the graph. The result contains no references back into the original graph unless the value represents shared memory, which follows separate security and runtime rules.</p>
+<p>Built-in objects with internal state need dedicated handling. A <code>Date</code> carries its numeric time value, and a <code>RegExp</code> carries its source and flags. <code>Map</code> and <code>Set</code> retain their entries and iteration order. <code>ArrayBuffer</code>, typed arrays, and <code>DataView</code> preserve their bytes, element type, length, and offset. Errors and several Web API types, including <code>Blob</code> and <code>File</code>, also have defined serialization behaviour in environments that support them.</p>
+<p>Preserving a built-in type does not keep a connection to the original instance:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+  <span class="token punctuation">[</span><span class="token string">'createdAt'</span><span class="token punctuation">,</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-08-22T10:00:00Z'</span><span class="token punctuation">)</span><span class="token punctuation">]</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">Map</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'createdAt'</span><span class="token punctuation">)</span> <span class="token keyword">instanceof</span> <span class="token class-name">Date</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token operator">===</span> original<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'createdAt'</span><span class="token punctuation">)</span> <span class="token operator">===</span> original<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'createdAt'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>The receiving graph contains a new <code>Map</code> and a new <code>Date</code>. Their internal state survives because the algorithm defines how to serialize those built-ins.</p>
+<p>Map keys reveal the same boundary from another direction. Object keys are cloned along with the rest of the graph, so the original key cannot be used to query the cloned map:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> key <span class="token operator">=</span> <span class="token punctuation">{</span> <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token number">42</span> <span class="token punctuation">}</span>
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  key<span class="token punctuation">,</span>
+  <span class="token literal-property property">lookup</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">[</span>key<span class="token punctuation">,</span> <span class="token string">'found'</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>lookup<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>lookup<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>key<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// "found"</span>
+</code></pre>
+<p>Inside <code>copy</code>, the <code>key</code> property and the map entry still refer to the same cloned object, the memory map described in the previous section preserves that relationship. The original <code>key</code> belongs to the source graph and has no identity inside the clone.</p>
+<p>Binary views follow this graph-preservation rule as well. If several views share one buffer before cloning, their copies share one new buffer afterward:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayBuffer</span><span class="token punctuation">(</span><span class="token number">8</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">bytes</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">words</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Uint32Array</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>bytes <span class="token keyword">instanceof</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>words <span class="token keyword">instanceof</span> <span class="token class-name">Uint32Array</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>bytes<span class="token punctuation">.</span>buffer <span class="token operator">===</span> copy<span class="token punctuation">.</span>words<span class="token punctuation">.</span>buffer<span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>bytes<span class="token punctuation">.</span>buffer <span class="token operator">===</span> buffer<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+</code></pre>
+<p>Copying the buffer produces new storage, while the relationship between the views survives.</p>
+<p>Some built-ins preserve less state than their familiar surface suggests. A cloned <code>RegExp</code> retains its pattern and flags, but its <code>lastIndex</code> returns to zero:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> pattern <span class="token operator">=</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">clone</span><span class="token regex-delimiter">/</span><span class="token regex-flags">g</span></span>
+pattern<span class="token punctuation">.</span>lastIndex <span class="token operator">=</span> <span class="token number">4</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>pattern<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>source<span class="token punctuation">)</span>    <span class="token comment">// "clone"</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>flags<span class="token punctuation">)</span>     <span class="token comment">// "g"</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>lastIndex<span class="token punctuation">)</span> <span class="token comment">// 0</span>
+</code></pre>
+<p>This still counts as a <code>RegExp</code> clone according to the algorithm because the standardized serialization steps record its matcher, source, and flags, but mutable state outside those steps does not travel.</p>
+<p>Structured clone therefore preserves two different things: dedicated rules reconstruct supported built-in types, while the traversal memory preserves identity relationships within the new graph. Neither guarantee extends to every property or every kind of object. The later sections examine the information that those reconstruction rules leave behind.</p>
+<h2 id="transferables%3A-move-instead-of-copy" tabindex="-1"><a class="header-anchor" href="#transferables%3A-move-instead-of-copy">Transferables: Move Instead of Copy</a></h2>
+<p>As we saw, cloning an <code>ArrayBuffer</code> allocates new storage and copies every byte into it. That cost grows with images, audio chunks, model inputs, and other binary payloads passed between threads. The <a href="https://html.spec.whatwg.org/multipage/structured-data.html#transferable-objects">transferable-object mechanism</a> lets selected resources change owners during structured serialization.</p>
+<p>A transfer list applies to resources inside a larger value. Everything else follows the normal cloning rules:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayBuffer</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> bytes <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+bytes<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token number">42</span>
+
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">jobId</span><span class="token operator">:</span> <span class="token string">'resize-17'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">options</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">width</span><span class="token operator">:</span> <span class="token number">800</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  bytes
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>buffer<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>jobId<span class="token punctuation">)</span>
+<span class="token comment">// "resize-17"</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>options <span class="token operator">===</span> original<span class="token punctuation">.</span>options<span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>bytes<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token comment">// 42</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>buffer<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 0</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>bytes<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 0</span>
+</code></pre>
+<p>The strings and ordinary objects are cloned, <code>Uint8Array</code> is reconstructed around the buffer received by <code>copy</code>, while the buffer used by <code>original.bytes</code> is detached. Every view backed by that source buffer loses access to the storage, including views that were never included in the value passed to <code>structuredClone()</code>. Detachment happens before the call returns. Code that hands off a buffer must also give up every path that could use it afterward. Keeping an alias in a queue, cache, closure, or pending operation leaves that code holding a view with a byte length of zero.</p>
+<p>The transfer list names the transferable resource rather than every object that refers to it. Typed arrays and <code>DataView</code> objects are serializable views, while their underlying <code>ArrayBuffer</code> supplies the transferable storage:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> bytes <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">30</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>bytes<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>bytes<span class="token punctuation">.</span>buffer<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// Uint8Array(3) [10, 20, 30]</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>bytes<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 0</span>
+</code></pre>
+<p>Listing the typed array itself as the transferable produces an error. The distinction follows the ownership being moved: the bytes belong to the buffer, and a typed array describes how to view them.</p>
+<p>A transferred object gets one handoff, reusing the detached source does not send the bytes again:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayBuffer</span><span class="token punctuation">(</span><span class="token number">16</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> first <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>buffer<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>buffer<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>first<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 16</span>
+
+<span class="token function">structuredClone</span><span class="token punctuation">(</span>buffer<span class="token punctuation">)</span>
+<span class="token comment">// DataCloneError</span>
+</code></pre>
+<p>The transfer list must also contain each resource at most once: listing the same <code>ArrayBuffer</code> twice causes a <code>DataCloneError</code> rather than creating two destinations for one resource.</p>
+<p><code>structuredClone()</code> performs the handoff within the current thread and returns the receiving value. Messaging APIs perform the same ownership change while sending the serialized value elsewhere:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> buffer <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayBuffer</span><span class="token punctuation">(</span><span class="token number">1024</span><span class="token punctuation">)</span>
+
+worker<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'chunk'</span><span class="token punctuation">,</span> buffer <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">[</span>buffer<span class="token punctuation">]</span>
+<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>buffer<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+<span class="token comment">// 0</span>
+</code></pre>
+<p>The worker receives a new <code>ArrayBuffer</code> through its <code>message</code> event. The sender loses access as soon as <code>postMessage()</code> accepts the transfer, it does not wait for the worker's event handler to run. The options form, <code>worker.postMessage(message, { transfer: [buffer] })</code>, expresses the same transfer in environments that support that signature.</p>
+<p>Browsers define several transferable platform objects in addition to <code>ArrayBuffer</code>. <code>MessagePort</code> moves one endpoint of a message channel. <code>ImageBitmap</code> and <code>OffscreenCanvas</code> can hand graphics resources to another context. Streams can also be transferable in supporting environments. Available types depend on the browser, runtime, and the API receiving the value, so code that crosses several environments needs tests against each target.</p>
+<p><code>SharedArrayBuffer</code> follows different semantics: structured serialization can create a new <code>SharedArrayBuffer</code> object that refers to the same shared memory, subject to the platform's isolation requirements. It does not appear in the transfer list and the sender keeps access. Coordination then becomes part of the program because both agents can read and write the same bytes, usually through <code>Atomics</code>.</p>
+<p>Transfer removes the byte-for-byte copy of the resource, but the surrounding object graph still has to be traversed and reconstructed. Small buffers may not justify the ownership complexity, and transferring a buffer that other code still expects to use creates failures that a normal clone would avoid. Large payloads with a clear handoff point are the natural use case: once the sender queues the work, the receiver owns the resource and the sender discards its references.</p>
+<h2 id="where-structured-clone-loses-information" tabindex="-1"><a class="header-anchor" href="#where-structured-clone-loses-information">Where Structured Clone Loses Information</a></h2>
+<p>The list of supported built-ins can make structured clone look broader than it is. They survive because the algorithm recognizes their internal slots and defines how to reconstruct them, but application-defined types have no such reconstruction steps.</p>
+<h3 id="classes-lose-their-identity" tabindex="-1"><a class="header-anchor" href="#classes-lose-their-identity">Classes Lose Their Identity</a></h3>
+<p>The <code>Session</code> instance in the introduction became a plain object because its prototype was not serialized. The same rule applies when a class is available in both realms. Structured clone does not look up a constructor by name or reconnect the received object to application code.</p>
+<p>Subclasses of supported built-ins keep the built-in part and lose the subclass:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">Scores</span> <span class="token keyword">extends</span> <span class="token class-name">Map</span> <span class="token punctuation">{</span>
+  <span class="token function">highest</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token operator">...</span><span class="token keyword">this</span><span class="token punctuation">.</span><span class="token function">values</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Scores</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+  <span class="token punctuation">[</span><span class="token string">'Alice'</span><span class="token punctuation">,</span> <span class="token number">12</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token punctuation">[</span><span class="token string">'Bob'</span><span class="token punctuation">,</span> <span class="token number">9</span><span class="token punctuation">]</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span>
+original<span class="token punctuation">.</span>round <span class="token operator">=</span> <span class="token string">'final'</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">Map</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">Scores</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>round<span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>highest<span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+</code></pre>
+<p>The map entries and their order survive through the <code>Map</code> serialization steps. The <code>Scores</code> prototype and the extra <code>round</code> property are outside those steps. Extending <code>Date</code>, <code>Set</code>, or a typed array produces the same kind of result: the recognized built-in state travels without the application-defined layer around it.</p>
+<p>Private fields disappear with the class instance because only the class body can access them and the algorithm has no rule for reconstructing them. A private field cannot be recovered from the enumerable public properties left in the clone.</p>
+<h3 id="unsupported-values-stop-the-whole-operation" tabindex="-1"><a class="header-anchor" href="#unsupported-values-stop-the-whole-operation">Unsupported Values Stop the Whole Operation</a></h3>
+<p>Functions, symbol values, <code>WeakMap</code>, <code>WeakSet</code>, <code>Promise</code>, and proxies cannot be structured-cloned. Encountering one anywhere in the graph throws a <code>DataCloneError</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> message <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'calculate'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">payload</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">values</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+    <span class="token function">callback</span><span class="token punctuation">(</span><span class="token parameter">result</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>result<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token function">structuredClone</span><span class="token punctuation">(</span>message<span class="token punctuation">)</span>
+<span class="token comment">// DataCloneError</span>
+</code></pre>
+<p>The surrounding object does not make the callback cloneable. The serializer reaches the function while traversing <code>payload</code> and aborts the entire operation.</p>
+<p>A proxy fails even when its target contains only ordinary data:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> state <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Proxy</span><span class="token punctuation">(</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">count</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+
+<span class="token function">structuredClone</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span>
+<span class="token comment">// DataCloneError</span>
+</code></pre>
+<p>This affects reactive state and other libraries that wrap data in proxies. Worker messages and IndexedDB writes see the wrapper passed at the boundary, rather than the plain target hidden behind it. The application has to extract a supported data representation before making the call.</p>
+<p>Symbols follow two different paths: a symbol used as a value throws, while a symbol-keyed property falls outside the enumerable string-keyed properties collected from an ordinary object:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> internal <span class="token operator">=</span> <span class="token function">Symbol</span><span class="token punctuation">(</span><span class="token string">'internal'</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">visible</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  <span class="token punctuation">[</span>internal<span class="token punctuation">]</span><span class="token operator">:</span> <span class="token number">2</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// { visible: 1 }</span>
+
+<span class="token function">structuredClone</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token literal-property property">value</span><span class="token operator">:</span> internal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token comment">// DataCloneError</span>
+</code></pre>
+<p>The first operation succeeds without carrying the symbol-keyed property. The second operation reaches the symbol as a value and fails.</p>
+<h3 id="properties-become-ordinary-data" tabindex="-1"><a class="header-anchor" href="#properties-become-ordinary-data">Properties Become Ordinary Data</a></h3>
+<p>For an ordinary object, structured clone visits enumerable own string-keyed properties and reads their values. Inherited properties and non-enumerable properties stay behind. The clone creates ordinary data properties, so read-only flags, setters, and other descriptor details do not survive.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>original<span class="token punctuation">,</span> <span class="token string">'id'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token number">42</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">writable</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">configurable</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+Object<span class="token punctuation">.</span><span class="token function">defineProperty</span><span class="token punctuation">(</span>original<span class="token punctuation">,</span> <span class="token string">'secret'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token string">'hidden'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">enumerable</span><span class="token operator">:</span> <span class="token boolean">false</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
+<span class="token comment">// { id: 42 }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">getOwnPropertyDescriptor</span><span class="token punctuation">(</span>copy<span class="token punctuation">,</span> <span class="token string">'id'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {</span>
+<span class="token comment">//   value: 42,</span>
+<span class="token comment">//   writable: true,</span>
+<span class="token comment">//   enumerable: true,</span>
+<span class="token comment">//   configurable: true</span>
+<span class="token comment">// }</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>secret<span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+</code></pre>
+<p>Accessors are read during serialization. Their functions do not cross the boundary, the values they return become ordinary properties in the clone:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">let</span> reads <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">subtotal</span><span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span>
+
+  <span class="token keyword">get</span> <span class="token function">total</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    reads <span class="token operator">+=</span> <span class="token number">1</span>
+    <span class="token keyword">return</span> <span class="token keyword">this</span><span class="token punctuation">.</span>subtotal <span class="token operator">*</span> <span class="token number">1.2</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>reads<span class="token punctuation">)</span>
+<span class="token comment">// 1</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>total<span class="token punctuation">)</span>
+<span class="token comment">// 120</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Object<span class="token punctuation">.</span><span class="token function">getOwnPropertyDescriptor</span><span class="token punctuation">(</span>copy<span class="token punctuation">,</span> <span class="token string">'total'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>get<span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+</code></pre>
+<p>A getter can mutate state, log information, perform expensive work, or throw - structured cloning an unfamiliar object can therefore execute code before it produces a result. A thrown getter exception propagates from the cloning call.</p>
+<h3 id="there-is-no-custom-serialization-hook" tabindex="-1"><a class="header-anchor" href="#there-is-no-custom-serialization-hook">There Is No Custom Serialization Hook</a></h3>
+<p><code>JSON.stringify()</code> checks for a <code>toJSON()</code> method and accepts a replacer. Structured clone ignores <code>toJSON()</code> inherited from a prototype and has no replacer or reviver.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">Account</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">id</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>id <span class="token operator">=</span> id
+  <span class="token punctuation">}</span>
+
+  <span class="token function">toJSON</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'Account'</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">id</span><span class="token operator">:</span> <span class="token keyword">this</span><span class="token punctuation">.</span>id
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> account <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Account</span><span class="token punctuation">(</span><span class="token number">42</span><span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>account<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// {"type":"Account","id":42}</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">structuredClone</span><span class="token punctuation">(</span>account<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// { id: 42 }</span>
+</code></pre>
+<p>The JSON representation can carry the type tag because <code>Account</code> controls that conversion. The structured clone result follows the rules for an ordinary object and receives only the enumerable <code>id</code> field.</p>
+<p>JavaScript currently provides no <code>Symbol.toStructuredClone</code>, registration API, or callback for adding a type to the native algorithm. A custom type has to be converted before the boundary and reconstructed afterward by application code. Both sides need to agree on the tag and validate the associated data.</p>
+<h3 id="errors-preserve-an-engine-defined-record" tabindex="-1"><a class="header-anchor" href="#errors-preserve-an-engine-defined-record">Errors Preserve an Engine-Defined Record</a></h3>
+<p><code>Error</code> objects receive dedicated treatment, but their useful state extends beyond a simple set of enumerable properties. The HTML Standard records the recognized error name, message, and an implementation-defined representation of the stack. It also allows engines to include other accompanying data.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">TypeError</span><span class="token punctuation">(</span><span class="token string">'Invalid amount'</span><span class="token punctuation">)</span>
+original<span class="token punctuation">.</span>code <span class="token operator">=</span> <span class="token string">'E_AMOUNT'</span>
+
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>name<span class="token punctuation">)</span>
+<span class="token comment">// "TypeError"</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>message<span class="token punctuation">)</span>
+<span class="token comment">// "Invalid amount"</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">.</span>code<span class="token punctuation">)</span>
+<span class="token comment">// undefined</span>
+</code></pre>
+<p>The custom enumerable <code>code</code> property is not part of the standard <code>Error</code> serialization steps. Stack content can differ after a worker or persistence boundary because its representation belongs to the engine. Modern engines may preserve <code>cause</code>, but applications that require it across every supported runtime should encode it as part of their own error record.</p>
+<p>Sending operational errors as plain data gives the receiver a stable contract:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">toErrorMessage</span><span class="token punctuation">(</span><span class="token parameter">error</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">name</span><span class="token operator">:</span> error<span class="token punctuation">.</span>name<span class="token punctuation">,</span>
+    <span class="token literal-property property">message</span><span class="token operator">:</span> error<span class="token punctuation">.</span>message<span class="token punctuation">,</span>
+    <span class="token literal-property property">code</span><span class="token operator">:</span> error<span class="token punctuation">.</span>code<span class="token punctuation">,</span>
+    <span class="token literal-property property">cause</span><span class="token operator">:</span> error<span class="token punctuation">.</span>cause<span class="token operator">?.</span>message
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The conversion chooses the fields that matter to the application instead of inheriting an engine's current <code>Error</code> serialization behaviour.</p>
+<h3 id="host-objects-depend-on-the-environment" tabindex="-1"><a class="header-anchor" href="#host-objects-depend-on-the-environment">Host Objects Depend on the Environment</a></h3>
+<p>Web APIs opt supported platform objects into structured serialization. <code>Blob</code>, <code>File</code>, and several graphics types define how their internal data crosses a boundary. A DOM node has no corresponding representation and throws a <code>DataCloneError</code>:</p>
+<pre class="language-js"><code class="language-js"><span class="token function">structuredClone</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span>body<span class="token punctuation">)</span>
+<span class="token comment">// DataCloneError</span>
+</code></pre>
+<p>Node.js implements the WHATWG algorithm alongside its own platform types. Its <a href="https://nodejs.org/api/worker_threads.html#considerations-when-cloning-objects-with-prototypes-classes-and-accessors">worker documentation</a> calls out one common conversion: a Node <code>Buffer</code> arrives as a plain <code>Uint8Array</code>.</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> original <span class="token operator">=</span> Buffer<span class="token punctuation">.</span><span class="token function">from</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token number">10</span><span class="token punctuation">,</span> <span class="token number">20</span><span class="token punctuation">,</span> <span class="token number">30</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>original<span class="token punctuation">)</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">isBuffer</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// false</span>
+
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy <span class="token keyword">instanceof</span> <span class="token class-name">Uint8Array</span><span class="token punctuation">)</span>
+<span class="token comment">// true</span>
+</code></pre>
+<p>Support also changes as standards and runtimes evolve. Older engines rejected some objects that current engines serialize, and fields such as <code>Error.cause</code> have not behaved uniformly. Feature detection can establish that <code>structuredClone()</code> exists, but only a boundary test can establish that a particular value returns with the required type and state.</p>
+<h2 id="practical-boundaries-and-failure-modes" tabindex="-1"><a class="header-anchor" href="#practical-boundaries-and-failure-modes">Practical Boundaries and Failure Modes</a></h2>
+<p>Structured clone defines the representation of a value. The API using it determines when serialization happens, which realm receives the result, and what can happen before that result is consumed. A successful call to <code>structuredClone()</code> covers only the simplest case because the sender and receiver are the same piece of synchronous code.</p>
+<h3 id="messages-are-serialized-before-delivery" tabindex="-1"><a class="header-anchor" href="#messages-are-serialized-before-delivery">Messages Are Serialized Before Delivery</a></h3>
+<p><code>postMessage()</code> serializes the message during the call, before the browser queues work for the receiving context. Getters run on the sending side, and an unsupported value throws there:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">try</span> <span class="token punctuation">{</span>
+  worker<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'calculate'</span><span class="token punctuation">,</span>
+    <span class="token function">callback</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>error<span class="token punctuation">.</span>name<span class="token punctuation">)</span>
+  <span class="token comment">// "DataCloneError"</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The worker never receives a partial message. Once serialization succeeds, delivery and deserialization happen later. The sender may have changed its own state by then, but those changes cannot alter the serialized message.</p>
+<p>Transferables follow the same timing. A buffer passed in the transfer list is detached before <code>postMessage()</code> returns, even though the worker's <code>message</code> handler has not run. This creates a clean handoff point for binary data: code after the call executes without access to the transferred storage.</p>
+<p>Deserialization can fail separately when the target environment cannot reconstruct a platform object contained in the message. Messaging APIs report this through a <code>messageerror</code> event rather than the normal <code>message</code> handler:</p>
+<pre class="language-js"><code class="language-js">worker<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'messageerror'</span><span class="token punctuation">,</span> <span class="token parameter">event</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'The worker could not deserialize the message'</span><span class="token punctuation">,</span> event<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>This failure is less common for ordinary JavaScript values, but platform types can differ between windows, workers, browser versions, and non-browser runtimes.</p>
+<h3 id="cross-window-messages-need-an-origin-contract" tabindex="-1"><a class="header-anchor" href="#cross-window-messages-need-an-origin-contract">Cross-Window Messages Need an Origin Contract</a></h3>
+<p>Structured cloning carries data across a window boundary without deciding who should receive it. The <code>targetOrigin</code> argument to <code>window.postMessage()</code> controls delivery:</p>
+<pre class="language-js"><code class="language-js">otherWindow<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'payment-complete'</span><span class="token punctuation">,</span> <span class="token literal-property property">orderId</span><span class="token operator">:</span> <span class="token string">'A-42'</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token string">'https://checkout.example'</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>Using an exact origin prevents the browser from delivering the message after the target window navigates to an unrelated site. The receiving window should check <code>event.origin</code> and, where relevant, <code>event.source</code> before acting on <code>event.data</code>.</p>
+<p>A cloned object remains untrusted input. Structured clone can preserve a <code>Map</code> or a <code>Date</code>, but it does not validate field names, string contents, numeric ranges, or application permissions. The receiver still needs a schema and authorization checks for the operation requested by the message.</p>
+<p>Workers do not use <code>targetOrigin</code>, but their lifetimes introduce other constraints. Terminating a worker can discard queued messages. A service worker may be stopped between events, and asynchronous work associated with an event must be attached to its lifetime through APIs such as <code>event.waitUntil()</code>. Successful serialization provides no delivery or durability guarantee.</p>
+<h3 id="indexeddb-stores-a-snapshot" tabindex="-1"><a class="header-anchor" href="#indexeddb-stores-a-snapshot">IndexedDB Stores a Snapshot</a></h3>
+<p>IndexedDB stores record values using <a href="https://w3c.github.io/IndexedDB/#clone-value"><code>StructuredSerializeForStorage</code></a>. The value is captured when <code>put()</code> or <code>add()</code> is called. Mutating the source object afterward does not update the stored record:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> preferences <span class="token operator">=</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">theme</span><span class="token operator">:</span> <span class="token string">'dark'</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">shortcuts</span><span class="token operator">:</span> <span class="token keyword">new</span> <span class="token class-name">Map</span><span class="token punctuation">(</span><span class="token punctuation">[</span><span class="token punctuation">[</span><span class="token string">'save'</span><span class="token punctuation">,</span> <span class="token string">'Ctrl+S'</span><span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+store<span class="token punctuation">.</span><span class="token function">put</span><span class="token punctuation">(</span>preferences<span class="token punctuation">,</span> <span class="token string">'preferences'</span><span class="token punctuation">)</span>
+
+preferences<span class="token punctuation">.</span>theme <span class="token operator">=</span> <span class="token string">'light'</span>
+preferences<span class="token punctuation">.</span>shortcuts<span class="token punctuation">.</span><span class="token function">set</span><span class="token punctuation">(</span><span class="token string">'open'</span><span class="token punctuation">,</span> <span class="token string">'Ctrl+O'</span><span class="token punctuation">)</span>
+</code></pre>
+<p>A later read returns the earlier snapshot with the dark theme and one map entry, assuming the transaction commits. The database does not retain a live reference to <code>preferences</code>.</p>
+<p>The storage variant excludes values that cannot safely be restored later. <code>SharedArrayBuffer</code>, for example, cannot be persisted because its meaning depends on shared memory within a running agent cluster. Transfer lists also have no role in IndexedDB; stored data must remain available after the objects and execution contexts that created it have disappeared.</p>
+<p>A successful clone at the <code>put()</code> call does not mean that the write has committed. IndexedDB performs the storage operation through a transaction that can later abort because of another request, an application exception, or a storage failure. Code that needs confirmation must observe the request and transaction completion events.</p>
+<p>Persistence extends the compatibility period from one message to months or years. A browser update may deserialize an old record with newer implementations of the same built-ins, while application code may have changed its expected shape. Stored structured-clone values therefore need the same versioning and migration discipline as records encoded with JSON.</p>
+<p>The Cache API has a narrower data model. It stores copies of <code>Request</code> and <code>Response</code> objects using Fetch and Service Worker rules; it is not a general store for arbitrary structured-clone values. Application metadata belongs in IndexedDB or another database rather than being attached as custom properties to a cached response.</p>
+<h3 id="values-belong-to-the-receiving-realm" tabindex="-1"><a class="header-anchor" href="#values-belong-to-the-receiving-realm">Values Belong to the Receiving Realm</a></h3>
+<p>Deserialization creates built-ins from the target realm. A <code>Map</code> received by an iframe uses that iframe's <code>Map.prototype</code>, and an array delivered to a worker uses the worker's <code>Array.prototype</code>. This normally makes <code>instanceof Map</code> work in the receiving code because both sides of the check come from the receiving realm.</p>
+<p>References retained by the sender belong to a different graph. Comparing a received object with an original object, including an object used as a map key, always fails by identity. Code that needs stable identity across messages should send an identifier and resolve it against state owned by the receiver.</p>
+<p>Cross-realm reconstruction also rules out prototype patching as a transport strategy. Adding methods to <code>Map.prototype</code> in the main window does not add them to a map reconstructed inside a worker. Each realm must load the behaviour it needs, and incoming data should be converted into local application types after validation.</p>
+<h3 id="serialization-can-block-the-sender" tabindex="-1"><a class="header-anchor" href="#serialization-can-block-the-sender">Serialization Can Block the Sender</a></h3>
+<p><code>structuredClone()</code> is synchronous, and the serialization portion of <code>postMessage()</code> also runs before the call returns. Traversing a large graph can block the main thread even when the receiver handles the message asynchronously. Deserialization later consumes time and memory in the target context.</p>
+<p>Cost depends on the graph rather than its top-level object count. A small wrapper can lead to a large buffer, a map with thousands of object keys, or repeated getters that perform their own work. Shared references avoid serializing the same object twice within one operation, but the algorithm still has to visit the surrounding properties and collection entries.</p>
+<p>Common performance failures come from sending more state than the receiver needs and repeatedly cloning the same stable data with every message. Narrow messages reduce traversal work and make the boundary contract easier to understand. Large buffers suit transfer when the sender can relinquish them. Data needed by both sides may belong in shared memory, provided that the synchronization cost and isolation requirements fit the application.</p>
+<p>Performance tests should exercise the complete boundary on the target runtimes. A benchmark of <code>structuredClone()</code> on one engine does not include message queuing, target-side deserialization, IndexedDB I/O, or the application work performed by getters. Measure the path that users actually wait for.</p>
+<h2 id="safer-patterns-for-structured-clone-boundaries" tabindex="-1"><a class="header-anchor" href="#safer-patterns-for-structured-clone-boundaries">Safer Patterns for Structured Clone Boundaries</a></h2>
+<p>Define the value accepted on each boundary before choosing how to move it. JSON suits data that must become text, cross a network, enter another language, or remain readable outside the runtime that produced it. Structured clone fits messages and stored values that benefit from supported JavaScript and platform types such as <code>Map</code>, <code>Date</code>, <code>Blob</code>, and typed arrays.</p>
+<p>The richer type set does not remove the need for a contract. A worker should receive a known message shape rather than an arbitrary object taken from application state.</p>
+<h3 id="build-boundary-values" tabindex="-1"><a class="header-anchor" href="#build-boundary-values">Build Boundary Values</a></h3>
+<p>Class instances, reactive state, and library objects carry behaviour that the receiver cannot use. Convert them into a record containing the fields required by the operation:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">toResizeMessage</span><span class="token punctuation">(</span><span class="token parameter">job</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">version</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'resize-image'</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">jobId</span><span class="token operator">:</span> <span class="token function">String</span><span class="token punctuation">(</span>job<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">width</span><span class="token operator">:</span> job<span class="token punctuation">.</span>targetWidth<span class="token punctuation">,</span>
+    <span class="token literal-property property">pixels</span><span class="token operator">:</span> job<span class="token punctuation">.</span>pixels
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">const</span> message <span class="token operator">=</span> <span class="token function">toResizeMessage</span><span class="token punctuation">(</span>job<span class="token punctuation">)</span>
+
+worker<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span>message<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>message<span class="token punctuation">.</span>pixels<span class="token punctuation">.</span>buffer<span class="token punctuation">]</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The conversion fixes the message shape independently of the <code>job</code> class. Adding a getter, method, cache, or private field to that class cannot alter the worker protocol. The <code>version</code> field gives the receiver a way to distinguish future shapes.</p>
+<p>Use the types that serve the boundary. A <code>Map</code> is reasonable when both sides run in environments that support its structured serialization and key identity has meaning within the message. An array of entries is easier to inspect and can later move to JSON without another redesign. The contract should make that choice rather than inherit it from whichever object the sender already holds.</p>
+<h3 id="validate-after-receiving" tabindex="-1"><a class="header-anchor" href="#validate-after-receiving">Validate After Receiving</a></h3>
+<p>A successful deserialization proves that the platform understood the value's types. It says nothing about the application's required fields and constraints. Worker messages, window messages, and IndexedDB records should be checked before business code uses them:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">isResizeMessage</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+    value <span class="token operator">!==</span> <span class="token keyword">null</span> <span class="token operator">&amp;&amp;</span>
+    <span class="token keyword">typeof</span> value <span class="token operator">===</span> <span class="token string">'object'</span> <span class="token operator">&amp;&amp;</span>
+    value<span class="token punctuation">.</span>version <span class="token operator">===</span> <span class="token number">1</span> <span class="token operator">&amp;&amp;</span>
+    value<span class="token punctuation">.</span>type <span class="token operator">===</span> <span class="token string">'resize-image'</span> <span class="token operator">&amp;&amp;</span>
+    <span class="token keyword">typeof</span> value<span class="token punctuation">.</span>jobId <span class="token operator">===</span> <span class="token string">'string'</span> <span class="token operator">&amp;&amp;</span>
+    Number<span class="token punctuation">.</span><span class="token function">isInteger</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>width<span class="token punctuation">)</span> <span class="token operator">&amp;&amp;</span>
+    value<span class="token punctuation">.</span>width <span class="token operator">></span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span>
+    value<span class="token punctuation">.</span>pixels <span class="token keyword">instanceof</span> <span class="token class-name">Uint8Array</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+worker<span class="token punctuation">.</span><span class="token function">addEventListener</span><span class="token punctuation">(</span><span class="token string">'message'</span><span class="token punctuation">,</span> <span class="token parameter">event</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span><span class="token function">isResizeMessage</span><span class="token punctuation">(</span>event<span class="token punctuation">.</span>data<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">error</span><span class="token punctuation">(</span><span class="token string">'Invalid worker message'</span><span class="token punctuation">)</span>
+    <span class="token keyword">return</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token function">resize</span><span class="token punctuation">(</span>event<span class="token punctuation">.</span>data<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Cross-window messages need the origin and source checks described earlier before shape validation. IndexedDB needs the same shape check even though its data came from the same origin. Old application versions, interrupted migrations, browser extensions, and other tabs can leave records that current code did not create in its present form.</p>
+<p>Schema libraries can replace handwritten checks for larger protocols. The schema must run at runtime; a TypeScript annotation describes what the program expects but cannot inspect a message or stored record.</p>
+<h3 id="encode-custom-types-outside-the-algorithm" tabindex="-1"><a class="header-anchor" href="#encode-custom-types-outside-the-algorithm">Encode Custom Types Outside the Algorithm</a></h3>
+<p>Application-defined types need a transport representation and a reconstruction function. A type tag keeps that conversion visible:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">class</span> <span class="token class-name">Account</span> <span class="token punctuation">{</span>
+  <span class="token function">constructor</span><span class="token punctuation">(</span><span class="token parameter">id<span class="token punctuation">,</span> currency</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>id <span class="token operator">=</span> id
+    <span class="token keyword">this</span><span class="token punctuation">.</span>currency <span class="token operator">=</span> currency
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">function</span> <span class="token function">encodeAccount</span><span class="token punctuation">(</span><span class="token parameter">account</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'Account'</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">version</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">id</span><span class="token operator">:</span> account<span class="token punctuation">.</span>id<span class="token punctuation">,</span>
+    <span class="token literal-property property">currency</span><span class="token operator">:</span> account<span class="token punctuation">.</span>currency
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">function</span> <span class="token function">decodeAccount</span><span class="token punctuation">(</span><span class="token parameter">value</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>
+    value<span class="token operator">?.</span>type <span class="token operator">!==</span> <span class="token string">'Account'</span> <span class="token operator">||</span>
+    value<span class="token punctuation">.</span>version <span class="token operator">!==</span> <span class="token number">1</span> <span class="token operator">||</span>
+    <span class="token keyword">typeof</span> value<span class="token punctuation">.</span>id <span class="token operator">!==</span> <span class="token string">'string'</span> <span class="token operator">||</span>
+    <span class="token keyword">typeof</span> value<span class="token punctuation">.</span>currency <span class="token operator">!==</span> <span class="token string">'string'</span>
+  <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">TypeError</span><span class="token punctuation">(</span><span class="token string">'Invalid Account record'</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">return</span> <span class="token keyword">new</span> <span class="token class-name">Account</span><span class="token punctuation">(</span>value<span class="token punctuation">.</span>id<span class="token punctuation">,</span> value<span class="token punctuation">.</span>currency<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>The receiver chooses when to construct an <code>Account</code> and validates the fields first. Avoid resolving an arbitrary tag through <code>globalThis</code> or calling a constructor named by incoming data. A small allowlist of known codecs keeps deserialization tied to types the application supports.</p>
+<p>Nested graphs require a broader codec when custom values can appear at any depth. At that point, a library with registered encoders and decoders may fit better than a growing collection of manual tree walks. The encoded output still needs a versioned schema and tests on both sides of the boundary.</p>
+<h3 id="make-transfer-visible-in-the-api" tabindex="-1"><a class="header-anchor" href="#make-transfer-visible-in-the-api">Make Transfer Visible in the API</a></h3>
+<p>A function that transfers a resource should communicate that ownership leaves the caller. Naming and state changes can make later use harder:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">sendImageBuffer</span><span class="token punctuation">(</span><span class="token parameter">worker<span class="token punctuation">,</span> buffer</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  worker<span class="token punctuation">.</span><span class="token function">postMessage</span><span class="token punctuation">(</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">type</span><span class="token operator">:</span> <span class="token string">'image-buffer'</span><span class="token punctuation">,</span> buffer <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>buffer<span class="token punctuation">]</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+<span class="token keyword">let</span> pendingBuffer <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">loadImageBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token function">sendImageBuffer</span><span class="token punctuation">(</span>worker<span class="token punctuation">,</span> pendingBuffer<span class="token punctuation">)</span>
+pendingBuffer <span class="token operator">=</span> <span class="token keyword">null</span>
+</code></pre>
+<p>Setting the local variable to <code>null</code> does not detach any additional aliases, but it documents the handoff and prevents that variable from being reused accidentally. An application with several views over the buffer should gather their ownership under one object rather than distributing aliases across unrelated components.</p>
+<p>Transfer fits a pipeline in which one stage finishes with a resource as the next stage begins. Normal cloning fits data that both sides must continue reading independently. Shared memory requires a synchronization protocol and should enter the design only when both sides need concurrent access to the same bytes.</p>
+<h3 id="detect-the-capability-you-need" tabindex="-1"><a class="header-anchor" href="#detect-the-capability-you-need">Detect the Capability You Need</a></h3>
+<p>Checking for the global function establishes only that some form of structured cloning exists:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> structuredClone <span class="token operator">!==</span> <span class="token string">'function'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// Choose a supported fallback for this application.</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Support for a platform object or transfer operation can vary independently. Test the required behaviour when the application targets environments with different capabilities:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">canTransferArrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">typeof</span> structuredClone <span class="token operator">!==</span> <span class="token string">'function'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token boolean">false</span>
+  <span class="token punctuation">}</span>
+
+  <span class="token keyword">const</span> source <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">ArrayBuffer</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span>
+
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> copy <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>source<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">transfer</span><span class="token operator">:</span> <span class="token punctuation">[</span>source<span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+    <span class="token keyword">return</span> source<span class="token punctuation">.</span>byteLength <span class="token operator">===</span> <span class="token number">0</span> <span class="token operator">&amp;&amp;</span> copy<span class="token punctuation">.</span>byteLength <span class="token operator">===</span> <span class="token number">1</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">{</span>
+    <span class="token keyword">return</span> <span class="token boolean">false</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>A JSON round trip is a safe fallback only for values designed for JSON. Applying it to an arbitrary structured-clone payload reintroduces the lost types, rejected <code>BigInt</code>, and cycle failures discussed in the previous article. Polyfills can reproduce part of the algorithm for JavaScript built-ins, while host objects and transfer semantics depend on facilities provided by the runtime.</p>
+<h3 id="test-the-complete-crossing" tabindex="-1"><a class="header-anchor" href="#test-the-complete-crossing">Test the Complete Crossing</a></h3>
+<p>Tests should send a value through the API used in production and assert the result in the receiving context. Calling <code>structuredClone()</code> in a unit test does not exercise worker startup, target-realm support, message delivery, transaction completion, or persistence across a reload.</p>
+<p>Check the properties that form the contract. A message test can verify the received built-in types and graph relationships. A transfer test should verify the destination bytes and the sender's detached views. An IndexedDB test should close and reopen the database before reading the stored record, then run the same migration and validation code used by the application.</p>
+<p>Boundary tests also need invalid input. Unsupported values should fail where the sender expects, malformed records should be rejected by the receiver, and older versions should follow a defined migration or rejection path. These tests turn the structured clone rules from runtime assumptions into behaviour maintained by the application.</p>
+<p>Boundary crossing is also a good candidate for <a href="https://en.wikipedia.org/wiki/Fuzz_testing">fuzz testing</a>. Randomly generated graphs can reveal unexpected cycles, getters, and other structures that the algorithm must traverse. A fuzz test can also verify that the application-defined schema and codec functions reject invalid input rather than throwing an unhandled exception.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>Structured clone is useful when a boundary needs values that JSON cannot carry, but it still needs a data contract. The receiving side gets the platform's reconstruction of a value, which may have a different prototype, fewer properties, or no result at all if one nested value is unsupported.</p>
+<p>Define the shape that crosses the boundary and validate it on arrival, convert application objects before sending them, and transfer a resource only when the sender is finished with it. The platform can preserve supported types and graph identity; application code remains responsible for preserving meaning. It's a nice tool to keep in the toolbox, but it is not a magic wand that makes every JavaScript value portable.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
