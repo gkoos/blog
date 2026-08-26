@@ -14,6 +14,8 @@ tags:
 - commonjs
 - "... is lying to you"
 ---
+*Featured in [Javascript Weekly - 2026-08-25](https://javascriptweekly.com/issues/799)*
+
 Consider this small ES module:
 
 ```js
