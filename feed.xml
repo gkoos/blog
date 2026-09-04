@@ -1559,5 +1559,27 @@
         
       </item>
     
+      <item>
+        <title>Your typeof Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-04-Your-typeof-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-04-Your-typeof-Is-Lying-to-You/</guid>
+        <pubDate>Fri, 04 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>JavaScript&#39;s typeof operator is useful, but it is not a real type system. It exposes a coarse runtime tag, and that coarseness is exactly where the confusion starts.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>types</category>
+        
+        <category>typeof</category>
+        
+        <category>runtime</category>
+        
+        <category>... is lying to you</category>
+        
+      </item>
+    
   </channel>
 </rss>
