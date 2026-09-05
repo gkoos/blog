@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fuzzing the State Machines Inside My HTTP Client</title>
+  <meta name="description" content="ffetch had a full suite of passing tests for retries, hedging, timeouts, and cancellation. Describing the rules instead of the cases, and letting fast-check generate network outcomes and timings, found eleven real defects.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Fuzzing the State Machines Inside My HTTP Client">
+  <meta property="og:description" content="ffetch had a full suite of passing tests for retries, hedging, timeouts, and cancellation. Describing the rules instead of the cases, and letting fast-check generate network outcomes and timings, found eleven real defects.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Fuzzing the State Machines Inside My HTTP Client">
+  <meta name="twitter:description" content="ffetch had a full suite of passing tests for retries, hedging, timeouts, and cancellation. Describing the rules instead of the cases, and letting fast-check generate network outcomes and timings, found eleven real defects.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1788595731863" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Fuzzing the State Machines Inside My HTTP Client</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-09-05T00:00:00.000Z">Sat Sep 05 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">testing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">property-based-testing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">fuzzing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">ffetch</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">fetch-kit</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><a href="https://github.com/fetch-kit/ffetch"><code>ffetch</code></a> had tests for retries, timeouts, hedging, cancellation, circuit breaking, bulkheads, request deduplication, and the plugin combinations where those features interact. Nineteen files, 206 test blocks, all passing. I had written most of them while writing the features themselves, which is the part worth being suspicious about.</p>
+<p>The hedge plugin sends a second copy of a request after a short delay and takes whichever attempt answers usefully first, which is a good way to cut tail latency when one connection stalls. Deciding which answer counts as useful is where it gets interesting: a <code>429</code> or a <code>500</code> is a response, but it is not an answer you want to hand back to the caller if another attempt is still running and might return a <code>200</code>. I had a feeling the plugin got that wrong when the hedge failed quickly while the original was still in flight.</p>
+<p>Writing that exact scenario as a regression test would have taken ten minutes and proved almost nothing. It would confirm that I can fix a bug I already described, and it would tell me nothing about the orderings I had not thought to describe. The alternative was to state the rule instead of the case: whenever any attempt is capable of returning a usable response, the plugin must return one, no matter how the timings fall. Then let a generator pick the timings.</p>
+<p>It found a violation on the fourth generated case and shrank it to a timeline three milliseconds wide. That was the result I expected. What I did not expect was that the same approach, applied to the rest of the client over the following week, would surface ten more defects that I had not suspected, including one sitting underneath a test named after the exact behaviour it failed to check.</p>
+<h2 id="describing-inputs-instead-of-listing-them" tabindex="-1"><a class="header-anchor" href="#describing-inputs-instead-of-listing-them">Describing inputs instead of listing them</a></h2>
+<p>The tests most of us write are <em>example-based</em>. You pick an input, work out what should come back, and write both down: sort <code>[3, 1, 2]</code>, expect <code>[1, 2, 3]</code>. That proves one thing about one input, and what you know about the function afterwards is the sum of the examples you were willing to type out.</p>
+<p><em>Property-based testing</em>, or <em>fuzzing</em> replaces both halves of that. Instead of picking an input you describe what any valid input looks like: an array of integers, any length, any values. Instead of naming the expected output you state a rule that holds whatever the input turns out to be: the result is the same length as the input, and each element is less than or equal to the one after it. The runner generates inputs from your description, checks the rule after each one, and repeats a few hundred or a few thousand times. Most of those inputs you never see, and you never write down the answer for any of them. The descriptions are called <em>arbitraries</em>, and they compose, so small ones combine into the input space you actually care about.</p>
+<p>Two mechanics make this work. The first is reproducibility: a failing run reports the seed that produced it, so the same sequence can be replayed. The second is <em>shrinking</em>, and it does most of the work: when a property fails, the runner does not hand you the case it happened to generate, which is usually full of irrelevant detail. It searches for smaller inputs that still fail, repeatedly, until it reaches something minimal. A failure that arrives as &quot;delay 17ms, status 503, delay 4ms, status 200&quot; becomes &quot;delay 1ms, status 429, delay 3ms, status 200&quot;, and at that size you can hold the whole thing in your head.</p>
+<p>This is worth separating from what people usually mean by fuzzing HTTP: that normally involves mutating protocol bytes to attack a parser, or generating request payloads to hammer a server. Both are useful but neither is what happens here. My target is the behavioural state machine inside the client, so the generated inputs are network outcomes and their timings: what each attempt returns, and when.</p>
+<h2 id="where-the-bugs-actually-live" tabindex="-1"><a class="header-anchor" href="#where-the-bugs-actually-live">Where the bugs actually live</a></h2>
+<p>An HTTP client with resilience features does not transform a request into a response. It reacts to a timeline, and the timeline has more dimensions than are comfortable to enumerate by hand. Attempts start at different moments, responses arrive in another order than the attempts were launched. Some attempts throw instead of returning. Backoff windows open and close between them. Cancellation can arrive from the caller, from an overall deadline, or from the client's own internal machinery, and each of those has to be told apart from the others. Timers have to be cleaned up regardless of which path settled the request.</p>
+<p>Every example-based test I wrote covered one path through that space. Together they form a list of orderings I thought of while implementing the feature, and this list looks thorough right up until you notice that it was assembled by the same mind that wrote the code. The holes are not in the entries, they are between them, in the orderings that never occurred to me, which are also the orderings I did not defend against.</p>
+<p>To be clear about who this is for: the value here belongs to the library author. Nobody using <code>ffetch</code> should have to fuzz their own configuration to find out whether documented behaviour is real. That is my job, and this is the account of doing it.</p>
+<h2 id="the-harness" tabindex="-1"><a class="header-anchor" href="#the-harness">The harness</a></h2>
+<p>My setup was simple: <code>fast-check</code> as a dev dependency, running inside the existing Vitest suite. No separate runner, no separate CI job, no separate command. The properties are test files that happen to generate their inputs, so <code>npm test</code> runs them alongside everything else.</p>
+<p>Vitest fake timers do the rest of the work. Generated delays cost nothing when time is advanced programmatically, which is what makes a thousand cases per property affordable. A property that would take twenty real seconds finishes in under one.</p>
+<p>The input space for the first hedge property is</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> outcomeArbitrary <span class="token operator">=</span> fc<span class="token punctuation">.</span><span class="token function">record</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  delay<span class="token operator">:</span> fc<span class="token punctuation">.</span><span class="token function">integer</span><span class="token punctuation">(</span><span class="token punctuation">{</span> min<span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> max<span class="token operator">:</span> <span class="token number">20</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  status<span class="token operator">:</span> fc<span class="token punctuation">.</span><span class="token function">constantFrom</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token number">429</span><span class="token punctuation">,</span> <span class="token number">500</span><span class="token punctuation">,</span> <span class="token number">503</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>An outcome is a completion time between zero and twenty milliseconds and a status drawn from one success and three retryable failures. Two of those describe a hedged request: one for the original attempt, one for the hedge.</p>
+<p>The property itself:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token function">it</span><span class="token punctuation">(</span><span class="token string">'does not let a retryable response beat an in-flight success'</span><span class="token punctuation">,</span> <span class="token keyword">async</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">await</span> fc<span class="token punctuation">.</span><span class="token function">assert</span><span class="token punctuation">(</span>
+    fc<span class="token punctuation">.</span><span class="token function">asyncProperty</span><span class="token punctuation">(</span>
+      outcomeArbitrary<span class="token punctuation">,</span>
+      outcomeArbitrary<span class="token punctuation">,</span>
+      <span class="token keyword">async</span> <span class="token punctuation">(</span>original<span class="token punctuation">,</span> hedge<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+        fc<span class="token punctuation">.</span><span class="token function">pre</span><span class="token punctuation">(</span>original<span class="token punctuation">.</span>status <span class="token operator">===</span> <span class="token number">200</span> <span class="token operator">||</span> hedge<span class="token punctuation">.</span>status <span class="token operator">===</span> <span class="token number">200</span><span class="token punctuation">)</span>
+
+        vi<span class="token punctuation">.</span><span class="token function">useFakeTimers</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+        <span class="token keyword">const</span> outcomes <span class="token operator">=</span> <span class="token punctuation">[</span>original<span class="token punctuation">,</span> hedge<span class="token punctuation">]</span>
+        <span class="token keyword">let</span> calls <span class="token operator">=</span> <span class="token number">0</span>
+        <span class="token keyword">const</span> next<span class="token operator">:</span> <span class="token function-variable function">PluginDispatch</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">delayedResponse</span><span class="token punctuation">(</span>outcomes<span class="token punctuation">[</span>calls<span class="token operator">++</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+        <span class="token keyword">const</span> dispatch <span class="token operator">=</span> <span class="token function">hedgePlugin</span><span class="token punctuation">(</span><span class="token punctuation">{</span> delay<span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span>wrapDispatch<span class="token operator">!</span><span class="token punctuation">(</span>next<span class="token punctuation">)</span>
+
+        <span class="token keyword">const</span> resultPromise <span class="token operator">=</span> <span class="token function">dispatch</span><span class="token punctuation">(</span><span class="token function">makeContext</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token keyword">await</span> vi<span class="token punctuation">.</span><span class="token function">runAllTimersAsync</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+        <span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token keyword">await</span> resultPromise
+
+        <span class="token function">expect</span><span class="token punctuation">(</span>result<span class="token punctuation">.</span>ok<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBe</span><span class="token punctuation">(</span><span class="token boolean">true</span><span class="token punctuation">)</span>
+        <span class="token function">expect</span><span class="token punctuation">(</span>calls<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toBeLessThanOrEqual</span><span class="token punctuation">(</span><span class="token number">2</span><span class="token punctuation">)</span>
+
+        vi<span class="token punctuation">.</span><span class="token function">useRealTimers</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> numRuns<span class="token operator">:</span> <span class="token number">1_000</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The <code>fc.pre</code> line discards generated cases where neither attempt succeeds, since the rule says nothing about those. Everything else is two assertions: a usable response has to come back, and the plugin must not launch more attempts than it was configured for.</p>
+<p>Notice what the property does not contain. There is no ordering in it, no scenario, no hint about which arrangement of timings might be dangerous. It states the rule I believed was already true and leaves the search to the generator.</p>
+<h2 id="the-race-that-took-four-cases" tabindex="-1"><a class="header-anchor" href="#the-race-that-took-four-cases">The race that took four cases</a></h2>
+<p><code>fast-check</code> reported a failure on the fourth generated case and shrank it to this:</p>
+<pre class="language-text"><code class="language-text">original: 200 after 3 ms
+hedge:    429 immediately after launch
+hedge delay: 1 ms
+</code></pre>
+<p>Laid out as a timeline:</p>
+<pre class="language-text"><code class="language-text">t=0 ms  original request starts
+t=1 ms  hedge starts
+t=1 ms  hedge returns 429
+t=3 ms  original would return 200
+</code></pre>
+<p><code>ffetch</code> returned the <code>429</code>, and it aborted the original request on the way out, so the <code>200</code> that was two milliseconds from arriving never arrived at all. The caller got a retryable failure while a success was sitting in flight.</p>
+<p>The cause was a single assumption buried deep in the winner-selection logic. The plugin used an attempt's position to decide whether anything better might still be coming: if the attempt that just completed was the most recently launched one, it was treated as the last word, and a retryable response from the last word became the answer. Position is a fact about when an attempt started. Nothing about it says whether an earlier attempt is still running.</p>
+<p>The existing example tests were not thin here. They covered a <code>5xx</code> original waiting for its hedge, a <code>429</code> original waiting for its hedge, a <code>5xx</code> resolving when it genuinely was the last attempt, a <code>4xx</code> winning immediately as a legitimate answer, all attempts failing, and one attempt succeeding while others failed. What none of them covered was the reverse ordering: a failing hedge completing while a successful original was still pending. Each of those tests is reasonable on its own, and reading through the file gives a strong impression of coverage. But the impression comes from the number of cases rather than from the shape of the space they occupy.</p>
+<p>The fix removes the assumption. A retryable response becomes a fallback candidate instead of a winner, and the fallback is only used once every launched and scheduled attempt has completed without producing something better:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">if</span> <span class="token punctuation">(</span>result<span class="token punctuation">.</span>status <span class="token operator">===</span> <span class="token string">'fulfilled'</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> res <span class="token operator">=</span> result<span class="token punctuation">.</span>value
+  <span class="token comment">// A retryable response is only a fallback. Its attempt index says</span>
+  <span class="token comment">// when it was launched, not whether a better attempt is pending.</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>res<span class="token punctuation">.</span>ok <span class="token operator">||</span> <span class="token punctuation">(</span>res<span class="token punctuation">.</span>status <span class="token operator">&lt;</span> <span class="token number">500</span> <span class="token operator">&amp;&amp;</span> res<span class="token punctuation">.</span>status <span class="token operator">!==</span> <span class="token number">429</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token function">settle</span><span class="token punctuation">(</span>index<span class="token punctuation">,</span> res<span class="token punctuation">)</span>
+    <span class="token keyword">return</span>
+  <span class="token punctuation">}</span>
+  fallbackResponse <span class="token operator">=</span> res
+<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+  lastError <span class="token operator">=</span> result<span class="token punctuation">.</span>reason
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Anything acceptable, including a <code>4xx</code> that is not a <code>429</code>, settles the request the moment it arrives. Transport errors keep their original fail-fast behaviour, since a thrown connection error is not a response anyone can fall back to. The comment in there is load-bearing; it is the sentence I wish had been in my head when I wrote the original version.</p>
+<p>With that change, the property passes its thousand cases, and the three-millisecond counterexample stays in the suite permanently, not as a test I wrote but as a case the generator can still reach.</p>
+<h2 id="five-more-properties%2C-nothing-found" tabindex="-1"><a class="header-anchor" href="#five-more-properties%2C-nothing-found">Five more properties, nothing found</a></h2>
+<p>One confirmed hunch is a weak result. If the only rule I could state was the one I already suspected, the exercise would amount to an expensive way of writing a regression test. So before touching anything else I wrote five more hedge properties, none of them aimed at a behaviour I doubted.</p>
+<p>They generate between two and four attempts and require that a reachable success still wins. They generate a <code>maxHedges</code> between zero and five and require that exactly <code>1 + maxHedges</code> attempts get launched when everything stays retryable. They mix thrown transport errors into the responses. They check that every loser is aborted once a winner settles and that no scheduled attempt starts afterwards. They abort from outside at generated moments and require that every launched attempt notices, that nothing new starts, and that no timer survives.</p>
+<h2 id="into-the-core-client" tabindex="-1"><a class="header-anchor" href="#into-the-core-client">Into the core client</a></h2>
+<p>Everything up to here confirmed something I suspected. The rest of the work had no hypothesis behind it, which is where the results start being interesting.</p>
+<p>The core client is where retries, backoff, timeouts, cancellation, and lifecycle hooks all meet. I wrote properties for the retry loop on its own and for the whole client including its timeout and abort machinery: attempts never exceed <code>retries + 1</code>, the first non-retryable response stops the loop, retryable responses and thrown errors consume the same budget, <code>onRetry</code> agrees with the physical attempt history, <code>onComplete</code> fires exactly once, aborting or timing out during backoff prevents another attempt, and no retry timer survives termination.</p>
+<h3 id="cancellation-that-returned-a-response-anyway" tabindex="-1"><a class="header-anchor" href="#cancellation-that-returned-a-response-anyway">Cancellation that returned a response anyway</a></h3>
+<p>Two properties failed immediately and shrank to nearly identical configurations:</p>
+<pre class="language-text"><code class="language-text">user abort: abort at 0 ms during backoff, retries = 1
+timeout:    timeout at 1 ms during backoff, retries = 1
+</code></pre>
+<p>In both, the first request returned <code>503</code> and the client entered its retry delay. The abort arrived during that delay and correctly prevented a second physical request. Then the returned promise resolved with the saved <code>503</code> instead of rejecting with <code>AbortError</code> or <code>TimeoutError</code>.</p>
+<p>This one is more interesting than a straightforward mistake, because two contracts are internally coherent here. A client could treat cancellation as terminating the whole logical operation, in which case it rejects regardless of what came before. A client could also treat cancellation as revoking permission to make further attempts, in which case returning the most recent response is reasonable.</p>
+<p><code>ffetch</code> says that aborting during backoff cancels immediately, presents <code>AbortError</code> and <code>TimeoutError</code> as terminal errors, shows callers catching <code>AbortError</code> to handle cancellation, and defines the timeout as covering the complete logical operation including retries. Returning that <code>503</code> contradicted all of it: a caller who cancelled would see an ordinary response and never learn that their cancellation had taken effect.</p>
+<p>The cause was precedence. The client keeps the most recent response around so that failures occurring after the response arrives, during transformation for instance, can still return something useful. That fallback ran in the catch path before anything checked whether the terminal condition was cancellation. The same paths could also fire <code>onAbort</code> or <code>onTimeout</code> and then fire it again from the outer handler. The fix classifies <code>AbortError</code> and <code>TimeoutError</code> before the saved response is considered, always rejects for those two, centralises their hooks in the outer catch, and leaves the fallback intact for everything else.</p>
+<h3 id="a-test-that-passed-for-the-wrong-reason" tabindex="-1"><a class="header-anchor" href="#a-test-that-passed-for-the-wrong-reason">A test that passed for the wrong reason</a></h3>
+<p><code>abortAll()</code> cancels every request a client currently has in flight. The property for it failed on its first run and shrank to the smallest case available:</p>
+<pre class="language-text"><code class="language-text">pending requests: 1
+call abortAll()
+physical request signal: not aborted
+</code></pre>
+<p>One request! The client tracked it, <code>abortAll()</code> walked the list of pending entries and called <code>.abort()</code> on each controller, and the controller duly reported itself aborted. That controller's signal had never been included in the signal handed to the fetch handler. Aborting it changed a flag that nothing downstream was listening to, so the request carried on.</p>
+<p>There was already a test named &quot;abortAll aborts all requests&quot;. It created two hanging requests, called <code>abortAll()</code>, asserted that the exposed controller signals became <code>aborted</code>, and awaited both requests expecting rejection. Both assertions passed. The first passed because the controllers really were aborted, which was never in question. The second passed because those requests carried a one-second client timeout and eventually rejected on their own. The test proved that a timeout works.</p>
+<p>The generated property behaved differently: it watched the signal the fetch handler actually received rather than the one the client exposed, disabled the timeout so nothing else could produce a rejection, and always settled its synthetic transport so shrinking could not stall. None of those choices were clever.</p>
+<p>The fix gives every logical request an internal controller and folds its signal into the combined signal used for every physical attempt, alongside the user signal, the transformed-request signal, and the timeout:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> signals<span class="token operator">:</span> AbortSignal<span class="token punctuation">[</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>userSignal<span class="token punctuation">)</span> signals<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>userSignal<span class="token punctuation">)</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>transformedSignal <span class="token operator">&amp;&amp;</span> transformedSignal <span class="token operator">!==</span> userSignal<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  signals<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>transformedSignal<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token keyword">if</span> <span class="token punctuation">(</span>timeoutSignal<span class="token punctuation">)</span> signals<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>timeoutSignal<span class="token punctuation">)</span>
+signals<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>controller<span class="token punctuation">.</span>signal<span class="token punctuation">)</span>
+</code></pre>
+<p>An abort from that internal controller then has to be classified as an <code>AbortError</code> rather than retried or wrapped as a <code>RetryLimitError</code>, which means the precedence between the four cancellation sources became explicit.</p>
+<p>Of the eleven defects, this is the one I would point at if I had to justify the whole exercise: the behaviour was documented, implemented, and covered by a test named after it, and it did not work.</p>
+<h3 id="a-promise-nobody-awaited" tabindex="-1"><a class="header-anchor" href="#a-promise-nobody-awaited">A promise nobody awaited</a></h3>
+<p>The last core property generates failures in every lifecycle hook, synchronously and asynchronously, and requires that the request still settles, leaves <code>pendingRequests</code>, and produces no stray work. Its assertions passed, Vitest then reported several hundred unhandled promise rejections.</p>
+<p>Shrinking and grouping pointed at one hook. The public <code>Hooks</code> type lets every hook return <code>void</code> or <code>Promise&lt;void&gt;</code>, and most of them are awaited. <code>onRetry</code> was called from the synchronous wrapper that decides whether to retry, so its returned promise went nowhere. An async <code>onRetry</code> that rejected left the request to complete normally while the rejected promise escaped into the process, which is the kind of thing that shows up much later as a crashed Node worker with no useful stack.</p>
+<p>Making the internal decision callback able to return a promise, and awaiting it in both the response and error paths, was most of the fix. The rest was restructuring the retry loop so that a failure inside the decision or its hook is not mistaken for a failure from the request itself. The public <code>shouldRetry</code> option stays synchronous, since that is what its documentation promises; only the internal wrapper changed, so the async hook type that was already documented now actually works.</p>
+<h2 id="where-components-meet" tabindex="-1"><a class="header-anchor" href="#where-components-meet">Where components meet</a></h2>
+<p>Each hedge branch owns its own retry loop, so the two features multiply: physical traffic is bounded by <code>(retries + 1) x (maxHedges + 1)</code>. That composition is supported, so I generated both policies together and asserted the obvious things about it: a success anywhere wins, traffic never exceeds the product, all-retryable scenarios use the budget exactly, callbacks agree with physical launches, aborting stops every branch, and settling one branch cancels the rest.</p>
+<p>Three defects came out of it, and none of them lived in retry or in hedge. They lived in the seam.</p>
+<p><strong>The second hedge could not clone the body.</strong> The property shrank to something ridiculously small: an empty string body, a <code>PUT</code>, zero retries, one hedge. The hedge plugin built its first branch directly from the shared <code>Request</code>, which disturbs the source body, so when the scheduled hedge tried to build its own branch it threw <code>Cannot construct a Request with a Request object that has already been used</code>. Standalone retry tests never saw this because the retry loop clones per attempt; the hedge layer had its own cloning boundary and did not use it for the first branch. Cloning before constructing every branch, including the first, gives each branch a source its own retry loop can reuse.</p>
+<p><strong><code>onComplete</code> fired once per speculative branch.</strong> With zero retries and one hedge, the property reduced to two physical branches and two calls. The hook lived inside the retry runner, which is correct as long as there is exactly one runner; hedging creates one per branch. Any metric counting completions would have double-counted, and any cleanup attached to <code>onComplete</code> would have run twice. It now lives at the boundary after plugins have selected an outcome, behind a once-only guard:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">let</span> completeCalled <span class="token operator">=</span> <span class="token boolean">false</span>
+<span class="token keyword">const</span> <span class="token function-variable function">callComplete</span> <span class="token operator">=</span> <span class="token keyword">async</span> <span class="token punctuation">(</span>
+  response<span class="token operator">:</span> Response <span class="token operator">|</span> <span class="token keyword">undefined</span><span class="token punctuation">,</span>
+  error<span class="token operator">:</span> <span class="token builtin">unknown</span>
+<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>completeCalled<span class="token punctuation">)</span> <span class="token keyword">return</span>
+  completeCalled <span class="token operator">=</span> <span class="token boolean">true</span>
+  <span class="token keyword">await</span> effectiveHooks<span class="token punctuation">.</span>onComplete<span class="token operator">?.</span><span class="token punctuation">(</span>request<span class="token punctuation">,</span> response<span class="token punctuation">,</span> error<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p><strong>Cancelled losers looked like user aborts.</strong> The last property generated a successful original plus one hanging hedge. The original returned <code>200</code>, the hedge loser was correctly aborted, the overall request succeeded, and <code>onAbort</code> and <code>onError</code> fired anyway. From the application's side nothing had been aborted and nothing had failed; its request returned a response. Speculative cleanup was leaking through the public lifecycle, so an application counting aborts would have seen phantom cancellations proportional to how well hedging was working. Terminal errors are now reported only at the logical request boundary, and branches detached from that boundary stay quiet.</p>
+<p>The pattern across all three is that retry was right about retrying and hedge was right about hedging. Neither was wrong on its own terms, and the defects only exist in the region where one component's assumptions meet another's.</p>
+<h2 id="the-component-with-nothing-wrong" tabindex="-1"><a class="header-anchor" href="#the-component-with-nothing-wrong">The component with nothing wrong</a></h2>
+<p>The circuit breaker got six properties and 2,200 cases, and found nothing.</p>
+<p><code>ffetch</code>'s circuit plugin is deliberately simpler than the textbook three-state breaker: there is no half-open state and no queueing while open. Requests before the reset deadline fail immediately with <code>CircuitOpenError</code> and never reach the transport, every request after the deadline is admitted including concurrent ones, the first success closes the circuit, and a failure reopens it with a fresh window.</p>
+<p>The properties I wrote describe the two-state contract: the threshold opens the circuit exactly when configured, a non-failure response resets the count, open requests are rejected without dispatch, all concurrent post-reset requests are currently admitted, a failed post-reset request reopens and extends the gate, and normalized transport failures count the same as HTTP failures.</p>
+<p>What that bought is not bug-finding but documentation that executes. If the plugin later grows an explicit half-open state with a probe limit, the properties describing today's behaviour will fail.</p>
+<h2 id="the-queue-that-outlived-its-deadline" tabindex="-1"><a class="header-anchor" href="#the-queue-that-outlived-its-deadline">The queue that outlived its deadline</a></h2>
+<p>The bulkhead limits how many requests run at once and queues the rest. Its properties generate concurrency limits, queue limits, request counts, outcomes, abort patterns, and timeouts, then check that concurrency never exceeds the limit, queue depth never exceeds its own, overflow rejects with <code>BulkheadFullError</code>, admitted requests reach the transport in order, every outcome releases exactly one slot, and everything returns to zero afterwards.</p>
+<p>The timeout property failed after one generated case and shrank to a deadline of one millisecond:</p>
+<pre class="language-text"><code class="language-text">maxConcurrent: 1
+request A: occupies the active slot indefinitely
+request B: waits in the queue with timeout = 1 ms
+</code></pre>
+<p>B's timeout fired on schedule and it stayed in the queue. It left only when A finally completed and the queue admitted it, at which point the core noticed the expired deadline and rejected. The error type was correct, which is precisely why this would have survived a less careful test: the caller sees <code>TimeoutError</code> eventually. The deadline had bounded nothing, and if A never completed, B would have waited forever holding a queue slot.</p>
+<p>The reason is a signal mix-up: the bulkhead was listening to <code>ctx.request.signal</code>, which carries the caller's original signal. The signal that actually represents the whole logical request, combining user cancellation, transformed-request cancellation, the overall timeout, and the controller behind <code>abortAll()</code>, lives in plugin metadata and is used at dispatch. The queue sits before dispatch, so it was watching a signal that could never carry a timeout. One line moves it to the right one:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> signal <span class="token operator">=</span> ctx<span class="token punctuation">.</span>metadata<span class="token punctuation">.</span>signals<span class="token punctuation">.</span>combined <span class="token operator">??</span> request<span class="token punctuation">.</span>signal
+</code></pre>
+<p>Cancellation while queued then has to preserve its classification, so a user abort becomes <code>AbortError</code> and an expired deadline becomes <code>TimeoutError</code>, and the entry and its listener are removed the moment either arrives.</p>
+<h2 id="two-defects-in-deduplication" tabindex="-1"><a class="header-anchor" href="#two-defects-in-deduplication">Two defects in deduplication</a></h2>
+<p>The dedupe plugin collapses concurrent identical requests into one physical request. Everything about it depends on what &quot;identical&quot; means, and the default answer is method, URL, and body, with a <code>hashFn</code> option for applications that need headers or tenant identity or anything else in the key.</p>
+<p>The body-identity property failed after one case and shrank to two POSTs whose bodies were <code>&quot;&quot;</code> and <code>&quot; &quot;</code>, collapsed into a single physical request. The documented identity includes the body, but the implementation read it from the <code>init</code> argument only. A caller who passes a fully constructed <code>Request</code> has no <code>init.body</code>, so every such request hashed as though it had no body at all, and two POSTs differing only in payload became the same key. One of them was silently answered with the other's response.</p>
+<p>The correction is a single expression, though the reasoning behind it took longer:</p>
+<pre class="language-ts"><code class="language-ts">body<span class="token operator">:</span> <span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>init<span class="token punctuation">.</span>body <span class="token operator">??</span> ctx<span class="token punctuation">.</span>request<span class="token punctuation">.</span>body<span class="token punctuation">)</span> <span class="token keyword">as</span> DedupeHashParams<span class="token punctuation">[</span><span class="token string">'body'</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+</code></pre>
+<p>A synchronous hash function cannot read a <code>ReadableStream</code> body without consuming it, and consuming it would break the request it is trying to identify. Passing the real body through means the default strategy encounters a stream and declines to deduplicate, which is the safe answer: two requests are treated as distinct when the client cannot prove they are the same. Applications that know how their streamed requests should be identified can still supply a <code>hashFn</code>.</p>
+<p>The cancellation property failed on its first case too, shrinking to two callers sharing one request where the second aborts. Its promise stayed pending until the shared response arrived, then resolved successfully. The dedupe entry stored <code>resolve</code> and <code>reject</code> for each waiter and never watched their signals, so a waiter could ask to leave and be ignored. Each waiter now gets a listener that removes it on cancellation with the right error type, and cancelling a waiter affects only that caller.</p>
+<p>One asymmetry remains, and documenting it was the honest move: the first caller owns the physical request, so aborting that one aborts the shared operation and rejects everyone still waiting.</p>
+<h2 id="arithmetic-on-a-number-the-server-chose" tabindex="-1"><a class="header-anchor" href="#arithmetic-on-a-number-the-server-chose">Arithmetic on a number the server chose</a></h2>
+<p>The download progress plugin wraps a response body and reports bytes as they arrive. Its properties generate chunk boundaries, valid and malformed <code>Content-Length</code> headers, declared lengths that disagree with the actual body, upstream failures, callback failures, and consumer cancellation, then require byte-for-byte passthrough, cumulative counts that match the chunks seen, percentages between zero and one, and metadata that survives the wrapper.</p>
+<p>Two cases exposed the same mistake from opposite directions. A response with <code>Content-Length: garbage</code> and one byte of body reported <code>totalBytes: NaN</code>, and every subsequent percentage computed from it was <code>NaN</code> too. A response declaring one byte and delivering two reported <code>percent: 2</code>, from an API whose type documents a fraction between zero and one. Both went straight into arithmetic and out to the callback.</p>
+<p><code>Content-Length</code> is a value the server chose. It arrives over the network, it can be absent, malformed, or simply wrong, and nothing in the client had been treating it as input:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> parsedContentLength <span class="token operator">=</span>
+  contentLength <span class="token operator">&amp;&amp;</span> <span class="token regex"><span class="token regex-delimiter">/</span><span class="token regex-source language-regex">^\d+$</span><span class="token regex-delimiter">/</span></span><span class="token punctuation">.</span><span class="token function">test</span><span class="token punctuation">(</span>contentLength<span class="token punctuation">)</span> <span class="token operator">?</span> <span class="token function">Number</span><span class="token punctuation">(</span>contentLength<span class="token punctuation">)</span> <span class="token operator">:</span> <span class="token number">0</span>
+<span class="token keyword">const</span> totalBytes <span class="token operator">=</span> Number<span class="token punctuation">.</span><span class="token function">isSafeInteger</span><span class="token punctuation">(</span>parsedContentLength<span class="token punctuation">)</span>
+  <span class="token operator">?</span> parsedContentLength
+  <span class="token operator">:</span> <span class="token number">0</span>
+</code></pre>
+<p>Anything that is not a non-negative decimal integer inside the safe range becomes the documented unknown-total value. The percentage is then clamped so that a server sending more than it declared produces <code>1</code> rather than <code>2</code>, while the transferred-byte count stays truthful about what actually arrived.</p>
+<p>Seven properties across 2,300 cases confirmed the rest: bytes leave the wrapper exactly as they entered, cumulative counts track the chunks, status and headers survive, upstream and callback failures reach the consumer, and cancelling the returned body propagates upstream without inventing a final progress event.</p>
+<h2 id="the-tally" tabindex="-1"><a class="header-anchor" href="#the-tally">The tally</a></h2>
+<table>
+<thead>
+<tr>
+<th>Area</th>
+<th style="text-align:right">Properties</th>
+<th style="text-align:right">Generated cases</th>
+<th style="text-align:right">Defects</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hedge</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">4,500</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td>Retry</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">4,600</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td>Core client</td>
+<td style="text-align:right">12</td>
+<td style="text-align:right">5,750</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td>Retry and hedge together</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">3,500</td>
+<td style="text-align:right">3</td>
+</tr>
+<tr>
+<td>Circuit breaker</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">2,200</td>
+<td style="text-align:right">0</td>
+</tr>
+<tr>
+<td>Bulkhead</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">2,100</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td>Dedupe</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">2,500</td>
+<td style="text-align:right">2</td>
+</tr>
+<tr>
+<td>Download progress</td>
+<td style="text-align:right">7</td>
+<td style="text-align:right">2,300</td>
+<td style="text-align:right">1</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td style="text-align:right"><strong>55</strong></td>
+<td style="text-align:right"><strong>27,450</strong></td>
+<td style="text-align:right"><strong>11</strong></td>
+</tr>
+</tbody>
+</table>
+<p>The suite went from 19 files and 206 test blocks to 27 files and 274 tests, and it still runs in under nine seconds because fake timers mean generated delays cost nothing. There is no separate fuzz command and no separate CI job, the properties are ordinary Vitest files that generate their own inputs, so <code>npm test</code> runs all 27,450 cases alongside everything else. It all shipped as <code>@fetchkit/ffetch</code> 5.6.0.</p>
+<p>Every counterexample stayed. Three of them became deterministic tests sitting next to the property that found them, for cases specific enough that I wanted them checked by name; the rest live on as inputs the generator can still reach.</p>
+<h2 id="what-the-eleven-have-in-common" tabindex="-1"><a class="header-anchor" href="#what-the-eleven-have-in-common">What the eleven have in common</a></h2>
+<p>The defects came from eight different files, and they were not eight different mistakes.</p>
+<p><strong>Position mistaken for proof.</strong> The hedge race and the per-branch <code>onComplete</code> are the same error wearing different clothes. In one, the most recently launched attempt was treated as the only remaining attempt. In the other, the retry runner reporting completion was treated as the only runner. Both are cases of a component knowing something about itself and assuming that fact describes the whole operation.</p>
+<p><strong>Cancellation stopping at a layer boundary.</strong> <code>abortAll()</code> reached the bookkeeping and not the socket. The bulkhead queue watched the caller's signal instead of the one carrying the deadline. Both are about which signal a layer is entitled to trust, and in both cases the layer trusted the one nearest to hand rather than the one representing the request as a whole.</p>
+<p><strong>Internal machinery visible from outside.</strong> Losing hedge branches reported their cancellation as application-level aborts, and speculative branches announced completions the application never asked for. The client was describing its own implementation to code that only knows about logical requests.</p>
+<p><strong>Server values treated as invariants.</strong> <code>Content-Length</code> went from a header into arithmetic without anything asking whether it was a number.</p>
+<p><strong>Tests passing for reasons unrelated to their names.</strong> The <code>abortAll</code> example test is the cautionary one, and it is worth sitting with: a timeout in the fixture made a broken feature look correct, indefinitely, to anyone reading the test name.</p>
+<p><strong>Promises created and dropped.</strong> The async <code>onRetry</code> failure was invisible to every assertion about requests, hooks, and cleanup, and showed up only as process-level noise that a less strict setup would have swallowed.</p>
+<p>None of these are exotic. If you write async infrastructure in JavaScript, you have most of them somewhere.</p>
+<h2 id="what-this-does-not-prove" tabindex="-1"><a class="header-anchor" href="#what-this-does-not-prove">What this does not prove</a></h2>
+<p>Twenty-seven thousand generated cases is not a proof, and the number is less impressive than it looks: it is 27,450 draws from a space I described, so it inherits every assumption I made about what a network outcome is. My arbitraries produce four status codes and delays up to twenty milliseconds. Real servers produce redirects, <code>1xx</code> responses, connections that half-close, and delays measured in seconds.</p>
+<p>Fake timers buy determinism and give up realism. The properties never touch a socket, so anything arising from real transport behaviour, event loop pressure, or genuine parallelism is outside what they can see. Application handler behaviour is outside too; the properties check what <code>ffetch</code> does, not what happens when an <code>onRetry</code> hook mutates shared state.</p>
+<p>This is also bounded property testing rather than continuous fuzzing. The runs are fixed-size, they happen when CI happens, and nothing is accumulating a corpus or exploring coverage over time. A Go project would get more from <code>go test -fuzz</code>, which keeps interesting inputs and searches with feedback.</p>
+<p>Some properties earned their place more than others. The circuit breaker suite found nothing and is closer to executable documentation than to bug-finding, which is worth having but is not what I would point at to justify the technique. A few of the core-client properties duplicate what a decent parameterised test would have covered. The ones that paid were the properties about ordering, cancellation, and cleanup, which is to say the ones where the input was a timeline.</p>
+<h2 id="trying-this-on-your-own-code" tabindex="-1"><a class="header-anchor" href="#trying-this-on-your-own-code">Trying this on your own code</a></h2>
+<ul>
+<li>Pick the component that reacts to an ordering rather than a value. Anything that races, retries, queues, cancels, or cleans up is where generated timings find things - a pure function that maps input to output is better served by the examples you already have.</li>
+<li>State the rule you already believe rather than the case you already fear. If you write a property that encodes the counterexample you suspect, you have written a regression test with extra ceremony. The value comes from properties general enough that the generator can surprise you, and the surprise is the point.</li>
+<li>Use fake timers. A thousand cases with generated delays costs a second when time is advanced programmatically, and that is what makes it reasonable to run every property on every commit instead of nightly.</li>
+<li>When a property fails, read the shrunk counterexample before you open the source. It is usually small enough to reason about directly, and half the time the cause is obvious from the input alone.</li>
+<li>Keep both artifacts: the property, and the minimal case it produced. The property guards the general rule going forward, and the case documents the specific thing that was once broken.</li>
+<li>When a failure exposes a genuine design question rather than a mistake, let the documentation break the tie. The cancellation finding could have gone either way as a design choice, and what made it a bug was that the library had already promised the other behaviour in writing.</li>
+</ul>
+<h2 id="what-actually-changed" tabindex="-1"><a class="header-anchor" href="#what-actually-changed">What actually changed</a></h2>
+<p>The suspicion I started with was correct, and confirming it was the least valuable thing that happened. A regression test would have done that with less cognitive overhead.</p>
+<p>What the properties did instead was find ten defects I had no reason to suspect, in components I considered finished, several of them covered by tests that passed. The tests I wrote by hand covered the situations I had imagined while writing the code, which is exactly the limitation you would predict and exactly the one that is hardest to notice from the inside.</p>
+<p>All the work described above can be found in <a href="https://github.com/fetch-kit/ffetch/pull/90/changes">this PR</a>. The same approach has since run against <code>chaos-fetch</code>, <code>chaos-proxy</code>, and the Go port, where the tooling is different and the findings were different again. This was the first time I have used property-based testing to explore a space I could not enumerate by hand, and it was worth the effort. It also improves the <a href="https://scorecard.dev/viewer/?uri=github.com/fetch-kit/ffetch">OpenSSF scorecard</a> of <code>ffetch</code> a little bit :D</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

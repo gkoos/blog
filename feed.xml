@@ -1581,5 +1581,29 @@
         
       </item>
     
+      <item>
+        <title>Fuzzing the State Machines Inside My HTTP Client</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-05-Fuzzing-the-State-Machines-Inside-My-HTTP-Client/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-05-Fuzzing-the-State-Machines-Inside-My-HTTP-Client/</guid>
+        <pubDate>Sat, 05 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>ffetch had a full suite of passing tests for retries, hedging, timeouts, and cancellation. Describing the rules instead of the cases, and letting fast-check generate network outcomes and timings, found eleven real defects.</description>
+        
+        <category>testing</category>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>property-based-testing</category>
+        
+        <category>fuzzing</category>
+        
+        <category>ffetch</category>
+        
+        <category>fetch-kit</category>
+        
+      </item>
+    
   </channel>
 </rss>
