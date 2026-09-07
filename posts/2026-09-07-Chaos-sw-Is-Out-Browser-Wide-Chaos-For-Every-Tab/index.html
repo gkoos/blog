@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>chaos-sw Is Out: Browser-wide Chaos For Every Tab</title>
+  <title>chaos-sw Is Out: Browser-Wide Chaos For Every Tab</title>
   <meta name="description" content="chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.">
   <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="chaos-sw Is Out: Browser-wide Chaos For Every Tab">
+  <meta property="og:title" content="chaos-sw Is Out: Browser-Wide Chaos For Every Tab">
   <meta property="og:description" content="chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
@@ -18,7 +18,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="chaos-sw Is Out: Browser-wide Chaos For Every Tab">
+  <meta name="twitter:title" content="chaos-sw Is Out: Browser-Wide Chaos For Every Tab">
   <meta name="twitter:description" content="chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
@@ -34,7 +34,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1788785509684" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1788785678198" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +88,7 @@
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
 <article>
-  <h1 class="text-3xl font-bold mb-4">chaos-sw Is Out: Browser-wide Chaos For Every Tab</h1>
+  <h1 class="text-3xl font-bold mb-4">chaos-sw Is Out: Browser-Wide Chaos For Every Tab</h1>
   <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
     <time datetime="2026-09-07T00:00:00.000Z">Mon Sep 07 2026</time>
     
@@ -147,7 +147,7 @@ npx chaos-sw init public
 <p>The new <code>chaos-fetch</code> release adds origin-specific routing with absolute URL patterns while keeping path-based routing intact for browser and Service Worker use cases.</p>
 <p>It also exports the public <code>ChaosConfig</code> and <code>MiddlewareConfig</code> types, and replaces the <code>@koa/router</code> dependency with a direct <code>path-to-regexp</code> matcher. That reduces integration friction and removes the Node.js <code>http</code>/<code>url</code> requirement from the browser bundle.</p>
 <p>The result is a cleaner middleware model for real-world routing, especially when the same app needs to target different origins or split global and route-specific behavior.</p>
-<h2 id="why-this-pairing-matters" tabindex="-1"><a class="header-anchor" href="#why-this-pairing-matters">Why this pairing matters</a></h2>
+<h2 id="using-them-together" tabindex="-1"><a class="header-anchor" href="#using-them-together">Using them together</a></h2>
 <p>The two tools are intentionally complementary:</p>
 <ul>
 <li><code>chaos-fetch</code> is the middleware layer you can use directly in app code and tests.</li>
