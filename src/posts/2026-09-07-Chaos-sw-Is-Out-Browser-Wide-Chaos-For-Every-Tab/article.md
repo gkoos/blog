@@ -66,14 +66,10 @@ The result is a cleaner middleware model for real-world routing, especially when
 
 ## Using them together
 
-The two tools are intentionally complementary:
-
 - `chaos-fetch` is the middleware layer you can use directly in app code and tests.
 - `chaos-sw` extends the same configuration model to every controlled tab in the browser.
 
 That gives you a clear path from targeted tests to realistic browser-level resilience experiments.
-
-If you are testing frontend behavior under degraded conditions, both packages are worth a look.
 
 GitHub:
 
