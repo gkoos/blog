@@ -1,6 +1,6 @@
 ---
 layout: layouts/post.njk
-title: "chaos-sw Is Out: Browser-wide Chaos For Every Tab"
+title: "chaos-sw Is Out: Browser-Wide Chaos For Every Tab"
 date: 2026-09-07
 description: chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.
 excerpt: "chaos-sw is out, and chaos-fetch 1.3.0 adds origin-aware routing for more realistic browser and Service Worker testing."
@@ -64,7 +64,7 @@ It also exports the public `ChaosConfig` and `MiddlewareConfig` types, and repla
 
 The result is a cleaner middleware model for real-world routing, especially when the same app needs to target different origins or split global and route-specific behavior.
 
-## Why this pairing matters
+## Using them together
 
 The two tools are intentionally complementary:
 
