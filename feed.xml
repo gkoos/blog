@@ -1625,5 +1625,19 @@
         
       </item>
     
+      <item>
+        <title>Half Past Fetch</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-08-Half-Past-Fetch/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-08-Half-Past-Fetch/</guid>
+        <pubDate>Tue, 08 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>The fetch promise resolves when the headers have been parsed, while the body is still arriving over an open socket. What that gap does to connections, clone, abort, and timeouts.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+      </item>
+    
   </channel>
 </rss>

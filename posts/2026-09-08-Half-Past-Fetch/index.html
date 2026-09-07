@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Half Past Fetch</title>
+  <meta name="description" content="The fetch promise resolves when the headers have been parsed, while the body is still arriving over an open socket. What that gap does to connections, clone, abort, and timeouts.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Half Past Fetch">
+  <meta property="og:description" content="The fetch promise resolves when the headers have been parsed, while the body is still arriving over an open socket. What that gap does to connections, clone, abort, and timeouts.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Half Past Fetch">
+  <meta name="twitter:description" content="The fetch promise resolves when the headers have been parsed, while the body is still arriving over an open socket. What that gap does to connections, clone, abort, and timeouts.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1788825345080" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Half Past Fetch</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-09-08T00:00:00.000Z">Tue Sep 08 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><code>await fetch(url)</code> looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a <code>Response</code> object whose body is still arriving over a connection that is very much open, and the code after your <code>await</code> runs while bytes are still on the wire.</p>
+<p>The gap is easy to miss because it's usually microscopic. When a server sends the headers and the body together, the distance between the promise resolving and the last byte landing is a fraction of a millisecond, and nothing you write is going to notice it. Put a 300ms pause between the headers and the body and the promise still settles after about a millisecond, with the body finishing 300ms later. The resolution time doesn't move, because the thing it waits for happened at the same point it always does.</p>
+<p>In this article we'll go through what the specification says the promise awaits for, what happens to the connection while you decide whether to read the body, what <code>clone()</code> does when there is nothing finished to copy yet, how abort behaves once you already have a <code>Response</code> in hand, and why a timeout you thought covered the request often doesn't. There are subtle browser and Node differences worth knowing about too.</p>
+<h2 id="the-promise-settles-early" tabindex="-1"><a class="header-anchor" href="#the-promise-settles-early">The promise settles early</a></h2>
+<p><a href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a> is the algorithm that talks to the socket. Because a server may send provisional 1xx responses ahead of the real one, it loops over incoming status lines and discards anything in the 1xx range. When a final status shows up it waits for the last header byte, leaves the loop, attaches a fresh <code>ReadableStream</code> to the response, and hands that response back to its caller. Printed underneath that final step is a note: <em>Typically response's body's stream is still being enqueued to after returning</em>. The warning appears a second time in <a href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a>, one level higher up the call chain.</p>
+<p>The promise you are awaiting is resolved by an algorithm the spec calls <code>processResponse</code>, which is handed the response at that same moment and queued as a task. Nothing in that path consults the body, what you get back is a <code>Response</code> whose headers, status and URL are all final, and whose <code>body</code> is a stream that the network layer is still writing into from a buffer it fills as bytes arrive. Reading the body is a separate operation you have not started yet.</p>
+<p>Run the following snippet in a browser console or Node REPL to see the gap in action:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> t0 <span class="token operator">=</span> performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'https://httpbin.org/drip?duration=3&amp;numbytes=120&amp;delay=0'</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'headers  '</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">'ms'</span><span class="token punctuation">,</span> response<span class="token punctuation">.</span>status<span class="token punctuation">)</span>
+<span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'body done'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">'ms'</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-"><code class="language-">headers   <span class="token number">250.7</span> ms <span class="token number">200</span>
+body done <span class="token number">3445.8</span> ms
+</code></pre>
+<p>The status and the headers are readable at 250ms, the last byte of the body arrives at 3445ms. On an ordinary endpoint that sends headers and body together the two numbers are a fraction of a millisecond apart, so the gap only becomes measurable when the server or the network is slow.</p>
+<p><code>HEAD</code> requests and the <a href="https://fetch.spec.whatwg.org/#null-body-status">null body statuses</a> (101, 103, 204, 205, 304) are exceptions. <a href="https://fetch.spec.whatwg.org/#main-fetch">Main fetch</a> sets their body to null and disregards any enqueuing toward it, so <code>response.body</code> is <code>null</code> rather than an empty stream and there is nothing still arriving. The rest of this article is about the other responses.</p>
+<h2 id="the-socket-is-still-yours" tabindex="-1"><a class="header-anchor" href="#the-socket-is-still-yours">The socket is still yours</a></h2>
+<p>Checking the status and walking away is a common pattern: you send a request, the promise resolves, the status is 500 or 404 or simply not what you wanted, and you return early without touching <code>response.body</code>. Under HTTP/1.1 a connection carries one exchange at a time and can only be handed back to the pool once the current response has been read to its last byte. An unread body leaves bytes on the wire that nobody will ever take delivery of, and the client has no way to find the start of the next response, so the connection is closed rather than reused.</p>
+<p>Whether that costs you anything depends on how big the body is. Ten sequential requests against a local server, first reading each body and then ignoring it, show where the boundary sits in Node:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span>
+
+<span class="token keyword">let</span> seen <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">createServer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  seen<span class="token punctuation">.</span><span class="token function">add</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>socket<span class="token punctuation">)</span>
+  <span class="token keyword">const</span> size <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">URL</span><span class="token punctuation">(</span>req<span class="token punctuation">.</span>url<span class="token punctuation">,</span> <span class="token string">'http://x'</span><span class="token punctuation">)</span><span class="token punctuation">.</span>searchParams<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'size'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  res<span class="token punctuation">.</span><span class="token function">writeHead</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string-property property">'content-type'</span><span class="token operator">:</span> <span class="token string">'application/octet-stream'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span>size<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> r<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> port <span class="token operator">=</span> server<span class="token punctuation">.</span><span class="token function">address</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>port
+
+<span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> kb <span class="token keyword">of</span> <span class="token punctuation">[</span><span class="token number">4</span><span class="token punctuation">,</span> <span class="token number">8</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">,</span> <span class="token number">32</span><span class="token punctuation">,</span> <span class="token number">64</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> counts <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> read <span class="token keyword">of</span> <span class="token punctuation">[</span><span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token boolean">false</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    seen <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Set</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">let</span> i <span class="token operator">=</span> <span class="token number">0</span><span class="token punctuation">;</span> i <span class="token operator">&lt;</span> <span class="token number">10</span><span class="token punctuation">;</span> i<span class="token operator">++</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>port<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/?size=</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>kb <span class="token operator">*</span> <span class="token number">1024</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span>read<span class="token punctuation">)</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    counts<span class="token punctuation">.</span><span class="token function">push</span><span class="token punctuation">(</span>seen<span class="token punctuation">.</span>size<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>kb<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">KB  read: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>counts<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">  ignored: </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>counts<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+process<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-"><code class="language-">4KB   read<span class="token operator">:</span> <span class="token number">2</span>  <span class="token literal-property property">ignored</span><span class="token operator">:</span> <span class="token number">2</span>
+8KB   read<span class="token operator">:</span> <span class="token number">2</span>  <span class="token literal-property property">ignored</span><span class="token operator">:</span> <span class="token number">2</span>
+16KB  read<span class="token operator">:</span> <span class="token number">2</span>  <span class="token literal-property property">ignored</span><span class="token operator">:</span> <span class="token number">10</span>
+32KB  read<span class="token operator">:</span> <span class="token number">2</span>  <span class="token literal-property property">ignored</span><span class="token operator">:</span> <span class="token number">10</span>
+64KB  read<span class="token operator">:</span> <span class="token number">2</span>  <span class="token literal-property property">ignored</span><span class="token operator">:</span> <span class="token number">10</span>
+</code></pre>
+<p>Below 16KB it makes no difference at all. The whole response has already arrived and been buffered by the time the promise resolves, so from the transport's point of view the exchange is complete whether or not your code ever looks at the bytes. From 16KB upward every ignored response burns a connection, and 10 requests need 10 of them instead of 2.</p>
+<p>The number is a property of the runtime rather than of fetch. Chrome tolerates far larger unread bodies, reusing a single connection through 512KB and only starting to open extra ones somewhere between 512KB and 4MB. That is two orders of magnitude away from Node's boundary, which means what you can get away with in the browser may or may not work on the server. Both numbers come from the size of the buffers underneath, so neither is a guarantee to build on, and the safe reading is that a body you never touch may or may not cost you a connection depending on where the code runs.</p>
+<p>Cancelling the stream explicitly does not buy the connection back. Add <code>await response.body.cancel()</code> to the loop above in place of ignoring the response and the counts do not move: 2 connections at 4KB and 8KB, 10 at 16KB and above, the same as walking away without saying anything. Cancellation tells the stream you are not going to read it, which is information the connection can't act on, because the bytes the server already committed to sending are still undelivered either way. Reading the body to the end is the only thing that returns a connection to the pool.</p>
+<p>The failure this produces is gradual. Twelve concurrent unread 4MB responses do not wedge the origin: the server receives all twelve across twelve sockets, and an unrelated request issued at the same time gets its headers back in under two milliseconds. What you get is connection growth, more sockets held open than the work requires, file descriptors on the server side, and a client pool that expands under load and shrinks again when the pressure comes off. Nothing breaks, which is why it can run in production for a long time before anyone asks why the connection count looks odd.</p>
+<p>The reason a large body behaves differently from a small one is <a href="/posts/2026-01-06-Backpressure-in-JavaScript-the-Hidden-Force-Behind-Streams-Fetch-and-Async-Code/">backpressure</a>. The network layer fills an internal buffer as bytes arrive and stops pulling from the socket once that buffer exceeds a limit the implementation chooses, waiting for a reader to drain it. A small response never reaches the limit and is fully absorbed before you decide anything. A large one stops mid-transfer and waits for a consumer that, in this pattern, never turns up.</p>
+<h2 id="clone-copies-nothing" tabindex="-1"><a class="header-anchor" href="#clone-copies-nothing">Clone copies nothing</a></h2>
+<p>A response body can only be read once. <code>clone()</code> is the escape hatch, and it is usually reached for when two pieces of code both want the payload: a cache that stores a copy while the caller gets the original, or a deduplicating layer handing the same in-flight request to several waiters. The name suggests a copy is made, which invites the assumption that some memory gets duplicated at the moment you call it and the two objects then go their separate ways.</p>
+<p>There is nothing to copy at that moment. The spec defines <a href="https://fetch.spec.whatwg.org/#concept-body-clone">cloning a body</a> in one line: <em>Let « out1, out2 » be the result of teeing body's stream</em>. Teeing a stream produces two readers over one source, and the source here is a socket that is still delivering. What <code>clone()</code> actually creates is a fork in a pipe that is still running.</p>
+<p>The consequence is that the two branches are tied together. A tee has to hand identical bytes to both, so a chunk pulled by whichever branch reads first has to be kept until the other branch asks for it. If one branch never asks, the chunks accumulate. Serving 60MB and sampling resident memory while it is read shows what that costs:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span>
+
+<span class="token keyword">const</span> <span class="token constant">MB</span> <span class="token operator">=</span> <span class="token number">1024</span> <span class="token operator">*</span> <span class="token number">1024</span>
+<span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">createServer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  res<span class="token punctuation">.</span><span class="token function">writeHead</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string-property property">'content-type'</span><span class="token operator">:</span> <span class="token string">'application/octet-stream'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token keyword">const</span> chunk <span class="token operator">=</span> Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span><span class="token constant">MB</span><span class="token punctuation">)</span>
+  <span class="token keyword">let</span> sent <span class="token operator">=</span> <span class="token number">0</span>
+  <span class="token keyword">const</span> <span class="token function-variable function">write</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">while</span> <span class="token punctuation">(</span>sent <span class="token operator">&lt;</span> <span class="token number">60</span> <span class="token operator">*</span> <span class="token constant">MB</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      sent <span class="token operator">+=</span> <span class="token constant">MB</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">!</span>res<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>chunk<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">once</span><span class="token punctuation">(</span><span class="token string">'drain'</span><span class="token punctuation">,</span> write<span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+    res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+  <span class="token function">write</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> r<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>server<span class="token punctuation">.</span><span class="token function">address</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/</span><span class="token template-punctuation string">`</span></span>
+
+<span class="token keyword">const</span> mode <span class="token operator">=</span> process<span class="token punctuation">.</span>argv<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span>
+<span class="token keyword">let</span> max <span class="token operator">=</span> <span class="token number">0</span>
+<span class="token keyword">const</span> sampler <span class="token operator">=</span> <span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  max <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>max<span class="token punctuation">,</span> process<span class="token punctuation">.</span><span class="token function">memoryUsage</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>rss<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">5</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> mode <span class="token operator">===</span> <span class="token string">'plain'</span> <span class="token operator">?</span> <span class="token keyword">null</span> <span class="token operator">:</span> response<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token function">clearInterval</span><span class="token punctuation">(</span>sampler<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>mode<span class="token punctuation">,</span> <span class="token punctuation">(</span>max <span class="token operator">/</span> <span class="token constant">MB</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">'MB'</span><span class="token punctuation">)</span>
+server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+process<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Each mode has to run in its own process, otherwise the second measurement inherits a heap the first one already grew and the numbers mean nothing:</p>
+<pre class="language-"><code class="language-">plain    <span class="token number">116.1</span> <span class="token constant">MB</span>
+clone    <span class="token number">169.3</span> <span class="token constant">MB</span>
+</code></pre>
+<p>The abandoned branch costs roughly another 55MB, close to the size of the response, because the tee is holding a second reference to every chunk on behalf of a reader that never arrives.</p>
+<p>The buffered data is genuinely retained rather than re-fetched. Reading the first branch to the end, waiting half a second so the exchange is definitively over, and only then reading the abandoned branch still produces the full 60MB, far faster than the network delivered it the first time:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span>
+
+<span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">createServer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  res<span class="token punctuation">.</span><span class="token function">writeHead</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string-property property">'content-type'</span><span class="token operator">:</span> <span class="token string">'application/octet-stream'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span><span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1024</span> <span class="token operator">*</span> <span class="token number">1024</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> r<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>server<span class="token punctuation">.</span><span class="token function">address</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/</span><span class="token template-punctuation string">`</span></span>
+
+
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> response<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> first <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'first branch'</span><span class="token punctuation">,</span> first<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>r<span class="token punctuation">,</span> <span class="token number">500</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> t0 <span class="token operator">=</span> performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> second <span class="token operator">=</span> <span class="token keyword">await</span> copy<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'second branch'</span><span class="token punctuation">,</span> second<span class="token punctuation">.</span>byteLength<span class="token punctuation">,</span> <span class="token string">'in'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token string">'ms'</span><span class="token punctuation">)</span>
+
+server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+process<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-"><code class="language-">first branch <span class="token number">62914560</span>
+second branch <span class="token number">62914560</span> <span class="token keyword">in</span> <span class="token number">32.5</span> ms
+</code></pre>
+<p>The examples below reuse that same seven-line server, so only the part after <code>const url</code> changes.</p>
+<p>That memory is held for as long as the unread branch is reachable. In a cache that clones a response and writes the copy asynchronously, the clone stays alive until the write completes, and the whole payload sits in memory in the meantime. The <a href="/posts/2026-03-29-One-Cache-to-Rule-Them-All-Handling-Responses-and-In-Flight-Requests-with-Durable-Objects/">Durable Objects cache</a> calls <code>.clone()</code> at three separate points for exactly this reason, once per consumer of a shared response, and each of those calls is a fork that has to be drained by somebody.</p>
+<p>The ordering rule follows from the same mechanism. There is only one stream to fork, so the fork has to happen before anything starts pulling from it:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span>
+<span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+response<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// TypeError: Response.clone: Body has already been consumed.</span>
+</code></pre>
+<p>A single <code>read()</code> produces the same error, since one chunk taken from the source is enough to make the two branches unequal. <code>response.bodyUsed</code> reports the state, and it is per object rather than shared, so after the original has been read it is <code>true</code> there and <code>false</code> on the copy. Body consumption rules and the fact that TypeScript cannot express any of this are covered in <a href="/posts/2026-04-10-Decorating-Promises-Without-Breaking-Them/">Decorating Promises Without Breaking Them</a>.</p>
+<p>Cancelling a clone you have decided not to read does release the retained chunks. Adding <code>copy.body.cancel()</code> to the measurement above brings it to 109.7MB, marginally under the plain read, and it comes with a trap:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> response<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> copy<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+</code></pre>
+<p>That deadlocks. Cancelling one branch of a tee returns a promise that stays pending until the other branch has finished, and the other branch is on the line below, never reached. Starting the cancel without awaiting it and watching when it settles shows the dependency:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span>
+<span class="token keyword">const</span> copy <span class="token operator">=</span> response<span class="token punctuation">.</span><span class="token function">clone</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> t0 <span class="token operator">=</span> performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> settled <span class="token operator">=</span> <span class="token boolean">false</span>
+copy<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">cancel</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">then</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  settled <span class="token operator">=</span> <span class="token boolean">true</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'cancel settled at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span>r<span class="token punctuation">,</span> <span class="token number">200</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'after 200ms, settled?'</span><span class="token punctuation">,</span> settled<span class="token punctuation">)</span>
+
+<span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'original read at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-"><code class="language-">after 200ms<span class="token punctuation">,</span> settled<span class="token operator">?</span> <span class="token boolean">false</span>
+cancel settled at <span class="token number">464.6</span>
+original read at <span class="token number">465.4</span>
+</code></pre>
+<p>The cancel is still pending two hundred milliseconds later and only settles when the other branch reaches the end of the response, which is why awaiting it first never returns.</p>
+<p>When both branches are read at roughly the same rate, the buffering stays small and <code>clone()</code> costs almost nothing. The expensive case is the asymmetric one, where a fast consumer races ahead and a slow one lags, or where a branch is created for a purpose that later turns out not to need it.</p>
+<h2 id="abort-outlives-the-promise" tabindex="-1"><a class="header-anchor" href="#abort-outlives-the-promise">Abort outlives the promise</a></h2>
+<p>The mental model most code is written against is that <code>AbortSignal</code> cancels a request in flight, and that once the promise has resolved the request is done and there is nothing left to cancel. The first half is right, the second half assumes the promise resolving means the exchange finished, which is the assumption this whole article is about.</p>
+<p>Aborting before the headers arrive gives the familiar result. The promise rejects, there is no <code>Response</code>, and the failure lands wherever the <code>await</code> was. This one needs a server that holds the headers back, so it gets a 300ms delay in front of <code>writeHead</code> and an abort at 50ms:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span>
+
+<span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">createServer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    res<span class="token punctuation">.</span><span class="token function">writeHead</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string-property property">'content-type'</span><span class="token operator">:</span> <span class="token string">'application/octet-stream'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span><span class="token number">60</span> <span class="token operator">*</span> <span class="token number">1024</span> <span class="token operator">*</span> <span class="token number">1024</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">300</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> r<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>server<span class="token punctuation">.</span><span class="token function">address</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/</span><span class="token template-punctuation string">`</span></span>
+
+<span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">50</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token comment">// DOMException [AbortError]: This operation was aborted</span>
+</code></pre>
+<p>The three examples that follow use the same server without the delay, the seven-line version from the previous section.</p>
+<p>Aborting after the promise has resolved is a different operation with a different shape. The <code>Response</code> already exists and nothing can take it away, so the rejection surfaces at the next attempt to pull from the body:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> reader <span class="token operator">=</span> response<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">getReader</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> first <span class="token operator">=</span> <span class="token keyword">await</span> reader<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'first chunk'</span><span class="token punctuation">,</span> first<span class="token punctuation">.</span>value<span class="token punctuation">.</span>byteLength<span class="token punctuation">)</span>
+
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> reader<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// DOMException [AbortError]: This operation was aborted</span>
+</code></pre>
+<pre class="language-"><code class="language-">first chunk <span class="token number">65356</span>
+</code></pre>
+<p>The first chunk is already in hand and stays valid. The second <code>read()</code> rejects. On the server side the request emits <code>aborted</code> and the response closes with <code>writableFinished</code> false, so this is a real disconnect rather than a client-side pretence: the remaining bytes are never sent, which is the outcome you wanted and the reason aborting a large download partway through is worth doing.</p>
+<p>Everything that arrived before the abort remains readable, and so does everything that was never part of the body. Status and headers are properties of an object you already hold:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>status<span class="token punctuation">,</span> response<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'content-type'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">// 200 application/octet-stream</span>
+<span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token comment">// DOMException [AbortError]: The operation was aborted.</span>
+</code></pre>
+<p>The convenience methods have no way to deliver a partial result, so <code>arrayBuffer</code>, <code>json</code> and <code>text</code> reject outright if the abort lands before they finish. Reading through <code>getReader()</code> is what lets you keep the chunks that already arrived, which matters when a partial body is useful, and does not when it isn't.</p>
+<p>Once the body has been read to the end, <code>abort()</code> does nothing at all and throws nothing:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> controller<span class="token punctuation">.</span>signal <span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'read'</span><span class="token punctuation">,</span> body<span class="token punctuation">.</span>byteLength<span class="token punctuation">,</span> <span class="token string">'bytes, abort threw nothing'</span><span class="token punctuation">)</span>
+<span class="token comment">// read 62914560 bytes, abort threw nothing</span>
+</code></pre>
+<p>There is no error to report because the operation it would have cancelled is over. That makes an abort call safe to leave in a cleanup path, which is convenient, and also means the call succeeding tells you nothing about whether anything was actually cancelled.</p>
+<p>The cooperative model underneath is covered in <a href="/posts/2025-12-23-Cancellation-In-JavaScript-Why-Its-Harder-Than-It-Looks/">Cancellation In JavaScript</a>: a signal expresses intent and the operation decides how to honour it. What <code>fetch</code> adds is that the operation stays honourable for longer than the promise suggests. The signal is not spent when the promise settles, and it stays wired to the body until the last chunk lands.</p>
+<h2 id="the-timeout-that-only-covered-half-the-request" tabindex="-1"><a class="header-anchor" href="#the-timeout-that-only-covered-half-the-request">The timeout that only covered half the request</a></h2>
+<p>A timeout written as a race between the <code>fetch</code> promise and a <code>setTimeout</code> rejection is a well-known pattern, putting a deadline on the promise. Since the promise settles when the headers have been parsed, the deadline covers the header phase and stops applying at the moment the body starts arriving.</p>
+<p>Both servers below are the same server, distinguished by path. <code>/slow-body</code> sends the headers immediately and then writes 80 chunks of 64KB at ten millisecond intervals. <code>/slow-headers</code> waits 800ms before <code>writeHead</code> and then sends a single chunk. Each stalls in one phase and runs at full speed in the other:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span>
+
+<span class="token keyword">const</span> <span class="token constant">CHUNK</span> <span class="token operator">=</span> <span class="token number">64</span> <span class="token operator">*</span> <span class="token number">1024</span>
+<span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">createServer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">req<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> delay <span class="token operator">=</span> req<span class="token punctuation">.</span>url <span class="token operator">===</span> <span class="token string">'/slow-headers'</span> <span class="token operator">?</span> <span class="token number">800</span> <span class="token operator">:</span> <span class="token number">0</span>
+  <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    res<span class="token punctuation">.</span><span class="token function">writeHead</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token string-property property">'content-type'</span><span class="token operator">:</span> <span class="token string">'application/octet-stream'</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>delay<span class="token punctuation">)</span> <span class="token keyword">return</span> res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span><span class="token constant">CHUNK</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">let</span> sent <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token keyword">const</span> tick <span class="token operator">=</span> <span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+      res<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span><span class="token constant">CHUNK</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+      <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">++</span>sent <span class="token operator">===</span> <span class="token number">80</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        <span class="token function">clearInterval</span><span class="token punctuation">(</span>tick<span class="token punctuation">)</span>
+        res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> delay<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> r<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>server<span class="token punctuation">.</span><span class="token function">address</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">withTimeout</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">promise<span class="token punctuation">,</span> ms</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+  Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+    promise<span class="token punctuation">,</span>
+    <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> reject</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">setTimeout</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token function">reject</span><span class="token punctuation">(</span><span class="token keyword">new</span> <span class="token class-name">Error</span><span class="token punctuation">(</span><span class="token string">'timeout'</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> ms<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> t0 <span class="token operator">=</span> performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">withTimeout</span><span class="token punctuation">(</span><span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>url<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/slow-body</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">200</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'race settled at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'body'</span><span class="token punctuation">,</span> body<span class="token punctuation">.</span>byteLength<span class="token punctuation">,</span> <span class="token string">'bytes at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+process<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-"><code class="language-">race settled at <span class="token number">59.7</span>
+body <span class="token number">5242880</span> bytes at <span class="token number">1251.3</span>
+</code></pre>
+<p>The race is over at 59ms with a <code>Response</code> in hand, so the timer loses and is never going to fire again. The 200ms budget is spent by the time the interesting part of the request begins, and the operation finishes at 1251ms with nothing to stop it. Point the same code at <code>/slow-headers</code> and it behaves exactly as advertised, rejecting with <code>timeout at 225.9</code>, because the phase it guards is the phase that was slow. The code is identical in both runs, which is why this is hard to catch by reading it.</p>
+<p><code>AbortSignal.timeout</code> is passed into the request rather than raced against the promise, and the signal stays attached to the response for as long as the body is still arriving, as the previous section showed. It therefore expires in whichever phase happens to be running when the budget runs out:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">for</span> <span class="token punctuation">(</span><span class="token keyword">const</span> path <span class="token keyword">of</span> <span class="token punctuation">[</span><span class="token string">'/slow-body'</span><span class="token punctuation">,</span> <span class="token string">'/slow-headers'</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> t0 <span class="token operator">=</span> performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">try</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>url<span class="token interpolation-punctuation punctuation">}</span></span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>path<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">signal</span><span class="token operator">:</span> AbortSignal<span class="token punctuation">.</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">)</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
+    <span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> <span class="token string">'read'</span><span class="token punctuation">,</span> body<span class="token punctuation">.</span>byteLength<span class="token punctuation">,</span> <span class="token string">'at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span> <span class="token keyword">catch</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>path<span class="token punctuation">,</span> error<span class="token punctuation">.</span>name<span class="token punctuation">,</span> <span class="token string">'at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<pre class="language-"><code class="language-"><span class="token operator">/</span>slow<span class="token operator">-</span>body    TimeoutError at <span class="token number">203.2</span>
+<span class="token operator">/</span>slow<span class="token operator">-</span>headers TimeoutError at <span class="token number">213.4</span>
+</code></pre>
+<p>Both cases now stop within a few milliseconds of the budget. The slow body is cut off partway through delivery, which the racing version could not do, since by then it had no way to reach the request any more.</p>
+<p>If you reproduce this in a browser, keep the tab in the foreground. Chrome clamps <code>setTimeout</code> in backgrounded tabs to roughly one second, so a 200ms budget in an unfocused tab fires somewhere after 800ms and a correctly behaving timeout looks broken. The first run of this measurement was discarded for that reason.</p>
+<p>Composing the budget with any other signal is another problem, because a request usually has more than one reason to stop. My http library <a href="https://github.com/fetch-kit/ffetch">ffetch</a> builds a single signal out of the caller's signal, the signal a request transform may have introduced, its timeout signal, and an internal controller it uses for its own cancellation, then passes the result of <code>AbortSignal.any</code> into <code>fetch</code>. Any one of those firing aborts the request, and because it goes in as the request's signal rather than around the promise, it keeps working after the headers have arrived.</p>
+<h2 id="reading-the-body-is-the-real-work" tabindex="-1"><a class="header-anchor" href="#reading-the-body-is-the-real-work">Reading the body is the real work</a></h2>
+<p>Everything so far has been a consequence of the same fact, approached from a different side each time: the connection stays open because the body has not arrived. <code>clone()</code> tees rather than copies because the body has not arrived. Abort still bites after the promise resolves because the body has not arrived. A racing timeout misses the slow case because the body has not arrived.</p>
+<p>This gap is the reason a useful set of things is possible at all. <code>response.body</code> is a <code>ReadableStream</code>, and a stream that is still being written into can be piped through something before anyone reads the far end. Counting bytes as they pass is the plainest example:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">import</span> <span class="token punctuation">{</span> createServer <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'node:http'</span>
+
+<span class="token keyword">const</span> <span class="token constant">CHUNK</span> <span class="token operator">=</span> <span class="token number">64</span> <span class="token operator">*</span> <span class="token number">1024</span>
+<span class="token keyword">const</span> server <span class="token operator">=</span> <span class="token function">createServer</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">_<span class="token punctuation">,</span> res</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+  res<span class="token punctuation">.</span><span class="token function">writeHead</span><span class="token punctuation">(</span><span class="token number">200</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
+    <span class="token string-property property">'content-type'</span><span class="token operator">:</span> <span class="token string">'application/octet-stream'</span><span class="token punctuation">,</span>
+    <span class="token string-property property">'content-length'</span><span class="token operator">:</span> <span class="token function">String</span><span class="token punctuation">(</span><span class="token number">80</span> <span class="token operator">*</span> <span class="token constant">CHUNK</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token keyword">let</span> sent <span class="token operator">=</span> <span class="token number">0</span>
+  <span class="token keyword">const</span> tick <span class="token operator">=</span> <span class="token function">setInterval</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    res<span class="token punctuation">.</span><span class="token function">write</span><span class="token punctuation">(</span>Buffer<span class="token punctuation">.</span><span class="token function">alloc</span><span class="token punctuation">(</span><span class="token constant">CHUNK</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token operator">++</span>sent <span class="token operator">===</span> <span class="token number">80</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token function">clearInterval</span><span class="token punctuation">(</span>tick<span class="token punctuation">)</span>
+      res<span class="token punctuation">.</span><span class="token function">end</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token number">10</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+<span class="token keyword">await</span> <span class="token keyword">new</span> <span class="token class-name">Promise</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token parameter">r</span><span class="token punctuation">)</span> <span class="token operator">=></span> server<span class="token punctuation">.</span><span class="token function">listen</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> r<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> url <span class="token operator">=</span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">http://localhost:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>server<span class="token punctuation">.</span><span class="token function">address</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">.</span>port<span class="token interpolation-punctuation punctuation">}</span></span><span class="token string">/</span><span class="token template-punctuation string">`</span></span>
+
+<span class="token keyword">const</span> t0 <span class="token operator">=</span> performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'promise settled at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> total <span class="token operator">=</span> <span class="token function">Number</span><span class="token punctuation">(</span>response<span class="token punctuation">.</span>headers<span class="token punctuation">.</span><span class="token function">get</span><span class="token punctuation">(</span><span class="token string">'content-length'</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token keyword">let</span> transferred <span class="token operator">=</span> <span class="token number">0</span>
+
+<span class="token keyword">const</span> counted <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Response</span><span class="token punctuation">(</span>
+  response<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">pipeThrough</span><span class="token punctuation">(</span>
+    <span class="token keyword">new</span> <span class="token class-name">TransformStream</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+      <span class="token function">transform</span><span class="token punctuation">(</span><span class="token parameter">chunk<span class="token punctuation">,</span> controller</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+        transferred <span class="token operator">+=</span> chunk<span class="token punctuation">.</span>byteLength
+        <span class="token keyword">const</span> percent <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span><span class="token punctuation">(</span>transferred <span class="token operator">/</span> total<span class="token punctuation">)</span> <span class="token operator">*</span> <span class="token number">100</span><span class="token punctuation">)</span>
+        <span class="token keyword">if</span> <span class="token punctuation">(</span>percent <span class="token operator">%</span> <span class="token number">25</span> <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+          console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>percent<span class="token punctuation">,</span> <span class="token string">'% at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+        <span class="token punctuation">}</span>
+        controller<span class="token punctuation">.</span><span class="token function">enqueue</span><span class="token punctuation">(</span>chunk<span class="token punctuation">)</span>
+      <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">status</span><span class="token operator">:</span> response<span class="token punctuation">.</span>status<span class="token punctuation">,</span> <span class="token literal-property property">headers</span><span class="token operator">:</span> response<span class="token punctuation">.</span>headers <span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">await</span> counted<span class="token punctuation">.</span><span class="token function">arrayBuffer</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'read'</span><span class="token punctuation">,</span> body<span class="token punctuation">.</span>byteLength<span class="token punctuation">,</span> <span class="token string">'at'</span><span class="token punctuation">,</span> <span class="token punctuation">(</span>performance<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">-</span> t0<span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token function">toFixed</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+server<span class="token punctuation">.</span><span class="token function">close</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+process<span class="token punctuation">.</span><span class="token function">exit</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-"><code class="language-">promise settled at <span class="token number">52.6</span>
+<span class="token number">25</span> <span class="token operator">%</span> at <span class="token number">340.4</span>
+<span class="token number">50</span> <span class="token operator">%</span> at <span class="token number">639.9</span>
+<span class="token number">75</span> <span class="token operator">%</span> at <span class="token number">948.4</span>
+<span class="token number">100</span> <span class="token operator">%</span> at <span class="token number">1257.6</span>
+read <span class="token number">5242880</span> at <span class="token number">1262.3</span>
+</code></pre>
+<p>The promise settled at 52ms and the progress lines are spread across the twelve hundred milliseconds that followed. Those numbers only exist because there was something left to observe after the <code>await</code> returned. <code>content-length</code> is readable at that point too, which is what makes a percentage possible at all, since the total is in the headers and the running count is in the stream.</p>
+<p>Wrapping matters as much as the counting: <code>pipeThrough</code> gives back a stream rather than a <code>Response</code>, so the transformed stream goes into a new <code>Response</code> along with the original status and headers, and whoever gets that object can call <code>json()</code> or <code>arrayBuffer()</code> on it without knowing anything happened. This is the shape ffetch's download progress plugin uses in <code>src/plugins/download-progress.ts</code>: it returns early when <code>response.body</code> is null, since there is nothing to transform for a <code>HEAD</code> or a 204, parses <code>content-length</code> defensively because a server may send something that is not a number, counts bytes in the <code>transform</code> and enqueues each chunk unchanged, then rebuilds the <code>Response</code> around the new stream. A plugin that intercepts a response and hands back a different one is only possible because the interception happens before the payload exists.</p>
+<p>So <code>await fetch(url)</code> is worth reading as what it is, the point where the headers are complete and the body is about to start. Nothing after that line is safe to treat as the end of the request. The connection, the memory, the cancellation and the deadline all belong to the part that comes next, and the code you write after the <code>await</code> is the code that decides how that part goes.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
