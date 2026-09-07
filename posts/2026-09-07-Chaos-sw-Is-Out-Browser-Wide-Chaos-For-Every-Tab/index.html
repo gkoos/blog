@@ -34,7 +34,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1788785678198" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1788785815827" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -148,13 +148,11 @@ npx chaos-sw init public
 <p>It also exports the public <code>ChaosConfig</code> and <code>MiddlewareConfig</code> types, and replaces the <code>@koa/router</code> dependency with a direct <code>path-to-regexp</code> matcher. That reduces integration friction and removes the Node.js <code>http</code>/<code>url</code> requirement from the browser bundle.</p>
 <p>The result is a cleaner middleware model for real-world routing, especially when the same app needs to target different origins or split global and route-specific behavior.</p>
 <h2 id="using-them-together" tabindex="-1"><a class="header-anchor" href="#using-them-together">Using them together</a></h2>
-<p>The two tools are intentionally complementary:</p>
 <ul>
 <li><code>chaos-fetch</code> is the middleware layer you can use directly in app code and tests.</li>
 <li><code>chaos-sw</code> extends the same configuration model to every controlled tab in the browser.</li>
 </ul>
 <p>That gives you a clear path from targeted tests to realistic browser-level resilience experiments.</p>
-<p>If you are testing frontend behavior under degraded conditions, both packages are worth a look.</p>
 <p>GitHub:</p>
 <ul>
 <li><a href="https://github.com/fetch-kit/chaos-sw">fetch-kit/chaos-sw</a></li>
