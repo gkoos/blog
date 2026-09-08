@@ -34,7 +34,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1788825345080" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1788827579686" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,8 +104,11 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><code>await fetch(url)</code> looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a <code>Response</code> object whose body is still arriving over a connection that is very much open, and the code after your <code>await</code> runs while bytes are still on the wire.</p>
-<p>The gap is easy to miss because it's usually microscopic. When a server sends the headers and the body together, the distance between the promise resolving and the last byte landing is a fraction of a millisecond, and nothing you write is going to notice it. Put a 300ms pause between the headers and the body and the promise still settles after about a millisecond, with the body finishing 300ms later. The resolution time doesn't move, because the thing it waits for happened at the same point it always does.</p>
+    <p><code>await fetch(url)</code> looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a <code>Response</code> object whose body is still arriving over a connection that is very much open, and the code after your <code>await</code> runs while bytes are still on the wire. This is why you usually await twice:</p>
+<pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span> <span class="token comment">// awaits the headers</span>
+<span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// awaits the body</span>
+</code></pre>
+<p>This gap is easy to miss because it's usually microscopic. When a server sends the headers and the body together, the distance between the fetch promise resolving and the last byte landing is a fraction of a millisecond, and nothing you write is going to notice it. Put a 300ms pause between the headers and the body and the promise still settles after about a millisecond, with the body finishing 300ms later. The resolution time doesn't move, because the thing it waits for happened at the same point it always does.</p>
 <p>In this article we'll go through what the specification says the promise awaits for, what happens to the connection while you decide whether to read the body, what <code>clone()</code> does when there is nothing finished to copy yet, how abort behaves once you already have a <code>Response</code> in hand, and why a timeout you thought covered the request often doesn't. There are subtle browser and Node differences worth knowing about too.</p>
 <h2 id="the-promise-settles-early" tabindex="-1"><a class="header-anchor" href="#the-promise-settles-early">The promise settles early</a></h2>
 <p><a href="https://fetch.spec.whatwg.org/#http-network-fetch">HTTP-network fetch</a> is the algorithm that talks to the socket. Because a server may send provisional 1xx responses ahead of the real one, it loops over incoming status lines and discards anything in the 1xx range. When a final status shows up it waits for the last header byte, leaves the loop, attaches a fresh <code>ReadableStream</code> to the response, and hands that response back to its caller. Printed underneath that final step is a note: <em>Typically response's body's stream is still being enqueued to after returning</em>. The warning appears a second time in <a href="https://fetch.spec.whatwg.org/#http-fetch">HTTP fetch</a>, one level higher up the call chain.</p>
