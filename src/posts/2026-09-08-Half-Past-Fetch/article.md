@@ -9,9 +9,14 @@ tags:
 - javascript
 - typescript
 ---
-`await fetch(url)` looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a `Response` object whose body is still arriving over a connection that is very much open, and the code after your `await` runs while bytes are still on the wire.
+`await fetch(url)` looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a `Response` object whose body is still arriving over a connection that is very much open, and the code after your `await` runs while bytes are still on the wire. This is why you usually await twice:
 
-The gap is easy to miss because it's usually microscopic. When a server sends the headers and the body together, the distance between the promise resolving and the last byte landing is a fraction of a millisecond, and nothing you write is going to notice it. Put a 300ms pause between the headers and the body and the promise still settles after about a millisecond, with the body finishing 300ms later. The resolution time doesn't move, because the thing it waits for happened at the same point it always does.
+```js
+const response = await fetch(url) // awaits the headers
+const body = await response.json() // awaits the body
+```
+
+This gap is easy to miss because it's usually microscopic. When a server sends the headers and the body together, the distance between the fetch promise resolving and the last byte landing is a fraction of a millisecond, and nothing you write is going to notice it. Put a 300ms pause between the headers and the body and the promise still settles after about a millisecond, with the body finishing 300ms later. The resolution time doesn't move, because the thing it waits for happened at the same point it always does.
 
 In this article we'll go through what the specification says the promise awaits for, what happens to the connection while you decide whether to read the body, what `clone()` does when there is nothing finished to copy yet, how abort behaves once you already have a `Response` in hand, and why a timeout you thought covered the request often doesn't. There are subtle browser and Node differences worth knowing about too.
 
