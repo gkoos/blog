@@ -34,7 +34,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1788996015573" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1789131776773" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,7 +114,8 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><a href="https://github.com/fetch-kit/ffetch"><code>ffetch</code></a> had tests for retries, timeouts, hedging, cancellation, circuit breaking, bulkheads, request deduplication, and the plugin combinations where those features interact. Nineteen files, 206 test blocks, all passing. I had written most of them while writing the features themselves, which is the part worth being suspicious about.</p>
+    <p><em>Featured in <a href="https://nodeweekly.com/issues/640">Node Weekly - 2026-09-10</a></em></p>
+<p><a href="https://github.com/fetch-kit/ffetch"><code>ffetch</code></a> had tests for retries, timeouts, hedging, cancellation, circuit breaking, bulkheads, request deduplication, and the plugin combinations where those features interact. Nineteen files, 206 test blocks, all passing. I had written most of them while writing the features themselves, which is the part worth being suspicious about.</p>
 <p>The hedge plugin sends a second copy of a request after a short delay and takes whichever attempt answers usefully first, which is a good way to cut tail latency when one connection stalls. Deciding which answer counts as useful is where it gets interesting: a <code>429</code> or a <code>500</code> is a response, but it is not an answer you want to hand back to the caller if another attempt is still running and might return a <code>200</code>. I had a feeling the plugin got that wrong when the hedge failed quickly while the original was still in flight.</p>
 <p>Writing that exact scenario as a regression test would have taken ten minutes and proved almost nothing. It would confirm that I can fix a bug I already described, and it would tell me nothing about the orderings I had not thought to describe. The alternative was to state the rule instead of the case: whenever any attempt is capable of returning a usable response, the plugin must return one, no matter how the timings fall. Then let a generator pick the timings.</p>
 <p>It found a violation on the fourth generated case and shrank it to a timeline three milliseconds wide. That was the result I expected. What I did not expect was that the same approach, applied to the rest of the client over the following week, would surface ten more defects that I had not suspected, including one sitting underneath a test named after the exact behaviour it failed to check.</p>

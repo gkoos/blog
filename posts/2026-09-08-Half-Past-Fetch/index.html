@@ -34,7 +34,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1788996015573" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1789131776773" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,7 +104,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><em>Featured in <a href="https://javascriptweekly.com/issues/801">Javascript Weekly - 2026-09-08</a></em></p>
+    <p><em>Featured in <a href="https://javascriptweekly.com/issues/801">Javascript Weekly - 2026-09-08</a> and <a href="https://nodeweekly.com/issues/640">Node Weekly - 2026-09-10</a></em></p>
 <p><code>await fetch(url)</code> looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a <code>Response</code> object whose body is still arriving over a connection that is very much open, and the code after your <code>await</code> runs while bytes are still on the wire. This is why you usually await twice:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span>url<span class="token punctuation">)</span> <span class="token comment">// awaits the headers</span>
 <span class="token keyword">const</span> body <span class="token operator">=</span> <span class="token keyword">await</span> response<span class="token punctuation">.</span><span class="token function">json</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token comment">// awaits the body</span>
