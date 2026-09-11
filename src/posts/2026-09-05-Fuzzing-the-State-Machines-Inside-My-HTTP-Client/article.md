@@ -14,6 +14,8 @@ tags:
 - ffetch
 - fetch-kit
 ---
+*Featured in [Node Weekly - 2026-09-10](https://nodeweekly.com/issues/640)*
+
 [`ffetch`](https://github.com/fetch-kit/ffetch) had tests for retries, timeouts, hedging, cancellation, circuit breaking, bulkheads, request deduplication, and the plugin combinations where those features interact. Nineteen files, 206 test blocks, all passing. I had written most of them while writing the features themselves, which is the part worth being suspicious about.
 
 The hedge plugin sends a second copy of a request after a short delay and takes whichever attempt answers usefully first, which is a good way to cut tail latency when one connection stalls. Deciding which answer counts as useful is where it gets interesting: a `429` or a `500` is a response, but it is not an answer you want to hand back to the caller if another attempt is still running and might return a `200`. I had a feeling the plugin got that wrong when the hedge failed quickly while the original was still in flight.

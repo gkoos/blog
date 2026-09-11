@@ -9,7 +9,7 @@ tags:
 - javascript
 - typescript
 ---
-*Featured in [Javascript Weekly - 2026-09-08](https://javascriptweekly.com/issues/801)*
+*Featured in [Javascript Weekly - 2026-09-08](https://javascriptweekly.com/issues/801) and [Node Weekly - 2026-09-10](https://nodeweekly.com/issues/640)*
 
 `await fetch(url)` looks like it waits for the response, but it only waits for the headers. By the time the promise settles you are holding a `Response` object whose body is still arriving over a connection that is very much open, and the code after your `await` runs while bytes are still on the wire. This is why you usually await twice:
 
