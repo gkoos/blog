@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+  <title id="title">Shared breaker state in a coordinator</title>
+  <desc id="desc">Several replicas of the same service call one coordinator, which holds three keys per scope: a state hash with the current state and generation, a sorted set of recent observations, and a sorted set of probe tokens. All replicas call the same downstream dependency.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <marker id="arrowlight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa7ad"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="560" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">One window, many replicas</text>
+  <text x="480" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Every decision is a script that runs on the coordinator, never a read followed by a write</text>
+
+  <g filter="url(#shadow)">
+    <rect x="48" y="122" width="150" height="62" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="123" y="159" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">replica 1</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="48" y="208" width="150" height="62" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="123" y="245" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">replica 2</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="48" y="294" width="150" height="62" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="123" y="331" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">replica 3</text>
+  </g>
+  <text x="123" y="398" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="700" fill="#9aa7ad">. . .</text>
+  <g filter="url(#shadow)">
+    <rect x="48" y="418" width="150" height="62" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="123" y="455" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">replica N</text>
+  </g>
+
+  <line x1="202" y1="153" x2="336" y2="248" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="202" y1="239" x2="336" y2="272" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="202" y1="325" x2="336" y2="296" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="202" y1="449" x2="336" y2="320" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="342" y="150" width="290" height="266" rx="10" fill="#eef2f4" stroke="#2f4858" stroke-width="2"/>
+    <text x="487" y="184" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#20313a">coordinator</text>
+    <text x="487" y="206" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">three keys per scope</text>
+
+    <rect x="366" y="222" width="242" height="52" rx="6" fill="#ffffff" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="487" y="243" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">state hash</text>
+    <text x="487" y="262" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">state, generation, openedAt</text>
+
+    <rect x="366" y="284" width="242" height="52" rx="6" fill="#ffffff" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="487" y="305" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">observations</text>
+    <text x="487" y="324" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">sorted set, scored by server time</text>
+
+    <rect x="366" y="346" width="242" height="52" rx="6" fill="#ffffff" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="487" y="367" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">probe tokens</text>
+    <text x="487" y="386" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">sorted set, scored by lease deadline</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="742" y="240" width="178" height="86" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="831" y="278" text-anchor="middle" font-family="Arial, sans-serif" font-size="17" font-weight="700" fill="#7b3b2e">dependency</text>
+    <text x="831" y="300" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">the thing being protected</text>
+  </g>
+
+  <path d="M 198 140 C 300 92, 700 92, 780 234" fill="none" stroke="#9aa7ad" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#arrowlight)"/>
+  <text x="492" y="106" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#7d8a91">admitted calls only</text>
+
+  <text x="480" y="516" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">The scope key decides how many independent breakers exist: one per tenant, one per region, or one for everything</text>
+</svg>
