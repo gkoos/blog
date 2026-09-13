@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">What to do when the coordinator is unreachable</title>
+  <desc id="desc">A decision tree for an unreachable coordinator. If the scope was last seen open or half-open, the call is rejected. Otherwise the configured policy decides: fail open allows the call through, fail closed rejects it. Failures while recording an outcome are dropped instead of surfacing to the caller.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="600" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">The coordinator is unreachable</text>
+  <text x="480" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">What the replica does depends on what it last knew about this scope</text>
+
+  <g filter="url(#shadow)">
+    <rect x="356" y="110" width="248" height="62" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="480" y="139" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">a call needs a decision</text>
+    <text x="480" y="159" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">the coordinator does not answer</text>
+  </g>
+
+  <line x1="480" y1="172" x2="480" y2="208" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="316" y="214" width="328" height="62" rx="8" fill="#eef2f4" stroke="#2f4858" stroke-width="2"/>
+    <text x="480" y="243" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">was this scope last seen non-closed?</text>
+    <text x="480" y="263" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">from this replica's own memory</text>
+  </g>
+
+  <path d="M 316 245 L 232 245 L 232 330" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="268" y="234" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#7b3b2e">yes</text>
+
+  <path d="M 644 245 L 728 245 L 728 330" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="692" y="234" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">no</text>
+
+  <g filter="url(#shadow)">
+    <rect x="112" y="336" width="240" height="76" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="232" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">reject</text>
+    <text x="232" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#7b3b2e">the breaker was protecting</text>
+    <text x="232" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#7b3b2e">something; keep protecting it</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="608" y="336" width="240" height="76" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="728" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">configured policy decides</text>
+    <text x="728" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">no evidence either way,</text>
+    <text x="728" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">so the choice is the operator's</text>
+  </g>
+
+  <path d="M 668 412 L 668 452" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 788 412 L 788 452" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="576" y="458" width="184" height="58" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="668" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">fail open</text>
+    <text x="668" y="503" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#34533a">let the call through</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="772" y="458" width="164" height="58" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="854" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#7b3b2e">fail closed</text>
+    <text x="854" y="503" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#7b3b2e">reject the call</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="88" y="458" width="288" height="58" rx="8" fill="#fff7dd" stroke="#c6a548" stroke-width="2"/>
+    <text x="232" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#725b18">recording an outcome is different</text>
+    <text x="232" y="503" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#725b18">drop it, never fail the caller for it</text>
+  </g>
+
+  <text x="480" y="566" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">Falling back to per-replica state is not on this diagram on purpose: it rebuilds the problem the shared window was for</text>
+</svg>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Implement a Distributed Circuit Breaker</title>
+  <meta name="description" content="The circuit breaker pattern is simple in one process and much harder across a fleet. Shared state, stale results, probe arbitration and coordinator loss, with a working Redis implementation.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How to Implement a Distributed Circuit Breaker">
+  <meta property="og:description" content="The circuit breaker pattern is simple in one process and much harder across a fleet. Shared state, stale results, probe arbitration and coordinator loss, with a working Redis implementation.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="How to Implement a Distributed Circuit Breaker">
+  <meta name="twitter:description" content="The circuit breaker pattern is simple in one process and much harder across a fleet. Shared state, stale results, probe arbitration and coordinator loss, with a working Redis implementation.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1789340246166" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">How to Implement a Distributed Circuit Breaker</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-09-14T00:00:00.000Z">Mon Sep 14 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>Imagine you run a SaaS and your payment service starts timing out. Every checkout request that needs it now sits and waits for the full timeout before failing, holding a worker and a connection the whole time. The users who get an error press the button again, so the failing service receives more traffic than it did while it was healthy, and the callers upstream fill with requests that are all waiting on the same thing. Nothing here is down in a way that a health check would notice, the system is simply spending all of its capacity on calls whose outcome is already decided. <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a> goes through this shape of failure in more detail, along with the timeouts and retry rules.</p>
+<p>The answer usually is the <a href="https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern">circuit breaker design pattern</a>: the caller keeps a record of how recent calls to that dependency went, and once the failure rate crosses a threshold it stops sending traffic there for a while, failing immediately instead. That takes load off a service which is already struggling and gives the caller its capacity back. Inside one process the whole thing is a sliding window of recent outcomes and a timestamp for when the breaker last tripped. It's discussed in <a href="/posts/2025-09-17-Stop-Hammering-Broken-APIs-the-Circuit-Breaker-Pattern/">Stop Hammering Broken APIs</a>, which ends by noting that it gets complicated once it has to work in a distributed system, and leaves it for a future article. This is that article.</p>
+<p>Run the same service on twenty replicas and each one keeps its own window. Every replica has to be hurt independently before it reacts, so the dependency absorbs roughly twenty times the damage before anything trips at all. Moving the window into shared storage fixes that - at the cost of added complexity and potential performance bottlenecks. Once the window lives somewhere else, reading it and acting on it are no longer the same step, a result can arrive after the state it was recorded against has already changed, and the storage you just made load-bearing can itself go away.</p>
+<p>This article covers the in-process version quickly, then moves on to what breaks when the state is shared and what to do about each failure. The code comes from <a href="https://github.com/gkoos/caracal">caracal</a>, a resilience library where the breaker is backed by Redis, so the examples are a working implementation rather than some pseudocode.</p>
+<h2 id="the-3-states%3A-closed%2C-open%2C-half-open" tabindex="-1"><a class="header-anchor" href="#the-3-states%3A-closed%2C-open%2C-half-open">The 3 states: closed, open, half-open</a></h2>
+<p>A breaker in the <code>closed</code> state passes every call through to the dependency and records how each one turned out. This is the normal operating state, and a healthy system spends effectively all of its time here. Once the recorded failure rate crosses the configured threshold the breaker moves to <code>open</code>, where it stops calling the dependency at all and rejects immediately. Rejecting everything leaves the breaker with no information about whether the dependency has recovered, because it is no longer making the calls that would tell it.</p>
+<p>So how does it ever close again? The naive answer is to flip back to <code>closed</code> after a fixed cooldown, which sends the full traffic load at a service that may still be broken and produces the thundering herd described in <a href="/posts/2025-09-17-Stop-Hammering-Broken-APIs-the-Circuit-Breaker-Pattern/">Stop Hammering Broken APIs</a>. The <code>half-open</code> state exists to avoid that: after the open period elapses, a bounded number of probe attempts are admitted while everything else continues to be rejected, and the outcome of those probes decides what happens next. Enough successes close the breaker, and a single failure sends it straight back to open.</p>
+<p>That gives us exactly four transitions:</p>
+<table>
+<thead>
+<tr>
+<th>From</th>
+<th>To</th>
+<th>Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>closed</code></td>
+<td><code>open</code></td>
+<td>failure ratio reaches <code>failureThreshold</code>, after at least <code>minimumThroughput</code> observations</td>
+</tr>
+<tr>
+<td><code>open</code></td>
+<td><code>half-open</code></td>
+<td>first admission attempt once <code>openMs</code> has elapsed</td>
+</tr>
+<tr>
+<td><code>half-open</code></td>
+<td><code>closed</code></td>
+<td><code>halfOpenSuccesses</code> probe successes</td>
+</tr>
+<tr>
+<td><code>half-open</code></td>
+<td><code>open</code></td>
+<td>any probe failure</td>
+</tr>
+</tbody>
+</table>
+<p><img src="01.svg" alt="Diagram: the circuit breaker state machine, with closed moving to open on the failure threshold, open moving to half-open after the open period, and half-open returning to either state depending on probe outcomes"></p>
+<p>The edges that are missing matter just as much as the ones that are there. A closed breaker cannot jump to <code>half-open</code>, since that state only means something as a recovery attempt from <code>open</code>. An open breaker cannot close directly, because recovery has to be demonstrated by a probe rather than assumed from the passage of time. Keeping that set small is what makes the state machine testable later on. Caracal's <a href="https://github.com/gkoos/caracal/tree/main/test">property and fuzz suites</a> both encode this exact table and assert that no emitted transition ever falls outside it.</p>
+<p>The second row deserves more attention, because there are two ways to build it. One is to schedule something: when the breaker opens, set a timer for the open period, and have it move the breaker to <code>half-open</code> when it fires. The other is to store the time the breaker opened and do nothing else, then compare that timestamp against the clock on every incoming call and make the transition inside the first call that finds the period has elapsed.</p>
+<p>The second approach is usually the better. A breaker that has stopped receiving traffic has nothing to recover for, so a timer firing into an idle process only serves to make the state change on a schedule nobody is watching. It also means the state a breaker reports is always the result of a transition that really happened, rather than one a background task performed while the system was quiet. Dropping the timer removes a piece of per-breaker machinery that has to be created, cleared on every transition, and torn down when the process shuts down.</p>
+<p>Under the lazy approach, the call that observes the open period has elapsed is the same call that wants to run the first probe, so noticing the transition and claiming a probe slot can happen in one transaction. With a timer, those are two separate events with a gap between them, and that gap is where every replica in a fleet can see a freshly half-open breaker at once and rush it together, causing the very thundering herd we were trying to avoid. The lazy approach is also simpler to implement, because it doesn't require a background task or any scheduling at all.</p>
+<h2 id="the-in-process-breaker" tabindex="-1"><a class="header-anchor" href="#the-in-process-breaker">The in-process breaker</a></h2>
+<p>Inside a single process the whole thing is pretty straightforward. The window of recent outcomes is a circular buffer of booleans with the failure count maintained as entries go in and out, so the threshold check never has to walk the buffer:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token function">record</span><span class="token punctuation">(</span>failure<span class="token operator">:</span> <span class="token builtin">boolean</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> evicted <span class="token operator">=</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#buf<span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">.</span>#head<span class="token punctuation">]</span> <span class="token operator">===</span> <span class="token boolean">true</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#count <span class="token operator">===</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#size<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>evicted<span class="token punctuation">)</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#failures<span class="token operator">--</span>
+  <span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span>
+    <span class="token keyword">this</span><span class="token punctuation">.</span>#count<span class="token operator">++</span>
+  <span class="token punctuation">}</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>#buf<span class="token punctuation">[</span><span class="token keyword">this</span><span class="token punctuation">.</span>#head<span class="token punctuation">]</span> <span class="token operator">=</span> failure
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>failure<span class="token punctuation">)</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#failures<span class="token operator">++</span>
+  <span class="token keyword">this</span><span class="token punctuation">.</span>#head <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>#head <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">%</span> <span class="token keyword">this</span><span class="token punctuation">.</span>#size
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Around that sit two functions. One decides whether a call may proceed, returning <code>closed</code>, <code>half-open</code> or <code>rejected</code>, and it is where the lazy transition from the previous section lives along with the probe budget check. The other takes the settled outcome and feeds it back, either into the window or into the half-open success counter. The opening rule itself is a single comparison:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">if</span> <span class="token punctuation">(</span>
+  window<span class="token punctuation">.</span>count <span class="token operator">>=</span> minimumThroughput <span class="token operator">&amp;&amp;</span>
+  window<span class="token punctuation">.</span>failures <span class="token operator">/</span> window<span class="token punctuation">.</span>count <span class="token operator">>=</span> failureThreshold
+<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">transitionToOpen</span><span class="token punctuation">(</span>context<span class="token punctuation">,</span> <span class="token string">"closed"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<p>Without <code>minimumThroughput</code>, one failed call out of the first one ever made is a failure rate of 100% and the breaker opens on a single unlucky request.</p>
+<p>What is less obvious is that even here, in one process with no network involved, results can arrive against a state that has moved on. Calls are concurrent, and a call admitted while the breaker was half-open may not settle until several transitions later. If that stale success is counted, it can close a breaker that another probe already re-opened. The fix is a generation counter that increments on every transition. Each call captures the current value when it is admitted, and its result is discarded if the value has changed by the time it settles:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">if</span> <span class="token punctuation">(</span>admittedGeneration <span class="token operator">!==</span> generation <span class="token operator">||</span> admitted <span class="token operator">!==</span> state<span class="token punctuation">)</span> <span class="token keyword">return</span>
+</code></pre>
+<p>The caller still receives whatever the underlying call produced, it is only the breaker's bookkeeping that ignores it. Keep this in mind, as it is the seed of a much larger problem once the window is shared.</p>
+<p>There is one more trap worth knowing about before moving on. A half-open probe occupies one of a small number of slots, and in the simple implementation nothing releases that slot except the attempt settling. A call that hangs forever therefore holds its slot forever, and with a probe budget of one that leaves the breaker stuck in <code>half-open</code>, rejecting everything, for the life of the process, the breaker has quietly become a permanent outage of its own making. You can prevent this with a timeout on the wrapped call, which is why a timeout belongs <em>inside</em> the breaker rather than around it. Its job there is not to improve the caller's latency but to guarantee that every admitted attempt eventually settles.</p>
+<h2 id="moving-the-window-out-of-the-process" tabindex="-1"><a class="header-anchor" href="#moving-the-window-out-of-the-process">Moving the window out of the process</a></h2>
+<p>Everything above assumes the breaker and the calls it governs live in the same memory. Take that away and each piece has to be rebuilt.</p>
+<h3 id="whose-window-is-it" tabindex="-1"><a class="header-anchor" href="#whose-window-is-it">Whose window is it</a></h3>
+<p>With a local breaker on twenty replicas, each one needs <code>minimumThroughput</code> observations of its own before it can react, and each one only sees the fraction of traffic the load balancer happened to send it. The dependency absorbs roughly twenty times the failures before the first breaker trips, and if traffic is spread thinly enough, some replicas never accumulate enough observations to trip at all. There is also no agreement about what state the system is in: at any moment some replicas are rejecting calls and others are sending them.</p>
+<p>The fix is to keep one window in a store every replica can reach, and to make each replica ask that store rather than its own memory. The unit of sharing is a key, and choosing it is an important design decision. Everything mapped to the same key shares one window, one state and one probe budget:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span>ctx<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">region:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">String</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>metadata<span class="token punctuation">.</span>region<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span>   <span class="token comment">// one breaker per region</span>
+<span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span>ctx<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">tenant:</span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span><span class="token function">String</span><span class="token punctuation">(</span>ctx<span class="token punctuation">.</span>metadata<span class="token punctuation">.</span>tenantId<span class="token punctuation">)</span><span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span> <span class="token comment">// one breaker per tenant</span>
+<span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">"global"</span>                                     <span class="token comment">// one breaker for everything</span>
+</code></pre>
+<p><img src="02.svg" alt="Diagram: several replicas of one service calling a shared coordinator that holds a state hash, an observations sorted set and a probe token set per scope, with only admitted calls reaching the dependency"></p>
+<p>A global scope reacts fastest, because every replica's failures land in the same window, but it also means one bad tenant or one bad region can open the breaker for everyone. Narrower scopes contain the damage at the cost of each window filling more slowly, which pushes you back toward the problem you were trying to solve. In caracal the full key is <code>(namespace, policy name, operation name, scope)</code>, so two different operations pointed at the same dependency keep separate windows by default.</p>
+<p>Two practical notes. Scope keys end up in the coordinator's keyspace where they are visible to anyone with access to it, so they should be stable and contain nothing sensitive. And every replica sharing a key has to agree on the configuration behind it, since nothing stops one replica from using a different threshold against the same shared window.</p>
+<h3 id="reading-and-deciding-are-no-longer-one-step" tabindex="-1"><a class="header-anchor" href="#reading-and-deciding-are-no-longer-one-step">Reading and deciding are no longer one step</a></h3>
+<p>In a single process, checking the window and acting on what it says can happen in one go. Across a network they are two roundtrips, and whatever you read may be wrong before you act on it. A replica that fetches the window, computes a failure rate above the threshold and writes back <code>open</code> can be racing a dozen other replicas doing exactly the same thing, and the same is true of the probe budget, where every replica can read three slots free and every one of them can take the last slot.</p>
+<p>The way out is to stop reading and deciding separately, and instead send the decision to where the data is. In Redis that means a Lua script, which runs to completion without interleaving. The client sends the outcome and the configuration, and the script does the recording, the evaluation and the transition as one indivisible operation, returning what it decided:</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">if</span> wTotal <span class="token operator">>=</span> minTP and wFail <span class="token operator">*</span> <span class="token number">1000</span> <span class="token operator">>=</span> threshNum <span class="token operator">*</span> wTotal then
+  gen <span class="token operator">=</span> gen <span class="token operator">+</span> <span class="token number">1</span>
+  <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'HSET'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'state'</span><span class="token punctuation">,</span> <span class="token string">'open'</span><span class="token punctuation">,</span> <span class="token string">'generation'</span><span class="token punctuation">,</span> gen<span class="token punctuation">,</span>
+             <span class="token string">'openedAt'</span><span class="token punctuation">,</span> now<span class="token punctuation">,</span> <span class="token string">'probeCount'</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token string">'probeSuccesses'</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">)</span>
+  <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'PERSIST'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token number">2</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> gen<span class="token punctuation">,</span> wTotal<span class="token punctuation">,</span> wFail<span class="token punctuation">}</span>
+end
+</code></pre>
+<p>The second reason to push the work down is time. Every replica has its own clock and they do not agree, so a deadline written by one and compared by another is measured against two different notions of now. Timestamps that matter to the breaker are therefore read on the coordinator, from the same clock, on every call:</p>
+<pre class="language-lua"><code class="language-lua">local t   <span class="token operator">=</span> <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'TIME'</span><span class="token punctuation">)</span>
+local now <span class="token operator">=</span> t<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">*</span> <span class="token number">1000</span> <span class="token operator">+</span> math<span class="token punctuation">.</span><span class="token function">floor</span><span class="token punctuation">(</span>t<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">/</span> <span class="token number">1000</span><span class="token punctuation">)</span>
+</code></pre>
+<p>No timestamp ever travels from a client into a decision. Clock skew between replicas stops being something the breaker's correctness depends on, which removes an entire category of failure that is miserable to reproduce. (For more on time-related problems, see <a href="/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/">Beyond Happy Path Engineering: Time</a>.)</p>
+<h3 id="the-threshold-does-not-survive-the-trip-intact" tabindex="-1"><a class="header-anchor" href="#the-threshold-does-not-survive-the-trip-intact">The threshold does not survive the trip intact</a></h3>
+<p>Moving the comparison into Lua has a consequence that is easy to miss: Lua numbers are doubles, and a failure threshold is a fraction, so comparing <code>wFail / wTotal</code> against it invites the usual floating point surprises at the exact boundary the breaker is supposed to act on. The comparison above avoids division entirely by scaling the threshold to an integer numerator of thousandths, so <code>0.5</code> arrives as <code>500</code> and the test becomes <code>wFail * 1000 &gt;= 500 * wTotal</code>.</p>
+<p>That works, and it quietly narrows what a threshold can mean. Anything below <code>0.0005</code> rounds to a numerator of zero, which makes the comparison true no matter what the window contains, so the breaker opens on a window of pure successes and re-opens immediately after every recovery. Anything at or above <code>0.9995</code> rounds to <code>1000</code>, requiring every single observation to be a failure, so the breaker effectively never opens. Both are configurations that look reasonable in a config file and fail in a way that is hard to debug. The simplest solution is to reject them at the point of configuration, so no need to bother later:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">function</span> <span class="token function">assertResolvableThreshold</span><span class="token punctuation">(</span>failureThreshold<span class="token operator">:</span> <span class="token builtin">number</span><span class="token punctuation">)</span><span class="token operator">:</span> <span class="token keyword">void</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> numerator <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span>failureThreshold <span class="token operator">*</span> <span class="token constant">FAILURE_THRESHOLD_SCALE</span><span class="token punctuation">)</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>numerator <span class="token operator">&lt;</span> <span class="token number">1</span> <span class="token operator">||</span> numerator <span class="token operator">>=</span> <span class="token constant">FAILURE_THRESHOLD_SCALE</span><span class="token punctuation">)</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RangeError</span><span class="token punctuation">(</span>
+      <span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">failureThreshold must be at least 0.0005 and below 0.9995 (thresholds are resolved to thousandths); got </span><span class="token interpolation"><span class="token interpolation-punctuation punctuation">${</span>failureThreshold<span class="token interpolation-punctuation punctuation">}</span></span><span class="token template-punctuation string">`</span></span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre>
+<h3 id="generations-become-epochs" tabindex="-1"><a class="header-anchor" href="#generations-become-epochs">Generations become epochs</a></h3>
+<p>The generation counter from the in-process breaker solved a small problem: discard a result that settles after the state it was admitted against has moved on. Shared state gives it a second job.</p>
+<p>A local breaker empties its window on every transition, which is one line of code because the window is an array it owns. Doing the same remotely means another call to the coordinator, on a path that already costs a roundtrip, and it introduces a window of time where the state has changed but the observations have not been cleared yet. The alternative is to leave the old observations where they are and stop counting them. Each observation is written with the generation it belongs to, and counting only looks at members carrying the current one:</p>
+<pre class="language-lua"><code class="language-lua">local member <span class="token operator">=</span> <span class="token function">tostring</span><span class="token punctuation">(</span>gen<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token string">':'</span> <span class="token punctuation">.</span><span class="token punctuation">.</span> uuid <span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token string">':'</span> <span class="token punctuation">.</span><span class="token punctuation">.</span> outcome
+<span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'ZADD'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'NX'</span><span class="token punctuation">,</span> now<span class="token punctuation">,</span> member<span class="token punctuation">)</span>
+</code></pre>
+<pre class="language-lua"><code class="language-lua">local prefix  <span class="token operator">=</span> <span class="token function">tostring</span><span class="token punctuation">(</span>gen<span class="token punctuation">)</span> <span class="token punctuation">.</span><span class="token punctuation">.</span> <span class="token string">':'</span>
+<span class="token keyword">for</span> _<span class="token punctuation">,</span> m <span class="token keyword">in</span> <span class="token function">ipairs</span><span class="token punctuation">(</span>all<span class="token punctuation">)</span> <span class="token keyword">do</span>
+  <span class="token keyword">if</span> string<span class="token punctuation">.</span><span class="token function">sub</span><span class="token punctuation">(</span>m<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> #prefix<span class="token punctuation">)</span> <span class="token operator">==</span> prefix then
+    wTotal <span class="token operator">=</span> wTotal <span class="token operator">+</span> <span class="token number">1</span>
+    <span class="token keyword">if</span> string<span class="token punctuation">.</span><span class="token function">sub</span><span class="token punctuation">(</span>m<span class="token punctuation">,</span> <span class="token operator">-</span><span class="token number">8</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token string">':failure'</span> then wFail <span class="token operator">=</span> wFail <span class="token operator">+</span> <span class="token number">1</span> end
+  end
+end
+</code></pre>
+<p>A transition now costs nothing beyond incrementing a number, and the superseded observations age out on their own. The generation has become an epoch label as well as a staleness token, and those two roles are what makes the next part subtle.</p>
+<p>Because the epoch is what decides membership, moving it is how you throw a window away, and <em>not</em> moving it is how you keep one. That is why the distributed breaker does not increment on the <code>open</code> to <code>half-open</code> edge, even though the local one increments on every transition. Recovery is a continuation of the same epoch, so the window stays. What has to be discarded there is the set of probe tokens from the previous recovery attempt, which is a separate key and a separate <code>DEL</code>.</p>
+<p>There is a failure mode hiding in this arrangement: the state hash carries the current generation, and the observations are just members in another key, so if the hash disappears while the observations survive, which an eviction policy or an administrative delete will happily do, then a breaker that restarts its generation from zero adopts every orphaned member whose label happens to be zero. The window it believes is current is actually a window from the past.</p>
+<p>Luckily, you can restart from a value nothing can be carrying. When the script finds no state hash but does find observations, it derives a fresh epoch from the incoming observation's own identifier:</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">if</span> <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'EXISTS'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token operator">==</span> <span class="token number">1</span> then
+  gen <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>string<span class="token punctuation">.</span><span class="token function">sub</span><span class="token punctuation">(</span>redis<span class="token punctuation">.</span><span class="token function">sha1hex</span><span class="token punctuation">(</span>uuid<span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">11</span><span class="token punctuation">)</span><span class="token punctuation">,</span> <span class="token number">16</span><span class="token punctuation">)</span>
+  <span class="token keyword">if</span> not gen or gen <span class="token operator">==</span> <span class="token number">0</span> then gen <span class="token operator">=</span> <span class="token number">1</span> end
+<span class="token keyword">else</span>
+  gen <span class="token operator">=</span> <span class="token number">0</span>
+end
+</code></pre>
+<p>Forty-four bits is at most fourteen decimal digits, which stock Lua prints in full. A wider value can come out in scientific notation, and since the epoch roundtrips through the hash as a decimal string, a generation written as <code>1e+15</code> stops matching the members it labels. A number that cannot survive being printed and parsed is not usable as a key prefix.</p>
+<h3 id="the-probe-budget-has-to-be-a-global-one" tabindex="-1"><a class="header-anchor" href="#the-probe-budget-has-to-be-a-global-one">The probe budget has to be a global one</a></h3>
+<p>Half-open admits a small number of probes, and in one process that number is enforced by a counter that admission and settlement both touch. Twenty replicas each enforcing a budget of three means sixty concurrent probes arriving at a dependency that has just fallen over, which is the thundering herd the half-open state wants to prevent.</p>
+<p>The budget has to live with the window, and it needs to handle a case the local version never faced: a replica that is admitted and then dies. A counter cannot recover from that, because the decrement it was relying on is never coming. So instead of a count, the coordinator keeps one member per in-flight probe, scored with the time its claim expires. Counting live probes means first dropping the ones whose deadline has passed:</p>
+<pre class="language-lua"><code class="language-lua"><span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'ZREMRANGEBYSCORE'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'-inf'</span><span class="token punctuation">,</span> now<span class="token punctuation">)</span>
+local activeProbes <span class="token operator">=</span> <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'ZCARD'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token keyword">if</span> activeProbes <span class="token operator">>=</span> maxProbes then
+  <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">,</span> gen<span class="token punctuation">,</span> activeProbes<span class="token punctuation">,</span> transitioned<span class="token punctuation">}</span>
+end
+</code></pre>
+<p><img src="03.svg" alt="Diagram: replica A's probe admission transitions the breaker to half-open and claims the only slot, replica B is rejected, and A's success closes the breaker and discards remaining tokens"></p>
+<p>This is where the lazy transition from earlier pays off. The script above is the same one that moves the breaker out of <code>open</code>, so the call that notices the open period has elapsed is the call that takes the first slot, with no gap in between for anyone else to arrive. Had a timer performed the transition, every replica would learn about the new half-open state independently and race for the slots.</p>
+<p>The expiring claim creates a problem of its own: once a deadline passes, the slot is available to whoever asks next, so a probe that was slow rather than dead can come back with a perfectly good result against a slot that now belongs to someone else. Counting it would mean acting on the outcome of a probe that, as far as the budget was concerned, was no longer running. The settlement script checks the deadline before doing anything with the result:</p>
+<pre class="language-lua"><code class="language-lua"><span class="token keyword">if</span> <span class="token function">tonumber</span><span class="token punctuation">(</span>deadline<span class="token punctuation">)</span> <span class="token operator">&lt;=</span> now then
+  probeCnt <span class="token operator">=</span> math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span><span class="token number">0</span><span class="token punctuation">,</span> probeCnt <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span>
+  <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'HSET'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">'probeCount'</span><span class="token punctuation">,</span> probeCnt<span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">,</span> sc<span class="token punctuation">,</span> gen<span class="token punctuation">}</span>
+end
+</code></pre>
+<p>Note what the deadline does <em>not</em> do. It is a backstop for probes that never report back, not a timer for probes that are simply taking a while, so a probe that settles normally releases its slot immediately rather than holding it until expiry. The same applies to a result the classifier decides to ignore: nothing is recorded and no progress is made toward closing, but the slot goes back into the pool so the next probe is not kept waiting for a deadline that has nothing to do with it.</p>
+<h3 id="when-the-coordinator-itself-is-the-problem" tabindex="-1"><a class="header-anchor" href="#when-the-coordinator-itself-is-the-problem">When the coordinator itself is the problem</a></h3>
+<p>Putting the window in shared storage means the breaker now has a dependency of its own, and that dependency can be unreachable at the exact moment a decision is needed. There is no correct answer here, only a choice about which failure you prefer, and the choice is different depending on what the replica already knows.</p>
+<p>The case with a clear answer is a scope the replica has previously seen open or half-open. The breaker was protecting something, nothing has said it recovered, and the only reason the replica cannot confirm that is the coordinator being down. Letting calls through because the bookkeeping is unavailable removes the protection at the moment it is doing its job, so a scope known to be non-closed rejects regardless of configuration.</p>
+<p>Everything else is genuinely ambiguous. A scope last seen closed, or never seen at all, gives no evidence that the dependency is in trouble. Blocking all traffic because a coordinator is unreachable turns one outage into two, which is usually worse than letting calls through unprotected. Usually, not always, and it depends on what the call does rather than on anything the library can work out, so it is a configuration option with a documented default rather than a decision made silently:</p>
+<pre class="language-ts"><code class="language-ts">onCoordinatorError<span class="token operator">:</span> <span class="token string">"fail-open"</span><span class="token punctuation">,</span>  <span class="token comment">// or "fail-closed"</span>
+</code></pre>
+<p>That is the same argument <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a> makes about breakers generally, that opening one changes user-visible behaviour and should be tied to business priorities rather than buried in a library default. Refusing all checkouts during a Redis blip is a product decision, not an implementation detail.</p>
+<p><img src="04.svg" alt="Diagram: a decision tree for an unreachable coordinator, rejecting when the scope was last seen non-closed, deferring to the configured policy otherwise, and dropping failures that occur while recording an outcome"></p>
+<p>Recording an outcome is a different matter from deciding about a call. If the coordinator is unreachable when a result comes back, there is nothing useful to do with it and no reason to fail a call that has already completed, so the observation is dropped. One missing datapoint moves a window of a hundred by one percent. The same applies to a probe settlement that cannot be delivered: the claim expires on its own and the slot returns to the pool without anyone needing to be told.</p>
+<p>Remembering which scopes were non-closed has a cost, so it's worth being precise about what is kept. Only open and half-open are retained, because &quot;closed&quot; and &quot;never heard of it&quot; lead to the same decision and storing closed would grow the map with every scope the process ever sees. Entries are keyed by operation as well as scope, so one policy shared across operations cannot answer for the wrong one:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> <span class="token function-variable function">keyFor</span> <span class="token operator">=</span> <span class="token punctuation">(</span>operation<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">,</span> scope<span class="token operator">:</span> <span class="token builtin">string</span><span class="token punctuation">)</span> <span class="token operator">=></span>
+  <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span><span class="token punctuation">[</span>operation<span class="token punctuation">,</span> scope<span class="token punctuation">]</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The caveat is that entries leave only when that same scope is later seen closed, which requires traffic. A scope that opens once and then goes quiet stays in the map for the life of the process, holding a belief that may be long out of date.</p>
+<p>One option is falling back to a local breaker when the coordinator is unavailable. It is tempting, because the fallback looks like graceful degradation and the process keeps working, but what it actually does is rebuild the per-replica window that the shared one existed to replace, at the moment the system is already under stress, while continuing to report itself as a distributed breaker. A breaker that silently changes what it protects is worse than one that tells you it cannot decide.</p>
+<h3 id="trusting-logic-that-runs-somewhere-else" tabindex="-1"><a class="header-anchor" href="#trusting-logic-that-runs-somewhere-else">Trusting logic that runs somewhere else</a></h3>
+<p>Moving the decisions into Lua means the interesting behaviour no longer runs in the language the rest of the code is written in, cannot be stepped through in a debugger, and is exercised only when a real coordinator is present. That is a poor place to rely on reading the code carefully and hoping.</p>
+<p>What works better is keeping a second implementation of the same contract in memory, then running both against the same generated sequences of operations and comparing the results field by field. Any disagreement is a bug in one of them, and it does not matter which, because the two were written from the same specification by different means. The in-memory version also makes most of the test suite runnable without a coordinator at all.</p>
+<p>The trap with generated sequences is a generator that only produces boring ones. A run where the breaker never opens will pass happily and prove very little, so the suite counts how many times each interesting path was reached, opened, admitted, rejected at the probe limit, settled, transitioned, stale, and fails if any of them stayed at zero. The test verifies the behaviour, the counters verify the test.</p>
+<h2 id="the-settings-are-not-independent" tabindex="-1"><a class="header-anchor" href="#the-settings-are-not-independent">The settings are not independent</a></h2>
+<p>A distributed breaker has more settings than a local one, and each may look sensible on its own while the combination does nothing useful. They constrain each other, so changing one usually means revisiting the others too.</p>
+<p>Shared observations cannot live forever, which gives the window two ways of forgetting one: by count, once enough newer ones have arrived, and by age, once its retention period has passed. Whichever comes first wins. Under normal traffic that is the count, on a quiet scope it is the age. If the window needs twenty observations before it may open and observations expire after a minute, a scope receiving ten calls a minute never holds twenty at once. It can fail every single call and stay closed forever. Whatever default a library picks for retention is a guess at a reasonable period rather than a measurement of your traffic, so a low-volume scope is worth checking by hand.</p>
+<p>The same shape of mistake produces a breaker that cannot open for a different reason: a window smaller than the minimum number of observations required to evaluate it means the count-based trim removes entries before the window is ever big enough to be looked at. Along with the threshold bounds from earlier, this is the kind of thing worth rejecting when the breaker is configured rather than leaving to be discovered in production.</p>
+<p>The lease on a probe slot has a range rather than a target. Too short and a live probe loses its slot while it is still running: the slot is handed to someone else, more probes run than the budget allows, and the original probe's result is discarded as stale when it finally arrives. It therefore has to exceed the slowest a probe can possibly take, which is what the timeout inside the breaker is for. Too long and a crashed replica's claim blocks recovery for that whole period, so the recovery window stalls while nothing is wrong with the dependency. Both ends of that range move when the timeout does.</p>
+<p>The number of successes required to close interacts with the probe rate in a way that is easy to get wrong. Any single probe failure resets progress and sends the breaker back to open, so requiring many successes on a scope with a low probe budget means recovery depends on a long unbroken run. On a dependency that is mostly better but still occasionally failing, a high value keeps traffic shut off long after it recovered.</p>
+<p>Then there is the storage itself. Since a missing state record reads as closed, letting an open breaker expire silently admits all traffic and loses the epoch that labels the current window, so a breaker that is not closed must not be allowed to expire at all. Only the closed state can carry an expiry, for cleaning up scopes that have gone quiet, and even that is bounded below by the window retention: the record that says which epoch is current has to outlive the observations carrying that label, or the orphan problem from earlier is created deliberately by the cleanup.</p>
+<p>One last thing that is not a setting: a distributed breaker reads the coordinator's clock and a local one reads the host's, so a machine whose clock steps backwards extends its open period and one that steps forward can admit a probe early. Neither breaks anything, but if you are comparing recovery timing between the two and the numbers do not line up, the clock is a reasonable place to look.</p>
+<h2 id="closing" tabindex="-1"><a class="header-anchor" href="#closing">Closing</a></h2>
+<p>The rule at the centre of all this is still the one from the top of the article: count the recent outcomes, and if too many of them failed, stop calling for a while. But in distributed systems the simple rule is now surrounded by complex logic and a dozen ways to get it wrong.</p>
+<p>Most of the work goes into problems the local version never had. The window belongs to a key rather than a process, so the key has to be chosen. Reading and deciding are two roundtrips, so the decision moves to the data. A result can arrive for a window that no longer exists, so observations carry the epoch they belong to. The probe budget is global, so a slot has to be claimable and reclaimable from a replica that has died. The store holding all of it can be unreachable, so there has to be an answer for that which does not quietly turn the breaker into something else. None of these are exotic, they are the same problems that appear whenever shared state replaces local state, and they show up here in a smaller system to see all of them at once.</p>
+<p>If you want to read the whole implementation rather than the excerpts, it is in <a href="https://github.com/gkoos/caracal">caracal</a>, where the breaker runs either against local memory or against Redis behind the same interface, so both variants can be compared directly.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

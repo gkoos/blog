@@ -483,37 +483,42 @@
   
   <url>
     <loc>https://blog.gaborkoos.com/categories/</loc>
-    <lastmod>2026-09-13T18:13:13.805Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.156Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/code/</loc>
-    <lastmod>2026-09-13T18:13:13.805Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.156Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/consulting/</loc>
-    <lastmod>2026-09-13T18:13:13.805Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.156Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/feed.xml</loc>
-    <lastmod>2026-09-13T18:13:13.806Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.156Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/</loc>
-    <lastmod>2026-09-13T18:13:13.806Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.156Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/publications/</loc>
-    <lastmod>2026-09-13T18:13:13.842Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.207Z</lastmod>
   </url>
   
   <url>
     <loc>https://blog.gaborkoos.com/publications/database-safari/</loc>
-    <lastmod>2026-09-13T18:13:13.842Z</lastmod>
+    <lastmod>2026-09-13T22:57:15.207Z</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://blog.gaborkoos.com/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/</loc>
+    <lastmod>2026-09-14T00:00:00.000Z</lastmod>
   </url>
   
 </urlset>

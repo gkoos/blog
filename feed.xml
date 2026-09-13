@@ -1639,5 +1639,19 @@
         
       </item>
     
+      <item>
+        <title>How to Implement a Distributed Circuit Breaker</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/</guid>
+        <pubDate>Mon, 14 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>The circuit breaker pattern is simple in one process and much harder across a fleet. Shared state, stale results, probe arbitration and coordinator loss, with a working Redis implementation.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+      </item>
+    
   </channel>
 </rss>
