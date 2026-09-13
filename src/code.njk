@@ -1,0 +1,225 @@
+---
+title: Code
+description: Open source projects and developer tools built by Gabor Koos.
+layout: layouts/base.njk
+permalink: /code/
+---
+
+<h1 class="text-4xl font-bold mb-8">Open Source</h1>
+
+<div class="space-y-8">
+  <p class="text-lg">
+    I build and maintain open source tools, mostly around reliability, HTTP clients, and developer
+    experience. Everything below is open source — pull requests, issues, and feedback are always welcome.
+  </p>
+
+  <div class="not-prose space-y-12 mt-8">
+
+    <!-- Caracal -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/caracal" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
+            <img src="/assets/images/caracal-logo.svg" alt="" class="h-8 w-auto m-0" loading="lazy" />
+            Caracal
+          </a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/caracal?style=social" alt="GitHub stars for gkoos/caracal" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        Scoped distributed resilience for asynchronous operations. A composable model for applying
+        timeouts, retries, circuit breakers, and bulkheads to any operation, with policies shared and
+        coordinated across replicas through Redis.
+      </p>
+    </section>
+
+    <!-- Crossflight -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/crossflight" class="text-blue-600 dark:text-blue-400 hover:underline">Crossflight</a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/crossflight?style=social" alt="GitHub stars for gkoos/crossflight" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        Cross-process cache stampede protection for the cache you already use.
+      </p>
+    </section>
+
+    <!-- Fetch-Kit -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/fetch-kit" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
+            <img src="/assets/images/fetch-kit-logo.png" alt="" class="h-8 w-8 object-contain m-0" loading="lazy" />
+            Fetch-Kit
+          </a>
+        </h2>
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        Making fetch more powerful in production and more testable in development. A toolkit of
+        production-ready fetch utilities and chaos-testing tools for JavaScript/TypeScript developers.
+      </p>
+      <p class="mt-2 text-base">
+        <a href="https://fetchkit.org" class="text-blue-600 dark:text-blue-400 hover:underline">fetchkit.org</a>
+      </p>
+
+      <div class="space-y-6 mt-6">
+        <!-- ffetch -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/fetch-kit/ffetch" class="text-blue-600 dark:text-blue-400 hover:underline">ffetch</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/fetch-kit/ffetch?style=social" alt="GitHub stars for fetch-kit/ffetch" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            TypeScript-first fetch wrapper with configurable timeouts, retries, and circuit-breaker baked in.
+          </p>
+        </div>
+
+        <!-- chaos-fetch -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/fetch-kit/chaos-fetch" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-fetch</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/fetch-kit/chaos-fetch?style=social" alt="GitHub stars for fetch-kit/chaos-fetch" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            Library for injecting network chaos (latency, failures, drops, etc.) into fetch requests.
+          </p>
+        </div>
+
+        <!-- chaos-sw -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/fetch-kit/chaos-sw" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-sw</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/fetch-kit/chaos-sw?style=social" alt="GitHub stars for fetch-kit/chaos-sw" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            Service Worker for injecting configurable network chaos (latency, failures, throttling, rate-limiting) into browser requests.
+          </p>
+        </div>
+
+        <!-- chaos-proxy -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/fetch-kit/chaos-proxy" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-proxy</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/fetch-kit/chaos-proxy?style=social" alt="GitHub stars for fetch-kit/chaos-proxy" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            Proxy for injecting network chaos (latency, failures, drops, rate-limiting) into API requests.
+          </p>
+        </div>
+
+        <!-- chaos-proxy-go -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/fetch-kit/chaos-proxy-go" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-proxy-go</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/fetch-kit/chaos-proxy-go?style=social" alt="GitHub stars for fetch-kit/chaos-proxy-go" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            Golang port of chaos-proxy.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Confluence2md -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/confluence2md" class="text-blue-600 dark:text-blue-400 hover:underline">Confluence2md</a>
+        </h2>
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        A local Confluence knowledge pipeline: crawl Confluence Cloud into clean Markdown with incremental
+        updates, index the result for fast local hybrid search, and expose it to AI clients over MCP.
+      </p>
+
+      <div class="space-y-6 mt-6">
+        <!-- confluence2md -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/gkoos/confluence2md" class="text-blue-600 dark:text-blue-400 hover:underline">confluence2md</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/gkoos/confluence2md?style=social" alt="GitHub stars for gkoos/confluence2md" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            Confluence Cloud to Markdown crawler with incremental updates and local link rewriting.
+          </p>
+        </div>
+
+        <!-- confluence2md-indexer -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/gkoos/confluence2md-indexer" class="text-blue-600 dark:text-blue-400 hover:underline">confluence2md-indexer</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/gkoos/confluence2md-indexer?style=social" alt="GitHub stars for gkoos/confluence2md-indexer" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            Turn confluence2md output into fast local search with SQLite, embeddings, and explainable hybrid ranking.
+          </p>
+        </div>
+
+        <!-- confluence2md-mcp -->
+        <div>
+          <div class="flex flex-wrap items-center gap-3 mb-1">
+            <h3 class="text-xl font-semibold">
+              <a href="https://github.com/gkoos/confluence2md-mcp" class="text-blue-600 dark:text-blue-400 hover:underline">confluence2md-mcp</a>
+            </h3>
+            <img src="https://img.shields.io/github/stars/gkoos/confluence2md-mcp?style=social" alt="GitHub stars for gkoos/confluence2md-mcp" class="h-5 w-auto m-0" loading="lazy" />
+          </div>
+          <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+            MCP server that exposes confluence2md-indexer search to any MCP-compatible AI client, returning
+            ranked results with score metadata.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nullmail -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/nullmail" class="text-blue-600 dark:text-blue-400 hover:underline">Nullmail</a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/nullmail?style=social" alt="GitHub stars for gkoos/nullmail" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        A privacy-focused, ephemeral temp mail service with instant disposable inboxes, automatic expiry,
+        no sign-up, and no tracking. Built with SvelteKit, Supabase, and ForwardEmail.
+      </p>
+      <p class="mt-2 text-base">
+        <a href="https://nullmail.cc" class="text-blue-600 dark:text-blue-400 hover:underline">nullmail.cc</a>
+      </p>
+    </section>
+
+    <!-- Mermaid Editor -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/mermaid-editor" class="text-blue-600 dark:text-blue-400 hover:underline">Mermaid Editor</a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/mermaid-editor?style=social" alt="GitHub stars for gkoos/mermaid-editor" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        A fast, browser-based editor for creating and exporting Mermaid diagrams. No sign-up, no ads, and
+        no limits on usage.
+      </p>
+      <p class="mt-2 text-base">
+        <a href="https://mermaid-editor.online" class="text-blue-600 dark:text-blue-400 hover:underline">mermaid-editor.online</a>
+      </p>
+    </section>
+
+  </div>
+</div>
