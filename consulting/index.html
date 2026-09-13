@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>chaos-sw Is Out: Browser-Wide Chaos For Every Tab</title>
-  <meta name="description" content="chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.">
+  <title>Consulting</title>
+  <meta name="description" content="Short, focused consulting on reliability, networking, RAG pipelines, and data systems.">
   <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="chaos-sw Is Out: Browser-Wide Chaos For Every Tab">
-  <meta property="og:description" content="chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.">
+  <meta property="og:title" content="Consulting">
+  <meta property="og:description" content="Short, focused consulting on reliability, networking, RAG pipelines, and data systems.">
   <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Twitter Meta Tags -->
   <meta name="twitter:card" content="summary_large_image">
   <meta property="twitter:domain" content="gaborkoos.com">
   <meta property="twitter:url" content="https://gaborkoos.com">
-  <meta name="twitter:title" content="chaos-sw Is Out: Browser-Wide Chaos For Every Tab">
-  <meta name="twitter:description" content="chaos-sw brings browser-wide network chaos injection to every controlled tab, and chaos-fetch 1.3.0 adds origin-aware route matching and cleaner public config types.">
+  <meta name="twitter:title" content="Consulting">
+  <meta name="twitter:description" content="Short, focused consulting on reliability, networking, RAG pipelines, and data systems.">
   <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
 
   <!-- Meta Tags Generated via https://www.opengraph.xyz -->
@@ -28,10 +28,6 @@
   <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
 
   
-  
-  
-
-
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
   <link rel="stylesheet" href="/assets/css/styles.css?v=1789321410979" />
@@ -41,8 +37,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <link rel="stylesheet" href="/assets/css/fix-katex.css">
-
 </head>
 <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
   <!-- Header/Navigation with Theme Switcher -->
@@ -89,85 +83,79 @@
   <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
   <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
     
-<article>
-  <h1 class="text-3xl font-bold mb-4">chaos-sw Is Out: Browser-Wide Chaos For Every Tab</h1>
-  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-    <time datetime="2026-09-07T00:00:00.000Z">Mon Sep 07 2026</time>
-    
-    
-      <span class="text-gray-300">•</span>
-      <div class="flex flex-wrap gap-2">
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">announcements</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">testing</div>
-        
-          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">fetch-kit</div>
-        
-      </div>
-    
-  </div>
-  <div class="prose dark:prose-invert max-w-none">
-    <p>Two releases are out:</p>
-<ul>
-<li><a href="https://www.npmjs.com/package/@fetchkit/chaos-sw"><code>@fetchkit/chaos-sw</code></a></li>
-<li><a href="https://www.npmjs.com/package/@fetchkit/chaos-fetch"><code>@fetchkit/chaos-fetch</code> 1.3.0</a></li>
-</ul>
-<p>Together, they give a more complete workflow for testing real browser apps under degraded network conditions.</p>
-<h2 id="chaos-sw%3A-browser-wide-chaos-without-changing-app-code" tabindex="-1"><a class="header-anchor" href="#chaos-sw%3A-browser-wide-chaos-without-changing-app-code">chaos-sw: browser-wide chaos without changing app code</a></h2>
-<p><code>chaos-sw</code> installs a Service Worker that intercepts requests from every controlled browser tab and applies the same middleware rules as <code>chaos-fetch</code>. Your app can keep using its regular <code>fetch</code> calls; latency, failures, rate limits, throttling, and mock responses are applied centrally.</p>
-<p>This is useful when you want to test a real app under slow, flaky, or failing conditions without rewriting the code paths under test.</p>
-<p>Some of the package highlights from the README:</p>
-<ul>
-<li>Service Worker interception for browser requests</li>
-<li>Global and route-specific chaos rules</li>
-<li>Path-only and exact-origin absolute URL matching</li>
-<li>Built-in latency, failure, rate-limit, throttle, and mock middleware</li>
-<li>Runtime enable, disable, config replacement, and scenario reset</li>
-<li>Standalone worker or integration with an existing Service Worker</li>
-</ul>
-<p>The setup is intentionally simple:</p>
-<pre class="language-sh"><code class="language-sh"><span class="token function">npm</span> <span class="token function">install</span> @fetchkit/chaos-sw
-npx chaos-sw init public
-</code></pre>
-<p>Then you can apply a config like this:</p>
-<pre class="language-ts"><code class="language-ts"><span class="token keyword">await</span> chaos<span class="token punctuation">.</span><span class="token function">applyConfig</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
-  global<span class="token operator">:</span> <span class="token punctuation">[</span><span class="token punctuation">{</span> latencyRange<span class="token operator">:</span> <span class="token punctuation">{</span> minMs<span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span> maxMs<span class="token operator">:</span> <span class="token number">500</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
-  routes<span class="token operator">:</span> <span class="token punctuation">{</span>
-    <span class="token string-property property">'GET /api/users/:id'</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-      <span class="token punctuation">{</span> failNth<span class="token operator">:</span> <span class="token punctuation">{</span> n<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> status<span class="token operator">:</span> <span class="token number">503</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-    <span class="token punctuation">]</span><span class="token punctuation">,</span>
-  <span class="token punctuation">}</span><span class="token punctuation">,</span>
-<span class="token punctuation">}</span><span class="token punctuation">)</span>
-</code></pre>
-<p>This makes the chaos layer feel less like a custom fetch wrapper and more like a browser-wide test harness.</p>
-<h2 id="chaos-fetch-1.3.0%3A-more-realistic-routing" tabindex="-1"><a class="header-anchor" href="#chaos-fetch-1.3.0%3A-more-realistic-routing">chaos-fetch 1.3.0: more realistic routing</a></h2>
-<p>The new <code>chaos-fetch</code> release adds origin-specific routing with absolute URL patterns while keeping path-based routing intact for browser and Service Worker use cases.</p>
-<p>It also exports the public <code>ChaosConfig</code> and <code>MiddlewareConfig</code> types, and replaces the <code>@koa/router</code> dependency with a direct <code>path-to-regexp</code> matcher. That reduces integration friction and removes the Node.js <code>http</code>/<code>url</code> requirement from the browser bundle.</p>
-<p>The result is a cleaner middleware model for real-world routing, especially when the same app needs to target different origins or split global and route-specific behavior.</p>
-<h2 id="using-them-together" tabindex="-1"><a class="header-anchor" href="#using-them-together">Using them together</a></h2>
-<ul>
-<li><code>chaos-fetch</code> is the middleware layer you can use directly in app code and tests.</li>
-<li><code>chaos-sw</code> extends the same configuration model to every controlled tab in the browser.</li>
-</ul>
-<p>That gives you a clear path from targeted tests to realistic browser-level resilience experiments.</p>
-<p>GitHub:</p>
-<ul>
-<li><a href="https://github.com/fetch-kit/chaos-sw">fetch-kit/chaos-sw</a></li>
-<li><a href="https://github.com/fetch-kit/chaos-fetch">fetch-kit/chaos-fetch</a></li>
-</ul>
-<p>npm:</p>
-<ul>
-<li><a href="https://www.npmjs.com/package/@fetchkit/chaos-sw">@fetchkit/chaos-sw</a></li>
-<li><a href="https://www.npmjs.com/package/@fetchkit/chaos-fetch">@fetchkit/chaos-fetch</a></li>
-</ul>
+<h1 class="text-4xl font-bold mb-8">Consulting</h1>
 
+<div class="space-y-8">
+  <p class="text-lg">
+    I occasionally take on short, focused engagements outside my day job. The work is limited in scope
+    and time so it stays secondary to both employment and the open-source / writing side of things.
+  </p>
+
+  <div>
+    <h2 class="text-2xl font-semibold mb-4">What I can help with</h2>
+    <ul class="space-y-3">
+      <li>
+        Making HTTP clients and network-facing code more reliable in production: timeouts, retries,
+        circuit breaking, bulkheads, and observable failure modes.
+      </li>
+      <li>
+        Designing and reviewing chaos / fault-injection approaches for services and tests.
+      </li>
+      <li>
+        Backend and distributed-systems questions around failure handling, consistency edges, and
+        operational reality.
+      </li>
+      <li>
+        Turning fuzzy reliability requirements into concrete design and implementation choices.
+      </li>
+      <li>
+        Building and reviewing RAG pipelines - ingestion and chunking, embeddings, vector and hybrid
+        search, ranking, and keeping an index fresh, fast, and useful once it is in production.
+      </li>
+      <li>
+        Choosing the right database for a workload: knowing when a general-purpose engine is enough and
+        when a specialist (vector, time-series, graph, columnar/OLAP, geospatial) has truly earned its
+        place, and how to combine them into a hybrid architecture that stays operationally sane. This is
+        the subject of my forthcoming book,
+        <a href="/publications/database-safari/">The Database Safari</a>.
+      </li>
+    </ul>
   </div>
-</article>
+
+  <p class="text-lg">
+    Basically the same territory as my <a href="https://gaborkoos.com">portfolio</a>, the <a href="/writing">writing</a>, and the
+    <a href="/code">libraries</a>: reliability under real conditions, especially around networking and
+    asynchronous work.
+  </p>
+
+  <div>
+    <h2 class="text-2xl font-semibold mb-4">How it usually works</h2>
+    <ul class="space-y-3">
+      <li>
+        Short advisory calls or reviews (design, code, test strategy).
+      </li>
+      <li>
+        Small implementation or pairing blocks when that is the fastest way to unblock something.
+      </li>
+      <li>
+        Fixed scope preferred over open-ended obligations.
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <h2 class="text-2xl font-semibold mb-4">Availability</h2>
+    <p>
+      Limited. I only take work that fits cleanly around existing commitments so I can actually deliver.
+    </p>
+  </div>
+
+  <p>
+    If you have a concrete problem in the areas above, email me at 
+    <a href="mailto:gabor@gaborkoos.com">gabor@gaborkoos.com</a> with a short description of the
+    situation and what you want out of the engagement. I will reply if it looks like a fit.
+  </p>
+</div>
 
   </div>
   </main>
