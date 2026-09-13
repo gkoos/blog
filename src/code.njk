@@ -5,46 +5,35 @@ layout: layouts/base.njk
 permalink: /code/
 ---
 
+{# Tech-stack badges: small flat-square shields.io badges. #}
+{% macro tech(name, slug, color, logoColor) %}<img src="https://img.shields.io/badge/{{ name | replace(' ', '_') }}-{{ color }}?style=flat-square{% if slug %}&amp;logo={{ slug }}&amp;logoColor={{ logoColor }}{% endif %}" alt="{{ name }}" class="h-5 w-auto m-0" loading="lazy" />{% endmacro %}
+{% macro badges(items) %}<div class="flex flex-wrap items-center gap-2 mt-3">{% for item in items %}{{ tech(item[0], item[1], item[2], item[3]) | safe }}{% endfor %}</div>{% endmacro %}
+
+{% set TS = ['TypeScript', 'typescript', '3178C6', 'white'] %}
+{% set GO = ['Go', 'go', '00ADD8', 'white'] %}
+{% set JAVASCRIPT = ['JavaScript', 'javascript', 'F7DF1E', 'black'] %}
+{% set SVELTE = ['Svelte', 'svelte', 'FF3E00', 'white'] %}
+{% set REDIS = ['Redis', 'redis', 'FF4438', 'white'] %}
+{% set POSTGRES = ['PostgreSQL', 'postgresql', '4169E1', 'white'] %}
+{% set SQLITE = ['SQLite', 'sqlite', '003B57', 'white'] %}
+{% set NODE = ['Node.js', 'nodedotjs', '5FA04E', 'white'] %}
+{% set SUPABASE = ['Supabase', 'supabase', '3FCF8E', 'white'] %}
+{% set CLOUDFLARE = ['Cloudflare', 'cloudflare', 'F38020', 'white'] %}
+{% set MERMAID = ['Mermaid', 'mermaid', 'FF3670', 'white'] %}
+{% set VITE = ['Vite', 'vite', '646CFF', 'white'] %}
+{% set TAILWIND = ['Tailwind CSS', 'tailwindcss', '06B6D4', 'white'] %}
+{% set OPENAI = ['OpenAI', 'openai', '412991', 'white'] %}
+{% set MCP = ['MCP', '', '1F2937', ''] %}
+
 <h1 class="text-4xl font-bold mb-8">Open Source</h1>
 
 <div class="space-y-8">
   <p class="text-lg">
     I build and maintain open source tools, mostly around reliability, HTTP clients, and developer
-    experience. Everything below is open source — pull requests, issues, and feedback are always welcome.
+    experience. Everything below is open source, pull requests, issues, and feedback are always welcome.
   </p>
 
   <div class="not-prose space-y-12 mt-8">
-
-    <!-- Caracal -->
-    <section>
-      <div class="flex flex-wrap items-center gap-3 mb-2">
-        <h2 class="text-2xl font-semibold">
-          <a href="https://github.com/gkoos/caracal" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
-            <img src="/assets/images/caracal-logo.svg" alt="" class="h-8 w-auto m-0" loading="lazy" />
-            Caracal
-          </a>
-        </h2>
-        <img src="https://img.shields.io/github/stars/gkoos/caracal?style=social" alt="GitHub stars for gkoos/caracal" class="h-5 w-auto m-0" loading="lazy" />
-      </div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-        Scoped distributed resilience for asynchronous operations. A composable model for applying
-        timeouts, retries, circuit breakers, and bulkheads to any operation, with policies shared and
-        coordinated across replicas through Redis.
-      </p>
-    </section>
-
-    <!-- Crossflight -->
-    <section>
-      <div class="flex flex-wrap items-center gap-3 mb-2">
-        <h2 class="text-2xl font-semibold">
-          <a href="https://github.com/gkoos/crossflight" class="text-blue-600 dark:text-blue-400 hover:underline">Crossflight</a>
-        </h2>
-        <img src="https://img.shields.io/github/stars/gkoos/crossflight?style=social" alt="GitHub stars for gkoos/crossflight" class="h-5 w-auto m-0" loading="lazy" />
-      </div>
-      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-        Cross-process cache stampede protection for the cache you already use.
-      </p>
-    </section>
 
     <!-- Fetch-Kit -->
     <section>
@@ -63,6 +52,7 @@ permalink: /code/
       <p class="mt-2 text-base">
         <a href="https://fetchkit.org" class="text-blue-600 dark:text-blue-400 hover:underline">fetchkit.org</a>
       </p>
+      {{ badges([TS, GO, NODE]) | safe }}
 
       <div class="space-y-6 mt-6">
         <!-- ffetch -->
@@ -76,6 +66,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             TypeScript-first fetch wrapper with configurable timeouts, retries, and circuit-breaker baked in.
           </p>
+          {{ badges([TS, NODE]) | safe }}
         </div>
 
         <!-- chaos-fetch -->
@@ -89,6 +80,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Library for injecting network chaos (latency, failures, drops, etc.) into fetch requests.
           </p>
+          {{ badges([TS]) | safe }}
         </div>
 
         <!-- chaos-sw -->
@@ -102,6 +94,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Service Worker for injecting configurable network chaos (latency, failures, throttling, rate-limiting) into browser requests.
           </p>
+          {{ badges([TS]) | safe }}
         </div>
 
         <!-- chaos-proxy -->
@@ -115,6 +108,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Proxy for injecting network chaos (latency, failures, drops, rate-limiting) into API requests.
           </p>
+          {{ badges([TS, NODE]) | safe }}
         </div>
 
         <!-- chaos-proxy-go -->
@@ -128,6 +122,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Golang port of chaos-proxy.
           </p>
+          {{ badges([GO]) | safe }}
         </div>
       </div>
     </section>
@@ -143,6 +138,7 @@ permalink: /code/
         A local Confluence knowledge pipeline: crawl Confluence Cloud into clean Markdown with incremental
         updates, index the result for fast local hybrid search, and expose it to AI clients over MCP.
       </p>
+      {{ badges([GO, SQLITE, OPENAI, MCP]) | safe }}
 
       <div class="space-y-6 mt-6">
         <!-- confluence2md -->
@@ -156,6 +152,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Confluence Cloud to Markdown crawler with incremental updates and local link rewriting.
           </p>
+          {{ badges([GO]) | safe }}
         </div>
 
         <!-- confluence2md-indexer -->
@@ -169,6 +166,7 @@ permalink: /code/
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Turn confluence2md output into fast local search with SQLite, embeddings, and explainable hybrid ranking.
           </p>
+          {{ badges([GO, SQLITE, OPENAI]) | safe }}
         </div>
 
         <!-- confluence2md-mcp -->
@@ -183,8 +181,42 @@ permalink: /code/
             MCP server that exposes confluence2md-indexer search to any MCP-compatible AI client, returning
             ranked results with score metadata.
           </p>
+          {{ badges([GO, MCP]) | safe }}
         </div>
       </div>
+    </section>
+
+    <!-- Caracal -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/caracal" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
+            <img src="/assets/images/caracal-logo.svg" alt="" class="h-8 w-auto m-0" loading="lazy" />
+            Caracal
+          </a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/caracal?style=social" alt="GitHub stars for gkoos/caracal" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        Scoped distributed resilience for asynchronous operations. A composable model for applying
+        timeouts, retries, circuit breakers, and bulkheads to any operation, with policies shared and
+        coordinated across replicas through Redis.
+      </p>
+      {{ badges([TS, REDIS, POSTGRES, NODE]) | safe }}
+    </section>
+
+    <!-- Crossflight -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/crossflight" class="text-blue-600 dark:text-blue-400 hover:underline">Crossflight</a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/crossflight?style=social" alt="GitHub stars for gkoos/crossflight" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        Cross-process cache stampede protection for the cache you already use.
+      </p>
+      {{ badges([TS, REDIS]) | safe }}
     </section>
 
     <!-- Nullmail -->
@@ -199,6 +231,7 @@ permalink: /code/
         A privacy-focused, ephemeral temp mail service with instant disposable inboxes, automatic expiry,
         no sign-up, and no tracking. Built with SvelteKit, Supabase, and ForwardEmail.
       </p>
+      {{ badges([SVELTE, SUPABASE, CLOUDFLARE]) | safe }}
       <p class="mt-2 text-base">
         <a href="https://nullmail.cc" class="text-blue-600 dark:text-blue-400 hover:underline">nullmail.cc</a>
       </p>
@@ -216,9 +249,26 @@ permalink: /code/
         A fast, browser-based editor for creating and exporting Mermaid diagrams. No sign-up, no ads, and
         no limits on usage.
       </p>
+      {{ badges([JAVASCRIPT, MERMAID, VITE, TAILWIND]) | safe }}
       <p class="mt-2 text-base">
         <a href="https://mermaid-editor.online" class="text-blue-600 dark:text-blue-400 hover:underline">mermaid-editor.online</a>
       </p>
+    </section>
+
+    <!-- Skyline -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/skyline" class="text-blue-600 dark:text-blue-400 hover:underline">Skyline</a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/skyline?style=social" alt="GitHub stars for gkoos/skyline" class="h-5 w-auto m-0" loading="lazy" />
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        A Go library for efficient skyline queries. Finds the Pareto-optimal points in multi-dimensional
+        datasets, with static computation and incremental dynamic updates using Block Nested Loop,
+        Divide &amp; Conquer, and SkyTree algorithms.
+      </p>
+      {{ badges([GO]) | safe }}
     </section>
 
   </div>
