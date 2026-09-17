@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="640" viewBox="0 0 960 640" role="img" aria-labelledby="title desc">
+  <title id="title">The life of a permit</title>
+  <desc id="desc">A replica acquires a permit and keeps it alive by renewing on a timer, then releases it by removing its token. A holder that dies stops renewing, so its lease lapses and the slot returns to the pool. A holder that stays alive but misses renewals can have its lease lapse while the work is still running, and a successor is admitted into the slot.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="640" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">The life of a permit</text>
+  <text x="480" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">A permit is a claim that expires unless its holder keeps renewing — expiry is the only release a dead holder can still perform</text>
+
+  <g filter="url(#shadow)">
+    <rect x="60" y="100" width="180" height="48" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="150" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">holder (replica)</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="470" y="100" width="180" height="48" rx="8" fill="#eef2f4" stroke="#2f4858" stroke-width="2"/>
+    <text x="560" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="700" fill="#20313a">coordinator (Redis)</text>
+  </g>
+
+  <line x1="150" y1="148" x2="150" y2="380" stroke="#b9c1c7" stroke-width="2" stroke-dasharray="6 6"/>
+  <line x1="560" y1="148" x2="560" y2="380" stroke="#b9c1c7" stroke-width="2" stroke-dasharray="6 6"/>
+
+  <line x1="150" y1="170" x2="552" y2="170" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="351" y="160" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">acquire</text>
+
+  <g filter="url(#shadow)">
+    <rect x="578" y="182" width="330" height="42" rx="6" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="743" y="202" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#20313a">permit recorded</text>
+    <text x="743" y="219" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">token + lease deadline</text>
+  </g>
+
+  <line x1="150" y1="250" x2="552" y2="250" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="351" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">renew on a timer</text>
+
+  <line x1="150" y1="300" x2="552" y2="300" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="351" y="290" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">renew</text>
+
+  <line x1="150" y1="350" x2="552" y2="350" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="351" y="340" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">release: remove this token</text>
+
+  <g filter="url(#shadow)">
+    <rect x="578" y="362" width="330" height="42" rx="6" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="743" y="382" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#34533a">slot returns</text>
+    <text x="743" y="399" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#34533a">token removed from the set</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="48" y="420" width="424" height="176" rx="10" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="260" y="446" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">holder dies</text>
+
+    <rect x="64" y="462" width="112" height="46" rx="6" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="120" y="489" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#20313a">renewals stop</text>
+    <line x1="180" y1="485" x2="204" y2="485" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="210" y="462" width="112" height="46" rx="6" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="266" y="489" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#20313a">lease lapses</text>
+    <line x1="326" y1="485" x2="350" y2="485" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="356" y="462" width="112" height="46" rx="6" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="412" y="489" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#34533a">slot returns</text>
+
+    <text x="260" y="560" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">A dead holder cannot return a permit, so expiry returns it</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="488" y="420" width="424" height="176" rx="10" fill="#fff7dd" stroke="#c6a548" stroke-width="2"/>
+    <text x="700" y="446" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#725b18">holder lives, misses renewals</text>
+
+    <rect x="504" y="462" width="112" height="46" rx="6" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="560" y="489" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#20313a">renewals missed</text>
+    <line x1="620" y1="485" x2="644" y2="485" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="650" y="462" width="112" height="46" rx="6" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="706" y="489" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#20313a">lease lapses</text>
+    <line x1="766" y1="485" x2="790" y2="485" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="796" y="462" width="112" height="46" rx="6" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="852" y="489" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="700" fill="#7b3b2e">successor admitted</text>
+
+    <text x="700" y="560" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">Lapse is not proof the work stopped — the call may still be running</text>
+  </g>
+
+  <text x="480" y="620" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">Renewing at roughly a third of leaseMs means one missed renewal never lapses a healthy permit</text>
+</svg>

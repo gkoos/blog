@@ -1651,6 +1651,28 @@
         
         <category>typescript</category>
         
+        <category>distributed systems</category>
+        
+        <category>resilience</category>
+        
+      </item>
+    
+      <item>
+        <title>How to Implement a Distributed Bulkhead</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/</guid>
+        <pubDate>Thu, 17 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>A concurrency limit is easy inside one process and a distributed-systems problem once it is shared. Permits, leases, renewal, ownership and the guarantees a shared limit can honestly make, with a working Redis implementation.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>distributed systems</category>
+        
+        <category>resilience</category>
+        
       </item>
     
   </channel>
