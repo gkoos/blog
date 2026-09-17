@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+  <title id="title">When the coordinator fails</title>
+  <desc id="desc">A decision tree for the two ways Redis can fail. If Redis answers and the key is absent, the scope reads as holding no permits and the call is admitted, which is correct. If Redis does not answer, the outcome of the command is unknown and the call is refused with the reason attached, with no local fallback.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="600" fill="#f7f4ee"/>
+
+  <text x="480" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">When the coordinator fails</text>
+  <text x="480" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">Of the two ways Redis can fail, one is not a failure at all, and the other has only one honest answer</text>
+
+  <g filter="url(#shadow)">
+    <rect x="356" y="110" width="248" height="62" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="480" y="139" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">a call needs a decision</text>
+    <text x="480" y="159" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">the bulkhead asks Redis</text>
+  </g>
+
+  <line x1="480" y1="172" x2="480" y2="208" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="316" y="214" width="328" height="62" rx="8" fill="#eef2f4" stroke="#2f4858" stroke-width="2"/>
+    <text x="480" y="243" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">does Redis answer?</text>
+    <text x="480" y="263" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">for this scope key</text>
+  </g>
+
+  <path d="M 316 245 L 232 245 L 232 330" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="268" y="234" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#7b3b2e">no</text>
+
+  <path d="M 644 245 L 728 245 L 728 330" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="692" y="234" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#53646d">yes</text>
+
+  <g filter="url(#shadow)">
+    <rect x="112" y="336" width="240" height="76" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="232" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">outcome unknown</text>
+    <text x="232" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#7b3b2e">the command may have run,</text>
+    <text x="232" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#7b3b2e">or it may not have</text>
+  </g>
+
+  <path d="M 232 412 L 232 452" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="112" y="458" width="240" height="58" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="232" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#7b3b2e">refuse — fail closed</text>
+    <text x="232" y="503" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#7b3b2e">reason attached, no fallback</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="608" y="336" width="240" height="76" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="728" y="366" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">key is absent</text>
+    <text x="728" y="388" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">reads as no permits held,</text>
+    <text x="728" y="404" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">which is correct</text>
+  </g>
+
+  <path d="M 728 412 L 728 452" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <g filter="url(#shadow)">
+    <rect x="608" y="458" width="240" height="58" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+    <text x="728" y="483" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="#34533a">admit</text>
+    <text x="728" y="503" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#34533a">not a failure — the slot is free</text>
+  </g>
+
+  <text x="480" y="566" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" fill="#53646d">A local per-process fallback is not on this diagram on purpose: it rebuilds the per-replica limit the shared one replaced</text>
+</svg>

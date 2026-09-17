@@ -8,6 +8,8 @@ tags:
 - posts
 - javascript
 - typescript
+- distributed systems
+- resilience
 ---
 Imagine you run a SaaS and your payment service starts timing out. Every checkout request that needs it now sits and waits for the full timeout before failing, holding a worker and a connection the whole time. The users who get an error press the button again, so the failing service receives more traffic than it did while it was healthy, and the callers upstream fill with requests that are all waiting on the same thing. Nothing here is down in a way that a health check would notice, the system is simply spending all of its capacity on calls whose outcome is already decided. [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) goes through this shape of failure in more detail, along with the timeouts and retry rules.
 
@@ -190,7 +192,7 @@ Forty-four bits is at most fourteen decimal digits, which stock Lua prints in fu
 
 Half-open admits a small number of probes, and in one process that number is enforced by a counter that admission and settlement both touch. Twenty replicas each enforcing a budget of three means sixty concurrent probes arriving at a dependency that has just fallen over, which is the thundering herd the half-open state wants to prevent.
 
-The budget has to live with the window, and it needs to handle a case the local version never faced: a replica that is admitted and then dies. A counter cannot recover from that, because the decrement it was relying on is never coming. So instead of a count, the coordinator keeps one member per in-flight probe, scored with the time its claim expires. Counting live probes means first dropping the ones whose deadline has passed:
+The budget has to live with the window, and it needs to handle a case the local version never faced: a replica that is admitted and then dies. A counter cannot recover from that, because the decrement it was relying on is never coming. So instead of a count, the coordinator keeps one member per in-flight probe, scored with the time its claim expires. Since 0.6.0 the local breaker arms the same probe lease, for a different wedge: a probe whose adapter promise never settles would otherwise hold half-open forever. Counting live probes means first dropping the ones whose deadline has passed:
 
 ```lua
 redis.call('ZREMRANGEBYSCORE', KEYS[2], '-inf', now)
@@ -261,7 +263,7 @@ Shared observations cannot live forever, which gives the window two ways of forg
 
 The same shape of mistake produces a breaker that cannot open for a different reason: a window smaller than the minimum number of observations required to evaluate it means the count-based trim removes entries before the window is ever big enough to be looked at. Along with the threshold bounds from earlier, this is the kind of thing worth rejecting when the breaker is configured rather than leaving to be discovered in production.
 
-The lease on a probe slot has a range rather than a target. Too short and a live probe loses its slot while it is still running: the slot is handed to someone else, more probes run than the budget allows, and the original probe's result is discarded as stale when it finally arrives. It therefore has to exceed the slowest a probe can possibly take, which is what the timeout inside the breaker is for. Too long and a crashed replica's claim blocks recovery for that whole period, so the recovery window stalls while nothing is wrong with the dependency. Both ends of that range move when the timeout does.
+The lease on a probe slot has a range rather than a target. Too short and a live probe loses its slot while it is still running: the slot is handed to someone else, more probes run than the budget allows, and the original probe's result is discarded as stale when it finally arrives. It therefore has to exceed the slowest a probe can possibly take, which is what the timeout inside the breaker is for. Too long and a crashed replica's claim blocks recovery for that whole period, so the recovery window stalls while nothing is wrong with the dependency. Both ends of that range move when the timeout does. Since 0.6.0 the local breaker takes the same lease via `probeLeaseTtlMs` (defaulting to `openMs × 2`), so the range argument applies in-process too - there it reclaims a probe whose adapter promise never settles, rather than one whose replica died.
 
 The number of successes required to close interacts with the probe rate in a way that is easy to get wrong. Any single probe failure resets progress and sends the breaker back to open, so requiring many successes on a scope with a low probe budget means recovery depends on a long unbroken run. On a dependency that is mostly better but still occasionally failing, a high value keeps traffic shut off long after it recovered.
 
