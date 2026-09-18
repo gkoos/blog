@@ -11,6 +11,8 @@ tags:
 - distributed systems
 - resilience
 ---
+*Featured in [Node Weekly - 2026-09-17](https://nodeweekly.com/issues/641)*
+
 Imagine you run a SaaS and your payment service starts timing out. Every checkout request that needs it now sits and waits for the full timeout before failing, holding a worker and a connection the whole time. The users who get an error press the button again, so the failing service receives more traffic than it did while it was healthy, and the callers upstream fill with requests that are all waiting on the same thing. Nothing here is down in a way that a health check would notice, the system is simply spending all of its capacity on calls whose outcome is already decided. [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) goes through this shape of failure in more detail, along with the timeouts and retry rules.
 
 The answer usually is the [circuit breaker design pattern](https://en.wikipedia.org/wiki/Circuit_breaker_design_pattern): the caller keeps a record of how recent calls to that dependency went, and once the failure rate crosses a threshold it stops sending traffic there for a while, failing immediately instead. That takes load off a service which is already struggling and gives the caller its capacity back. Inside one process the whole thing is a sliding window of recent outcomes and a timestamp for when the breaker last tripped. It's discussed in [Stop Hammering Broken APIs](/posts/2025-09-17-Stop-Hammering-Broken-APIs-the-Circuit-Breaker-Pattern/), which ends by noting that it gets complicated once it has to work in a distributed system, and leaves it for a future article. This is that article.
