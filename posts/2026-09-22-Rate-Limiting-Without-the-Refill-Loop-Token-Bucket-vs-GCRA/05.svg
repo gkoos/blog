@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="440" viewBox="0 0 960 440" role="img" aria-labelledby="title desc">
+<title id="title">One arrival sequence, two equivalent states</title>
+<desc id="desc">At zero milliseconds, 25 calls arrive: 20 are admitted, leaving zero tokens and TAT 200 milliseconds. At five milliseconds a call is rejected, leaving 0.5 tokens and TAT 200. At ten and twenty milliseconds, calls are admitted, leaving zero tokens and TAT 210 and 220. After an idle interval, a call at 220 milliseconds is admitted, leaving 19 tokens and TAT 230. All balances and timestamps are after processing the arrivals.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker></defs>
+<rect width="960" height="440" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="42" text-anchor="middle" font-size="22" font-weight="700">Different state, identical admissions</text>
+<text x="480" y="71" text-anchor="middle" font-size="15" fill="#53646d">R = 100 / second · B = 20 · I = 10 ms · τ = 190 ms</text>
+<path d="M235 121 H916" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+<g fill="#2f4858"><circle cx="275" cy="121" r="4"/><circle cx="415" cy="121" r="4"/><circle cx="555" cy="121" r="4"/><circle cx="695" cy="121" r="4"/><circle cx="835" cy="121" r="4"/></g>
+<g text-anchor="middle" font-size="15" font-weight="700"><text x="275" y="106">0 ms</text><text x="415" y="106">5 ms</text><text x="555" y="106">10 ms</text><text x="695" y="106">20 ms</text><text x="835" y="106">220 ms</text></g>
+<g text-anchor="middle" font-size="13" fill="#53646d"><text x="275" y="147">25 calls</text><text x="415" y="147">1 call</text><text x="555" y="147">1 call</text><text x="695" y="147">1 call</text><text x="835" y="147">1 call after idle</text></g>
+<rect x="35" y="171" width="890" height="66" rx="8" fill="#e7efe8"/>
+<rect x="35" y="248" width="890" height="66" rx="8" fill="#eef2f4"/>
+<text x="55" y="199" font-size="16" font-weight="700" fill="#34533a">Token bucket</text><text x="55" y="221" font-size="13" fill="#53646d">available balance</text>
+<text x="55" y="276" font-size="16" font-weight="700">GCRA</text><text x="55" y="298" font-size="13" fill="#53646d">stored TAT</text>
+<g text-anchor="middle" font-size="21" font-weight="700" fill="#34533a"><text x="275" y="212">0</text><text x="415" y="212">0.5</text><text x="555" y="212">0</text><text x="695" y="212">0</text><text x="835" y="212">19</text></g>
+<g text-anchor="middle" font-size="18" font-weight="700"><text x="275" y="289">200 ms</text><text x="415" y="289">200 ms</text><text x="555" y="289">210 ms</text><text x="695" y="289">220 ms</text><text x="835" y="289">230 ms</text></g>
+<text x="55" y="346" font-size="14" font-weight="700">Both decide</text>
+<g text-anchor="middle" font-size="14"><text x="275" y="344" fill="#34533a">20 admitted</text><text x="275" y="366" fill="#7b3b2e">5 rejected</text><text x="415" y="344" fill="#7b3b2e">Reject</text><text x="415" y="366" fill="#53646d">Retry in 5 ms</text><text x="555" y="344" fill="#34533a">Admit</text><text x="695" y="344" fill="#34533a">Admit</text><text x="835" y="344" fill="#34533a">Admit</text></g>
+<text x="480" y="410" text-anchor="middle" font-size="14" fill="#53646d">States shown after each arrival. The arrival sequence is not drawn to time scale.</text>
+</g></svg>

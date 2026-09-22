@@ -1675,5 +1675,17 @@
         
       </item>
     
+      <item>
+        <title>Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/</guid>
+        <pubDate>Tue, 22 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>What a rate limit constrains, how token bucket and GCRA represent rate and burst, and how their bookkeeping affects admission decisions and retry hints.</description>
+        
+        <category>algorithms</category>
+        
+      </item>
+    
   </channel>
 </rss>

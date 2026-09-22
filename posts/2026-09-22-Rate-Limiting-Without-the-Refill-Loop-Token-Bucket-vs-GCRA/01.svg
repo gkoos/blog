@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="410" viewBox="0 0 960 410" role="img" aria-labelledby="title desc">
+<title id="title">The token bucket</title>
+<desc id="desc">Credit replenishes at 100 tokens per second up to a capacity of 20. Each admitted call consumes one token. Calls are rejected when the available balance is below one.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker></defs>
+<rect width="960" height="410" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" text-anchor="middle" fill="#20313a">
+<text x="480" y="44" font-size="22" font-weight="700">A balance with a ceiling</text>
+<text x="480" y="73" font-size="15" fill="#53646d">Rate: 100 tokens / second · Capacity: 20 tokens · Cost: 1 token / call</text>
+<rect x="340" y="130" width="220" height="190" rx="8" fill="#fff" stroke="#2f4858" stroke-width="2"/>
+<rect x="342" y="210" width="216" height="108" rx="6" fill="#e7efe8"/>
+<path d="M340 210 H560" stroke="#7a9a7e" stroke-width="2"/>
+<text x="450" y="157" font-size="14" fill="#53646d">capacity = burst</text>
+<text x="450" y="252" font-size="19" font-weight="700" fill="#34533a">available tokens</text>
+<text x="450" y="279" font-size="14">0 ≤ balance ≤ 20</text>
+<text x="158" y="175" font-size="17" font-weight="700">Replenish at rate R</text>
+<text x="158" y="199" font-size="14" fill="#53646d">Stop accumulating at capacity</text>
+<path d="M65 226 H326" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M560 226 H643" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="655" y="125" width="260" height="80" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="785" y="155" font-size="17" font-weight="700" fill="#34533a">Balance ≥ 1: admit</text>
+<text x="785" y="182" font-size="14">Subtract one token</text>
+<rect x="655" y="245" width="260" height="80" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+<text x="785" y="275" font-size="17" font-weight="700" fill="#7b3b2e">Balance &lt; 1: reject</text>
+<text x="785" y="302" font-size="14">Keep the remaining credit</text>
+<text x="480" y="377" font-size="14" fill="#53646d">Replenishment can be calculated on access; no background timer is required.</text>
+</g></svg>
