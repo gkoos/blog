@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="475" viewBox="0 0 960 475" role="img" aria-labelledby="title desc">
+<title id="title">Idle, burst and sustained admission with GCRA</title>
+<desc id="desc">With interval 10 milliseconds and tolerance 190 milliseconds, a depleted limiter has TAT zero at time minus 200 milliseconds. TAT remains zero during idle time, restoring the full allowance at time zero. Twenty simultaneous admissions advance TAT to 200 milliseconds and five extra attempts are rejected. Calls at 10, 20 and 30 milliseconds advance TAT to 210, 220 and 230 milliseconds.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker></defs>
+<rect width="960" height="475" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="43" text-anchor="middle" font-size="22" font-weight="700">The same traffic, recorded as a schedule</text>
+<text x="480" y="73" text-anchor="middle" font-size="15" fill="#53646d">Interval I = 10 ms · Tolerance τ = 190 ms · Burst capacity B = 20</text>
+<rect x="35" y="118" width="260" height="272" rx="8" fill="#fff" stroke="#2f4858" stroke-width="2"/>
+<rect x="330" y="118" width="270" height="272" rx="8" fill="#fff" stroke="#2f4858" stroke-width="2"/>
+<rect x="635" y="118" width="290" height="272" rx="8" fill="#fff" stroke="#2f4858" stroke-width="2"/>
+<path d="M299 250 H325 M604 250 H630" fill="none" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+<g text-anchor="middle">
+<text x="165" y="151" font-size="17" font-weight="700">Idle: −200 ms to 0 ms</text>
+<text x="165" y="195" font-size="16">TAT stays at 0 ms</text>
+<text x="165" y="228" font-size="14" fill="#53646d">Now catches up with TAT</text>
+<rect x="57" y="254" width="216" height="96" rx="6" fill="#e7efe8"/>
+<text x="165" y="280" font-size="14" fill="#34533a">Available immediate admissions</text>
+<text x="165" y="311" font-size="20" font-weight="700" fill="#34533a">0 → 20</text>
+<text x="165" y="335" font-size="13" fill="#53646d">No state writes during idle time</text>
+<text x="465" y="151" font-size="17" font-weight="700">Burst at 0 ms</text>
+<text x="465" y="190" font-size="15">25 calls arrive together</text>
+<text x="465" y="223" font-size="19" font-weight="700" fill="#34533a">20 admitted</text>
+<text x="465" y="251" font-size="16">TAT: 0 → 200 ms</text>
+<text x="465" y="291" font-size="17" font-weight="700" fill="#7b3b2e">5 rejected</text>
+<text x="465" y="319" font-size="14" fill="#53646d">TAT remains 200 ms</text>
+<text x="465" y="360" font-size="14">Next eligible at 10 ms</text>
+<text x="780" y="151" font-size="17" font-weight="700">Sustained admissions</text>
+</g>
+<g font-size="14"><text x="660" y="194" font-weight="700">Arrival</text><text x="767" y="194" font-weight="700">TAT after admit</text>
+<path d="M655 207 H905" stroke="#d7dfe2"/>
+<text x="660" y="239">10 ms</text><text x="798" y="239" fill="#34533a">210 ms</text>
+<text x="660" y="276">20 ms</text><text x="798" y="276" fill="#34533a">220 ms</text>
+<text x="660" y="313">30 ms</text><text x="798" y="313" fill="#34533a">230 ms</text>
+<text x="780" y="360" text-anchor="middle" fill="#53646d">Each admit advances TAT by I</text></g>
+<text x="480" y="436" text-anchor="middle" font-size="14" fill="#53646d">Event sequence, not to scale. All times share the same origin: the burst arrives at 0 ms.</text>
+</g></svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="450" viewBox="0 0 960 450" role="img" aria-labelledby="title desc">
+<title id="title">Idle, burst, then sustained admission</title>
+<desc id="desc">Left panel: an empty bucket fills to 20 tokens over 200 milliseconds without requests. Right panel: at time zero, 20 calls consume that balance. At 10, 20 and 30 milliseconds, one new token is earned and immediately spent. The vertical scale is shared but the panels have different time scales.</desc>
+<rect width="960" height="450" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="42" text-anchor="middle" font-size="22" font-weight="700">Idle time builds credit; calls spend it</text>
+<text x="480" y="70" text-anchor="middle" font-size="15" fill="#53646d">Continuous refill at 100 tokens / second, capped at 20</text>
+<rect x="46" y="98" width="358" height="285" rx="8" fill="#fff"/>
+<rect x="430" y="98" width="485" height="285" rx="8" fill="#fff"/>
+<text x="225" y="127" text-anchor="middle" font-size="17" font-weight="700">No calls for 200 ms</text>
+<text x="675" y="127" text-anchor="middle" font-size="17" font-weight="700">Burst, then one call every 10 ms</text>
+<g stroke="#d7dfe2" stroke-dasharray="4 4"><path d="M90 165 H365 M90 235 H365 M480 165 H880 M480 235 H880"/></g>
+<g stroke="#2f4858" stroke-width="1.5" fill="none"><path d="M90 151 V305 H365 M480 151 V305 H880"/></g>
+<g font-size="13" fill="#53646d" text-anchor="end"><text x="80" y="170">20</text><text x="80" y="240">10</text><text x="80" y="310">0</text><text x="470" y="170">20</text><text x="470" y="240">10</text><text x="470" y="310">0</text></g>
+<path d="M95 305 L355 165" stroke="#7a9a7e" stroke-width="3" fill="none"/>
+<circle cx="355" cy="165" r="5" fill="#34533a"/>
+<path d="M500 165 V305" stroke="#c37a68" stroke-width="3"/>
+<path d="M500 305 L620 298 V305 L740 298 V305 L860 298 V305" stroke="#7a9a7e" stroke-width="3" fill="none"/>
+<g fill="#34533a"><circle cx="620" cy="305" r="4"/><circle cx="740" cy="305" r="4"/><circle cx="860" cy="305" r="4"/></g>
+<g font-size="13" fill="#53646d" text-anchor="middle"><text x="95" y="330">−200 ms</text><text x="355" y="330">0 ms</text><text x="500" y="330">0 ms</text><text x="620" y="330">10 ms</text><text x="740" y="330">20 ms</text><text x="860" y="330">30 ms</text></g>
+<text x="520" y="196" font-size="14" fill="#7b3b2e">20 calls spend</text><text x="520" y="217" font-size="14" fill="#7b3b2e">the full balance</text>
+<text x="710" y="264" text-anchor="middle" font-size="14" fill="#34533a">Each small rise earns 1 token</text>
+<text x="225" y="361" text-anchor="middle" font-size="13" fill="#53646d">Token balance rises from 0 to 20</text>
+<text x="675" y="361" text-anchor="middle" font-size="13" fill="#53646d">Balance returns to 0 after every admission</text>
+<text x="480" y="419" text-anchor="middle" font-size="14" fill="#53646d">Both panels show token balance. Time scales differ to make the post-burst refill visible.</text>
+</g></svg>
