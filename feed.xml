@@ -1687,5 +1687,25 @@
         
       </item>
     
+      <item>
+        <title>How to Implement a Distributed Rate Limiter</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/</guid>
+        <pubDate>Thu, 24 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>A rate limit is one timestamp in one process and a distributed-systems problem once that timestamp is shared. Scope, clock, and the one answer that admits nothing, with a working Redis implementation.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>distributed systems</category>
+        
+        <category>resilience</category>
+        
+        <category>algorithms</category>
+        
+      </item>
+    
   </channel>
 </rss>

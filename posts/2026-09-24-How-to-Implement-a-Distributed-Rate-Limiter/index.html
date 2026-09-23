@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Implement a Distributed Rate Limiter</title>
+  <meta name="description" content="A rate limit is one timestamp in one process and a distributed-systems problem once that timestamp is shared. Scope, clock, and the one answer that admits nothing, with a working Redis implementation.">
+  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How to Implement a Distributed Rate Limiter">
+  <meta property="og:description" content="A rate limit is one timestamp in one process and a distributed-systems problem once that timestamp is shared. Scope, clock, and the one answer that admits nothing, with a working Redis implementation.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="How to Implement a Distributed Rate Limiter">
+  <meta name="twitter:description" content="A rate limit is one timestamp in one process and a distributed-systems problem once that timestamp is shared. Scope, clock, and the one answer that admits nothing, with a working Redis implementation.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790202757683" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">How to Implement a Distributed Rate Limiter</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-09-24T00:00:00.000Z">Thu Sep 24 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">resilience</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">algorithms</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>This series explores three classic resilience patterns: circuit breakers, bulkheads, and rate limiters. We build each from its in-process foundations and examine what changes when multiple replicas must share the same decisions. The examples come from <a href="https://github.com/gkoos/caracal">Caracal</a>, a TypeScript resilience library with working Redis-backed implementations.</em></p>
+<ol>
+<li><a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/">How to Implement a Distributed Circuit Breaker</a></li>
+<li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
+<li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
+<li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
+</ol>
+<p>You run a service on twenty replicas that all call the same API, with a shared budget of 100 calls a second. You need <strong>rate limiting</strong> across the whole fleet so that adding capacity to your service does not overwhelm the callee. Giving each replica its own limit of 100 calls a second allows 2,000 calls a second under sustained demand, so every admission needs to account for traffic sent by the other replicas.</p>
+<p>The usual first idea is a <strong>token bucket</strong>: tokens accumulate at a fixed rate up to a maximum capacity, and each call spends one before it starts. The <strong>Generic Cell Rate Algorithm</strong>, or <strong>GCRA</strong>, represents the same allowance as a schedule stored in a single timestamp, which each admission checks and advances. That makes its bookkeeping simpler to share across replicas, because the coordinator only needs to read and update one value atomically. <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a> explains both algorithms and their admission decisions in more depth. Here we will use GCRA and work through what happens when that timestamp moves into shared storage.</p>
+<p>The <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/">distributed circuit breaker</a> and <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">distributed bulkhead</a> articles established how to put shared state behind a key and make decisions where that state lives. They also dealt with what happens when the coordinator becomes unreachable. We will use the same approach here, with code from the Redis implementation in <a href="https://github.com/gkoos/caracal">Caracal</a>, and concentrate on what changes when the shared state represents a rate allowance.</p>
+<p>Of these mechanisms, the rate limiter has the least state to distribute: one timestamp, with no permit holder whose death would leave something to reclaim. Its idle state can expire without a cleanup worker. That simplicity puts more weight on the clock, because every admission depends on comparing the stored schedule with the current time. Once Redis makes that comparison for the whole fleet, its clock determines when your service may send the next call.</p>
+<h2 id="what-a-rate-limit-is" tabindex="-1"><a class="header-anchor" href="#what-a-rate-limit-is">What a rate limit is</a></h2>
+<p>A rate limit bounds how quickly calls may start, while a <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">bulkhead</a> bounds how many may be in flight at once. If your service keeps admitting 100 calls a second while the API takes progressively longer to answer, unfinished calls accumulate even though you remain within the rate budget. A concurrency limit addresses that separate problem, and the two controls can work together around the same dependency. For rate limiting, GCRA keeps the admission schedule in a single theoretical arrival time (TAT), as described in the <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">algorithm article</a>. We will carry its <code>rate</code> and <code>burst</code> settings into the distributed implementation and examine their interaction in <a href="#the-settings-are-not-independent">The settings are not independent</a>. First, the local implementation gives us the exact state transition that every replica will need to share.</p>
+<h2 id="the-in-process-rate-limiter" tabindex="-1"><a class="header-anchor" href="#the-in-process-rate-limiter">The in-process rate limiter</a></h2>
+<p>Caracal's local limiter keeps <code>let tat = 0</code> in the policy instance's closure, alongside the timing values calculated from its configuration. The complete <code>execute</code> method is small enough to show here, including the cancellation check and runtime events:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">async</span> <span class="token generic-function"><span class="token function">execute</span><span class="token generic class-name"><span class="token operator">&lt;</span>Result<span class="token operator">></span></span></span><span class="token punctuation">(</span>
+  context<span class="token operator">:</span> ExecutionContext<span class="token punctuation">,</span>
+  next<span class="token operator">:</span> Next<span class="token operator">&lt;</span>Result<span class="token operator">></span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span><span class="token operator">:</span> <span class="token builtin">Promise</span><span class="token operator">&lt;</span>Result<span class="token operator">></span> <span class="token punctuation">{</span>
+  <span class="token function">admissionSignal</span><span class="token punctuation">(</span>context<span class="token punctuation">)</span><span class="token operator">?.</span><span class="token function">throwIfAborted</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">const</span> now <span class="token operator">=</span> Date<span class="token punctuation">.</span><span class="token function">now</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
+  <span class="token keyword">const</span> anchored <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>tat<span class="token punctuation">,</span> now<span class="token punctuation">)</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>anchored <span class="token operator">-</span> now <span class="token operator">></span> burstDelayMs<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">const</span> retryAfterMs <span class="token operator">=</span> anchored <span class="token operator">-</span> burstDelayMs <span class="token operator">-</span> now
+    <span class="token function">event</span><span class="token punctuation">(</span>
+      context<span class="token punctuation">,</span>
+      <span class="token string">"local"</span><span class="token punctuation">,</span>
+      name<span class="token punctuation">,</span>
+      <span class="token string">"process"</span><span class="token punctuation">,</span>
+      <span class="token string">"rejected"</span><span class="token punctuation">,</span>
+      retryAfterMs<span class="token punctuation">,</span>
+      <span class="token string">"rate-exceeded"</span><span class="token punctuation">,</span>
+    <span class="token punctuation">)</span>
+    <span class="token keyword">throw</span> <span class="token keyword">new</span> <span class="token class-name">RateLimitExceededError</span><span class="token punctuation">(</span><span class="token string">"local"</span><span class="token punctuation">,</span> name<span class="token punctuation">,</span> <span class="token string">"process"</span><span class="token punctuation">,</span> retryAfterMs<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+  tat <span class="token operator">=</span> anchored <span class="token operator">+</span> emissionIntervalMs
+  <span class="token function">event</span><span class="token punctuation">(</span>context<span class="token punctuation">,</span> <span class="token string">"local"</span><span class="token punctuation">,</span> name<span class="token punctuation">,</span> <span class="token string">"process"</span><span class="token punctuation">,</span> <span class="token string">"admitted"</span><span class="token punctuation">)</span>
+  <span class="token keyword">return</span> <span class="token keyword">await</span> <span class="token function">next</span><span class="token punctuation">(</span>context<span class="token punctuation">)</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span>
+</code></pre>
+<p>The admission path reads and advances one variable before handing control to the next policy or the operation itself. There is no <code>await</code> between reading <code>tat</code> and updating it, so executions sharing this policy instance cannot interleave that decision on the JavaScript event loop. A rejected call leaves the timestamp untouched and receives a <code>RateLimitExceededError</code> carrying the retry delay. The limiter itself does not queue the call or arrange another attempt.</p>
+<p>For a small example, set the burst to three and keep the rate at 100 calls a second. Three calls can start together, but a fourth at the same instant must wait for the next 10 ms interval, as the sequence below shows.</p>
+<p><img src="01.svg" alt="A local GCRA limiter admitting three calls at time zero, rejecting a fourth, and admitting another call at each 10 ms interval while updating one timestamp"></p>
+<p><em>The local allowance lives in one timestamp inside one policy instance. Rejection leaves that timestamp unchanged.</em></p>
+<p>The <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#the-in-process-bulkhead">local bulkhead</a> needed an occupancy counter and a queue for waiting calls, while the circuit breaker kept a window of outcomes. Here, the schedule contains all the admission state, and completion requires no <code>finally</code> block to release anything. Whether the admitted call succeeds or fails, the timestamp has already advanced.</p>
+<p>That state belongs to one policy instance, so twenty replicas with separate instances still admit twenty times the configured sustained rate. To enforce the shared budget, every replica must perform this same read-and-advance operation against the same stored timestamp.</p>
+<h2 id="moving-the-cell-out-of-the-process" tabindex="-1"><a class="header-anchor" href="#moving-the-cell-out-of-the-process">Moving the cell out of the process</a></h2>
+<p>The shared implementation keeps the same admission rule, with Redis storing the timestamp and executing the comparison. Before looking at the script, we need to establish which calls share that timestamp and what an admission leaves behind.</p>
+<h3 id="whose-rate-is-it" tabindex="-1"><a class="header-anchor" href="#whose-rate-is-it">Whose rate is it</a></h3>
+<p>The <code>scope</code> function maps an execution to a string, and the coordinator combines it with the namespace, policy name and operation name to identify the stored cell. This follows the key selection described in the <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#whose-window-is-it">circuit breaker</a> and <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#whose-limit-is-it">bulkhead</a> articles. Every replica enforcing the same budget must resolve to the same identity, including the operation name: matching scope strings alone do not combine budgets across different operations.</p>
+<p>For a rate limiter, that identity also determines who shares the burst allowance. With <code>burst: 20</code>, twenty replicas sharing a cell can admit twenty calls together after sufficient idle time, in whatever distribution reaches Redis first. One busy replica can consume that entire allowance, because the shared schedule provides no fairness between replicas. Use stable, non-secret scope values with bounded cardinality so that incoming traffic cannot create an unrestricted number of independent budgets.</p>
+<p>The diagram separates admission traffic from the downstream call. Redis returns a decision to the requesting replica, and that replica contacts the API only after it receives permission.</p>
+<p><img src="02.svg" alt="Three replicas sharing one Redis GCRA cell and a fleet-wide burst of twenty, with only admitted replicas sending requests to the partner API"></p>
+<p><em>Every replica shares the same allowance. Redis coordinates admission; the replicas send the API requests.</em></p>
+<h3 id="one-cell%2C-nothing-to-own" tabindex="-1"><a class="header-anchor" href="#one-cell%2C-nothing-to-own">One cell, nothing to own</a></h3>
+<p>The bulkhead needed leases because <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#a-permit-that-nobody-can-return">a dead process cannot return its permit</a>. The rate limiter has no holder to track after admission, so a process disappearing leaves no claim that another process must reclaim. Its timestamp remains valid, and elapsed time restores the allowance without any renewal or release operation.</p>
+<p>This also determines what happens to abandoned calls. Once Redis has admitted an attempt, an outer timeout cancelling that attempt does not refund its allowance, even if the downstream work never completes. Admission has already advanced the shared schedule, and the rate limiter has no settlement step that reverses it. The <code>ratelimit.admitted</code> event reports a confirmed admission, while the timestamp retains only the aggregate schedule rather than a record of individual calls.</p>
+<h3 id="the-decision-moves-to-the-data" tabindex="-1"><a class="header-anchor" href="#the-decision-moves-to-the-data">The decision moves to the data</a></h3>
+<p>The <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#reading-and-deciding-are-no-longer-one-step">read-and-decide race</a> is the same one we encountered with the breaker: separate reads and writes would let replicas spend the same allowance. Caracal moves the complete transition into this Lua script, passing the emission interval and burst delay as arguments:</p>
+<pre class="language-lua"><code class="language-lua">local emission <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span><span class="token constant">ARGV</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+local burstDelay <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span><span class="token constant">ARGV</span><span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+local t <span class="token operator">=</span> <span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'TIME'</span><span class="token punctuation">)</span>
+local now <span class="token operator">=</span> t<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">*</span> <span class="token number">1000</span> <span class="token operator">+</span> math<span class="token punctuation">.</span><span class="token function">floor</span><span class="token punctuation">(</span>t<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token operator">/</span> <span class="token number">1000</span><span class="token punctuation">)</span>
+local tat <span class="token operator">=</span> <span class="token function">tonumber</span><span class="token punctuation">(</span><span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'GET'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> or <span class="token string">'0'</span><span class="token punctuation">)</span>
+local anchored <span class="token operator">=</span> math<span class="token punctuation">.</span><span class="token function">max</span><span class="token punctuation">(</span>tat<span class="token punctuation">,</span> now<span class="token punctuation">)</span>
+<span class="token keyword">if</span> anchored <span class="token operator">-</span> now <span class="token operator">></span> burstDelay then
+  <span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token number">0</span><span class="token punctuation">,</span> anchored <span class="token operator">-</span> burstDelay <span class="token operator">-</span> now<span class="token punctuation">}</span>
+end
+local nextTat <span class="token operator">=</span> anchored <span class="token operator">+</span> emission
+<span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'SET'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> nextTat<span class="token punctuation">)</span>
+<span class="token function">redis</span><span class="token punctuation">.</span><span class="token function">call</span><span class="token punctuation">(</span><span class="token string">'PEXPIREAT'</span><span class="token punctuation">,</span> <span class="token constant">KEYS</span><span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">,</span> nextTat<span class="token punctuation">)</span>
+<span class="token keyword">return</span> <span class="token punctuation">{</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">0</span><span class="token punctuation">}</span>
+</code></pre>
+<p>The return value carries the admission flag and retry delay, which the TypeScript coordinator converts into <code>{ allowed, retryAfterMs }</code>. A rejection returns before changing the key, while an admission stores the advanced timestamp and sets its expiry in the same script execution. Other admissions cannot interleave with those steps.</p>
+<p>The breaker needed several keys to track its window and generations, and the bulkhead used a sorted set to track leased permits. This script touches one string key, so it needs no coordination between multiple keys or additional Redis Cluster placement rules. The shared key builder still supplies a hash tag, but this transition has no second key that must land beside it.</p>
+<h3 id="the-clock-is-the-whole-story" tabindex="-1"><a class="header-anchor" href="#the-clock-is-the-whole-story">The clock is the whole story</a></h3>
+<p>Every admission reads the current time from Redis, so application replicas never compare their own clocks with the shared timestamp. A schedule advanced on behalf of replica A is later read on behalf of replica B using the same Redis server's time. Clock differences between those application processes therefore do not change the admission decision.</p>
+<p>The remaining dependency is the server clock itself. The stored TAT is an absolute timestamp: moving the clock forward makes allowance available sooner, while moving it backward extends the wait against a timestamp already stored. Using one clock removes disagreement between application replicas, but admission still depends on how that clock progresses.</p>
+<p>The script also makes an explicit precision choice: it converts the seconds and microseconds returned by <code>TIME</code> into whole milliseconds. Together with Caracal's minimum emission interval of one millisecond, that limits this implementation to a configured rate of 1,000 calls a second. The <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">GCRA article</a> covers the rounding involved; the millisecond resolution here comes from the implementation's conversion.</p>
+<p>Time also provides a natural expiry point. Once the clock reaches <code>nextTat</code>, reading the old timestamp or finding no key produces the same anchor for the next admission. Setting <code>PEXPIREAT</code> to that timestamp therefore lets an idle scope's state expire without changing its future admission behaviour. There is no lease to recover and no application cleanup worker to run.</p>
+<p>For example, three admissions at time zero with a 10 ms interval leave the timestamp at 30 ms. If no more calls arrive, the key expires at that boundary; a call at 50 ms then starts from the current time, exactly as it would if the old timestamp were still present.</p>
+<p><img src="03.svg" alt="Timeline showing a shared GCRA timestamp of 30 ms expiring during an idle period, followed by a call at 50 ms anchoring at the current time and storing 60 ms"></p>
+<p><em>Once the stored schedule is in the past, retaining it and letting it expire produce the same next admission.</em></p>
+<h3 id="when-the-coordinator-itself-is-the-problem" tabindex="-1"><a class="header-anchor" href="#when-the-coordinator-itself-is-the-problem">When the coordinator itself is the problem</a></h3>
+<p>As with the <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#when-the-shared-storage-itself-fails">bulkhead's shared storage</a>, a missing record and an unanswered request mean different things. A missing key reads as zero and admits against a fresh allowance, which is the expected behaviour after idle expiry. If an active key is lost prematurely, the same rule resets its budget early, so that guarantee depends on retaining state until it is safe to expire.</p>
+<p>An unanswered admission request leaves its outcome unknown: Redis may have advanced the timestamp before the reply was lost. Caracal refuses to continue to the downstream call in that case. It emits <code>ratelimit.degraded</code> with reason <code>admission-unknown</code>, followed by <code>ratelimit.rejected</code> with reason <code>coordinator-unavailable</code>, and propagates the coordinator error. The Redis implementation wraps failures in <code>CoordinatorUnavailableError</code>, keeping them distinct from an ordinary rate rejection with a known retry delay.</p>
+<p>There is no <code>onCoordinatorError</code> option that allows the request through. Continuing without a confirmed admission would abandon the shared rate guarantee, and a local fallback would recreate the per-replica budgets discussed in the <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#when-the-coordinator-itself-is-the-problem">breaker article</a>. Refusing the call can leave an unused admission charged in Redis, but the schedule recovers as time passes.</p>
+<p>The branches below keep an ordinary rate rejection separate from a failure to confirm admission. An existing key gives the script enough state to decide, while a missing reply leaves the caller unable to establish whether the budget was charged.</p>
+<p><img src="04.svg" alt="Decision tree showing fresh admission for a missing Redis key, normal rate evaluation for an existing key, and refusal when no valid admission reply reaches the caller"></p>
+<p><em>Idle expiry restores the fresh allowance. An unanswered admission command stops the downstream call, with the coordinator failure attached.</em></p>
+<h3 id="trusting-logic-that-runs-somewhere-else" tabindex="-1"><a class="header-anchor" href="#trusting-logic-that-runs-somewhere-else">Trusting logic that runs somewhere else</a></h3>
+<p>The <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#trusting-logic-that-runs-somewhere-else">breaker's conformance testing approach</a> applies to this transition too. Caracal's <code>memory-rate-limit.ts</code> implements the same rule in TypeScript behind the single <code>command(identity, params)</code> method, with an explicit <code>setNow</code> clock for deterministic unit tests. The current tests use it to check rejection and admission exactly one millisecond later, while Redis integration tests cover expiry and refusal after disconnect. Those checks establish individual behaviours, but a generated suite comparing the two implementations would provide stronger evidence that they agree across sequences of calls.</p>
+<p>The comparison needs to cover both <code>allowed</code> and <code>retryAfterMs</code> after every command. Checking only admission would miss a limiter that rejects correctly but tells callers to retry too soon, while checking the final timestamp would miss an incorrect decision earlier in the sequence. With a rate of 100 calls a second and a burst of three, this small trace gives the suite concrete expectations:</p>
+<table>
+<thead>
+<tr>
+<th>Server time</th>
+<th>Attempt</th>
+<th>Expected reply</th>
+<th>TAT after the attempt</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 ms</td>
+<td>First three calls, in order</td>
+<td>Each allowed, retry delay 0</td>
+<td>10, then 20, then 30 ms</td>
+</tr>
+<tr>
+<td>0 ms</td>
+<td>Fourth call</td>
+<td>Rejected, retry delay 10 ms</td>
+<td>30 ms</td>
+</tr>
+<tr>
+<td>9 ms</td>
+<td>Another call</td>
+<td>Rejected, retry delay 1 ms</td>
+<td>30 ms</td>
+</tr>
+<tr>
+<td>10 ms</td>
+<td>Call at the admission boundary</td>
+<td>Allowed, retry delay 0</td>
+<td>40 ms</td>
+</tr>
+<tr>
+<td>50 ms</td>
+<td>Three calls after an idle period</td>
+<td>Each allowed, retry delay 0</td>
+<td>60, then 70, then 80 ms</td>
+</tr>
+<tr>
+<td>50 ms</td>
+<td>Fourth call at that instant</td>
+<td>Rejected, retry delay 10 ms</td>
+<td>80 ms</td>
+</tr>
+</tbody>
+</table>
+<p>Both implementations must consume the same clock values for that comparison to mean anything. Calling <code>setNow(10)</code> controls the TypeScript model, but the production Lua script still reads Redis's <code>TIME</code>; sleeping for 10 ms in the test does not make those clocks agree. A deterministic conformance harness would need a test-only way to supply the Lua transition's time while preserving its admission logic, with separate integration tests exercising the shipped script's server clock and expiry commands. That harness must also evaluate expiry against its controlled clock, because synthetic timestamps passed to the real <code>PEXPIREAT</code> would still be interpreted against Redis wall time. Without a consistent time source, a one-millisecond difference in execution can look like a logic bug exactly where the boundary assertions matter most.</p>
+<p>Generated sequences should deliberately reach those boundaries and mix identities to check that consuming one scope's allowance leaves another scope untouched. Count boundary admissions and burst exhaustion separately, and fail the run if either count stays at zero; also require an idle recovery followed by a full burst. Retaining the random seed and command trace makes a disagreement reproducible. The in-memory model keeps old timestamps rather than expiring keys, so idle recovery also checks whether that retained state behaves like Redis's missing key. Its <code>setNow</code> method rejects backward movement, leaving backward clock changes outside this model's coverage even if every generated comparison passes.</p>
+<h2 id="the-settings-are-not-independent" tabindex="-1"><a class="header-anchor" href="#the-settings-are-not-independent">The settings are not independent</a></h2>
+<p>The public settings meet in the timing values sent to Redis on every admission. Caracal calculates them as follows:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> emissionIntervalMs <span class="token operator">=</span> Math<span class="token punctuation">.</span><span class="token function">round</span><span class="token punctuation">(</span><span class="token number">1000</span> <span class="token operator">/</span> rate<span class="token punctuation">)</span>
+<span class="token keyword">const</span> burstDelayMs <span class="token operator">=</span> <span class="token punctuation">(</span>burst <span class="token operator">-</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> emissionIntervalMs
+</code></pre>
+<p>At <code>rate: 100</code> and <code>burst: 20</code>, the emission interval is 10 ms and the burst delay is 190 ms. Changing the rate also changes how far ahead the schedule may advance for that same burst size. As the <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">GCRA article</a> explains, rounding affects the sustained allowance too: <code>rate: 30</code> produces a 33 ms interval, corresponding to about 30.3 calls a second under continuous demand. Configuration accepts rates up to 1,000 calls a second, subject to the whole-millisecond representation already discussed.</p>
+<p>The burst setting applies to the entire shared identity, so adding replicas gives you more processes competing for the same allowance. If you carry <code>burst: 20</code> over from a local limiter on twenty replicas, you reduce their combined initial allowance from 400 calls to 20. Whether that is appropriate depends on the API's budget and how your traffic arrives; the number of replicas alone does not determine the right burst.</p>
+<p>Every replica sharing a cell must also use the same rate and burst settings. Redis stores only the timestamp, and each caller supplies the timing parameters for its own admission. A replica configured for 100 calls a second advances the schedule by 10 ms when admitted, while one configured for 200 advances it by 5 ms. Both can update the same key successfully, but the resulting schedule follows whichever parameters each caller supplies. A rolling deployment that changes these settings therefore needs to account for the period when old and new replicas share the cell, because the coordinator does not detect or reject that disagreement.</p>
+<p>For a controlled change, pause new admissions across the fleet and let outstanding coordinator commands finish before replacing the settings everywhere. Resume against the same key so the timestamp still accounts for the allowance already spent. That timestamp was built using the old parameters, however, so the transition follows the new admission rule against the remaining old schedule: reducing the burst can make callers wait longer, while increasing it can make more calls immediately eligible. If you need a fresh start under the new settings, keep admissions paused until the old schedule has elapsed and its key has expired before resuming. Changing the namespace or policy name during a rolling deployment creates a separate allowance, letting old and new replicas spend independent budgets. A change without a fleet-wide pause needs additional coordination, such as coordinator-owned configuration with an enforced version, which this implementation does not provide.</p>
+<p>Validation checks that the timing calculations remain safe integers and that the inputs are within their supported ranges. The <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#the-threshold-does-not-survive-the-trip-intact">breaker's threshold validation</a> could reject thresholds its stored window could not resolve; here, a numerically valid configuration can still permit a burst your dependency cannot absorb. Choosing that allowance and keeping it consistent across replicas remain deployment decisions.</p>
+<h2 id="closing" tabindex="-1"><a class="header-anchor" href="#closing">Closing</a></h2>
+<p>Distributing GCRA preserves the small state transition we started with: an admission compares the current time with a stored schedule and advances that schedule when the call is allowed. Putting the timestamp in Redis makes that decision visible to the whole fleet, provided every replica uses the same identity and settings. The server's clock then governs the allowance, and a caller that cannot confirm admission has to stop before starting the downstream work.</p>
+<p>The circuit breaker needed to preserve a history of outcomes, while the bulkhead had to account for permits held by processes that might disappear. The rate limiter carries less bookkeeping because an admission leaves no ownership to resolve. That simplicity makes the clock especially consequential: elapsed time restores the budget, and a change in the clock changes when calls become admissible.</p>
+<p>The <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">previous article</a> ended where the timestamp became shared. We now have an implementation that lets replicas spend one allowance together, with explicit behaviour when coordination fails. The complete code is in <a href="https://github.com/gkoos/caracal">Caracal</a>, including the local and Redis-backed policies and their tests, if you want to follow the transition from the in-process variable to the shared cell.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>
