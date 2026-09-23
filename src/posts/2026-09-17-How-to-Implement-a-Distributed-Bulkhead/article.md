@@ -11,6 +11,13 @@ tags:
 - distributed systems
 - resilience
 ---
+*This series explores three classic resilience patterns: circuit breakers, bulkheads, and rate limiters. We build each from its in-process foundations and examine what changes when multiple replicas must share the same decisions. The examples come from [Caracal](https://github.com/gkoos/caracal), a TypeScript resilience library with working Redis-backed implementations.*
+
+1. [How to Implement a Distributed Circuit Breaker](/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/)
+2. [How to Implement a Distributed Bulkhead](/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/)
+3. [Rate Limiting Without the Refill Loop: Token Bucket vs GCRA](/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/)
+4. [How to Implement a Distributed Rate Limiter](/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/)
+
 Say your service calls a partner API that answers in 80 ms, and you have sized it for thirty of those calls in flight at once. Then they have a slow afternoon, or your traffic doubles, and 80 ms becomes two seconds. Nothing fails and no health check notices. Every request that calls that API now holds a worker, a socket and a few hundred kilobytes of buffers while it waits for an answer, and response times climb on every endpoint - including the ones that never speak to the API at all, because the process has one worker pool and one event loop. You keep starting requests you can no longer finish, and the partner gets slower because you are sending it more.
 
 That's what a [bulkhead](https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead) is for. The name comes from shipbuilding, where a hull is divided into watertight compartments so that one flooded compartment does not sink the ship. In software it is a cap on how many calls to a dependency may be in flight at once, with everything above the cap refused immediately rather than queued. The point is containment, not throughput: a bulkhead deliberately finishes fewer requests so that the ones it does finish stay fast and the rest of the service keeps working. [Beyond Happy Path Engineering: the Network](/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/) goes through this shape of cascading failure in more detail, along with the timeouts and retry rules that belong around it.
