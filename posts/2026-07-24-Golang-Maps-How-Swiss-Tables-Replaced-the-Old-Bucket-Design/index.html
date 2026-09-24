@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790287293040" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790289531928" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -252,6 +252,7 @@ if segment exceeds thresholds, split that segment and update directory
 <p>Go cannot treat table entries as purely mechanical bytes. Keys and values may contain pointers, and pointer movement interacts with garbage collection and write barriers. Any redesign of map internals must preserve accurate pointer visibility and barrier behavior during insert, delete, grow, and iterator transitions.</p>
 <p>Segmented growth helps here too. Smaller relocation steps are easier to integrate with barriered writes and reduce the size of any single pointer-moving operation. This does not remove complexity, but it narrows blast radius and keeps runtime bookkeeping more tractable.</p>
 <p>Swiss-style metadata probing delivers the raw algorithmic win, but Go-specific adaptations — segmented growth, iterator-safe migration, and GC-barrier integration — are what make that win usable at scale in a garbage-collected, latency-sensitive runtime. The performance numbers in the next section reflect both layers working together.</p>
+<p>(The code-level rules behind those adaptations, from the triangular probe sequence and the tombstone invariant to the extendible-hashing growth steps, are in the companion <a href="https://gaborkoos.substack.com/i/208581428/go-swiss-map-internals-too-nerdy-for-the-public-article">Director's Cut</a> in the <a href="https://gaborkoos.substack.com/">import chaos newsletter</a>.)</p>
 <h2 id="performance-%26-memory-analysis-(deeper-dive)" tabindex="-1"><a class="header-anchor" href="#performance-%26-memory-analysis-(deeper-dive)">Performance &amp; Memory Analysis (Deeper Dive)</a></h2>
 <p>The easiest way to get misled by map benchmarks is to look only at a single synthetic test and assume that number transfers directly to production. For Swiss maps in Go, the public data tells a more nuanced story: the micro-level wins are real and often large, the application-level aggregate win is smaller but still positive, and a few workload shapes do regress enough to deserve attention.</p>
 <p>The official release notes for Go 1.24 report that runtime work, including the new Swiss map implementation, lowered CPU overhead by about 2 to 3 percent on average across a representative benchmark suite (<a href="https://go.dev/doc/go1.24#runtime">Go 1.24 release notes, Runtime section</a>). That is a whole-runtime number, not a map-only number, but it is useful as a reality check because it is measured across mixed workloads.</p>

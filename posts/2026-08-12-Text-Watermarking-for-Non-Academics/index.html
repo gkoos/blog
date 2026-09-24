@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790287293040" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790289531928" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -190,6 +190,7 @@ encouraging     4%
 <p>A 50,000-word document, on the other hand, presents a radically different measurement problem. It contains many opportunities for the generation process to express the same small preference. Some choices will lean away from the expected pattern, as random variation guarantees, while the aggregate can still show a persistent imbalance. The detector becomes less concerned with any single selection and more concerned with whether the observed total is plausible under ordinary generation.</p>
 <p>The intuition resembles repeated measurement. One noisy observation leaves many explanations open, while a large collection can reveal a small effect that remains invisible at the individual level. Statistical tests turn that accumulated difference into a score by comparing the observed pattern with an expected baseline. The strength of the result depends on both the size of the measured effect and the amount of usable text.</p>
 <p>Token choices are not independent observations. Each selected token becomes context for the next selection, so neighbouring choices influence one another. Topic and prompting change which vocabulary is available, while editing can remove or replace parts of the original pattern. Distribution shift creates another problem when the analysed text comes from different conditions than the text used to design or calibrate the detector.</p>
+<p>(The size of the effect and the amount of text it takes to see it are worked out in the companion <a href="https://gaborkoos.substack.com/i/211091230/directors-cut">Director's Cut</a> in the <a href="https://gaborkoos.substack.com/">import chaos newsletter</a>.)</p>
 <h2 id="engineering-the-fingerprint" tabindex="-1"><a class="header-anchor" href="#engineering-the-fingerprint">Engineering the Fingerprint</a></h2>
 <p>A watermarking system creates a stronger pattern by changing the probabilities the model already calculated. Consider a moment when the model has several reasonable ways to describe a server under load. Its original distribution could look like this:</p>
 <pre class="language-text"><code class="language-text">Normal distribution

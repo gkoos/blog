@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790287293040" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790289531928" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -218,6 +218,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>d<span class="token punctuation">.</span><span class="token function">getDate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">)</span>     <span class="token comment">// may be 20 in timezones west of UTC</span>
 </code></pre>
 <p>Same instant, different calendar day, depending on which getter you call. This is a common source of &quot;off by one day&quot; bugs in reports and date filters.</p>
+<p>(The internals behind that projection, from the stored epoch value to the host timezone data local reads depend on, are in the companion <a href="https://gaborkoos.substack.com/i/208581428/js-date-internals-i-cut-from-the-article">Director's Cut</a> in the <a href="https://gaborkoos.substack.com/">import chaos newsletter</a>.)</p>
 <p>DST adds another layer. In DST-observing timezones, some local days are 23 hours and some are 25.</p>
 <pre class="language-js"><code class="language-js"><span class="token comment">// Example outcome in America/New_York around spring-forward transition</span>
 <span class="token keyword">const</span> start <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Date</span><span class="token punctuation">(</span><span class="token string">'2026-03-08T00:00:00-05:00'</span><span class="token punctuation">)</span>
