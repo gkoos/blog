@@ -218,6 +218,8 @@ Segmented growth helps here too. Smaller relocation steps are easier to integrat
 
 Swiss-style metadata probing delivers the raw algorithmic win, but Go-specific adaptations — segmented growth, iterator-safe migration, and GC-barrier integration — are what make that win usable at scale in a garbage-collected, latency-sensitive runtime. The performance numbers in the next section reflect both layers working together.
 
+(The code-level rules behind those adaptations, from the triangular probe sequence and the tombstone invariant to the extendible-hashing growth steps, are in the companion [Director's Cut](https://gaborkoos.substack.com/i/208581428/go-swiss-map-internals-too-nerdy-for-the-public-article) in the [import chaos newsletter](https://gaborkoos.substack.com/).)
+
 ## Performance & Memory Analysis (Deeper Dive)
 
 The easiest way to get misled by map benchmarks is to look only at a single synthetic test and assume that number transfers directly to production. For Swiss maps in Go, the public data tells a more nuanced story: the micro-level wins are real and often large, the application-level aggregate win is smaller but still positive, and a few workload shapes do regress enough to deserve attention.

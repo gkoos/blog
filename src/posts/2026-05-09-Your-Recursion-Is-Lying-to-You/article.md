@@ -82,6 +82,8 @@ function fib(n) {
 
 Each call branches into two more calls, so the total number of calls grows as O(2ⁿ). (Well, more precisely, Θ(φⁿ) where φ ≈ 1.6, though it's usually approximated as O(2ⁿ) because both describe exponential growth.)  `fib(30)` already makes over a million calls; `fib(50)` is in the tens of billions. In a browser this freezes the tab long before any stack limit is reached, which makes the failure mode look identical to a stack overflow but have a completely different root cause.
 
+(The derivation behind that φ, from the recurrence to the characteristic equation, and the story of how a comment on this article caught the simplification in the first place, are in the companion [Director's Cut](https://gaborkoos.substack.com/i/209698120/directors-cut) in the [import chaos newsletter](https://gaborkoos.substack.com/).)
+
 The tail-recursive version of Fibonacci:
 
 ```js

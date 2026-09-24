@@ -102,6 +102,8 @@ For the same burst capacity $B$ as our bucket, use $\tau = (B - 1)I$. Our rate g
 
 Before the 20. call, TAT is 190 milliseconds ahead of the arrival time, exactly at the tolerance boundary. That call is admitted and pushes TAT to 200 milliseconds ahead. A twenty-first call at the same instant would be too early, so it is rejected. Configuring 200 milliseconds of tolerance would admit that extra call, giving a burst of 21 instead of 20.
 
+(That is as far as the argument needs to go in order to use the formula. The invariant that keeps the balance and the timestamp locked together for every arrival, and why the off-by-one is a width of intervals rather than a count of calls, is worked out in the companion [Director's Cut](https://gaborkoos.substack.com/i/216989922/directors-cut) in the [import chaos newsletter](https://gaborkoos.substack.com/).)
+
 ### Advancing the timestamp
 
 After an admission, update the timestamp with the following rule. A rejection leaves it unchanged, so repeated unsuccessful attempts do not push eligibility further into the future.

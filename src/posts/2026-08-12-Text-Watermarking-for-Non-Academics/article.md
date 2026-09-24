@@ -122,6 +122,8 @@ The intuition resembles repeated measurement. One noisy observation leaves many 
 
 Token choices are not independent observations. Each selected token becomes context for the next selection, so neighbouring choices influence one another. Topic and prompting change which vocabulary is available, while editing can remove or replace parts of the original pattern. Distribution shift creates another problem when the analysed text comes from different conditions than the text used to design or calibrate the detector.
 
+(The size of the effect and the amount of text it takes to see it are worked out in the companion [Director's Cut](https://gaborkoos.substack.com/i/211091230/directors-cut) in the [import chaos newsletter](https://gaborkoos.substack.com/).)
+
 ## Engineering the Fingerprint
 
 A watermarking system creates a stronger pattern by changing the probabilities the model already calculated. Consider a moment when the model has several reasonable ways to describe a server under load. Its original distribution could look like this:

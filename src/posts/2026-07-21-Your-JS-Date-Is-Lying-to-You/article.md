@@ -172,6 +172,8 @@ console.log(d.getDate())     // may be 20 in timezones west of UTC
 
 Same instant, different calendar day, depending on which getter you call. This is a common source of "off by one day" bugs in reports and date filters.
 
+(The internals behind that projection, from the stored epoch value to the host timezone data local reads depend on, are in the companion [Director's Cut](https://gaborkoos.substack.com/i/208581428/js-date-internals-i-cut-from-the-article) in the [import chaos newsletter](https://gaborkoos.substack.com/).)
+
 DST adds another layer. In DST-observing timezones, some local days are 23 hours and some are 25.
 
 ```js
