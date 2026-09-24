@@ -3,6 +3,8 @@ import path from 'path';
 const ARTICLE_FILE = 'article.md';
 
 export default {
+  // Include these pages in the Pagefind search index.
+  pagefindBody: true,
   permalink: (data) => {
     const inputPath = data.page?.inputPath || '';
     // Only article.md is published as a post. Other markdown files that live
