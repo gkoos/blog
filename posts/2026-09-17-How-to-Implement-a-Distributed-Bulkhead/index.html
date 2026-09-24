@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790285906609" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790286096318" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -116,6 +116,7 @@
 <li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
 <li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
 <li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
+<li><a href="/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a></li>
 </ol>
 <p>Say your service calls a partner API that answers in 80 ms, and you have sized it for thirty of those calls in flight at once. Then they have a slow afternoon, or your traffic doubles, and 80 ms becomes two seconds. Nothing fails and no health check notices. Every request that calls that API now holds a worker, a socket and a few hundred kilobytes of buffers while it waits for an answer, and response times climb on every endpoint - including the ones that never speak to the API at all, because the process has one worker pool and one event loop. You keep starting requests you can no longer finish, and the partner gets slower because you are sending it more.</p>
 <p>That's what a <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/bulkhead">bulkhead</a> is for. The name comes from shipbuilding, where a hull is divided into watertight compartments so that one flooded compartment does not sink the ship. In software it is a cap on how many calls to a dependency may be in flight at once, with everything above the cap refused immediately rather than queued. The point is containment, not throughput: a bulkhead deliberately finishes fewer requests so that the ones it does finish stay fast and the rest of the service keeps working. <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a> goes through this shape of cascading failure in more detail, along with the timeouts and retry rules that belong around it.</p>

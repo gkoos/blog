@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790285906609" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790286096318" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,6 +118,7 @@
 <li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
 <li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
 <li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
+<li><a href="/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a></li>
 </ol>
 <p>You run a service on twenty replicas that all call the same API, with a shared budget of 100 calls a second. You need <strong>rate limiting</strong> across the whole fleet so that adding capacity to your service does not overwhelm the callee. Giving each replica its own limit of 100 calls a second allows 2,000 calls a second under sustained demand, so every admission needs to account for traffic sent by the other replicas.</p>
 <p>The usual first idea is a <strong>token bucket</strong>: tokens accumulate at a fixed rate up to a maximum capacity, and each call spends one before it starts. The <strong>Generic Cell Rate Algorithm</strong>, or <strong>GCRA</strong>, represents the same allowance as a schedule stored in a single timestamp, which each admission checks and advances. That makes its bookkeeping simpler to share across replicas, because the coordinator only needs to read and update one value atomically. <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a> explains both algorithms and their admission decisions in more depth. Here we will use GCRA and work through what happens when that timestamp moves into shared storage.</p>

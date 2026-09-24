@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790285906609" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790286096318" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -116,7 +116,7 @@
 <li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
 <li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
 <li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
-<li>How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</li>
+<li><a href="/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a></li>
 </ol>
 <p>Your service runs on twenty replicas that all call the same API. Following the earlier articles, you have given them a shared rate budget of 100 calls a second, with a burst allowance of 20. A distributed bulkhead caps concurrent calls at 20, and a circuit breaker records their outcomes so the fleet can stop calling when the API starts failing. Under normal load, the partner answers in about 80 ms and requests pass through all the policies nicely.</p>
 <p>Then response times rise to two seconds, while the calls continue to succeed within their timeout. The rate limiter still permits its configured admission rate, but at 100 calls a second, two-second calls would require about 200 calls in flight once traffic settled into a steady flow. The bulkhead allows only 20, so with every slot occupied for two seconds, the service completes about ten calls a second and sheds the excess. These figures describe steady traffic with a fixed call duration; bursts and varying response times change when the slots fill. The failure-based breaker remains closed because the calls that reach the partner keep succeeding.</p>
