@@ -8,6 +8,7 @@ tags:
 - posts
 - tutorials
 - golang
+- series--Golang Deep Dives
 ---
 
 # Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea

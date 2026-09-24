@@ -11,6 +11,7 @@ tags:
 - debugging
 - devtools
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 Open your browser DevTools and run this:
 

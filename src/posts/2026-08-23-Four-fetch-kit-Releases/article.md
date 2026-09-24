@@ -9,7 +9,7 @@ tags:
 - announcements
 - javascript
 - typescript
-- go
+- golang
 - fetch-kit
 ---
 Four fetch-kit releases are out:

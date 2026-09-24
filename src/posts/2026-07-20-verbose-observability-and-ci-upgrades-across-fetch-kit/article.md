@@ -9,7 +9,7 @@ tags:
 - announcements
 - javascript
 - typescript
-- go
+- golang
 - fetch-kit
 ---
 Two releases and a round of release-pipeline work across the fetch-kit ecosystem.

@@ -12,6 +12,7 @@ tags:
 - software architecture
 - storage
 - beyond happy path engineering
+- series--Beyond Happy Path Engineering
 ---
 *Most software is first built under unusually friendly conditions. On a developer machine, the database is nearby, the network is quiet, the service you need is running, the test user behaves sensibly, the clock moves forward, the queue drains, the deployment finishes, and the request succeeds. Those conditions are useful. They let us build the first version of a thing without having to simulate all of production at once.*
 

@@ -13,6 +13,7 @@ tags:
 - esm
 - commonjs
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 *Featured in [Javascript Weekly - 2026-08-25](https://javascriptweekly.com/issues/799) and [Node Weekly - 2026-08-27](https://nodeweekly.com/issues/638)*
 

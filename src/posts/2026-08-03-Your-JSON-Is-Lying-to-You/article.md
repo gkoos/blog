@@ -11,6 +11,7 @@ tags:
 - json
 - serialization
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 *Featured in [TLDR IT - 2026-08-04](https://tldr.tech/it/2026-08-04) and in [Javascript Weekly - 2026-08-04](https://javascriptweekly.com/issues/797)*
 

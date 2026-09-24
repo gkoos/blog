@@ -8,6 +8,7 @@ tags:
 - posts
 - database zoo
 - databases
+- series--The Database Zoo
 ---
 ## Introduction / Context
 

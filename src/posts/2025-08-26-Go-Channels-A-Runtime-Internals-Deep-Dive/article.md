@@ -9,6 +9,7 @@ tags:
 - tutorials
 - golang
 - concurrency
+- series--Golang Deep Dives
 ---
 Go channels are one of the language's signature features. They provide a structured way for goroutines to communicate and coordinate. Instead of manually sharing memory and managing locks, channels let goroutines send and receive values directly, ensuring that data is transferred correctly and synchronization is handled automatically.
 

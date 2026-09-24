@@ -8,6 +8,7 @@ tags:
 - posts
 - tutorials
 - golang
+- series--Golang Deep Dives
 ---
 *Featured in [Go Weekly #601](https://golangweekly.com/issues/601)*
 

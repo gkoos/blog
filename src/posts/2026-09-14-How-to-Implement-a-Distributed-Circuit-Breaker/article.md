@@ -10,6 +10,7 @@ tags:
 - typescript
 - distributed systems
 - resilience
+- series--Distributed Resilience
 ---
 *Featured in [Node Weekly - 2026-09-17](https://nodeweekly.com/issues/641)*
 

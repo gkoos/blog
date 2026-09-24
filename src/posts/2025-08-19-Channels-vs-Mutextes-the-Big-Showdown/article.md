@@ -9,6 +9,7 @@ tags:
 - tutorials
 - golang
 - concurrency
+- series--Golang Deep Dives
 ---
 Concurrency is Go's crown jewel - goroutines and channels make concurrent programming feel almost magical. But not every problem belongs in a channel. Many developers fall into the trap of overusing channels or misusing mutexes, resulting in slow, buggy, or unmaintainable code. In this article, we'll demystify **when to use channels and when to use mutexes**, and why blindly following "Go concurrency patterns" can backfire.
 

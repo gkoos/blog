@@ -9,6 +9,7 @@ tags:
 - tutorials
 - golang
 - concurrency
+- series--Golang Deep Dives
 ---
 So you've learned everything about Go's goroutines and channels, and you're excited to dive into concurrent programming. But wait! Before you start spawning thousands of goroutines, let's take a step back and understand how to do this efficiently. In this article, we'll explore the concept of a _worker pool_ and how it can help you manage concurrency in Go without overwhelming your system.
 

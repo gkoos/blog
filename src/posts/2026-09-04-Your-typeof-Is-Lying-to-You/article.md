@@ -12,6 +12,7 @@ tags:
 - typeof
 - runtime
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 Years ago in a job interview I was asked what `typeof typeof 2` was. I answered `"string"`. I was right, but I wasn't confident. `typeof 2` is `"number"`, and `typeof "number"` is `"string"`. I got the job, and the question stuck with me.
 

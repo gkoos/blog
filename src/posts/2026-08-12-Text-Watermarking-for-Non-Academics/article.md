@@ -11,7 +11,7 @@ tags:
 - language models
 - text watermarking
 - provenance
-- AI detection
+- ai detection
 ---
 *Anthropic has just announced [how Claude marks AI-generated content](https://support.claude.com/en/articles/16266773-how-claude-marks-ai-generated-content), bringing text watermarking into immediate practical discussion. A watermark in plain text is less intuitive than one in an image or a file because copied text appears to leave its provenance behind. These two articles examine the mechanism and its implications. This first article explains how statistical text watermarking works from first principles, the [second](/posts/2026-08-12-What-Does-a-Text-Watermark-Actually-Prove) examines what detecting such a watermark would allow us to conclude.*
 

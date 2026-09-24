@@ -9,6 +9,7 @@ tags:
 - tutorials
 - javascript
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 *Featured in [Node Weekly #624](https://nodeweekly.com/issues/624)* and [Javascript Weekly - 2026-06-02](https://javascriptweekly.com/issues/788)*
 

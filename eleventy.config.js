@@ -16,7 +16,7 @@ export default function (eleventyConfig) {
   // Add a 'filterTags' filter to remove system tags
   eleventyConfig.addFilter('filterTags', function(tags, systemTags = ["posts", "all", "page"]) {
     if (!Array.isArray(tags)) return [];
-    return tags.filter(tag => !systemTags.includes(tag));
+    return tags.filter(tag => !systemTags.includes(tag) && !String(tag).startsWith('series--'));
   });
 
   // Add a 'toDate' filter to ensure a value is a Date object (simple version)

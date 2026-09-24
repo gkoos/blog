@@ -12,6 +12,7 @@ tags:
 - software architecture
 - time
 - beyond happy path engineering
+- series--Beyond Happy Path Engineering
 ---
 *Featured in [TLDR Dev - 2026-07-22](https://tldr.tech/dev/2026-07-22) and [Pointer #735](https://www.pointer.io/archives/post_94eb1316-ef73-4f82-8579-70be294baa03/)*
 

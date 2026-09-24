@@ -9,6 +9,7 @@ tags:
 - tutorials
 - javascript
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 [Throttling](https://www.geeksforgeeks.org/javascript/javascript-throttling/) is a fundamental technique for controlling the frequency of function calls in response to high-frequency events. Like [debounce](https://www.geeksforgeeks.org/javascript/debouncing-in-javascript/), it's a common tool in the frontend developer's toolkit.
 

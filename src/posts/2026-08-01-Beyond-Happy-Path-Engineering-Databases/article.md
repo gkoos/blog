@@ -12,6 +12,7 @@ tags:
 - software architecture
 - databases
 - beyond happy path engineering
+- series--Beyond Happy Path Engineering
 ---
 *Featured in [TLDR Data - 2026-08-03](https://tldr.tech/data/2026-08-03) and [Pointer #741](https://www.pointer.io/archives/post_b548ea9f-be30-4703-8ba1-54dc34932625/)*
 

@@ -7,6 +7,7 @@ excerpt: "A token bucket tracks available credit; GCRA tracks a schedule. With c
 tags:
 - posts
 - algorithms
+- series--Distributed Resilience
 ---
 *This series explores three classic resilience patterns: circuit breakers, bulkheads, and rate limiters. We build each from its in-process foundations and examine what changes when multiple replicas must share the same decisions. The examples come from [Caracal](https://github.com/gkoos/caracal), a TypeScript resilience library with working Redis-backed implementations.*
 

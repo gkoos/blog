@@ -10,6 +10,7 @@ tags:
 - javascript
 - networking
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 If you write frontend or Node.js code long enough, you eventually hit the same reliability wall: the network is fine in local testing, then production adds latency spikes, occasional 5xx responses, rate limits, and weird timing behavior that only appears under load.
 

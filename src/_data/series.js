@@ -2,7 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
 
-export default function() {
+const SERIES_PREFIX = 'series--';
+
+export default function () {
   const postsDir = path.resolve('./src/posts');
   const files = [];
 
@@ -21,29 +23,35 @@ export default function() {
   }
 
   collectArticleFiles(postsDir);
-  const tagMap = {};
-  const posts = [];
+
+  const seriesMap = new Map();
 
   for (const file of files) {
     const content = fs.readFileSync(file, 'utf8');
     const { data } = matter(content);
     if (!data.tags || !Array.isArray(data.tags)) continue;
-    // Always include the post, but filter out 'posts' and series markers from display and counting
-    const filteredTags = data.tags.filter(t => t !== 'posts' && !String(t).startsWith('series--'));
+    const seriesTags = data.tags.filter((tag) => typeof tag === 'string' && tag.startsWith(SERIES_PREFIX));
+    if (seriesTags.length === 0) continue;
     const slug = path.basename(path.dirname(file));
-    posts.push({
+    const post = {
       title: data.title || slug,
       date: data.date ? new Date(data.date) : new Date(0),
       url: `/posts/${slug}/`,
-      tags: filteredTags,
-    });
-    for (const tag of filteredTags) {
-      tagMap[tag] = (tagMap[tag] || 0) + 1;
+    };
+    for (const seriesTag of seriesTags) {
+      const title = seriesTag.slice(SERIES_PREFIX.length).trim();
+      if (!title) continue;
+      if (!seriesMap.has(title)) seriesMap.set(title, []);
+      seriesMap.get(title).push(post);
     }
   }
 
-  return {
-    categories: Object.entries(tagMap).map(([tag, count]) => ({ tag, count })).sort((a, b) => a.tag.localeCompare(b.tag)),
-    posts: posts.sort((a, b) => b.date - a.date),
-  };
+  return [...seriesMap.entries()]
+    .map(([title, posts]) => {
+      // Within a series: chronological (oldest first)
+      const sorted = posts.slice().sort((a, b) => a.date - b.date);
+      return { title, firstDate: sorted[0].date, posts: sorted };
+    })
+    // Across series: newest first by the first part's publish date
+    .sort((a, b) => b.firstDate - a.firstDate);
 }

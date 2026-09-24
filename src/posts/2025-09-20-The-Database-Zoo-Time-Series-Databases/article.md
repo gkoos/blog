@@ -8,6 +8,7 @@ tags:
 - posts
 - database zoo
 - databases
+- series--The Database Zoo
 ---
 *This post is part of* [The Database Zoo: Exotic Data Storage Engines](/categories/?tag=database%20zoo) *, a series exploring purpose-built databases engineered for specific workloads. Each post dives into a different type of specialized engine, explaining the problem it solves, the design decisions behind its architecture, how it stores and queries data efficiently, and real-world use cases. The goal is to show not just what these databases are, but why they exist and how they work under the hood.*
 

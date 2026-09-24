@@ -9,6 +9,7 @@ tags:
 - announcements
 - database zoo
 - databases
+- series--The Database Zoo
 ---
 Over the past year I've been writing a series called [The Database Zoo](/categories/?tag=database%20zoo), exploring the growing ecosystem of modern databases. The idea behind the series was simple: instead of treating "the database" as a single category, look at the different species that exist today - probabilistic databases, time-series systems, vector databases, and more - and understand why they were built and what problems they solve.
 

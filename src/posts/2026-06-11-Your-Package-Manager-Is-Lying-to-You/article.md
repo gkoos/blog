@@ -15,6 +15,7 @@ tags:
 - deno
 - tooling
 - "... is lying to you"
+- series--JavaScript Is Lying to You
 ---
 Package managers are usually treated as interchangeable tooling: install dependencies, commit the lockfile, and move on. In that framing, the only question that seems to matter is performance.
 

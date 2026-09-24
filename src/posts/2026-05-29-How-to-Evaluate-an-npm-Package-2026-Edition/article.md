@@ -9,7 +9,7 @@ tags:
 - javascript
 - npm
 - security
-- open-source
+- open source
 ---
 *Featured in [Javascript Weekly - 2026-06-02](https://javascriptweekly.com/issues/788) and [Node Weekly - 2026-06-04](https://nodeweekly.com/issues/627)*
 
