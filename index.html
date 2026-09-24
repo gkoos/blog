@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>import chaos</title>
   <meta name="description" content="The edge cases of software engineering.">
-  <meta name="algolia-site-verification" content="9F2FBEE971F8B46C" />
 
   <!-- Facebook Meta Tags -->
   <meta property="og:url" content="https://gaborkoos.com">
@@ -30,7 +29,7 @@
   
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1790202757683" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790285906609" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -67,6 +66,7 @@
         <!-- Navigation Links -->
         <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
           <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="/series" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Series</a>
           <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
           <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
           <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
@@ -123,6 +123,48 @@
 
 <!-- Posts Grid -->
 <div class="space-y-12">
+  
+    <article class="border-b border-gray-100 pb-12 last:border-b-0">
+      <div class="group">
+        <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4 group-hover:text-gray-700 transition-colors">
+          <a href="/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/" class="hover:no-underline">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a>
+        </h2>
+        
+        <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+          <time datetime="2027-09-25T00:00:00.000Z">Sat Sep 25 2027</time>
+          
+          
+            <span class="text-gray-300">•</span>
+            <div class="flex flex-wrap gap-2">
+              
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+              
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+              
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+              
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">resilience</div>
+              
+            </div>
+          
+        </div>
+        
+        <div class="text-gray-600 leading-relaxed">
+          
+            <p>A rate limiter admits a request, then a full bulkhead refuses it. The API receives no call, but the rate allowance has already been spent. Put the policies in the opposite order and a concurrency permit is held while the rate limiter decides. Each arrangement accounts for different work, and that choice shapes how the system behaves under load.</p>
+          
+        </div>
+        
+        <div class="mt-6">
+          <a href="/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/" class="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors">
+            Read more
+            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </article>
   
     <article class="border-b border-gray-100 pb-12 last:border-b-0">
       <div class="group">
@@ -483,7 +525,7 @@
               
                 <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
               
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">go</div>
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">golang</div>
               
                 <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">fetch-kit</div>
               
@@ -661,7 +703,7 @@
               
                 <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">provenance</div>
               
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">AI detection</div>
+                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">ai detection</div>
               
             </div>
           
@@ -719,52 +761,6 @@
         
         <div class="mt-6">
           <a href="/posts/2026-08-12-What-Does-a-Text-Watermark-Actually-Prove/" class="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors">
-            Read more
-            <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-            </svg>
-          </a>
-        </div>
-      </div>
-    </article>
-  
-    <article class="border-b border-gray-100 pb-12 last:border-b-0">
-      <div class="group">
-        <h2 class="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-gray-100 mb-4 group-hover:text-gray-700 transition-colors">
-          <a href="/posts/2026-08-11-Beyond-Happy-Path-Engineering-Storage/" class="hover:no-underline">Beyond Happy Path Engineering: Storage</a>
-        </h2>
-        
-        <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
-          <time datetime="2026-08-11T00:00:00.000Z">Tue Aug 11 2026</time>
-          
-          
-            <span class="text-gray-300">•</span>
-            <div class="flex flex-wrap gap-2">
-              
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">tutorials</div>
-              
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">reliability</div>
-              
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
-              
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">software architecture</div>
-              
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">storage</div>
-              
-                <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">beyond happy path engineering</div>
-              
-            </div>
-          
-        </div>
-        
-        <div class="text-gray-600 leading-relaxed">
-          
-            <p>Saving a file looks simple until the database and object store disagree. An upload can leave orphaned bytes or a broken record, a deleted object can remain cached, and a presigned URL can outlive the permission that created it. This article examines how to design storage workflows with explicit states, stable keys, direct uploads, reconciliation, and recoverable deletion.</p>
-          
-        </div>
-        
-        <div class="mt-6">
-          <a href="/posts/2026-08-11-Beyond-Happy-Path-Engineering-Storage/" class="inline-flex items-center text-sm font-medium text-gray-900 hover:text-gray-700 transition-colors">
             Read more
             <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

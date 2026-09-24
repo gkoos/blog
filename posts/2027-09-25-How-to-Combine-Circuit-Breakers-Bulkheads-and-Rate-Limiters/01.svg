@@ -1,0 +1,46 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="500" viewBox="0 0 960 500" role="img" aria-labelledby="title desc">
+<title id="title">Admission without a downstream call</title>
+<desc id="desc">Admission proceeds from a rate limiter to a bulkhead and then an open circuit breaker. The limiter charges one admission and the bulkhead acquires a permit. The breaker rejects before the API starts. The rejection returns through the bulkhead, releasing its permit, and through the limiter, whose charge remains. This is a general composition.</desc>
+<defs>
+<marker id="forward" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker>
+<marker id="return" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#c37a68"/></marker>
+</defs>
+<rect width="960" height="500" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="40" text-anchor="middle" font-size="23" font-weight="700">Admission without a downstream call</text>
+<text x="480" y="69" text-anchor="middle" font-size="16" fill="#53646d">General composition · admission moves right; rejection returns left</text>
+<text x="35" y="110" font-size="15" font-weight="700">Admission</text>
+<rect x="35" y="130" width="200" height="125" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="135" y="161" text-anchor="middle" font-size="19" font-weight="700">Rate limiter</text>
+<text x="135" y="194" text-anchor="middle" font-size="16">Admission charged</text>
+<text x="135" y="224" text-anchor="middle" font-size="15" fill="#53646d">Schedule advances</text>
+<path d="M235 192 H261" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#forward)"/>
+<rect x="270" y="130" width="200" height="125" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="370" y="161" text-anchor="middle" font-size="19" font-weight="700">Bulkhead</text>
+<text x="370" y="194" text-anchor="middle" font-size="16">Permit acquired</text>
+<text x="370" y="224" text-anchor="middle" font-size="15" fill="#53646d">One slot occupied</text>
+<path d="M470 192 H496" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#forward)"/>
+<rect x="505" y="130" width="200" height="125" rx="10" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+<text x="605" y="161" text-anchor="middle" font-size="19" font-weight="700">Circuit breaker</text>
+<text x="605" y="194" text-anchor="middle" font-size="16">Open: rejected</text>
+<text x="605" y="224" text-anchor="middle" font-size="15" fill="#53646d">Stops this request</text>
+<path d="M715 181 L732 202 M732 181 L715 202" stroke="#c37a68" stroke-width="2.5"/>
+<rect x="750" y="130" width="175" height="125" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="837" y="161" text-anchor="middle" font-size="19" font-weight="700">Partner API</text>
+<text x="837" y="194" text-anchor="middle" font-size="16">Never reached</text>
+<text x="837" y="224" text-anchor="middle" font-size="15" fill="#53646d">0 calls started</text>
+<path d="M605 255 V315 H473" fill="none" stroke="#c37a68" stroke-width="2.5" marker-end="url(#return)"/>
+<text x="548" y="294" text-anchor="middle" font-size="14" fill="#53646d">Rejection returns</text>
+<rect x="270" y="280" width="200" height="80" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="370" y="311" text-anchor="middle" font-size="17" font-weight="700">Permit released</text>
+<text x="370" y="340" text-anchor="middle" font-size="15" fill="#53646d">Slot available again</text>
+<path d="M270 320 H238" fill="none" stroke="#c37a68" stroke-width="2.5" marker-end="url(#return)"/>
+<rect x="35" y="280" width="200" height="80" rx="10" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+<text x="135" y="311" text-anchor="middle" font-size="17" font-weight="700">Charge remains</text>
+<text x="135" y="340" text-anchor="middle" font-size="15" fill="#53646d">No refund step</text>
+<rect x="35" y="395" width="890" height="70" rx="10" fill="#eef2f4" stroke="#b4c0c6"/>
+<text x="480" y="436" text-anchor="middle" font-size="16">After rejection: one rate admission spent, no permit held, no API call.</text>
+</g>
+</svg>
+
+

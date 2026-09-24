@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-labelledby="title desc">
+<title id="title">The caller times out while capacity remains occupied</title>
+<desc id="desc">Four lanes show the caller, the adapter, the bulkhead permit, and the rate admission over time. The caller waits until its deadline and then gives up. The adapter continues past the deadline because it does not support abort, so the bulkhead permit stays held until the adapter settles. The rate admission is charged once and remains spent. A retry would start a new admission with a new rate charge and a new permit.</desc>
+<rect width="960" height="600" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="40" text-anchor="middle" font-size="23" font-weight="700">The caller times out while capacity remains occupied</text>
+<text x="480" y="69" text-anchor="middle" font-size="16" fill="#53646d">Each lane shows one resource over time · the deadline fires while the call and the permit continue</text>
+
+<text x="30" y="156" font-size="16" font-weight="700">Caller</text>
+<text x="30" y="246" font-size="16" font-weight="700">Adapter</text>
+<text x="30" y="336" font-size="16" font-weight="700">Bulkhead permit</text>
+<text x="30" y="426" font-size="16" font-weight="700">Rate admission</text>
+
+<rect x="200" y="130" width="360" height="40" rx="8" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="380" y="156" text-anchor="middle" font-size="14" fill="#53646d">waits for the response</text>
+<rect x="200" y="220" width="620" height="40" rx="8" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="510" y="246" text-anchor="middle" font-size="14" fill="#53646d">call continues after the deadline (abort unsupported)</text>
+<rect x="200" y="310" width="620" height="40" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="510" y="336" text-anchor="middle" font-size="14" fill="#53646d">held until the adapter settles</text>
+<rect x="200" y="400" width="48" height="40" rx="8" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="224" y="426" text-anchor="middle" font-size="13" font-weight="700">charged</text>
+<text x="300" y="426" font-size="14" fill="#53646d">remains spent; no refund</text>
+
+<line x1="560" y1="105" x2="560" y2="175" stroke="#c37a68" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="560" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#c37a68">caller deadline</text>
+<text x="560" y="195" text-anchor="middle" font-size="13" fill="#c37a68">caller gives up</text>
+<line x1="820" y1="195" x2="820" y2="355" stroke="#53646d" stroke-width="2"/>
+<text x="820" y="100" text-anchor="middle" font-size="13" font-weight="700" fill="#53646d">adapter settles</text>
+
+<rect x="25" y="480" width="890" height="78" rx="10" fill="#eef2f4" stroke="#b4c0c6"/>
+<text x="470" y="512" text-anchor="middle" font-size="14" fill="#53646d">The caller gives up at the deadline; the permit and the rate charge both survive.</text>
+<text x="470" y="536" text-anchor="middle" font-size="14" fill="#53646d">A retry starts over at admission: a new rate charge and a new permit, while the abandoned call may still finish.</text>
+</g>
+</svg>

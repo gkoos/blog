@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Series</title>
+  <meta name="description" content="The edge cases of software engineering.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Series">
+  <meta property="og:description" content="The edge cases of software engineering.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Series">
+  <meta name="twitter:description" content="The edge cases of software engineering.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790285906609" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="/series" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Series</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<h1 class="text-3xl font-bold mb-8">Series</h1>
+
+
+<div class="not-prose space-y-4">
+  
+  <details class="group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <summary class="flex items-center justify-between gap-4 cursor-pointer select-none px-5 py-4 text-lg font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+      <span>Distributed Resilience</span>
+      <span class="flex items-center gap-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        5 parts
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </span>
+    </summary>
+    <ol class="px-5 pb-4 mt-0 space-y-2">
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">How to Implement a Distributed Circuit Breaker</a>
+        <time datetime="2026-09-14T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Mon Sep 14 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">How to Implement a Distributed Bulkhead</a>
+        <time datetime="2026-09-17T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Thu Sep 17 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a>
+        <time datetime="2026-09-22T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Sep 22 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">How to Implement a Distributed Rate Limiter</a>
+        <time datetime="2026-09-24T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Thu Sep 24 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a>
+        <time datetime="2027-09-25T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sat Sep 25 2027</time>
+      </li>
+      
+    </ol>
+  </details>
+  
+  <details class="group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <summary class="flex items-center justify-between gap-4 cursor-pointer select-none px-5 py-4 text-lg font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+      <span>Beyond Happy Path Engineering</span>
+      <span class="flex items-center gap-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        4 parts
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </span>
+    </summary>
+    <ol class="px-5 pb-4 mt-0 space-y-2">
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Beyond Happy Path Engineering: the Network</a>
+        <time datetime="2026-07-01T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Wed Jul 01 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Beyond Happy Path Engineering: Time</a>
+        <time datetime="2026-07-19T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sun Jul 19 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-08-01-Beyond-Happy-Path-Engineering-Databases/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Beyond Happy Path Engineering: Databases</a>
+        <time datetime="2026-08-01T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sat Aug 01 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-08-11-Beyond-Happy-Path-Engineering-Storage/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Beyond Happy Path Engineering: Storage</a>
+        <time datetime="2026-08-11T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Aug 11 2026</time>
+      </li>
+      
+    </ol>
+  </details>
+  
+  <details class="group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <summary class="flex items-center justify-between gap-4 cursor-pointer select-none px-5 py-4 text-lg font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+      <span>JavaScript Is Lying to You</span>
+      <span class="flex items-center gap-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        10 parts
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </span>
+    </summary>
+    <ol class="px-5 pb-4 mt-0 space-y-2">
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your Debounce Is Lying to You</a>
+        <time datetime="2026-03-28T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sat Mar 28 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your Throttling Is Lying to You</a>
+        <time datetime="2026-03-31T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Mar 31 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your HTTP Client Is Lying to You</a>
+        <time datetime="2026-04-19T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sun Apr 19 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your Recursion Is Lying to You</a>
+        <time datetime="2026-05-09T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sat May 09 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your Package Manager Is Lying to You</a>
+        <time datetime="2026-06-11T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Thu Jun 11 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your console.log Is Lying to You</a>
+        <time datetime="2026-06-28T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sun Jun 28 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your JS Date Is Lying to You</a>
+        <time datetime="2026-07-21T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Jul 21 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-08-03-Your-JSON-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your JSON Is Lying to You</a>
+        <time datetime="2026-08-03T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Mon Aug 03 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-08-14-Your-Modules-Are-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your Modules Are Lying to You</a>
+        <time datetime="2026-08-14T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Fri Aug 14 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-09-04-Your-typeof-Is-Lying-to-You/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Your typeof Is Lying to You</a>
+        <time datetime="2026-09-04T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Fri Sep 04 2026</time>
+      </li>
+      
+    </ol>
+  </details>
+  
+  <details class="group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <summary class="flex items-center justify-between gap-4 cursor-pointer select-none px-5 py-4 text-lg font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+      <span>The Database Zoo</span>
+      <span class="flex items-center gap-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        5 parts
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </span>
+    </summary>
+    <ol class="px-5 pb-4 mt-0 space-y-2">
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-09-19-The-Database-Zoo-Exotic-Data-Storage-Engines/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">The Database Zoo: Exotic Data Storage Engines</a>
+        <time datetime="2025-09-19T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Fri Sep 19 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-09-20-The-Database-Zoo-Time-Series-Databases/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">The Database Zoo: Time Series Databases</a>
+        <time datetime="2025-09-20T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Sat Sep 20 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-10-02-The-Database-Zoo-Probabilistic-Approximate-Databases/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">The Database Zoo: Probabilistic / Approximate Databases</a>
+        <time datetime="2025-10-02T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Thu Oct 02 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">The Database Zoo: Vector Databases and High-Dimensional Search</a>
+        <time datetime="2025-11-25T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Nov 25 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-03-10-From-the-Database-Zoo-to-the-Database-Safari/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">From the Database Zoo to the Database Safari</a>
+        <time datetime="2026-03-10T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Mar 10 2026</time>
+      </li>
+      
+    </ol>
+  </details>
+  
+  <details class="group border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+    <summary class="flex items-center justify-between gap-4 cursor-pointer select-none px-5 py-4 text-lg font-semibold text-gray-900 dark:text-gray-100 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors list-none [&::-webkit-details-marker]:hidden">
+      <span>Golang Deep Dives</span>
+      <span class="flex items-center gap-3 text-sm font-normal text-gray-500 dark:text-gray-400">
+        7 parts
+        <svg class="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+        </svg>
+      </span>
+    </summary>
+    <ol class="px-5 pb-4 mt-0 space-y-2">
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-08-08-Taming-Goroutines/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Taming Goroutines - Efficient Concurrency with a Worker Pool in Go</a>
+        <time datetime="2025-08-07T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Thu Aug 07 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-08-19-Channels-vs-Mutextes-the-Big-Showdown/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Channels vs Mutexes In Go - the Big Showdown</a>
+        <time datetime="2025-08-19T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Aug 19 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-08-26-Go-Channels-A-Runtime-Internals-Deep-Dive/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Go Channels: A Runtime Internals Deep Dive</a>
+        <time datetime="2025-08-26T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Tue Aug 26 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2025-09-12-Garbage-Collection-In-Go.md/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</a>
+        <time datetime="2025-09-12T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Fri Sep 12 2025</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-01-08-The-Go-Build-System-Optimised-for-Humans-and-Machines/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">The Go Build System: Optimised for Humans and Machines</a>
+        <time datetime="2026-01-08T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Thu Jan 08 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-05-08-The-Go-Compiler-a-Deep-Dive-Into-How-Your-Code-Becomes-a-Binary/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">The Go Compiler: A Deep Dive Into How Your Code Becomes a Binary</a>
+        <time datetime="2026-05-08T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Fri May 08 2026</time>
+      </li>
+      
+      <li class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <a href="/posts/2026-07-24-Golang-Maps-How-Swiss-Tables-Replaced-the-Old-Bucket-Design/" class="text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors font-medium">Golang Maps: How Swiss Tables Replaced the Old Bucket Design</a>
+        <time datetime="2026-07-24T00:00:00.000Z" class="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">Fri Jul 24 2026</time>
+      </li>
+      
+    </ol>
+  </details>
+  
+</div>
+
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

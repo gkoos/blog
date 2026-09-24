@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="620" viewBox="0 0 960 620" role="img" aria-labelledby="title desc">
+<title id="title">Recovery through a shared quota</title>
+<desc id="desc">Two traffic lanes draw from one rate budget. The top lane is healthy traffic that spends the quota freely. The bottom lane is the recovering operation, whose circuit breaker is half-open. A probe claim is admitted by the breaker, then refused by the exhausted budget and ignored, so the claim is released without a downstream start. A later probe passes the budget, reaches the partner, and after two successes the breaker closes and ordinary traffic returns.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker>
+</defs>
+<rect width="960" height="620" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="40" text-anchor="middle" font-size="23" font-weight="700">Recovery through a shared quota</text>
+<text x="480" y="69" text-anchor="middle" font-size="16" fill="#53646d">Two lanes draw from one rate budget · the recovering lane's probes pass the other gates first</text>
+
+<rect x="25" y="100" width="130" height="55" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="90" y="128" text-anchor="middle" font-size="16" font-weight="700">Other traffic</text>
+<text x="90" y="145" text-anchor="middle" font-size="13" fill="#53646d">healthy spending</text>
+<rect x="25" y="240" width="130" height="55" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="90" y="268" text-anchor="middle" font-size="16" font-weight="700">Recovering</text>
+<text x="90" y="285" text-anchor="middle" font-size="13" fill="#53646d">behind the breaker</text>
+<rect x="190" y="240" width="150" height="55" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="265" y="268" text-anchor="middle" font-size="16" font-weight="700">Circuit breaker</text>
+<text x="265" y="285" text-anchor="middle" font-size="13" fill="#53646d">half-open</text>
+<rect x="380" y="100" width="180" height="195" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="470" y="190" text-anchor="middle" font-size="18" font-weight="700">Rate budget</text>
+<text x="470" y="210" text-anchor="middle" font-size="14" fill="#53646d">scope: credential:primary</text>
+<rect x="610" y="155" width="160" height="85" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="690" y="197" text-anchor="middle" font-size="18" font-weight="700">Partner API</text>
+
+<path d="M155 127 H377" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M155 267 H187" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M340 267 H377" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M560 197 H607" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+<text x="25" y="352" font-size="15" font-weight="700">The recovering lane, over time</text>
+<line x1="90" y1="430" x2="875" y2="430" stroke="#2f4858" stroke-width="2" marker-end="url(#arrow)"/>
+
+<circle cx="180" cy="430" r="6" fill="#53646d"/>
+<text x="180" y="410" text-anchor="middle" font-size="13" font-weight="700">probe claim</text>
+<text x="180" y="460" text-anchor="middle" font-size="12" fill="#53646d">breaker admits a slot</text>
+
+<path d="M354 424 L366 436 M366 424 L354 436" stroke="#c37a68" stroke-width="2.5"/>
+<text x="360" y="410" text-anchor="middle" font-size="13" font-weight="700" fill="#c37a68">rate rejects · ignored</text>
+<text x="360" y="460" text-anchor="middle" font-size="12" fill="#53646d">claim released; no start</text>
+
+<circle cx="520" cy="430" r="6" fill="#53646d"/>
+<text x="520" y="410" text-anchor="middle" font-size="13" font-weight="700">probe claim</text>
+
+<circle cx="680" cy="430" r="6" fill="#7a9a7e"/>
+<text x="680" y="410" text-anchor="middle" font-size="13" font-weight="700">downstream start</text>
+<text x="680" y="460" text-anchor="middle" font-size="12" fill="#53646d">success ×2</text>
+
+<circle cx="840" cy="430" r="6" fill="#7a9a7e"/>
+<text x="840" y="410" text-anchor="middle" font-size="13" font-weight="700">breaker closes</text>
+<text x="840" y="460" text-anchor="middle" font-size="12" fill="#53646d">traffic returns</text>
+
+<rect x="25" y="510" width="890" height="60" rx="10" fill="#eef2f4" stroke="#b4c0c6"/>
+<text x="470" y="535" text-anchor="middle" font-size="14" fill="#53646d">A probe claim is the slot the breaker admits, a downstream start is the probe actually reaching the partner.</text>
+<text x="470" y="556" text-anchor="middle" font-size="14" fill="#53646d">The blocked probe releases its claim and leaves the breaker half-open.</text>
+</g>
+</svg>

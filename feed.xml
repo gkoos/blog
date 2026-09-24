@@ -199,6 +199,8 @@
         
         <category>concurrency</category>
         
+        <category>series--Golang Deep Dives</category>
+        
       </item>
     
       <item>
@@ -329,6 +331,8 @@
         
         <category>concurrency</category>
         
+        <category>series--Golang Deep Dives</category>
+        
       </item>
     
       <item>
@@ -344,6 +348,8 @@
         <category>golang</category>
         
         <category>concurrency</category>
+        
+        <category>series--Golang Deep Dives</category>
         
       </item>
     
@@ -459,6 +465,8 @@
         
         <category>golang</category>
         
+        <category>series--Golang Deep Dives</category>
+        
       </item>
     
       <item>
@@ -539,6 +547,8 @@
         
         <category>databases</category>
         
+        <category>series--The Database Zoo</category>
+        
       </item>
     
       <item>
@@ -552,6 +562,8 @@
         <category>database zoo</category>
         
         <category>databases</category>
+        
+        <category>series--The Database Zoo</category>
         
       </item>
     
@@ -689,6 +701,8 @@
         
         <category>databases</category>
         
+        <category>series--The Database Zoo</category>
+        
       </item>
     
       <item>
@@ -801,6 +815,8 @@
         
         <category>databases</category>
         
+        <category>series--The Database Zoo</category>
+        
       </item>
     
       <item>
@@ -842,6 +858,8 @@
         <category>tutorials</category>
         
         <category>golang</category>
+        
+        <category>series--Golang Deep Dives</category>
         
       </item>
     
@@ -933,6 +951,8 @@
         
         <category>databases</category>
         
+        <category>series--The Database Zoo</category>
+        
       </item>
     
       <item>
@@ -1001,6 +1021,8 @@
         
         <category>... is lying to you</category>
         
+        <category>series--JavaScript Is Lying to You</category>
+        
       </item>
     
       <item>
@@ -1032,6 +1054,8 @@
         <category>javascript</category>
         
         <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
         
       </item>
     
@@ -1105,6 +1129,8 @@
         
         <category>... is lying to you</category>
         
+        <category>series--JavaScript Is Lying to You</category>
+        
       </item>
     
       <item>
@@ -1118,6 +1144,8 @@
         <category>tutorials</category>
         
         <category>golang</category>
+        
+        <category>series--Golang Deep Dives</category>
         
       </item>
     
@@ -1134,6 +1162,8 @@
         <category>javascript</category>
         
         <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
         
       </item>
     
@@ -1169,7 +1199,7 @@
         
         <category>security</category>
         
-        <category>open-source</category>
+        <category>open source</category>
         
       </item>
     
@@ -1198,6 +1228,8 @@
         <category>tooling</category>
         
         <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
         
       </item>
     
@@ -1251,6 +1283,8 @@
         
         <category>... is lying to you</category>
         
+        <category>series--JavaScript Is Lying to You</category>
+        
       </item>
     
       <item>
@@ -1272,6 +1306,8 @@
         <category>software architecture</category>
         
         <category>beyond happy path engineering</category>
+        
+        <category>series--Beyond Happy Path Engineering</category>
         
       </item>
     
@@ -1295,6 +1331,8 @@
         
         <category>beyond happy path engineering</category>
         
+        <category>series--Beyond Happy Path Engineering</category>
+        
       </item>
     
       <item>
@@ -1311,7 +1349,7 @@
         
         <category>typescript</category>
         
-        <category>go</category>
+        <category>golang</category>
         
         <category>fetch-kit</category>
         
@@ -1335,6 +1373,8 @@
         
         <category>... is lying to you</category>
         
+        <category>series--JavaScript Is Lying to You</category>
+        
       </item>
     
       <item>
@@ -1354,6 +1394,8 @@
         <category>data structures</category>
         
         <category>performance</category>
+        
+        <category>series--Golang Deep Dives</category>
         
       </item>
     
@@ -1395,6 +1437,8 @@
         
         <category>beyond happy path engineering</category>
         
+        <category>series--Beyond Happy Path Engineering</category>
+        
       </item>
     
       <item>
@@ -1414,6 +1458,8 @@
         <category>serialization</category>
         
         <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
         
       </item>
     
@@ -1436,6 +1482,8 @@
         <category>storage</category>
         
         <category>beyond happy path engineering</category>
+        
+        <category>series--Beyond Happy Path Engineering</category>
         
       </item>
     
@@ -1477,7 +1525,7 @@
         
         <category>provenance</category>
         
-        <category>AI detection</category>
+        <category>ai detection</category>
         
       </item>
     
@@ -1502,6 +1550,8 @@
         <category>commonjs</category>
         
         <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
         
       </item>
     
@@ -1553,7 +1603,7 @@
         
         <category>typescript</category>
         
-        <category>go</category>
+        <category>golang</category>
         
         <category>fetch-kit</category>
         
@@ -1578,6 +1628,8 @@
         <category>runtime</category>
         
         <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
         
       </item>
     
@@ -1655,6 +1707,8 @@
         
         <category>resilience</category>
         
+        <category>series--Distributed Resilience</category>
+        
       </item>
     
       <item>
@@ -1673,6 +1727,8 @@
         
         <category>resilience</category>
         
+        <category>series--Distributed Resilience</category>
+        
       </item>
     
       <item>
@@ -1684,6 +1740,8 @@
         <description>What a rate limit constrains, how token bucket and GCRA represent rate and burst, and how their bookkeeping affects admission decisions and retry hints.</description>
         
         <category>algorithms</category>
+        
+        <category>series--Distributed Resilience</category>
         
       </item>
     
@@ -1704,6 +1762,28 @@
         <category>resilience</category>
         
         <category>algorithms</category>
+        
+        <category>series--Distributed Resilience</category>
+        
+      </item>
+    
+      <item>
+        <title>How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</title>
+        <link>https://blog.gaborkoos.com/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/</link>
+        <guid>https://blog.gaborkoos.com/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/</guid>
+        <pubDate>Sat, 25 Sep 2027 00:00:00 GMT</pubDate>
+
+        <description>Combining distributed resilience policies changes what each one counts and protects. How to choose their order and handle the failures that appear between admission and execution.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>distributed systems</category>
+        
+        <category>resilience</category>
+        
+        <category>series--Distributed Resilience</category>
         
       </item>
     

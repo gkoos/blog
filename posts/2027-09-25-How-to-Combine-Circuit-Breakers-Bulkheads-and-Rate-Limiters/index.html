@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</title>
+  <meta name="description" content="Combining distributed resilience policies changes what each one counts and protects. How to choose their order and handle the failures that appear between admission and execution.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How to Combine Circuit Breakers, Bulkheads, and Rate Limiters">
+  <meta property="og:description" content="Combining distributed resilience policies changes what each one counts and protects. How to choose their order and handle the failures that appear between admission and execution.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="How to Combine Circuit Breakers, Bulkheads, and Rate Limiters">
+  <meta name="twitter:description" content="Combining distributed resilience policies changes what each one counts and protects. How to choose their order and handle the failures that appear between admission and execution.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1790285906609" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="/series" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Series</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none">
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2027-09-25T00:00:00.000Z">Sat Sep 25 2027</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2">
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">resilience</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>This series follows circuit breakers, bulkheads, and rate limiters from their in-process foundations to implementations that coordinate across a fleet. This final article examines how they behave together, using configuration examples from <a href="https://github.com/gkoos/caracal">Caracal</a>.</em></p>
+<ol>
+<li><a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/">How to Implement a Distributed Circuit Breaker</a></li>
+<li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
+<li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
+<li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
+<li>How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</li>
+</ol>
+<p>Your service runs on twenty replicas that all call the same API. Following the earlier articles, you have given them a shared rate budget of 100 calls a second, with a burst allowance of 20. A distributed bulkhead caps concurrent calls at 20, and a circuit breaker records their outcomes so the fleet can stop calling when the API starts failing. Under normal load, the partner answers in about 80 ms and requests pass through all the policies nicely.</p>
+<p>Then response times rise to two seconds, while the calls continue to succeed within their timeout. The rate limiter still permits its configured admission rate, but at 100 calls a second, two-second calls would require about 200 calls in flight once traffic settled into a steady flow. The bulkhead allows only 20, so with every slot occupied for two seconds, the service completes about ten calls a second and sheds the excess. These figures describe steady traffic with a fixed call duration; bursts and varying response times change when the slots fill. The failure-based breaker remains closed because the calls that reach the partner keep succeeding.</p>
+<p>Now suppose that the breaker wraps the bulkhead and counts its admission rejections as failures. Its window starts filling with errors from requests that never reached the API, and eventually it opens against a dependency that is still answering successfully. If the breaker is intended to measure dependency health, those observations give it the wrong evidence. Caracal ignores bulkhead admission refusals by default, but a custom classifier or its explicit option to count them changes that behavior. Classifying every thrown error as a dependency failure therefore changes the protection the composed system provides.</p>
+<p>Even with the classification corrected, the order has a cost. A request that passes the rate limiter before reaching the full bulkhead has spent allowance without making a downstream call. Put the bulkhead first and that charge is avoided when capacity is full, but an admitted request now holds a permit while the rate coordinator decides whether it may proceed. A slow coordinator extends that hold before the partner has received any work.</p>
+<p>The previous articles established how each shared policy makes its own decision. Here we will follow requests through the combined system and examine what an earlier admission leaves behind when a later policy refuses them. The useful arrangement depends on what the budget represents: charging an incoming request can be intentional for a tenant quota, while charging a call that never reaches a partner wastes part of the allowance reserved for that partner. We will use Caracal configurations where they express the arrangement being discussed and identify version limitations where they do not. Start with the request that passed the rate limiter and stopped at the bulkhead, because its unused admission already shows why each policy's accounting has to be understood across the whole call.</p>
+<h2 id="what-each-admission-commits" tabindex="-1"><a class="header-anchor" href="#what-each-admission-commits">What each admission commits</a></h2>
+<p>In the rate-limiter-first arrangement, the request refused by the full bulkhead has already changed the limiter's state. The shared schedule records its admission even though no API call follows, so the number of rate admissions can exceed the number of downstream calls. That difference comes from where the limiter makes its decision: it charges before handing control to the next policy, whose decision is still unknown.</p>
+<p>There are also two different units of work to keep track of: a logical request is the caller's invocation, such as fetching an order, while an attempt is one execution of the underlying adapter. Retries can turn one logical request into several adapter attempts, each making another call to the dependency. An admission rejection stops the path before the adapter starts, so that rejected path produces no downstream call at all.</p>
+<p>Each policy leaves different state behind when it admits that path:</p>
+<table>
+<thead>
+<tr>
+<th>Policy</th>
+<th>What admission commits</th>
+<th>What a later rejection requires</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rate limiter</td>
+<td>Advances the shared schedule by one admission</td>
+<td>The charge remains, and elapsed time restores allowance</td>
+</tr>
+<tr>
+<td>Bulkhead</td>
+<td>Acquires an owned concurrency permit</td>
+<td>Release the permit, if release cannot be confirmed, its lease provides eventual recovery</td>
+</tr>
+<tr>
+<td>Circuit breaker</td>
+<td>Allows execution and, in half-open, claims a probe slot</td>
+<td>Classify the returned outcome and settle any probe claim, including when the outcome is ignored</td>
+</tr>
+</tbody>
+</table>
+<p>The rate limiter has no completion step that reverses its admission. As <a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/#one-cell-nothing-to-own">One cell, nothing to own</a> explained, GCRA retains an aggregate schedule, with no individual claim to return when a call is abandoned. The bulkhead retains an identifiable permit, so a later refusal gives it something specific to release. Once work starts, that permit follows the underlying adapter's settlement, as described in <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#what-a-permit-actually-holds">What a permit actually holds</a>.</p>
+<p>To see both forms of accounting on one path, let the bulkhead have a free slot and put an open breaker after it. The request spends a rate admission and acquires a permit before the breaker refuses it. As the rejection returns through the enclosing policies, the bulkhead releases the permit, leaving no occupied slot for this request. The rate schedule stays advanced, despite the API having received no call.</p>
+<p><img src="01.svg" alt="A request passes the rate limiter and acquires a bulkhead permit before an open circuit breaker rejects it. The returning rejection releases the permit, while the rate admission remains charged and no call reaches the API."></p>
+<p><em>The rejection releases the permit while the rate charge remains.</em></p>
+<p>Each distributed admission can be atomic without the whole path forming a transaction. The limiter's Redis operation has finished before the bulkhead asks for capacity, and other replicas can spend allowance between those decisions. Sharing a Redis server does not join the separate policy operations into one admission that either commits everything or changes nothing.</p>
+<p>Cleanup therefore follows the state each policy owns. Removing a bulkhead's specific permit token leaves other holders' claims intact, while restoring an old GCRA timestamp would erase admissions made by other callers in the meantime. Even subtracting one interval from the current timestamp needs a separately defined refund policy, because the schedule has continued to interact with elapsed time and later traffic. The limiter from this series provides no such operation, so composition has to account for charges left behind by later refusals.</p>
+<p>The breaker adds an observation to this return path. An inner refusal reaches an enclosing breaker as an outcome to classify, and ignoring it must still release a half-open probe claim without counting it toward recovery. We will return to classification after choosing where the admissions belong, because their order determines which refusals the breaker gets to observe.</p>
+<h2 id="order-changes-what-gets-protected" tabindex="-1"><a class="header-anchor" href="#order-changes-what-gets-protected">Order changes what gets protected</a></h2>
+<p>The previous diagram puts the breaker last to expose the cost of a poor arrangement for our partner API. Once the breaker is open, acquiring downstream capacity and spending the partner's rate allowance achieves nothing for that request. Checking the breaker first avoids both commitments, although a distributed breaker still needs to consult its coordinator.</p>
+<p>In the arrangements below, arrows show admission from the outermost policy toward the API, and outcomes return in the opposite direction. We will keep the breaker first while comparing the rate limiter with the bulkhead, then consider the different requirement that justifies a rate limiter outside the breaker.</p>
+<h3 id="rate-limiter-before-bulkhead" tabindex="-1"><a class="header-anchor" href="#rate-limiter-before-bulkhead">Rate limiter before bulkhead</a></h3>
+<p>With breaker → rate limiter → bulkhead → API, a request rejected by the rate limiter never reaches the capacity check. This is useful when arrivals greatly exceed the rate budget: the limiter sheds that excess before the system performs permit acquisition and cleanup. A distributed limiter still asks Redis about every arrival that reaches it, so this placement reduces work for the later policies without removing the coordinator cost of rate checking.</p>
+<p>The cost appears when the limiter admits a request and the bulkhead is full. Suppose the partner has become slow and all twenty permits are occupied, but the rate schedule allows another admission. The limiter spends that admission before the bulkhead refuses the request, leaving less allowance for traffic arriving after a slot becomes available. If this budget represents calls allowed by the partner, the charge consumes useful allowance without using any of the partner's quota.</p>
+<p>The same behavior has a purpose when the budget represents traffic accepted from a tenant. A tenant making repeated requests against a saturated service continues to consume its allowance, which limits how often it can reach later admission checks. The distinction belongs in the budget's definition: a tenant-facing admission quota and a quota for calls sent to a provider account for different activity.</p>
+<h3 id="bulkhead-before-rate-limiter" tabindex="-1"><a class="header-anchor" href="#bulkhead-before-rate-limiter">Bulkhead before rate limiter</a></h3>
+<p>With breaker → bulkhead → rate limiter → API, a full bulkhead rejects before the rate schedule changes. This preserves allowance for requests that have capacity available, making it a useful starting point for the partner API example. After the bulkhead acquires a permit, the rate limiter either admits the request or refuses it and causes the permit to be released.</p>
+<p>The diagram compares those orders with identical starting conditions. All twenty permits are held by existing calls, and the rate budget has allowance for one more admission, so neither arrangement starts another API call.</p>
+<p><img src="02.svg" alt="Two admission orders with a full bulkhead and available rate allowance. Rate-first admission spends one rate unit before capacity rejection, while bulkhead-first admission rejects without reaching the limiter. Neither request acquires a permit or starts an API call."></p>
+<p><em>With capacity already full, checking it first preserves the available rate allowance. The existing twenty calls keep their permits in both cases.</em></p>
+<p>When a slot is available, checking capacity first has a different cost: the acquired permit remains occupied while the rate coordinator responds. A slow coordinator lengthens that interval, and a rate rejection adds a release operation for work that never reached the API. Choosing this order therefore trades wasted rate admissions during saturation for temporary permit ownership during rate checks.</p>
+<p>A waiting limiter would extend that ownership through the wait for allowance. Enough waiting requests could occupy every permit while the dependency receives no work, defeating a bulkhead intended to count active downstream calls. Caracal's limiter rejects immediately, but systems that need waiting must decide where to put it. A bounded queue before permit acquisition keeps those waiters outside the concurrency count, with queue time included in the caller's deadline and admission checked again before execution.</p>
+<h3 id="breaker-before-the-admission-budgets" tabindex="-1"><a class="header-anchor" href="#breaker-before-the-admission-budgets">Breaker before the admission budgets</a></h3>
+<p>Keeping the breaker outside both budgets lets an open breaker stop a request before either budget is touched. For our partner API, that avoids the waste shown in the previous section. It also places the later policies' refusals inside the breaker's observation boundary, which requires the classification rules introduced earlier.</p>
+<p>Half-open introduces another consequence of this placement. A request can claim a probe slot and then encounter a full bulkhead or an exhausted rate budget, so the breaker has admitted a recovery attempt without obtaining a downstream observation. An ignored refusal releases that claim without making progress toward closing. The recovery section will examine what happens when other traffic keeps competing for the capacity those probes need.</p>
+<h3 id="a-rate-limiter-outside-the-breaker" tabindex="-1"><a class="header-anchor" href="#a-rate-limiter-outside-the-breaker">A rate limiter outside the breaker</a></h3>
+<p>An ingress quota has a reason to run before the health check. With ingress limiter → breaker → bulkhead → provider limiter → API, a tenant spends its ingress allowance even while the partner's breaker is open. The provider allowance is charged only on paths that pass the breaker and find capacity, giving each limiter a placement consistent with its purpose.</p>
+<p>This arrangement also keeps ingress refusals outside the breaker's observations. Putting a downstream bulkhead before the breaker solely to obtain that separation adds permit work to requests the breaker will reject, so an explicit classifier is the better fit for our example. A bulkhead intended to bound an entire workflow has a broader accounting unit and needs to be evaluated against that workflow instead.</p>
+<p>Caracal 0.7.0's built-in rate limiters run around adapter attempts, inside its breaker, so moving a limiter earlier in the policy array does not create this ingress arrangement. It needs admission at a separate application boundary or a composition mechanism that supports that placement. The arrangement remains useful, and the next section will distinguish it from the orders Caracal's policy array actually expresses.</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Admission order</th>
+<th>Cost to account for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Preserve partner allowance when capacity is full</td>
+<td>Breaker → bulkhead → provider limiter</td>
+<td>A permit is held during the rate check</td>
+</tr>
+<tr>
+<td>Shed rate excess before capacity checks</td>
+<td>Breaker → provider limiter → bulkhead</td>
+<td>A later capacity refusal leaves the rate charge spent</td>
+</tr>
+<tr>
+<td>Charge ingress traffic during a partner outage</td>
+<td>Ingress limiter → breaker → downstream budgets</td>
+<td>Requests refused by the breaker still consume ingress allowance</td>
+</tr>
+</tbody>
+</table>
+<p>For the running example, we will use breaker → bulkhead → provider limiter because the rate budget belongs to the partner and capacity exhaustion should leave that budget available. This choice assumes prompt rate-admission decisions, and we will account for coordinator delays when setting the surrounding timeouts.</p>
+<h2 id="expressing-the-chosen-arrangement-in-caracal" tabindex="-1"><a class="header-anchor" href="#expressing-the-chosen-arrangement-in-caracal">Expressing the chosen arrangement in Caracal</a></h2>
+<p>Caracal 0.7.0 builds its execution path in two groups. The breaker belongs to the outer group, alongside timeout and retry policies, while bulkheads and rate limiters declare <code>phase: &quot;attempt&quot;</code> and wrap each adapter call. The <code>policies</code> array preserves order within each group, then the outer group wraps the attempt group.</p>
+<p>That means swapping the bulkhead and rate limiter changes which admission happens first. Moving either across a breaker in the array leaves it inside that breaker, and moving it across a retry policy leaves it around each individual attempt. Keep the array written in execution order so readers can follow it without mentally applying that partition.</p>
+<h3 id="configure-the-shared-policies" tabindex="-1"><a class="header-anchor" href="#configure-the-shared-policies">Configure the shared policies</a></h3>
+<p>For the example below, <code>breakerCoordinator</code>, <code>bulkheadCoordinator</code>, and <code>rateCoordinator</code> are the policy-specific wrappers around one connected Redis client, all using the namespace <code>checkout:prod</code>. They come from <code>redisCircuitBreakerCoordinator</code>, <code>redisCoordinator</code>, and <code>redisRateLimitCoordinator</code>, respectively, as shown in the earlier implementation articles. Sharing the client reuses the connection while each policy retains its own state.</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span>
+  bulkhead<span class="token punctuation">,</span>
+  circuitBreaker<span class="token punctuation">,</span>
+  operation<span class="token punctuation">,</span>
+  rateLimit<span class="token punctuation">,</span>
+  RateLimitExceededError<span class="token punctuation">,</span>
+  timeout<span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal"</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> fetchAdapter <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal/fetch"</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> CoordinatorUnavailableError <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal/redis"</span>
+
+<span class="token keyword">const</span> sharedBreaker <span class="token operator">=</span> circuitBreaker<span class="token punctuation">.</span><span class="token function">distributed</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token string">"partner-health"</span><span class="token punctuation">,</span>
+  coordinator<span class="token operator">:</span> breakerCoordinator<span class="token punctuation">,</span>
+  <span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">"partner:eu"</span><span class="token punctuation">,</span>
+  minimumThroughput<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+  failureThreshold<span class="token operator">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
+  openMs<span class="token operator">:</span> <span class="token number">10_000</span><span class="token punctuation">,</span>
+  halfOpenProbes<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+  halfOpenSuccesses<span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span>
+  probeLeaseTtlMs<span class="token operator">:</span> <span class="token number">15_000</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> sharedCapacity <span class="token operator">=</span> bulkhead<span class="token punctuation">.</span><span class="token function">distributed</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token string">"partner-capacity"</span><span class="token punctuation">,</span>
+  coordinator<span class="token operator">:</span> bulkheadCoordinator<span class="token punctuation">,</span>
+  <span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">"partner:eu"</span><span class="token punctuation">,</span>
+  limit<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+  leaseMs<span class="token operator">:</span> <span class="token number">30_000</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> sharedRate <span class="token operator">=</span> rateLimit<span class="token punctuation">.</span><span class="token function">distributed</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token string">"partner-quota"</span><span class="token punctuation">,</span>
+  coordinator<span class="token operator">:</span> rateCoordinator<span class="token punctuation">,</span>
+  <span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">"credential:primary"</span><span class="token punctuation">,</span>
+  rate<span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span>
+  burst<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The quota belongs to the credential used for API calls, while the breaker and capacity limit describe the partner's European service. Those scopes name different resources, each distributed identity also includes the operation name, so these policies will share state across replicas executing the same operation, but reusing them under another operation name creates separate budgets. The next section develops that distinction beyond this single operation.</p>
+<p>The breaker waits for at least twenty observations before evaluating its failure threshold. After opening for ten seconds, it allows one probe at a time and requires two successful probes to close. Its fifteen-second probe lease gives an abandoned claim a finite lifetime, while the bulkhead's thirty-second lease is renewed while its permit remains held. These values are assumptions for this example, with the sizing tradeoffs covered in <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#the-settings-are-not-independent">The settings are not independent</a>.</p>
+<h3 id="put-the-operation-around-them" tabindex="-1"><a class="header-anchor" href="#put-the-operation-around-them">Put the operation around them</a></h3>
+<p>The adapter needs to distinguish a refused admission from a failed HTTP call before we use this configuration. Here the fetch adapter ignores a local rate rejection and a Redis coordinator error for outcome classification, while retaining its default HTTP response classification. The breaker already ignores ordinary bulkhead admission refusals by default, and we will examine the remaining classification choices in a later section.</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">const</span> adapter <span class="token operator">=</span> <span class="token function">fetchAdapter</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  <span class="token function-variable function">classifyError</span><span class="token operator">:</span> <span class="token punctuation">(</span>error<span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>
+      error <span class="token keyword">instanceof</span> <span class="token class-name">RateLimitExceededError</span> <span class="token operator">||</span>
+      error <span class="token keyword">instanceof</span> <span class="token class-name">CoordinatorUnavailableError</span>
+    <span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token keyword">return</span> <span class="token string">"ignored"</span>
+    <span class="token punctuation">}</span>
+    <span class="token keyword">return</span> <span class="token string">"retryable"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> getOrder <span class="token operator">=</span> <span class="token function">operation</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token string">"partner-order"</span><span class="token punctuation">,</span>
+  adapter<span class="token punctuation">,</span>
+  policies<span class="token operator">:</span> <span class="token punctuation">[</span>
+    <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">5_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    sharedBreaker<span class="token punctuation">,</span>
+    <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">3_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    sharedCapacity<span class="token punctuation">,</span>
+    sharedRate<span class="token punctuation">,</span>
+  <span class="token punctuation">]</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>Returning <code>&quot;ignored&quot;</code> changes the policy's interpretation of an error without hiding the error from the caller. The remaining thrown errors are classified as retryable for this example, but no retry policy has been configured, so each invocation makes at most one adapter attempt. If retries are added later, this same classifier also controls which outcomes qualify for another attempt.</p>
+<p>The outer five-second timeout bounds the caller's wait, including time spent communicating with the breaker coordinator. The inner three-second timeout begins after breaker admission and covers the attempt policies as well as the adapter call. Breaker outcome recording takes place outside that inner timer, which is why the caller's total deadline has its own position.</p>
+<p>For this example, the shared Redis client retains its default one-second command timeout. That bounds each coordinator command separately, and several commands can consume time during one invocation. The outer deadline can therefore expire before all policy bookkeeping finishes. Neither deadline reverses a rate charge or proves that remote work stopped, and the probe lease must leave room for settlement after the inner timeout fires.</p>
+<h3 id="change-the-admission-order-deliberately" tabindex="-1"><a class="header-anchor" href="#change-the-admission-order-deliberately">Change the admission order deliberately</a></h3>
+<p>To shed excess rate before checking capacity, swap only the final pair. The outer policies stay in the same positions, so their timing boundaries remain the same.</p>
+<pre class="language-ts"><code class="language-ts">policies<span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">5_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  sharedBreaker<span class="token punctuation">,</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">3_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  sharedRate<span class="token punctuation">,</span>
+  sharedCapacity<span class="token punctuation">,</span>
+<span class="token punctuation">]</span>
+</code></pre>
+<p>This variation pays the cost described in the previous section: a successful rate admission remains charged if the bulkhead then refuses it. Moving <code>sharedRate</code> to the beginning of this array would still leave it in the attempt group, so it would not create a request-level quota outside the breaker.</p>
+<p>The same phase rule prevents a built-in bulkhead from holding one permit across an entire retry sequence through array placement. That broader limit can be useful for counting active workflows, but it requires a separate boundary in this version. Breaker and retry placement does remain configurable within the outer group, allowing a breaker to observe either the retry sequence's final result or each attempt, which we will use when introducing retries.</p>
+<h2 id="scope-each-policy-to-the-resource-it-protects" tabindex="-1"><a class="header-anchor" href="#scope-each-policy-to-the-resource-it-protects">Scope each policy to the resource it protects</a></h2>
+<p>The scopes in the previous section were chosen to name different resources, not to keep the example tidy. The rate limiter keys on the credential the service presents to the partner, while the breaker and the bulkhead key on the European region that serves those calls. A scope selects the shared state a policy reads and updates, so naming a scope is the same act as naming the resource the policy protects. The cases that follow develop that choice.</p>
+<h3 id="provider-quota-and-dependency-health" tabindex="-1"><a class="header-anchor" href="#provider-quota-and-dependency-health">Provider quota and dependency health</a></h3>
+<p>A provider quota and a dependency health signal measure different things and deserve different granularities. The partner meters the credential wherever it is presented, so that allowance can span regions and endpoints. Health is narrower: the European deployment can start failing while the credential still has allowance and another region keeps answering, so the breaker should key on the region while the limiter keys on the credential. Sharing a rate budget across the fleet does not oblige the fleet to share one breaker window, and a region whose breaker has opened should not drain allowance that a healthy region still needs.</p>
+<p>The scope string is only one part of the coordination identity. Caracal keys each distributed policy by the namespace, the policy name, the operation name, and the scope. The operation name is the interesting part for sharing: reusing one rate-limiter instance across operations with different names gives each operation its own budget, whatever the scope callback returns, because the operation name is folded into the key. A credential-wide quota that spans several operations therefore needs a coordinator that drops the operation name from its key; writing the same scope callback into each operation does not merge them. Caracal 0.7.0 supplies no such coordinator, so the quota remains a custom coordination design rather than a scope choice. <a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/#whose-rate-is-it">Whose rate is it</a> covers whose schedule the limiter should advance.</p>
+<h3 id="tenant-isolation-and-shared-capacity" tabindex="-1"><a class="header-anchor" href="#tenant-isolation-and-shared-capacity">Tenant isolation and shared capacity</a></h3>
+<p>Per-tenant rate limits and a shared capacity limit answer different questions, and neither replaces the other. A tenant rate bounds how quickly one tenant may arrive, yet many tenants can each remain under their own rate and together exceed what the partner can serve at once. A single shared bulkhead bounds that combined concurrency but promises no tenant a share of it, since one busy tenant can occupy every slot. Guarding both axes needs both policies, which raises the question of how the two bulkheads relate.</p>
+<p>Two bulkheads can nest a per-tenant cap inside a global cap, or the reverse. Acquiring the tenant permit first stops a tenant that has already reached its own limit from taking a global permit, so its excess sheds before it touches the shared resource. Acquiring the global permit first surfaces fleet exhaustion sooner, because every request checks the aggregate cap before any tenant-specific work, at the cost of consulting the tenant limit only after a global permit is held. Both orders owe the same cleanup when the inner admission refuses: the outer permit must be released before the rejection returns. Hold a consistent order across every path and reject rather than queue between the two, because a waiter would keep its first permit while nothing reaches the dependency. Caracal's distributed bulkhead sheds immediately and has no queue, so this version does not create that waiting-holder state, but systems that add a queue do. <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#multiple-bulkheads-acquired-in-order">Multiple bulkheads, acquired in order</a> develops the acquisition discipline.</p>
+<p>Because Caracal's bulkheads are attempt policies, two of them nest through their order inside the attempt group and both wrap each adapter call, so the tenant and global caps in that arrangement apply per attempt rather than across an entire workflow.</p>
+<h3 id="foreground-traffic-and-batch-work" tabindex="-1"><a class="header-anchor" href="#foreground-traffic-and-batch-work">Foreground traffic and batch work</a></h3>
+<p>Workload class is another axis that deserves its own capacity. Interactive requests that must answer within a few hundred milliseconds and batch jobs that run for minutes should not draw from one concurrency pool, since a burst of batch work could occupy every slot while foreground callers wait. Separate compartments give each class its own bound, but they also strand capacity: when batch work sits idle, its slots cannot be lent to interactive traffic, and the reverse holds. Whether that stranded capacity matters depends on whether the dependency has a hard aggregate budget.</p>
+<p>When it does, keep a shared total cap beside the class caps. Interactive and batch each get a bulkhead, and a third bounds their combined concurrency, with the acquisition-order question from the tenant case applying between each class cap and the total cap. The built-in bulkheads express these fixed compartments and the shared cap through nesting. They do not provide weighted fairness, priority queues, or work-conserving borrowing that would let an idle class lend capacity to a busy one. Those are scheduling capabilities for a queue or a caller-side dispatcher, outside the admission policies described in this series.</p>
+<p><img src="03.svg" alt="Two tenants pass through separate rate budgets keyed by tenant scope, then a foreground or batch bulkhead keyed by workload scope, then a circuit breaker keyed by region, before reaching the shared partner API. Each box carries the scope portion of its coordination identity."></p>
+<p><em>The figure shows scope boundaries, not one prescribed nesting order. The full identity adds the namespace, the policy name, and the operation name to each scope.</em></p>
+<h2 id="decide-what-the-breaker-is-learning" tabindex="-1"><a class="header-anchor" href="#decide-what-the-breaker-is-learning">Decide what the breaker is learning</a></h2>
+<p>A circuit breaker learns only what its classifier records, and a breaker scoped to the partner's health should record only outcomes that say something about the partner. The table separates the outcomes the running example can produce by whether a call reached the partner.</p>
+<table>
+<thead>
+<tr>
+<th>Outcome</th>
+<th>Did the downstream call start?</th>
+<th>What does this reveal?</th>
+<th>How should this breaker classify it?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Successful response</td>
+<td>Yes</td>
+<td>The partner answered</td>
+<td>success</td>
+</tr>
+<tr>
+<td>Downstream timeout</td>
+<td>Yes</td>
+<td>The partner did not answer in time</td>
+<td>failure</td>
+</tr>
+<tr>
+<td>Local rate rejection</td>
+<td>No</td>
+<td>Our quota was spent before the call</td>
+<td>ignored</td>
+</tr>
+<tr>
+<td>Bulkhead saturation</td>
+<td>No</td>
+<td>Our capacity was full before the call</td>
+<td>ignored</td>
+</tr>
+<tr>
+<td>Coordinator failure</td>
+<td>No</td>
+<td>Our shared state was unreachable before the call</td>
+<td>ignored</td>
+</tr>
+<tr>
+<td>Caller cancellation</td>
+<td>No</td>
+<td>The caller left before the call</td>
+<td>ignored</td>
+</tr>
+</tbody>
+</table>
+<p>The dividing line is the adapter call itself: a refusal that fires before the adapter starts reveals how our own limits are behaving, not how the partner is behaving, so it stays outside a health breaker's window. Only the first two rows, and the transport errors that follow a started call, are evidence about the callee.</p>
+<p>A provider returning HTTP 429 is different from our own limiter rejecting. 429 is the provider answering, and its admission policy is part of what a health breaker can learn, while our limiter rejecting before a network call says nothing about the provider. The fetch adapter's default response classification treats a 429 as retryable, which the breaker counts as a failure, while the <code>classifyError</code> callback shown earlier returns <code>&quot;ignored&quot;</code> for a local <code>RateLimitExceededError</code> so our own quota spending stays out of the window.</p>
+<p>Caracal 0.7.0 builds part of that distinction in. Bulkhead refusals with reasons <code>capacity</code>, <code>wait-timeout</code>, and <code>admission-expired</code> are ignored by default, because the adapter never started, <code>countBulkheadRejections: true</code> records them as failures instead, for a breaker that measures overload rather than dependency health. A custom <code>classify</code> callback on the breaker takes precedence over that setting and over the adapter's verdict. A <code>lease-lost</code> refusal is excluded from that default on purpose: the permit was held and the call had started before the lease expired, so it needs the reasoning of a timeout, not of a pre-call refusal.</p>
+<p>The rate limiter's rejection gets no built-in exemption. The fetch adapter classifies thrown errors as retryable by default, and the breaker counts retryable as failure, so without the <code>classifyError</code> callback a spent quota would accumulate as partner failures. The callback also returns <code>&quot;ignored&quot;</code> for <code>CoordinatorUnavailableError</code>, because an unreachable Redis server is our problem, not the partner's; coordinator health deserves its own signal separate from the partner's.</p>
+<p>That callback controls more than the breaker. Its <code>&quot;ignored&quot;</code> verdict keeps rate and coordinator errors out of any later retry policy too, while the <code>&quot;retryable&quot;</code> fallback marks the remaining transport errors as worth another attempt. The fallback is a choice that must match the application's error taxonomy: the example treats everything else the adapter throws as retryable, but a real service reserves that label for errors a retry can plausibly fix and adds caller cancellation to the ignored set.</p>
+<p>A custom breaker <code>classify</code> callback cannot replace the adapter's response classification. It receives only whether the adapter resolved and, on failure, the thrown error, so its <code>isSuccess</code> flag means the promise resolved, not that the response was healthy. A resolved HTTP 503 still needs the adapter's <code>classifyResponse</code> to mark it retryable; a breaker callback that reads only <code>isSuccess</code> would record the 503 as a success. Response classification therefore stays in the adapter, and the breaker callback is for overriding the refusal default, not for reading status codes.</p>
+<p>Fallback placement changes what the breaker observes. A cached response returned inside the breaker's boundary turns a dependency failure into a successful observation, because the wrapped execution settled successfully, so the breaker sees recovery where none happened. Returning the fallback outside the boundary preserves the actual dependency outcome and lets the breaker open on real evidence. Caracal has no built-in fallback, so the boundary is whichever composition you write.</p>
+<p>An <code>&quot;ignored&quot;</code> result still settles a half-open probe claim, releasing its slot without recording an outcome or advancing recovery; <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#the-probe-budget-has-to-be-a-global-one">The probe budget has to be a global one</a> covers that settlement.</p>
+<h2 id="retries%2C-timeouts%2C-and-waiting-alter-the-accounting" tabindex="-1"><a class="header-anchor" href="#retries%2C-timeouts%2C-and-waiting-alter-the-accounting">Retries, timeouts, and waiting alter the accounting</a></h2>
+<p>As we saw, retries change what a single request spends. A logical request that retries can consume several rate admissions and hold several permits over the course of its attempts, while the caller's deadline, the attempt's timeout, and the permit's lifetime each measure a different span. The subsections that follow trace those consequences through the accounting established earlier.</p>
+<h3 id="one-logical-request-can-spend-several-admissions" tabindex="-1"><a class="header-anchor" href="#one-logical-request-can-spend-several-admissions">One logical request can spend several admissions</a></h3>
+<p>A provider quota must count every attempt, since each retry passes through the rate limiter and the bulkhead again, and a request-level limit charges once per request instead. The two belong at separate boundaries. Caracal's built-in rate limiter is an attempt policy, so it is the quota form, while a request-level limiter lives outside the operation, as the ingress arrangement in the ordering section described.</p>
+<p>Retry placement relative to the breaker changes what the breaker observes. With the breaker outside the retry policy, it records only the final outcome of the retry sequence, so a request that fails twice and then succeeds records a single success. With the retry outside the breaker, the breaker records each attempt, and the failed attempts count even though the request ultimately succeeded. The first arrangement conceals intermediate failures from the breaker, and in half-open a probe that wraps the retry admits once but can start several downstream attempts during its one probe execution.</p>
+<p>Two policies arrays show the difference, keeping the rate limiter and the bulkhead around each attempt in both.</p>
+<pre class="language-ts"><code class="language-ts">policies<span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">5_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  sharedBreaker<span class="token punctuation">,</span>
+  <span class="token function">retry</span><span class="token punctuation">(</span><span class="token punctuation">{</span> maxAttempts<span class="token operator">:</span> <span class="token number">2</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">3_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  sharedCapacity<span class="token punctuation">,</span>
+  sharedRate<span class="token punctuation">,</span>
+<span class="token punctuation">]</span>
+</code></pre>
+<p>The breaker sits before the retry policy, so it records the final result of the whole sequence; a retry that recovers from an intermediate failure never reaches the breaker as a failure.</p>
+<pre class="language-ts"><code class="language-ts">policies<span class="token operator">:</span> <span class="token punctuation">[</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">5_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token function">retry</span><span class="token punctuation">(</span><span class="token punctuation">{</span> maxAttempts<span class="token operator">:</span> <span class="token number">2</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  sharedBreaker<span class="token punctuation">,</span>
+  <span class="token function">timeout</span><span class="token punctuation">(</span><span class="token punctuation">{</span> ms<span class="token operator">:</span> <span class="token number">3_000</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  sharedCapacity<span class="token punctuation">,</span>
+  sharedRate<span class="token punctuation">,</span>
+<span class="token punctuation">]</span>
+</code></pre>
+<p>With the retry policy before the breaker, each attempt is classified and recorded on its own. <code>maxAttempts</code> bounds the sequence, and the retry policy schedules another attempt only when the adapter declares <code>replay: &quot;safe&quot;</code> and the classifier calls the outcome retryable. The fetch adapter infers <code>&quot;safe&quot;</code> from a GET or HEAD, so the running example qualifies; a POST would be declined as replay-unsafe. Retry fundamentals, including idempotency and replay safety, are covered in <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a>.</p>
+<p>A <code>retryAfterMs</code> value, whether from the rate limiter or an HTTP <code>Retry-After</code> header, is the earliest time the request would be eligible again under the state observed when it was refused. It is not a reservation: competing replicas can spend the restored allowance first, so a retry that fires at exactly the minimum can find the budget gone again. Bounded retries therefore wait at least the minimum and add positive jitter so the fleet does not retry in lockstep. The retry policy accepts a <code>delay</code> option for that purpose, and this article stops at naming it rather than publishing a backoff schedule.</p>
+<h3 id="what-a-permit-spans" tabindex="-1"><a class="header-anchor" href="#what-a-permit-spans">What a permit spans</a></h3>
+<p>A permit held across a retry sequence would count active workflows rather than downstream calls, and the configuration section noted that the built-in bulkhead cannot reach that placement through array order. The price of that broader unit is the permit spent during backoff: a workflow that sleeps between attempts keeps its slot occupied while the partner receives nothing. Workflow concurrency and attempt concurrency are different axes, and a system that wants both needs a separate boundary for each.</p>
+<p>The attempt-level permit also follows the adapter's settlement, not the caller's patience. When the adapter does not support abort, an earlier attempt can keep running after the caller's deadline has fired and a retry has begun, so the old attempt's permit stays held while the new attempt asks for another. Caracal's fetch adapter declares abort support, but an adapter that does not retains its permit until it settles on its own.</p>
+<h3 id="deadlines-and-real-work" tabindex="-1"><a class="header-anchor" href="#deadlines-and-real-work">Deadlines and real work</a></h3>
+<p>The configuration section separated the caller's deadline from the inner timeout and the Redis command timeout. Retries give that separation a second meaning: the inner timeout restarts for each attempt, so it bounds one call, while the caller's deadline spans the whole retry sequence and gives up even when a timed-out attempt keeps running.</p>
+<p>The permit follows the adapter's settlement, and for the fetch adapter that settlement is the response headers, not the body. A caller that stops reading a streamed body still holds the permit until the body is cancelled or consumed, a boundary distinct from the timeout that bounds the caller's wait. <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#what-a-permit-actually-holds">What a permit actually holds</a> covers that distinction.</p>
+<p><img src="04.svg" alt="Timeline showing the caller deadline firing while an abort-unsupported adapter keeps running, the bulkhead permit held until the adapter settles, and the rate admission remaining charged. A further retry would start a new admission."></p>
+<p><em>The caller gives up at the deadline while the permit and the rate charge survive; a retry spends another admission.</em></p>
+<h2 id="recovery-must-pass-through-the-other-gates" tabindex="-1"><a class="header-anchor" href="#recovery-must-pass-through-the-other-gates">Recovery must pass through the other gates</a></h2>
+<p>A breaker that has opened still has to close, and closing requires probes that pass through the rate limiter and the bulkhead before they reach the dependency. The breaker moves to half-open after its open window, admits one probe at a time, and waits for two successes. If that probe is refused by an exhausted rate budget or a full bulkhead, the classification chosen earlier decides what happens next. An ignored refusal releases the probe claim without recording an outcome, so the breaker stays half-open and tries again; a refusal recorded as a failure would re-open the breaker and restart its open window. The same classification that keeps admission rejections out of the failure window is what lets a recovering breaker keep probing.</p>
+<p>Why the rate budget is empty is important, because it decides whether the probe can ever succeed. The limiter keys on the credential, and other healthy traffic on that credential keeps spending while this operation sits behind its open breaker. At 100 calls a second with a burst of 20, the allowance refills its burst in about a fifth of a second, so the ten-second open window restores it long before the first probe; an empty budget at probe time is other traffic on the shared credential, not this scope's own past calls. A slow-replenishing budget produces the same symptom for a different reason, and the two should not be confused.</p>
+<p>The bulkhead can starve probes the same way. Other work sharing the &quot;partner:eu&quot; scope can keep all twenty permits occupied, so a probe is refused for capacity and never reaches the partner even though the dependency is healthy. Recovery then stalls behind traffic the breaker is not governing. Reserving a little capacity for probes would prevent that starvation, but the reserve must sit inside the hard provider quota and the total concurrency limit rather than bypass them, and this version of Caracal has no built-in reserved probe lane or gradual recovery ramp.</p>
+<p>Once two probes succeed and the breaker closes, ordinary traffic returns all at once. The half-open probe limit throttled only the recovery window; nothing ramps the returning load. The rate limiter's burst has been replenishing during the open period, so a closed breaker can spend it immediately, sending a fresh burst into a dependency that just proved it can answer two calls. Closing is not a capacity decision.</p>
+<p>The gates also feed the breaker's evidence. The breaker opens on a failure ratio computed from a window of observations, and it needs at least <code>minimumThroughput</code> of them before the window expires. Heavy shedding admits few calls, so a mostly-refused dependency can fail to collect enough observations to open; the shedding that protects the fleet also slows its health detection. Admission settings and observation settings are one problem, not two. <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#the-settings-are-not-independent">The settings are not independent</a> and <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/#spending-and-rebuilding-the-burst">Spending and rebuilding the burst</a> cover those interactions.</p>
+<p><img src="05.svg" alt="Two traffic lanes share one rate budget while only one lane sits behind the recovering breaker. A probe claim is admitted, then refused by the exhausted budget and ignored, releasing the claim without a downstream start. A later probe passes the budget, reaches the partner, and after two successes the breaker closes and ordinary traffic returns."></p>
+<p><em>Recovery depends on the shared quota, not only on the dependency's health: a blocked probe releases its claim without advancing or undoing recovery.</em></p>
+<h2 id="the-composed-system-depends-on-its-coordinator" tabindex="-1"><a class="header-anchor" href="#the-composed-system-depends-on-its-coordinator">The composed system depends on its coordinator</a></h2>
+<p>Consider a request with the rate limiter ahead of the bulkhead. The limiter's coordinator confirms the charge, so that admission is spent, and then the bulkhead's acquisition loses its reply when the Redis command times out. No downstream call starts, because capacity was never confirmed, the bulkhead fails closed and rethrows the coordinator error. The rate charge stays spent, and if the bulkhead's acquire did grant a permit before the reply vanished, the lease recovers it later. A partial admission leaves a real charge behind and hands the uncertain part to the lease rather than to the caller.</p>
+<p>A breaker configured to fail open cannot rescue this. Its <code>onCoordinatorError</code> setting governs only the breaker's own admission, and only when the coordinator is unreachable while the last known state was closed. The rate limiter and the bulkhead have no such escape: each fails closed on uncertain admission. An outage of the shared Redis service therefore stops every distributed gate at once, whatever the breaker's fallback says.</p>
+<p>Missing state is different from an unreachable coordinator. The latter reports a transport error, missing state reports nothing. If Redis loses the rate limiter's theoretical arrival time, the allowance silently returns to full and the fleet can overspend. If it loses a running bulkhead lease, those permits are forgotten and more concurrency is admitted than the limit allows. No admission call sees an error, because the state is simply gone.</p>
+<p>A local fallback changes the guarantee. Falling back to per-process rate limiting or bulkheads keeps the service up, but a per-process budget is not the shared budget it replaces: 20 replicas each allowing their own share can together exceed the provider quota and the concurrency cap. Keeping the shared limit through a fallback requires an explicit aggregate bound and fleet assumptions that no longer hold when the coordinator is the thing that failed. Caracal's distributed limiter and bulkhead do not implement this fallback, and in the inspected version they fail closed instead.</p>
+<p>Coordinator overhead belongs in capacity planning. Every admission check, breaker outcome recording, permit release, and renewal is a Redis command, and all of them share one coordinator service. Each policy added to the pipeline adds remote work and another point where a reply can be lost, and the round-trip counts that look small in isolation add up across the fleet.</p>
+<p>Deployment decides whether the fleet actually shares one budget. Replicas with different names or namespaces keep independent state, so a mixed configuration can disagree about a single provider quota without any replica noticing. Changing a name or namespace during a migration splits the budget into two independent cells for as long as both configurations run. <a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/#the-settings-are-not-independent">The settings are not independent</a> covers that hazard in the rate limiter.</p>
+<h2 id="verify-the-whole-request-path" tabindex="-1"><a class="header-anchor" href="#verify-the-whole-request-path">Verify the whole request path</a></h2>
+<p>The earlier articles verified each policy in isolation, and those unit and integration suites still apply. The composed system needs assertions about the whole path, because one logical request can produce several outcomes and the metrics must separate them. The scenarios below pair each hazard from this article with what the composition should demonstrate under test.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>What the composition should demonstrate</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Slow successful calls</td>
+<td>Capacity shedding without fabricated dependency failures</td>
+</tr>
+<tr>
+<td>Fast downstream failures</td>
+<td>Breaker detection with retry load included in rate accounting</td>
+</tr>
+<tr>
+<td>Rate budget exhausted</td>
+<td>No downstream start and intentional breaker classification</td>
+</tr>
+<tr>
+<td>Open breaker</td>
+<td>Inner budgets untouched in the breaker-first arrangement</td>
+</tr>
+<tr>
+<td>Reply lost after rate admission</td>
+<td>No assumption that the charge was undone</td>
+</tr>
+<tr>
+<td>Later permit acquisition uncertain</td>
+<td>No downstream start without confirmed ownership</td>
+</tr>
+<tr>
+<td>Caller deadline with unsupported abort</td>
+<td>Permit follows underlying settlement</td>
+</tr>
+<tr>
+<td>Recovery under shared traffic</td>
+<td>Ignored refusals release probe claims; real probe outcomes govern closing</td>
+</tr>
+<tr>
+<td>One replica dies or loses its lease</td>
+<td>Recovery of claims measured separately from actual downstream concurrency</td>
+</tr>
+</tbody>
+</table>
+<p>The path is measured through six counts: logical requests, actual adapter starts, policy admissions, rejections by cause, permit occupancy, and breaker observations. They diverge: a rate admission is not a downstream start, and a low downstream error rate says little about user success when most requests are shed before they reach the dependency, so the counters have to be read together. The rejection events carry the cause, and the breaker events carry the outcome, which is how the counts are reconciled.</p>
+<p>Lease-loss tests need an independent downstream witness: a live-lease count alone does not prove that an expired holder stopped working, because the lease can outlive the work it was meant to bound, and asserting actual downstream concurrency requires watching the dependency itself.</p>
+<p>These are scenarios to build against, not measurements already taken. It is possible to run a test suite that exercises the whole path and counts the outcomes, but it is not possible to prove that a production fleet behaves the same way. The fleet's traffic is not under test control, and the coordinator can lose state or fail at any time. The scenarios above are therefore a guide for what to verify in a test environment, not a checklist of what has been observed in production.</p>
+<h2 id="closing" tabindex="-1"><a class="header-anchor" href="#closing">Closing</a></h2>
+<p>The example settled on one arrangement: the caller's deadline wraps a breaker, an inner timeout, a bulkhead, and a rate limiter, with the breaker and the bulkhead keyed to the API's European region and the limiter keyed to the credential. Each boundary accounts for a different resource: the limiter for the credential's allowance, the bulkhead for the region's concurrency, and the breaker for the region's health. The order decides what each observes and what it owes when a later boundary refuses. The bulkhead sits ahead of the limiter so a request refused for capacity sheds without spending allowance, and it releases its permit when a later boundary refuses. The breaker sits outside both, so it records only outcomes that followed a started call. The limiter, which has no refund step, charges last, immediately before the adapter runs.</p>
+<p>That arrangement is a choice, not a default. Before configuring any policy, name the concrete resource and the failure behavior each boundary expresses: which credential, which region, which refusals count as failures, and what to do when the coordinator is unreachable. The policies in Caracal turn those decisions into configuration, and the inspected version has limits this article noted where they arise.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="560" viewBox="0 0 960 560" role="img" aria-labelledby="title desc">
+<title id="title">Different scopes around the same work</title>
+<desc id="desc">Two tenants arrive and pass through separate rate-limit budgets keyed by tenant scope. Requests then pass through a foreground or batch bulkhead keyed by workload scope, and finally through a circuit breaker keyed by region before reaching the shared partner API. Each box carries the scope portion of its coordination identity; the full identity also includes the namespace, policy name, and operation name. The figure shows scope boundaries rather than one prescribed nesting order.</desc>
+<defs>
+<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker>
+</defs>
+<rect width="960" height="560" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="40" text-anchor="middle" font-size="23" font-weight="700">Different scopes around the same work</text>
+<text x="480" y="69" text-anchor="middle" font-size="16" fill="#53646d">Each budget keys on its own scope · arrows follow admission toward the partner API</text>
+
+<rect x="25" y="110" width="130" height="85" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="90" y="147" text-anchor="middle" font-size="18" font-weight="700">Tenant A</text>
+<text x="90" y="172" text-anchor="middle" font-size="14" fill="#53646d">requests</text>
+<rect x="195" y="110" width="205" height="85" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="297" y="147" text-anchor="middle" font-size="18" font-weight="700">Rate limiter</text>
+<text x="297" y="172" text-anchor="middle" font-size="14" fill="#53646d">scope: tenant:a</text>
+<rect x="440" y="110" width="205" height="85" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="542" y="147" text-anchor="middle" font-size="18" font-weight="700">Bulkhead</text>
+<text x="542" y="172" text-anchor="middle" font-size="14" fill="#53646d">capacity: workload:fg</text>
+
+<rect x="25" y="215" width="130" height="85" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="90" y="252" text-anchor="middle" font-size="18" font-weight="700">Tenant B</text>
+<text x="90" y="277" text-anchor="middle" font-size="14" fill="#53646d">requests</text>
+<rect x="195" y="215" width="205" height="85" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="297" y="252" text-anchor="middle" font-size="18" font-weight="700">Rate limiter</text>
+<text x="297" y="277" text-anchor="middle" font-size="14" fill="#53646d">scope: tenant:b</text>
+<rect x="440" y="215" width="205" height="85" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="542" y="252" text-anchor="middle" font-size="18" font-weight="700">Bulkhead</text>
+<text x="542" y="277" text-anchor="middle" font-size="14" fill="#53646d">capacity: workload:batch</text>
+
+<rect x="690" y="140" width="185" height="160" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="782" y="206" text-anchor="middle" font-size="18" font-weight="700">Circuit breaker</text>
+<text x="782" y="231" text-anchor="middle" font-size="14" fill="#53646d">health: partner:eu</text>
+
+<path d="M155 152 H186" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M400 152 H431" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M645 152 L681 190" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M155 257 H186" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M400 257 H431" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<path d="M645 257 L681 250" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+<text x="25" y="335" font-size="14" fill="#53646d">A tenant may use either workload compartment; the two lanes show representative paths.</text>
+
+<path d="M782 300 V386" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+<rect x="25" y="395" width="890" height="85" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="470" y="431" text-anchor="middle" font-size="20" font-weight="700">Partner API</text>
+<text x="470" y="458" text-anchor="middle" font-size="15" fill="#53646d">shared aggregate resource · every path passes this boundary</text>
+
+<rect x="25" y="505" width="890" height="45" rx="10" fill="#eef2f4" stroke="#b4c0c6"/>
+<text x="470" y="523" text-anchor="middle" font-size="14" fill="#53646d">Full identity = namespace · policy name · operation name · scope</text>
+<text x="470" y="542" text-anchor="middle" font-size="14" fill="#53646d">The figure shows scope boundaries, not one prescribed nesting order.</text>
+</g>
+</svg>
