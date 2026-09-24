@@ -19,6 +19,7 @@ tags:
 2. [How to Implement a Distributed Bulkhead](/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/)
 3. [Rate Limiting Without the Refill Loop: Token Bucket vs GCRA](/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/)
 4. [How to Implement a Distributed Rate Limiter](/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/)
+5. [How to Combine Circuit Breakers, Bulkheads, and Rate Limiters](/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/)
 
 You run a service on twenty replicas that all call the same API, with a shared budget of 100 calls a second. You need **rate limiting** across the whole fleet so that adding capacity to your service does not overwhelm the callee. Giving each replica its own limit of 100 calls a second allows 2,000 calls a second under sustained demand, so every admission needs to account for traffic sent by the other replicas.
 

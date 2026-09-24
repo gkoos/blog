@@ -18,6 +18,7 @@ tags:
 2. [How to Implement a Distributed Bulkhead](/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/)
 3. [Rate Limiting Without the Refill Loop: Token Bucket vs GCRA](/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/)
 4. [How to Implement a Distributed Rate Limiter](/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/)
+5. [How to Combine Circuit Breakers, Bulkheads, and Rate Limiters](/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/)
 
 Say your service calls a partner API that answers in 80 ms, and you have sized it for thirty of those calls in flight at once. Then they have a slow afternoon, or your traffic doubles, and 80 ms becomes two seconds. Nothing fails and no health check notices. Every request that calls that API now holds a worker, a socket and a few hundred kilobytes of buffers while it waits for an answer, and response times climb on every endpoint - including the ones that never speak to the API at all, because the process has one worker pool and one event loop. You keep starting requests you can no longer finish, and the partner gets slower because you are sending it more.
 

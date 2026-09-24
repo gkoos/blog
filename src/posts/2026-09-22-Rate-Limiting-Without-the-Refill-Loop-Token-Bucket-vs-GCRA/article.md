@@ -15,6 +15,7 @@ tags:
 2. [How to Implement a Distributed Bulkhead](/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/)
 3. [Rate Limiting Without the Refill Loop: Token Bucket vs GCRA](/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/)
 4. [How to Implement a Distributed Rate Limiter](/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/)
+5. [How to Combine Circuit Breakers, Bulkheads, and Rate Limiters](/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/)
 
 Say your service sends requests to a partner API with a budget of 100 calls per second and permission to send up to 20 at once after a quiet period. A batch of jobs becomes ready, and every worker wants to send its request immediately. The API is healthy and your workers have capacity, but you still need to decide which calls may start without spending that budget too quickly. A [rate limiter]((https://learn.microsoft.com/en-us/azure/architecture/patterns/rate-limiting-pattern)) makes that decision before each call begins: given a sustained rate and a bounded burst, may this call start now?
 
