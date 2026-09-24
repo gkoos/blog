@@ -1,0 +1,40 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="550" viewBox="0 0 960 550" role="img" aria-labelledby="title desc">
+<title id="title">Two orders with capacity already full</title>
+<desc id="desc">Both rows begin with all twenty bulkhead permits occupied and rate allowance available. In the first row the rate limiter charges one admission, then the bulkhead rejects. In the second row the bulkhead rejects first and the rate limiter is not reached. Both requests acquire zero permits and start zero API calls. The outer breaker has already admitted each request.</desc>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#2f4858"/></marker></defs>
+<rect width="960" height="550" fill="#f7f4ee"/>
+<g font-family="Arial, sans-serif" fill="#20313a">
+<text x="480" y="39" text-anchor="middle" font-size="23" font-weight="700">Two orders with capacity already full</text>
+<text x="480" y="69" text-anchor="middle" font-size="16" fill="#53646d">Same starting state: 20 of 20 permits held · rate allowance available</text>
+<text x="480" y="94" text-anchor="middle" font-size="14" fill="#53646d">The outer breaker has admitted the request. Arrows show admission order.</text>
+<rect x="30" y="115" width="900" height="175" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="50" y="144" font-size="17" font-weight="700">Rate limiter first</text>
+<rect x="50" y="160" width="240" height="77" rx="10" fill="#e7efe8" stroke="#7a9a7e" stroke-width="2"/>
+<text x="170" y="190" text-anchor="middle" font-size="18" font-weight="700">Rate limiter admits</text>
+<text x="170" y="217" text-anchor="middle" font-size="15">One admission charged</text>
+<path d="M290 198 H329" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+<rect x="340" y="160" width="240" height="77" rx="10" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+<text x="460" y="190" text-anchor="middle" font-size="18" font-weight="700">Bulkhead rejects</text>
+<text x="460" y="217" text-anchor="middle" font-size="15">No permit acquired</text>
+<rect x="640" y="160" width="265" height="77" rx="10" fill="#f7f4ee" stroke="#b4c0c6" stroke-width="2"/>
+<text x="772" y="190" text-anchor="middle" font-size="18" font-weight="700">API never reached</text>
+<text x="772" y="217" text-anchor="middle" font-size="15">No downstream call</text>
+<path d="M600 188 L620 208 M620 188 L600 208" stroke="#c37a68" stroke-width="2.5"/>
+<text x="50" y="269" font-size="15">This request: 1 rate admission charged · 0 permits acquired · 0 API calls</text>
+<rect x="30" y="310" width="900" height="175" rx="10" fill="#eef2f4" stroke="#b4c0c6" stroke-width="2"/>
+<text x="50" y="339" font-size="17" font-weight="700">Bulkhead first</text>
+<rect x="50" y="355" width="240" height="77" rx="10" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+<text x="170" y="385" text-anchor="middle" font-size="18" font-weight="700">Bulkhead rejects</text>
+<text x="170" y="412" text-anchor="middle" font-size="15">No permit acquired</text>
+<path d="M302 383 L322 403 M322 383 L302 403" stroke="#c37a68" stroke-width="2.5"/>
+<rect x="340" y="355" width="240" height="77" rx="10" fill="#f7f4ee" stroke="#b4c0c6" stroke-width="2"/>
+<text x="460" y="385" text-anchor="middle" font-size="18" font-weight="700">Rate limiter skipped</text>
+<text x="460" y="412" text-anchor="middle" font-size="15">Allowance unchanged</text>
+<rect x="640" y="355" width="265" height="77" rx="10" fill="#f7f4ee" stroke="#b4c0c6" stroke-width="2"/>
+<text x="772" y="385" text-anchor="middle" font-size="18" font-weight="700">API never reached</text>
+<text x="772" y="412" text-anchor="middle" font-size="15">No downstream call</text>
+<text x="50" y="464" font-size="15">This request: 0 rate admissions charged · 0 permits acquired · 0 API calls</text>
+<text x="480" y="520" text-anchor="middle" font-size="16" fill="#53646d">The existing twenty calls retain their permits in both arrangements.</text>
+</g>
+</svg>
+
