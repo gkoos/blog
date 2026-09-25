@@ -11,6 +11,7 @@ tags:
 - text watermarking
 - provenance
 - ai detection
+- series--AI Watermarking
 ---
 *Anthropic has just announced [how Claude marks AI-generated content](https://support.claude.com/en/articles/16266773-how-claude-marks-ai-generated-content), bringing text watermarking into immediate practical discussion. Detecting a signal in a passage and reconstructing the history behind that passage are separate problems. These two articles examine the mechanism and its implications. The [first article](/posts/2026-08-12-Text-Watermarking-for-Non-Academics) explains how statistical text watermarking works, this second article examines what a positive result allows us to conclude.*
 

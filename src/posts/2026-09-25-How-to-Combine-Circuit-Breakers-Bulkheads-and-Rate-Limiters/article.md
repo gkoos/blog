@@ -1,7 +1,7 @@
 ﻿---
 layout: layouts/post.njk
 title: How to Combine Circuit Breakers, Bulkheads, and Rate Limiters
-date: 2027-09-25
+date: 2026-09-25
 description: Combining distributed resilience policies changes what each one counts and protects. How to choose their order and handle the failures that appear between admission and execution.
 excerpt: "A rate limiter admits a request, then a full bulkhead refuses it. The API receives no call, but the rate allowance has already been spent. Put the policies in the opposite order and a concurrency permit is held while the rate limiter decides. Each arrangement accounts for different work, and that choice shapes how the system behaves under load."
 tags:

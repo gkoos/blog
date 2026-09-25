@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 720" role="img" aria-labelledby="title desc">
+  <title id="title">From the prompt to statistical detectability</title>
+  <desc id="desc">Prompt and generated context produce the next-token probability distribution, which sets the available uncertainty and therefore the opportunity to influence token selection. That opportunity becomes the effective watermark signal, which is what a detector finally measures as statistical detectability.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="920" height="720" rx="18" fill="#f8fafc"/>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <rect x="190" y="34" width="540" height="60" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="460" y="72" font-size="21" font-weight="600" fill="#172033">prompt + generated context</text>
+
+    <line x1="460" y1="98" x2="460" y2="138" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="146" width="540" height="60" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="460" y="184" font-size="21" font-weight="600" fill="#172033">next-token probability distribution</text>
+
+    <line x1="460" y1="210" x2="460" y2="250" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="258" width="540" height="60" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="296" font-size="21" font-weight="600" fill="#172033">available uncertainty</text>
+
+    <line x1="460" y1="322" x2="460" y2="362" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="370" width="540" height="60" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="408" font-size="21" font-weight="600" fill="#172033">opportunity to influence token selection</text>
+
+    <line x1="460" y1="434" x2="460" y2="474" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="482" width="540" height="60" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="520" font-size="21" font-weight="600" fill="#172033">effective watermark signal</text>
+
+    <line x1="460" y1="546" x2="460" y2="586" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="594" width="540" height="60" rx="12" fill="#eef2f7" stroke="#64748b" stroke-width="2"/>
+    <text x="460" y="632" font-size="21" font-weight="600" fill="#172033">statistical detectability</text>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" fill="#475569">
+    <circle cx="240" cy="686" r="7" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="256" y="692">model</text>
+    <circle cx="410" cy="686" r="7" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="426" y="692">watermark</text>
+    <circle cx="590" cy="686" r="7" fill="#eef2f7" stroke="#64748b" stroke-width="2"/>
+    <text x="606" y="692">detection</text>
+  </g>
+</svg>
