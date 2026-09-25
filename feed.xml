@@ -1505,6 +1505,8 @@
         
         <category>ai detection</category>
         
+        <category>series--AI Watermarking</category>
+        
       </item>
     
       <item>
@@ -1526,6 +1528,8 @@
         <category>provenance</category>
         
         <category>ai detection</category>
+        
+        <category>series--AI Watermarking</category>
         
       </item>
     
@@ -1769,9 +1773,9 @@
     
       <item>
         <title>How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</title>
-        <link>https://blog.gaborkoos.com/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/</link>
-        <guid>https://blog.gaborkoos.com/posts/2027-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/</guid>
-        <pubDate>Sat, 25 Sep 2027 00:00:00 GMT</pubDate>
+        <link>https://blog.gaborkoos.com/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/</guid>
+        <pubDate>Fri, 25 Sep 2026 00:00:00 GMT</pubDate>
 
         <description>Combining distributed resilience policies changes what each one counts and protects. How to choose their order and handle the failures that appear between admission and execution.</description>
         
@@ -1784,6 +1788,28 @@
         <category>resilience</category>
         
         <category>series--Distributed Resilience</category>
+        
+      </item>
+    
+      <item>
+        <title>How Much Watermark Can You Hide in AI Text?</title>
+        <link>https://blog.gaborkoos.com/posts/2026-09-26-How-Much-Watermark-Can-You-Hide-in-AI%20Text/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-26-How-Much-Watermark-Can-You-Hide-in-AI%20Text/</guid>
+        <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
+
+        <description>A deliberately simple watermark model shows how much room a text watermark has: the entropy available at each token, how a small bias becomes detectable, and why length matters.</description>
+        
+        <category>artificial intelligence</category>
+        
+        <category>language models</category>
+        
+        <category>text watermarking</category>
+        
+        <category>provenance</category>
+        
+        <category>ai detection</category>
+        
+        <category>series--AI Watermarking</category>
         
       </item>
     

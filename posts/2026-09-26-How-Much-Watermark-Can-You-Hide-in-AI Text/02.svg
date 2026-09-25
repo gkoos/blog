@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 700" role="img" aria-labelledby="title desc">
+  <title id="title">SynthID-Text tournament sampling</title>
+  <desc id="desc">The model's own next-token distribution is used to sample candidate tokens. The watermark assigns keyed pseudorandom scores to those candidates, they compete in tournament layers where the higher-scoring token survives, and one token remains as the winner.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="920" height="700" rx="18" fill="#f8fafc"/>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <rect x="190" y="34" width="540" height="78" rx="12" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="460" y="70" font-size="21" font-weight="600" fill="#172033">model's next-token distribution</text>
+    <text x="460" y="98" font-size="17" fill="#475569">the model's own probabilities</text>
+
+    <line x1="460" y1="116" x2="460" y2="156" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="164" width="540" height="78" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="200" font-size="21" font-weight="600" fill="#172033">sample candidates</text>
+    <text x="460" y="228" font-size="17" fill="#475569">eight candidates for three layers</text>
+
+    <line x1="460" y1="246" x2="460" y2="286" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="294" width="540" height="78" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="330" font-size="21" font-weight="600" fill="#172033">assign keyed pseudorandom scores</text>
+    <text x="460" y="358" font-size="17" fill="#475569">secret watermark key plus recent context</text>
+
+    <line x1="460" y1="376" x2="460" y2="416" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="424" width="540" height="78" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="460" font-size="21" font-weight="600" fill="#172033">tournament layers</text>
+    <text x="460" y="488" font-size="17" fill="#475569">the higher-scoring candidate in each pair survives</text>
+
+    <line x1="460" y1="506" x2="460" y2="546" stroke="#64748b" stroke-width="3" marker-end="url(#arrow)"/>
+
+    <rect x="190" y="554" width="540" height="78" rx="12" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="460" y="590" font-size="21" font-weight="600" fill="#172033">winning token</text>
+    <text x="460" y="618" font-size="17" fill="#475569">one candidate sampled from the model remains</text>
+  </g>
+  <g font-family="Inter, Segoe UI, Arial, sans-serif" font-size="16" fill="#475569">
+    <circle cx="262" cy="664" r="7" fill="#ffffff" stroke="#94a3b8" stroke-width="2"/>
+    <text x="278" y="670">model distribution</text>
+    <circle cx="468" cy="664" r="7" fill="#e0ecff" stroke="#2563eb" stroke-width="2"/>
+    <text x="484" y="670">SynthID-Text sampling</text>
+  </g>
+</svg>
