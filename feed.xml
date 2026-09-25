@@ -1793,8 +1793,8 @@
     
       <item>
         <title>How Much Watermark Can You Hide in AI Text?</title>
-        <link>https://blog.gaborkoos.com/posts/2026-09-26-How-Much-Watermark-Can-You-Hide-in-AI%20Text/</link>
-        <guid>https://blog.gaborkoos.com/posts/2026-09-26-How-Much-Watermark-Can-You-Hide-in-AI%20Text/</guid>
+        <link>https://blog.gaborkoos.com/posts/2026-09-26-How-Much-Watermark-Can-You-Hide-in-AI-Text/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-09-26-How-Much-Watermark-Can-You-Hide-in-AI-Text/</guid>
         <pubDate>Sat, 26 Sep 2026 00:00:00 GMT</pubDate>
 
         <description>A deliberately simple watermark model shows how much room a text watermark has: the entropy available at each token, how a small bias becomes detectable, and why length matters.</description>
