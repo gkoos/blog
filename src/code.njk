@@ -10,6 +10,9 @@ pagefindBody: true
 {% macro tech(name, slug, color, logoColor) %}<img src="https://img.shields.io/badge/{{ name | replace(' ', '_') }}-{{ color }}?style=flat-square{% if slug %}&amp;logo={{ slug }}&amp;logoColor={{ logoColor }}{% endif %}" alt="{{ name }}" class="h-5 w-auto m-0" loading="lazy" />{% endmacro %}
 {% macro badges(items) %}<div class="flex flex-wrap items-center gap-2 mt-3">{% for item in items %}{{ tech(item[0], item[1], item[2], item[3]) | safe }}{% endfor %}</div>{% endmacro %}
 
+{# Last-commit badge: shields.io dynamic JSON badge fed by the GitHub commits API. #}
+{% macro lastCommit(user, repo) %}<img src="https://img.shields.io/badge/dynamic/json?url={{ ('https://api.github.com/repos/' + user + '/' + repo + '/commits?per_page=1') | urlencode }}&amp;query={{ '$[0].commit.committer.date' | urlencode }}&amp;label=last%20commit&amp;color=blue&amp;style=flat-square&amp;cacheSeconds=3600" alt="Last commit for {{ user }}/{{ repo }}" class="h-5 w-auto m-0" loading="lazy" />{% endmacro %}
+
 {% set TS = ['TypeScript', 'typescript', '3178C6', 'white'] %}
 {% set GO = ['Go', 'go', '00ADD8', 'white'] %}
 {% set JAVASCRIPT = ['JavaScript', 'javascript', 'F7DF1E', 'black'] %}
@@ -53,7 +56,6 @@ pagefindBody: true
       <p class="mt-2 text-base">
         <a href="https://fetchkit.org" class="text-blue-600 dark:text-blue-400 hover:underline">fetchkit.org</a>
       </p>
-      {{ badges([TS, GO, NODE]) | safe }}
 
       <div class="space-y-6 mt-6">
         <!-- ffetch -->
@@ -63,6 +65,7 @@ pagefindBody: true
               <a href="https://github.com/fetch-kit/ffetch" class="text-blue-600 dark:text-blue-400 hover:underline">ffetch</a>
             </h3>
             <img src="https://img.shields.io/github/stars/fetch-kit/ffetch?style=social" alt="GitHub stars for fetch-kit/ffetch" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('fetch-kit', 'ffetch') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             TypeScript-first fetch wrapper with configurable timeouts, retries, and circuit-breaker baked in.
@@ -77,6 +80,7 @@ pagefindBody: true
               <a href="https://github.com/fetch-kit/chaos-fetch" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-fetch</a>
             </h3>
             <img src="https://img.shields.io/github/stars/fetch-kit/chaos-fetch?style=social" alt="GitHub stars for fetch-kit/chaos-fetch" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('fetch-kit', 'chaos-fetch') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Library for injecting network chaos (latency, failures, drops, etc.) into fetch requests.
@@ -91,6 +95,7 @@ pagefindBody: true
               <a href="https://github.com/fetch-kit/chaos-sw" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-sw</a>
             </h3>
             <img src="https://img.shields.io/github/stars/fetch-kit/chaos-sw?style=social" alt="GitHub stars for fetch-kit/chaos-sw" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('fetch-kit', 'chaos-sw') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Service Worker for injecting configurable network chaos (latency, failures, throttling, rate-limiting) into browser requests.
@@ -105,6 +110,7 @@ pagefindBody: true
               <a href="https://github.com/fetch-kit/chaos-proxy" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-proxy</a>
             </h3>
             <img src="https://img.shields.io/github/stars/fetch-kit/chaos-proxy?style=social" alt="GitHub stars for fetch-kit/chaos-proxy" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('fetch-kit', 'chaos-proxy') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Proxy for injecting network chaos (latency, failures, drops, rate-limiting) into API requests.
@@ -119,6 +125,7 @@ pagefindBody: true
               <a href="https://github.com/fetch-kit/chaos-proxy-go" class="text-blue-600 dark:text-blue-400 hover:underline">chaos-proxy-go</a>
             </h3>
             <img src="https://img.shields.io/github/stars/fetch-kit/chaos-proxy-go?style=social" alt="GitHub stars for fetch-kit/chaos-proxy-go" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('fetch-kit', 'chaos-proxy-go') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Golang port of chaos-proxy.
@@ -139,7 +146,6 @@ pagefindBody: true
         A local Confluence knowledge pipeline: crawl Confluence Cloud into clean Markdown with incremental
         updates, index the result for fast local hybrid search, and expose it to AI clients over MCP.
       </p>
-      {{ badges([GO, SQLITE, OPENAI, MCP]) | safe }}
 
       <div class="space-y-6 mt-6">
         <!-- confluence2md -->
@@ -149,6 +155,7 @@ pagefindBody: true
               <a href="https://github.com/gkoos/confluence2md" class="text-blue-600 dark:text-blue-400 hover:underline">confluence2md</a>
             </h3>
             <img src="https://img.shields.io/github/stars/gkoos/confluence2md?style=social" alt="GitHub stars for gkoos/confluence2md" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('gkoos', 'confluence2md') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Confluence Cloud to Markdown crawler with incremental updates and local link rewriting.
@@ -163,6 +170,7 @@ pagefindBody: true
               <a href="https://github.com/gkoos/confluence2md-indexer" class="text-blue-600 dark:text-blue-400 hover:underline">confluence2md-indexer</a>
             </h3>
             <img src="https://img.shields.io/github/stars/gkoos/confluence2md-indexer?style=social" alt="GitHub stars for gkoos/confluence2md-indexer" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('gkoos', 'confluence2md-indexer') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             Turn confluence2md output into fast local search with SQLite, embeddings, and explainable hybrid ranking.
@@ -177,6 +185,7 @@ pagefindBody: true
               <a href="https://github.com/gkoos/confluence2md-mcp" class="text-blue-600 dark:text-blue-400 hover:underline">confluence2md-mcp</a>
             </h3>
             <img src="https://img.shields.io/github/stars/gkoos/confluence2md-mcp?style=social" alt="GitHub stars for gkoos/confluence2md-mcp" class="h-5 w-auto m-0" loading="lazy" />
+            {{ lastCommit('gkoos', 'confluence2md-mcp') | safe }}
           </div>
           <p class="text-base text-gray-700 dark:text-gray-300 leading-relaxed">
             MCP server that exposes confluence2md-indexer search to any MCP-compatible AI client, returning
@@ -197,6 +206,7 @@ pagefindBody: true
           </a>
         </h2>
         <img src="https://img.shields.io/github/stars/gkoos/caracal?style=social" alt="GitHub stars for gkoos/caracal" class="h-5 w-auto m-0" loading="lazy" />
+        {{ lastCommit('gkoos', 'caracal') | safe }}
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
         Scoped distributed resilience for asynchronous operations. A composable model for applying
@@ -213,6 +223,7 @@ pagefindBody: true
           <a href="https://github.com/gkoos/crossflight" class="text-blue-600 dark:text-blue-400 hover:underline">Crossflight</a>
         </h2>
         <img src="https://img.shields.io/github/stars/gkoos/crossflight?style=social" alt="GitHub stars for gkoos/crossflight" class="h-5 w-auto m-0" loading="lazy" />
+        {{ lastCommit('gkoos', 'crossflight') | safe }}
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
         Cross-process cache stampede protection for the cache you already use.
@@ -227,10 +238,11 @@ pagefindBody: true
           <a href="https://github.com/gkoos/nullmail" class="text-blue-600 dark:text-blue-400 hover:underline">Nullmail</a>
         </h2>
         <img src="https://img.shields.io/github/stars/gkoos/nullmail?style=social" alt="GitHub stars for gkoos/nullmail" class="h-5 w-auto m-0" loading="lazy" />
+        {{ lastCommit('gkoos', 'nullmail') | safe }}
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
         A privacy-focused, ephemeral temp mail service with instant disposable inboxes, automatic expiry,
-        no sign-up, and no tracking. Built with SvelteKit, Supabase, and ForwardEmail.
+        no sign-up, and no tracking. Built with SvelteKit, Supabase, and ForwardEmail. Also Chrome and Firefox extensions for quick inbox creation.
       </p>
       {{ badges([SVELTE, SUPABASE, CLOUDFLARE]) | safe }}
       <p class="mt-2 text-base">
@@ -245,6 +257,7 @@ pagefindBody: true
           <a href="https://github.com/gkoos/mermaid-editor" class="text-blue-600 dark:text-blue-400 hover:underline">Mermaid Editor</a>
         </h2>
         <img src="https://img.shields.io/github/stars/gkoos/mermaid-editor?style=social" alt="GitHub stars for gkoos/mermaid-editor" class="h-5 w-auto m-0" loading="lazy" />
+        {{ lastCommit('gkoos', 'mermaid-editor') | safe }}
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
         A fast, browser-based editor for creating and exporting Mermaid diagrams. No sign-up, no ads, and
@@ -263,6 +276,7 @@ pagefindBody: true
           <a href="https://github.com/gkoos/skyline" class="text-blue-600 dark:text-blue-400 hover:underline">Skyline</a>
         </h2>
         <img src="https://img.shields.io/github/stars/gkoos/skyline?style=social" alt="GitHub stars for gkoos/skyline" class="h-5 w-auto m-0" loading="lazy" />
+        {{ lastCommit('gkoos', 'skyline') | safe }}
       </div>
       <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
         A Go library for efficient skyline queries. Finds the Pareto-optimal points in multi-dimensional
