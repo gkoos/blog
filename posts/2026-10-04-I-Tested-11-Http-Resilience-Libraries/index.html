@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>I Tested 11 HTTP Resilience Libraries</title>
+  <meta name="description" content="Twenty-one correctness scenarios run against eleven pinned fetch resilience libraries: 122 cells pass, 25 fail, and 84 combinations no library offers.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="I Tested 11 HTTP Resilience Libraries">
+  <meta property="og:description" content="Twenty-one correctness scenarios run against eleven pinned fetch resilience libraries: 122 cells pass, 25 fail, and 84 combinations no library offers.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="I Tested 11 HTTP Resilience Libraries">
+  <meta name="twitter:description" content="Twenty-one correctness scenarios run against eleven pinned fetch resilience libraries: 122 cells pass, 25 fail, and 84 combinations no library offers.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1791081596619" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <!-- Search -->
+          <form action="/search" method="get" role="search" class="flex-1 min-w-0 max-w-xs mx-2 sm:mx-4">
+            <label for="header-search" class="sr-only">Search</label>
+            <input id="header-search" type="search" name="q" placeholder="Search…" autocomplete="off"
+              class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-colors" />
+          </form>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="/series" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Series</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none" data-pagefind-body>
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">I Tested 11 HTTP Resilience Libraries</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-10-04T00:00:00.000Z" data-pagefind-meta="date:2026-10-04T00:00:00.000Z">Sun Oct 04 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2" data-pagefind-ignore>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">testing</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">resilience</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">networking</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">fetch-kit</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p>When I started building <a href="https://github.com/fetch-kit/ffetch">ffetch</a>, I had a fairly simple goal: make HTTP requests more resilient without turning a fetch wrapper into a complicated piece of machinery. Retries, backoffs, circuit breaking, and the other patterns could live around a small core, with plugins adding whatever a particular application needed. I liked the elegance of that design, and keeping the library lightweight was a big part of the appeal.</p>
+<p>The trouble started when I went back through the code looking for correctness issues. I found subtle bugs and edge cases, then more of them as I looked at what happens when you <a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">combine resilience patterns</a>. I worked through the fixes, but the implementation kept growing, until the small library I had set out to write had become <em>huge and complex</em>. That was frustrating, because the simplicity was something I had deliberately designed for. But I couldn't justify keeping an elegant implementation at the expense of handling those cases correctly, so correctness won, and I accepted the complexity that came with it.</p>
+<p>After working through that, I wanted to know what the other libraries were doing. These problems come with the resilience patterns themselves, so anyone implementing them has to deal with them somehow. How much of that complexity had other libraries managed to avoid, and how correctly did they handle the cases that had given me so much trouble? I put together a suite of 21 scenarios and ran it against eleven HTTP-resilience libraries, including ffetch, to find out.</p>
+<h2 id="methodology" tabindex="-1"><a class="header-anchor" href="#methodology">Methodology</a></h2>
+<p>I built scenarios covering retries and timeouts, circuit breaking, bulkheads, hedging, and request deduplication. Each library runs the scenarios its public API supports, with assertions checking the behaviour visible to the caller and the transport. The suite grew out of the bugs I found in ffetch, so its coverage reflects those concerns.</p>
+<p>The basic cases establish that a policy does what its configuration says. Retry recovery serves two <code>503</code> responses followed by a <code>200</code> and expects exactly three attempts. Zero retries must still allow the initial request. The body replay case consumes a <code>POST</code> payload before returning a <code>503</code>, then checks that a retry sends the same bytes or that an unsupported body is explicitly rejected.</p>
+<p>The combination cases introduce another event while a policy is already doing something. One aborts the caller 20 ms into a 100 ms retry backoff and checks that the promise settles before the wait ends, with no later dispatch. Another cancels a caller waiting in a bulkhead queue and checks that its place becomes available to a replacement. The circuit scenarios include a success from an older request arriving after a failed probe has reopened the breaker, when that success must leave the newer cooldown intact. These cases check whether the policies still behave correctly when their state changes underneath an operation.</p>
+<p>Most scenarios use a scripted fetch implementation that serves predefined responses, delays, headers, and streamed bodies while recording transport attempts. Vitest's fake timers let the tests advance to the exact moment of an abort or deadline, and <code>Math.random</code> is fixed at <code>0.5</code> to make jitter repeatable. Two integration scenarios use native fetch against a local <code>node:http</code> server, checking retry recovery and timeout behaviour over real sockets.</p>
+<p>Each library is configured through a thin adapter that preserves its own results and errors. A library that returns a terminal <code>503</code> response is checked for that response, while one that rejects is checked for its error type and any documented cause. Retry counts are aligned so that &quot;two retries&quot; means three attempts. Where libraries differ in circuit accounting or half-open probe admission, the tests respect the declared policy and check the invariants around it.</p>
+<p>Cancellation has an explicit contract: the caller must settle promptly, and cancelled work must stop dispatching. Queued cancellations must also release queue capacity, and deadlines must stop active work when the transport supports cancellation. These requirements can be stricter than a library's documentation, so a failure records a disagreement with the scenario's rule even when the library makes no promise about that interaction.</p>
+<p>In the generated report, every cell links to its configuration and expected behaviour, with assertion failures and traces attached when it fails. A combination the library cannot expose through its public API is marked <code>N/A</code>, with the reason recorded beside it. A supported combination that fails an assertion gets a <code>FAIL</code> verdict. The comparison measures correctness under these scenarios, with every verdict tied to the pinned release that was tested.</p>
+<p>The code is on <a href="https://github.com/fetch-kit/http-resilience">GitHub</a>. To reproduce the matrix or narrow the run to one library:</p>
+<pre class="language-sh"><code class="language-sh"><span class="token function">git</span> clone https://github.com/fetch-kit/http-resilience.git
+<span class="token builtin class-name">cd</span> http-resilience
+<span class="token function">npm</span> ci
+<span class="token function">npm</span> <span class="token builtin class-name">test</span>
+<span class="token function">npm</span> run report <span class="token comment"># writes results/matrix.html, .md and .json</span>
+<span class="token function">npm</span> <span class="token builtin class-name">test</span> -- <span class="token parameter variable">--testNamePattern</span> <span class="token string">"fetch-retry"</span>
+</code></pre>
+<p>If you don't want to set up the project locally, you can also view the generated report directly at <a href="https://fetchkit.org/http-resilience/">https://fetchkit.org/http-resilience/</a></p>
+<h2 id="the-libraries" tabindex="-1"><a class="header-anchor" href="#the-libraries">The libraries</a></h2>
+<p>The packages are pinned to exact versions in <code>package.json</code>, so a verdict is attached to a release. The selection leans toward fetch wrappers people actually install: general-purpose clients with one or two policies, packages that exist to add a single policy, and wrappers that stack several of them. And, of course, ffetch :D</p>
+<table>
+<thead>
+<tr>
+<th>Library</th>
+<th>Pinned version</th>
+<th>Cells implemented</th>
+<th>Pass</th>
+<th>Fail</th>
+<th>N/A</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://github.com/fetch-kit/ffetch">ffetch</a></td>
+<td>5.7.1</td>
+<td>21</td>
+<td>20</td>
+<td>1</td>
+<td>0</td>
+</tr>
+<tr>
+<td><a href="https://github.com/sindresorhus/ky">ky</a></td>
+<td>2.1.0</td>
+<td>10</td>
+<td>10</td>
+<td>0</td>
+<td>11</td>
+</tr>
+<tr>
+<td><a href="https://github.com/jonbern/fetch-retry">fetch-retry</a></td>
+<td>6.0.0</td>
+<td>7</td>
+<td>6</td>
+<td>1</td>
+<td>14</td>
+</tr>
+<tr>
+<td><a href="https://github.com/unjs/ofetch">ofetch</a></td>
+<td>1.5.1</td>
+<td>8</td>
+<td>7</td>
+<td>1</td>
+<td>13</td>
+</tr>
+<tr>
+<td><a href="https://github.com/elbywan/wretch">wretch</a></td>
+<td>3.0.9</td>
+<td>11</td>
+<td>8</td>
+<td>3</td>
+<td>10</td>
+</tr>
+<tr>
+<td><a href="https://github.com/cnoelle/resilient-fetch-client">resilient-fetch-client</a></td>
+<td>0.3.0</td>
+<td>14</td>
+<td>9</td>
+<td>5</td>
+<td>7</td>
+</tr>
+<tr>
+<td><a href="https://github.com/Ali-Raza-Arain/fetch-smartly">fetch-smartly</a></td>
+<td>1.0.2</td>
+<td>14</td>
+<td>13</td>
+<td>1</td>
+<td>7</td>
+</tr>
+<tr>
+<td><a href="https://github.com/nkcodedev/resili">@resili/fetch</a></td>
+<td>0.2.0-beta.1</td>
+<td>20</td>
+<td>15</td>
+<td>5</td>
+<td>1</td>
+</tr>
+<tr>
+<td><a href="https://github.com/mstuart/fetch-resilience">fetch-resilience</a></td>
+<td>0.1.0</td>
+<td>13</td>
+<td>9</td>
+<td>4</td>
+<td>8</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/flowshield">flowshield</a></td>
+<td>1.0.4</td>
+<td>18</td>
+<td>15</td>
+<td>3</td>
+<td>3</td>
+</tr>
+<tr>
+<td><a href="https://www.npmjs.com/package/ts-retry-circuit">ts-retry-circuit</a></td>
+<td>2.1.1</td>
+<td>11</td>
+<td>10</td>
+<td>1</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<p>(flowshield and ts-retry-circuit no longer publish a public GitHub repository, so those two link to their npm pages.)</p>
+<h2 id="the-results" tabindex="-1"><a class="header-anchor" href="#the-results">The results</a></h2>
+<p>Here's the full matrix. The symbols mean: ✅ passes, ❌ fails, ➖ not applicable. The header row carries the pinned version that produced each column.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>ffetch 5.7.1</th>
+<th>ky 2.1.0</th>
+<th>fetch-retry 6.0.0</th>
+<th>ofetch 1.5.1</th>
+<th>wretch 3.0.9</th>
+<th>resilient-fetch-client 0.3.0</th>
+<th>fetch-smartly 1.0.2</th>
+<th>@resili/fetch 0.2.0-beta.1</th>
+<th>fetch-resilience 0.1.0</th>
+<th>flowshield 1.0.4</th>
+<th>ts-retry-circuit 2.1.1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Retry recovery</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Retry exhaustion</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Zero retries</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Retry + abort during backoff</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Bulkhead + queued abort</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>❌</td>
+<td>➖</td>
+<td>❌</td>
+<td>❌</td>
+<td>❌</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Hedge + streaming body</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Circuit + hedge accounting</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Retry over real HTTP</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Timeout over real HTTP</td>
+<td>✅</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Retry + total timeout</td>
+<td>✅</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>❌</td>
+<td>❌</td>
+<td>➖</td>
+<td>➖</td>
+<td>❌</td>
+<td>❌</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Retry + body replay</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Retry-After + abort</td>
+<td>✅</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Retry + throwing hooks</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+<td>➖</td>
+<td>✅</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Hedge + all branches fail</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Hedge + timeout</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>❌</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Dedupe + retry</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>❌</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Dedupe + caller cancellation</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Bulkhead + retry</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>➖</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>➖</td>
+</tr>
+<tr>
+<td>Circuit + retry accounting</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Circuit + half-open concurrency</td>
+<td>❌</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>✅</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Circuit + local cancellation</td>
+<td>✅</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>➖</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+<td>❌</td>
+<td>✅</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="what-all-eleven-got-right" tabindex="-1"><a class="header-anchor" href="#what-all-eleven-got-right">What all eleven got right</a></h3>
+<p>Five scenarios pass in all eleven columns, which is 55 of the 147 implemented cells:</p>
+<ul>
+<li>Retry recovery: two 503 responses followed by a 200, with exactly three attempts.</li>
+<li>Retry exhaustion: three 503s, and the terminal result the library documents.</li>
+<li>Zero retries: one attempt, and the exact terminal response or error.</li>
+<li>Retry over real HTTP: three arrivals at a local server and a usable successful body.</li>
+<li>Retry + body replay: a POST body that reaches the server byte-for-byte on the retry, plus an explicit rejection when the body cannot be replayed.</li>
+</ul>
+<p>Retry is commodity behaviour in all of these packages. Timeout is nearly as uniform, with fetch-retry the only library that has none. The scenarios that exercise one policy in isolation also hold up: bulkhead + retry, circuit + retry accounting, dedupe + caller cancellation, hedge + streaming body, and hedge + all branches fail pass in every cell where the policy exists.</p>
+<p>The 25 failures cluster around a single pattern: something else arrives while a policy is waiting: a cancellation during a backoff sleep, a deadline that expires during the wait, a queued caller that leaves, a probe that completes after the breaker reopened. The rest of this post walks through those clusters.</p>
+<h3 id="retry-%2B-abort-during-backoff" tabindex="-1"><a class="header-anchor" href="#retry-%2B-abort-during-backoff">Retry + abort during backoff</a></h3>
+<p>This scenario serves one 503 to the first attempt, configures two retries with a 100 ms backoff, aborts the caller at 20 ms while the first delay is still running, drains every timer, and then issues a healthy follow-up request. The two questions that matter: does the caller's promise settle when the caller aborts, and does anything reach the transport afterwards?</p>
+<p>Six libraries answer the first question late. At the moment of the abort the caller's promise is still pending, and it stays pending until the backoff sleep ends. Five of them also dispatch after the abort. Two of the five run out the retry budget instead of stopping at the cancellation: <a href="https://fetchkit.org/http-resilience/#case-retry-backoff-abort-fetch-retry">fetch-retry</a> and <a href="https://fetchkit.org/http-resilience/#case-retry-backoff-abort-fetch-resilience">fetch-resilience</a> have made three dispatches by the time the harness looks, where it expects the one attempt that preceded the abort, and four attempts in total where it expects two. The abort is not terminal for them, and the retry loop keeps going after the caller has left. ofetch, wretch, and resilient-fetch-client dispatch exactly one more attempt. <a href="https://fetchkit.org/http-resilience/#case-retry-backoff-abort-@resili/fetch">@resili/fetch</a> is the member of this group that at least stops dispatching; its single failure is the late settlement.</p>
+<p>fetch-retry shows the mechanism in one function: its retry delay is a bare <code>setTimeout(function () { wrappedFetch(++attempt); }, delay)</code> that never reads <code>init.signal</code>, so the only code that can notice the abort is the <code>fetch</code> call that runs after the timer fires. A caller aborting during the wait cannot interrupt the sleep, so it waits it out and then watches another attempt leave. ffetch, ky, fetch-smartly, flowshield, and ts-retry-circuit pass.</p>
+<h3 id="bulkhead-%2B-queued-abort" tabindex="-1"><a class="header-anchor" href="#bulkhead-%2B-queued-abort">Bulkhead + queued abort</a></h3>
+<p>The setup is capacity 1, queue 1, a first request that holds the slot for 100 ms, a second caller that queues and aborts at 20 ms, and a replacement that should take the freed slot. Four of the five libraries that have a queue fail every assertion: <a href="https://fetchkit.org/http-resilience/#case-bulkhead-queued-abort-resilient-fetch-client">resilient-fetch-client</a>, <a href="https://fetchkit.org/http-resilience/#case-bulkhead-queued-abort-@resili/fetch">@resili/fetch</a>, <a href="https://fetchkit.org/http-resilience/#case-bulkhead-queued-abort-fetch-resilience">fetch-resilience</a>, and <a href="https://fetchkit.org/http-resilience/#case-bulkhead-queued-abort-flowshield">flowshield</a>.</p>
+<pre class="language-"><code class="language-">Queued cancellation must settle before slot handoff<span class="token operator">:</span> expected <span class="token keyword">undefined</span> to be defined
+Cancelled queue entry must release queue capacity<span class="token operator">:</span> expected <span class="token boolean">false</span> to be <span class="token boolean">true</span>
+expected <span class="token number">1</span> to be <span class="token number">2</span>
+</code></pre>
+<p>The queued caller is still pending when the slot becomes free, the queue keeps the cancelled waiter, and the replacement is refused because the queue is still full. Two of the four went further and dispatched the cancelled operation anyway, which shows up as an attempt against <code>https://example.test/resource/cancelled...</code> in the transport. ffetch is the only pass, and it is the only queue in the set that is written against the abort signal.</p>
+<p>This is what combination scenarios are for. All five libraries document a queue, and none of them documents what happens to a waiter that cancels. Losing a slot to a caller that already left is a leak rather than a design decision, and it only becomes visible when you abort a request that is waiting behind another one.</p>
+<h3 id="retry-%2B-total-timeout" tabindex="-1"><a class="header-anchor" href="#retry-%2B-total-timeout">Retry + total timeout</a></h3>
+<p>One overall deadline of 100 ms, one retry, and a second attempt that either follows a 300 ms backoff or, after an 80 ms backoff, hangs. The question is whether the deadline covers the policy around it.</p>
+<pre class="language-"><code class="language-">No dispatch after original deadline<span class="token operator">:</span> expected <span class="token number">2</span> to be <span class="token number">1</span>
+</code></pre>
+<p>wretch, resilient-fetch-client, fetch-resilience, and flowshield all dispatch the second attempt after the caller's deadline has passed, and <a href="https://fetchkit.org/http-resilience/#case-retry-total-timeout-wretch">wretch</a> adds a second failure, <code>Deadline must cover backoff and subsequent attempts</code>, because its caller is still pending at the deadline it was given. fetch-resilience and flowshield collect <code>Cooperative work must stop</code> instead, because the hung attempt is still alive after the deadline that was meant to bound it.</p>
+<p>Five libraries are not applicable here, and the reason is worth stating on its own: they expose a per-attempt timeout and nothing that spans retries and backoff. That's a different contract. The deadline in this scenario has to be owned by whoever composes the policies, which means the composition, not the library, decides whether the retry can outlive the caller's patience.</p>
+<h3 id="retry-after-%2B-abort" tabindex="-1"><a class="header-anchor" href="#retry-after-%2B-abort">Retry-After + abort</a></h3>
+<p>The scenario serves a 503 with <code>Retry-After</code> set to a number of seconds, an HTTP date, a malformed value, and a large value, and it checks the whole contract around the header: the retry waits for the advertised delay, a malformed value falls back to the configured backoff, a large value is capped, an abort during the header-derived wait settles immediately with the right error, and nothing reaches the transport afterwards.</p>
+<p><a href="https://fetchkit.org/http-resilience/#case-retry-after-abort-resilient-fetch-client">resilient-fetch-client</a> gets the timing right and then treats the wait as uninterruptible. For every one of the four header shapes it collects both of these:</p>
+<pre class="language-"><code class="language-">Abort must interrupt header<span class="token operator">-</span>derived wait<span class="token operator">:</span> <span class="token number">1</span><span class="token operator">:</span> expected <span class="token keyword">undefined</span> to be defined
+No dispatch after header<span class="token operator">-</span>wait cancellation<span class="token operator">:</span> expected <span class="token number">2</span> to be <span class="token number">1</span>
+</code></pre>
+<p><a href="https://fetchkit.org/http-resilience/#case-retry-after-abort-@resili/fetch">@resili/fetch</a> fails in the other direction: the header never controls the retry timing, so a second attempt exists before the advertised second has elapsed (<code>Retry-After must control retry timing: 1: expected 2 to be 1</code>), and the caller is again left pending on abort. Its timing failure is missing for the malformed value, which is a detail worth noticing: with a broken header the scenario expects a retry at the configured backoff, and retrying immediately is indistinguishable from retrying correctly. ffetch, ky, and fetch-smartly pass, and six libraries are not applicable because they never read the header at all.</p>
+<h3 id="retry-%2B-throwing-hooks" tabindex="-1"><a class="header-anchor" href="#retry-%2B-throwing-hooks">Retry + throwing hooks</a></h3>
+<p>Each library is exercised with the hooks it exposes: a retrying predicate, a delay function, and a retry callback, in synchronous and promise-returning form. The scenario throws a sentinel error from that hook and then checks three things: the caller settles with that exact error object, the failure is not retried, and the next request still succeeds. Eight libraries pass, two expose no hook to throw from, and <a href="https://fetchkit.org/http-resilience/#case-retry-hook-error-wretch">wretch</a> loses the caller:</p>
+<pre class="language-"><code class="language-"><span class="token literal-property property">callback</span><span class="token operator">:</span> callback rejection must settle the caller<span class="token operator">:</span> expected <span class="token keyword">undefined</span> to be defined
+</code></pre>
+<p>The callback owns the rejection, so nothing is left to settle the promise the caller is holding. It is the kind of failure that turns into an eternal <code>await</code> in application code, and it is easy to miss because the happy path of a retry hook is a boolean.</p>
+<h3 id="hedging-is-the-least-finished-surface" tabindex="-1"><a class="header-anchor" href="#hedging-is-the-least-finished-surface">Hedging is the least finished surface</a></h3>
+<p>Four scenarios cover hedging, and they produce 32 of the 84 not applicable cells, more than any other policy. Only three libraries ship a hedge with a configurable launch delay: ffetch, @resili/fetch, and flowshield. Two of the three pass all four scenarios, including the streaming-body case and the case where both branches fail in either order.</p>
+<p><a href="https://fetchkit.org/http-resilience/#case-hedge-timeout-flowshield">flowshield</a> fails the deadline scenario at every deadline it is given, 5 ms, 10 ms, 11 ms, and 100 ms. The timeout runs against a 10 ms hedge delay, so at 5 ms and 10 ms there should be no second request at all:</p>
+<pre class="language-"><code class="language-">No late hedge at deadline <span class="token number">5</span><span class="token operator">:</span> expected <span class="token number">2</span> to be <span class="token number">1</span>
+All cooperative branches must stop<span class="token operator">:</span> expected <span class="token number">1</span> to be <span class="token operator">+</span><span class="token number">0</span>
+</code></pre>
+<p>A hedge is launched after the timeout has already settled the caller, and the branches keep running afterwards. The second assertion is the one that matters for a server: a hedge that never stops is a request nobody is waiting for. When the deadline is longer than the hedge delay, the same library adds a dispatch at or past the deadline (<code>expected false to be true</code>) and leaves two branches alive (<code>All cooperative branches must stop: expected 2 to be +0</code>), so the boundary at the hedge delay is where this implementation breaks first.</p>
+<p>Hedging is a <a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/#scenario-c%3A-hedging-helps-tail-latency%2C-not-error-recovery">controversial and complex strategy</a>, so it is not surprising that the implementations vary widely and that many edge cases are not handled correctly.</p>
+<h3 id="deduplication-and-retry-share-more-than-the-request" tabindex="-1"><a class="header-anchor" href="#deduplication-and-retry-share-more-than-the-request">Deduplication and retry share more than the request</a></h3>
+<p>4 libraries deduplicate concurrent identical requests, and three of them pass the combination that matters most: four same-key callers, two delayed 503s, two retries, then a streamed body, followed by a fresh same-key request that must not be joined to the finished one. <a href="https://fetchkit.org/http-resilience/#case-dedupe-retry-@resili/fetch">@resili/fetch</a> shares the retry sequence correctly, and then hands the same response to everyone:</p>
+<pre class="language-"><code class="language-">expected <span class="token punctuation">{</span> <span class="token literal-property property">ok</span><span class="token operator">:</span> <span class="token boolean">false</span><span class="token punctuation">,</span> <span class="token function">…</span><span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">)</span> <span class="token punctuation">}</span> to deeply equal <span class="token punctuation">{</span> <span class="token literal-property property">ok</span><span class="token operator">:</span> <span class="token boolean">true</span><span class="token punctuation">,</span> <span class="token literal-property property">value</span><span class="token operator">:</span> <span class="token string">'ready'</span> <span class="token punctuation">}</span>
+</code></pre>
+<p>Three of the four callers get an unusable result because the body was consumed once. The scenario right next to it (dedupe + caller cancellation) passes for all four libraries, including this one, so the ownership rules around cancellation are in place. What the retry case adds is a response that is produced several layers away from the callers, and the first consumer wins.</p>
+<h3 id="circuit-%2B-half-open-concurrency" tabindex="-1"><a class="header-anchor" href="#circuit-%2B-half-open-concurrency">Circuit + half-open concurrency</a></h3>
+<p>Threshold 1, reset 100 ms, no retries. The transport serves a slow success at 150 ms, a 503 that trips the breaker, a probe admitted at the reset deadline that fails and restarts the cooldown, and a healthy recovery response for the next caller. The scenario accepts any of the three designs that appear in this set (a single probe, followers queued behind one probe, or unrestricted probes) and checks the invariants instead: nothing is dispatched before the reset deadline, the probe is admitted at the deadline, a failed probe restarts the cooldown, a success admitted before the reopen cannot close the newer state, and the recovery response still reaches the next caller.</p>
+<p>Three libraries fail, and the first one is mine. <a href="https://fetchkit.org/http-resilience/#case-circuit-half-open-concurrency-ffetch">ffetch</a> trips on a single assertion:</p>
+<pre class="language-"><code class="language-">late success must not close the newer open state<span class="token operator">:</span> expected <span class="token boolean">false</span> to be <span class="token boolean">true</span>
+</code></pre>
+<p>The 200 that arrives at 150 ms was admitted while the breaker was closed, and by the time it lands the breaker has reopened and restarted its cooldown. ffetch's circuit plugin keeps a <code>nextAttempt</code> deadline plus an <code>isOpen</code> flag, and its success path clears that flag whenever it finds it set, without asking which cooldown the flag belongs to. Admission is driven by the deadline, so traffic is still refused correctly, and the symptom is a state flag that disagrees with the breaker: anything reading <code>circuitOpen</code> (a health check, a dashboard, an integration test) sees a closed breaker that is still open. ffetch rechecks admission before every attempt precisely so a request parked in a bulkhead queue or a retry delay cannot be dispatched into a circuit that has opened in the meantime, and the stale-success rule is the mirror image of that problem. The plugin has no generation counter, so the mirror image is unimplemented.</p>
+<p><a href="https://fetchkit.org/http-resilience/#case-circuit-half-open-concurrency-fetch-smartly">fetch-smartly</a> and <a href="https://fetchkit.org/http-resilience/#case-circuit-half-open-concurrency-ts-retry-circuit">ts-retry-circuit</a> go further than ffetch, because in their case the stale success also changes what the transport sees:</p>
+<pre class="language-"><code class="language-">late success must not admit during the <span class="token keyword">new</span> <span class="token class-name">cooldown</span><span class="token operator">:</span> expected <span class="token boolean">true</span> to be <span class="token boolean">false</span>
+late success must not consume the recovery response<span class="token operator">:</span> expected <span class="token number">4</span> to be <span class="token number">3</span>
+</code></pre>
+<p>Their stale success clears the new cooldown, so the next request is admitted during it and consumes the recovery response that the scenario had queued for the healthy caller. ts-retry-circuit adds two boundary failures, <code>admit at the exact reset deadline: expected 1 to be 2</code> and <code>new cooldown expires at its deadline: expected 2 to be 3</code>, which means it refuses at the deadline itself in both the first and the restarted cooldown and admits only afterwards. The remaining four libraries pass, with two designs among them: one queued probe (resilient-fetch-client, @resili/fetch) and unrestricted probes (fetch-resilience, flowshield).</p>
+<h3 id="circuit-%2B-local-cancellation" tabindex="-1"><a class="header-anchor" href="#circuit-%2B-local-cancellation">Circuit + local cancellation</a></h3>
+<p>This scenario aborts a caller during a 100 ms retry backoff while the circuit is counting failures, and it is the backoff problem again with a breaker attached. <a href="https://fetchkit.org/http-resilience/#case-circuit-local-cancellation-resilient-fetch-client">resilient-fetch-client</a> and <a href="https://fetchkit.org/http-resilience/#case-circuit-local-cancellation-fetch-resilience">fetch-resilience</a> collect <code>backoff cancellation must settle promptly: expected undefined to be defined</code> and <code>no dispatch after backoff cancellation: expected 2 to be 1</code>, while <a href="https://fetchkit.org/http-resilience/#case-circuit-local-cancellation-@resili/fetch">@resili/fetch</a> has only the settlement failure.</p>
+<p>Everything else in the scenario passes for all three. The abort is excluded from the failure count where the adapter declares that exclusion, the breaker trips at the exact remaining budget, the refusal uses the documented error class, and the breaker recovers. The health accounting around cancellation is in better shape across this set than the cancellation timing itself.</p>
+<h2 id="the-confirmation-bias" tabindex="-1"><a class="header-anchor" href="#the-confirmation-bias">The confirmation bias</a></h2>
+<p>Because a lot of these scenarios come from bugs I had already fixed in ffetch, my library enters the comparison with an advantage. Its 20 passes out of 21 scenarios partly reflect that history and the behaviour I chose to implement. The cancellation cases require prompt settlement and forbid further dispatch, the queueing tests require cancelled waiters to release capacity, while the deadline tests require active work to stop when it supports cancellation. A library that observes an abort only when the next attempt starts receives a <code>fail</code> verdict under those rules, even if that behaviour matches its documentation. I tried to choose reasonable expectations, but the choice is subjective at times, and the results need to be read with that in mind.</p>
+<p>The tests also reflect my interpretation of specifications, particularly for <code>Retry-After</code> parsing and request-body replay. Each cell publishes its configuration and expected behaviour, giving readers the information they need to examine those interpretations and challenge the verdict. If an assertion applies the wrong rule, the test needs correcting, and I welcome that as a bug report.</p>
+<p>Some things are out of scope: there are no benchmarks, no throughput numbers, no assessment of the API design or the documentation, and nothing about how maintainers respond to issues. The table says what eleven pinned releases do when 21 scenarios drive them.</p>
+<h2 id="keeping-the-matrix-current" tabindex="-1"><a class="header-anchor" href="#keeping-the-matrix-current">Keeping the matrix current</a></h2>
+<p>I made some effort to keep the results up to date. The versions come from <code>package.json</code> and are recorded with the run, which is why the column headers carry them and why a verdict is attached to a release. Dependabot groups the pinned libraries. <code>.github/workflows/report-pages.yml</code> rebuilds and republishes the page weekly and whenever the pins change, <code>npm test &amp;&amp; npm run report</code> reproduces the same page locally, and the report refuses to publish a run that is incomplete. A failed assertion still writes the report and makes the command exit nonzero, so a red cell cannot disappear between runs. At the end of the pipeline, the matrix can be accessed at <a href="https://fetchkit.org/http-resilience/">https://fetchkit.org/http-resilience/</a></p>
+<h2 id="what-is-still-missing" tabindex="-1"><a class="header-anchor" href="#what-is-still-missing">What is still missing</a></h2>
+<p>The scenarios I have not written are mostly the second-order interactions: a body that fails halfway through streaming and then gets retried, cache validation combined with a retry, a hedge around a POST with a replayable body, timeouts inside deduplicated groups, and breaker state shared between processes rather than held in one. Rate limiting is deliberately absent, since this matrix is about fetch wrappers and <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">the token bucket comparison</a> belongs somewhere else. The composition post, <a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a>, describes several of the ordering rules that the scenario configurations here have to respect.</p>
+<p>Adding a scenario is a file in <code>test/conformance/</code>, an adapter if the combination is not covered yet, and a rerun. The reporter picks up whatever the run produced.</p>
+<h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
+<p>The eleven HTTP clients cover different subsets of resilience patterns, and they make different choices about how those patterns should behave. Some concentrate on retries and timeouts, while others also offer circuit breaking or hedging. Even a shared feature name leaves room for different contracts: a timeout can apply to each attempt or to the whole operation, and circuit breakers can admit recovery probes in different ways. Those choices matter when you configure a client, because the behaviour your application depends on goes beyond whether a feature appears in its documentation.</p>
+<p>The basic retry cases held up across all eleven libraries, but combining policies exposed problems that were easy to miss when looking at each feature on its own. That is where I would spend time testing a client against the way my application actually uses it. I want this matrix to make that easier by showing what each library offers and what happens in specific scenarios, with enough detail to examine the rules behind the verdicts. Working through these cases has made me more willing to accept complexity in ffetch, but also more careful about assuming that the complexity means I have got everything right.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

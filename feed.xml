@@ -1813,5 +1813,27 @@
         
       </item>
     
+      <item>
+        <title>I Tested 11 HTTP Resilience Libraries</title>
+        <link>https://blog.gaborkoos.com/posts/2026-10-04-I-Tested-11-Http-Resilience-Libraries/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-10-04-I-Tested-11-Http-Resilience-Libraries/</guid>
+        <pubDate>Sun, 04 Oct 2026 00:00:00 GMT</pubDate>
+
+        <description>Twenty-one correctness scenarios run against eleven pinned fetch resilience libraries: 122 cells pass, 25 fail, and 84 combinations no library offers.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>testing</category>
+        
+        <category>resilience</category>
+        
+        <category>networking</category>
+        
+        <category>fetch-kit</category>
+        
+      </item>
+    
   </channel>
 </rss>
