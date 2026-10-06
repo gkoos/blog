@@ -13,7 +13,7 @@ tags:
 - networking
 - fetch-kit
 ---
-*Featured in [TLDR IT - 2026-10-05](https://tldr.tech/it/2026-10-05)*
+*Featured in [TLDR IT - 2026-10-05](https://tldr.tech/it/2026-10-05) and [Javascript Weekly - 2026-10-06](https://javascriptweekly.com/issues/805)*
 
 When I started building [ffetch](https://github.com/fetch-kit/ffetch), I had a fairly simple goal: make HTTP requests more resilient without turning a fetch wrapper into a complicated piece of machinery. Retries, backoffs, circuit breaking, and the other patterns could live around a small core, with plugins adding whatever a particular application needed. I liked the elegance of that design, and keeping the library lightweight was a big part of the appeal.
 
