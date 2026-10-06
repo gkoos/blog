@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1791208401828" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1791324563040" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,7 +120,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <p><em>Featured in <a href="https://tldr.tech/it/2026-10-05">TLDR IT - 2026-10-05</a></em></p>
+    <p><em>Featured in <a href="https://tldr.tech/it/2026-10-05">TLDR IT - 2026-10-05</a> and <a href="https://javascriptweekly.com/issues/805">Javascript Weekly - 2026-10-06</a></em></p>
 <p>When I started building <a href="https://github.com/fetch-kit/ffetch">ffetch</a>, I had a fairly simple goal: make HTTP requests more resilient without turning a fetch wrapper into a complicated piece of machinery. Retries, backoffs, circuit breaking, and the other patterns could live around a small core, with plugins adding whatever a particular application needed. I liked the elegance of that design, and keeping the library lightweight was a big part of the appeal.</p>
 <p>The trouble started when I went back through the code looking for correctness issues. I found subtle bugs and edge cases, then more of them as I looked at what happens when you <a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">combine resilience patterns</a>. I worked through the fixes, but the implementation kept growing, until the small library I had set out to write had become <em>huge and complex</em>. That was frustrating, because the simplicity was something I had deliberately designed for. But I couldn't justify keeping an elegant implementation at the expense of handling those cases correctly, so correctness won, and I accepted the complexity that came with it.</p>
 <p>After working through that, I wanted to know what the other libraries were doing. These problems come with the resilience patterns themselves, so anyone implementing them has to deal with them somehow. How much of that complexity had other libraries managed to avoid, and how correctly did they handle the cases that had given me so much trouble? I put together a suite of 21 scenarios and ran it against eleven HTTP-resilience libraries, including ffetch, to find out.</p>
