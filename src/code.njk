@@ -15,6 +15,8 @@ pagefindBody: true
 
 {% set TS = ['TypeScript', 'typescript', '3178C6', 'white'] %}
 {% set GO = ['Go', 'go', '00ADD8', 'white'] %}
+{% set RUST = ['Rust', 'rust', '000000', 'white'] %}
+{% set WASM = ['WebAssembly', 'webassembly', '654FF0', 'white'] %}
 {% set JAVASCRIPT = ['JavaScript', 'javascript', 'F7DF1E', 'black'] %}
 {% set SVELTE = ['Svelte', 'svelte', 'FF3E00', 'white'] %}
 {% set REDIS = ['Redis', 'redis', 'FF4438', 'white'] %}
@@ -229,6 +231,29 @@ pagefindBody: true
         Cross-process cache stampede protection for the cache you already use.
       </p>
       {{ badges([TS, REDIS]) | safe }}
+    </section>
+
+    <!-- Slap5 -->
+    <section>
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        <h2 class="text-2xl font-semibold">
+          <a href="https://github.com/gkoos/slap5" class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:underline">
+            <img src="/assets/images/slap5-logo.svg" alt="" class="h-8 w-auto m-0" loading="lazy" />
+            Slap5
+          </a>
+        </h2>
+        <img src="https://img.shields.io/github/stars/gkoos/slap5?style=social" alt="GitHub stars for gkoos/slap5" class="h-5 w-auto m-0" loading="lazy" />
+        {{ lastCommit('gkoos', 'slap5') | safe }}
+      </div>
+      <p class="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+        A freestyle Gomoku (five-in-a-row) engine written in Rust. Principal variation search with
+        tactical threat analysis and selective pruning, playing natively and in the browser through
+        WebAssembly, and speaking the Gomocup protocol.
+      </p>
+      {{ badges([RUST, WASM, JAVASCRIPT, VITE]) | safe }}
+      <p class="mt-2 text-base">
+        <a href="https://gaborkoos.com/slap5/" class="text-blue-600 dark:text-blue-400 hover:underline">gaborkoos.com/slap5</a>
+      </p>
     </section>
 
     <!-- Nullmail -->
