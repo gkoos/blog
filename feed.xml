@@ -1851,5 +1851,25 @@
         
       </item>
     
+      <item>
+        <title>How Not to Build a Five-in-a-Row Game Engine</title>
+        <link>https://blog.gaborkoos.com/posts/2026-10-17-How-Not-to-Build-a-Five-in-a-row-Game_engine/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-10-17-How-Not-to-Build-a-Five-in-a-row-Game_engine/</guid>
+        <pubDate>Sat, 17 Oct 2026 00:00:00 GMT</pubDate>
+
+        <description>Building slap5, a five-in-a-row engine in Rust and WebAssembly, and finding out how much work lies between working code and a strong opponent.</description>
+        
+        <category>rust</category>
+        
+        <category>webassembly</category>
+        
+        <category>game development</category>
+        
+        <category>algorithms</category>
+        
+        <category>artificial intelligence</category>
+        
+      </item>
+    
   </channel>
 </rss>
