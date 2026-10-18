@@ -7,6 +7,7 @@ tags:
 - posts
 - mathematics
 - matched betting
+- series--Matched Betting Arithmetics
 ---
 In this post I'm discussing an offer I found on bet365:
 

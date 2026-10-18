@@ -8,6 +8,7 @@ tags:
   - posts
   - mathematics
   - matched betting
+  - series--Matched Betting Arithmetics
 ---
 _This is the second part of the series on matched bet arithmetics.<br>
 Click [here](/posts/2017-2-1-Matched-Betting-Arithmetics/) for Part 1._

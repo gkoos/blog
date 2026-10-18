@@ -7,6 +7,7 @@ tags:
 - posts
 - mathematics
 - matched betting
+- series--Matched Betting Arithmetics
 ---
 In this post we'll discuss a nifty little offer from Sun Bets. The offer is not that great in terms of profit but provides a textbook example of what mindset is needed to exploit bookmaker offers with a little help of mathematics.
 
