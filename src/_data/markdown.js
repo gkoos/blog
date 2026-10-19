@@ -18,7 +18,17 @@ const md = markdownIt({
     return `<pre class="language-${lang}"><code class="language-${lang}">${html}</code></pre>`;
   }
 })
-.use(anchor, { permalink: anchor.permalink.headerLink() })
+.use(anchor, {
+  permalink: anchor.permalink.headerLink(),
+  // Strip punctuation instead of percent-encoding it, so anchors stay readable
+  // and hand-written links such as #who-owns-recovery resolve.
+  slugify: (value) =>
+    String(value)
+      .trim()
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/\s+/g, "-"),
+})
 .use(toc)
 .use(mathjax3);
 

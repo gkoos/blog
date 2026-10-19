@@ -182,7 +182,7 @@ All cooperative branches must stop: expected 1 to be +0
 
 A hedge is launched after the timeout has already settled the caller, and the branches keep running afterwards. The second assertion is the one that matters for a server: a hedge that never stops is a request nobody is waiting for. When the deadline is longer than the hedge delay, the same library adds a dispatch at or past the deadline (`expected false to be true`) and leaves two branches alive (`All cooperative branches must stop: expected 2 to be +0`), so the boundary at the hedge delay is where this implementation breaks first.
 
-Hedging is a [controversial and complex strategy](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/#scenario-c%3A-hedging-helps-tail-latency%2C-not-error-recovery), so it is not surprising that the implementations vary widely and that many edge cases are not handled correctly.
+Hedging is a [controversial and complex strategy](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/#scenario-c-hedging-helps-tail-latency-not-error-recovery), so it is not surprising that the implementations vary widely and that many edge cases are not handled correctly.
 
 ### Deduplication and retry share more than the request
 
