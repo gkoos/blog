@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -174,7 +174,7 @@ else:
 <p>The problem is that each statement can look reasonable in isolation: the read worked, the comparison made sense, the insert succeeded, and the update changed a row. The failure lives <strong>between</strong> those statements, where another request can observe and change the same data before the first request finishes.</p>
 <p>The same thing happens when two requests create the same logical account, two workers pick up the same job, two updates overwrite each other from older copies of a row, or a cancellation races with payment completion. A retry arriving after the original request commits also belongs to the same family of problems: the code path is reasonable on its own, but it is no longer alone.</p>
 <p>Concurrency turns database correctness into a question about the whole operation, not just each statement. The important rule asks whether this request can reserve one unit of stock exactly once, even if another request is trying at the same time.</p>
-<h3 id="transactions-are-powerful%2C-not-magic" tabindex="-1"><a class="header-anchor" href="#transactions-are-powerful%2C-not-magic">Transactions are powerful, not magic</a></h3>
+<h3 id="transactions-are-powerful-not-magic" tabindex="-1"><a class="header-anchor" href="#transactions-are-powerful-not-magic">Transactions are powerful, not magic</a></h3>
 <p>Transactions are the first tool many engineers reach for when several database changes need to be treated as one unit. That instinct is good, especially when checkout is creating an order and changing inventory in the same operation. The transaction gives those statements a shared boundary, but it does not decide whether the operation was safe to perform in the first place.</p>
 <p>A transaction can make a group of statements commit or roll back together. Depending on the database and isolation level, it can also change what another checkout request is allowed to see or update at the same time. But the transaction still needs to be built around the actual rule for the operation. In the inventory example, that rule is not simply &quot;run these three statements together&quot;, it's &quot;do not sell the same unit of stock twice&quot;.</p>
 <p>For the last item in stock, the rule is to reserve one unit only when one is still available. That condition has to be part of the write that consumes the stock, or part of a locking strategy with the same effect. Without it, the transaction may faithfully commit a sequence of statements after the wrong decision has already been made. Stronger isolation can reduce some of these races, but it also changes the cost profile: transactions may wait longer, block each other, or be aborted and retried by the application. Long transactions make those costs worse because they hold database resources while the application continues doing work.</p>
@@ -219,7 +219,7 @@ where item_id = ? and available > 0
 <p>From the caller's point of view, &quot;I got a timeout&quot; says only that waiting ended. It does not tell you whether the write failed, succeeded, or is still in progress.</p>
 <p>That is why retries are only safe when the write is <strong>idempotent</strong> (running it more than once produces the same result as running it once). Without that property, timeout handling turns into a duplication bug: the caller retries, the original write was already committed, and now there are two.</p>
 <p>That property covers individual writes, but a multi-step workflow can still stall partway through. The database may already contain a valid committed write while the steps around it are incomplete. Persisting one step safely does not guarantee the rest finished, so operation state checks and reconciliation jobs are still needed to close those gaps.</p>
-<h3 id="deadlocks%2C-lock-waits%2C-and-retries-are-normal" tabindex="-1"><a class="header-anchor" href="#deadlocks%2C-lock-waits%2C-and-retries-are-normal">Deadlocks, lock waits, and retries are normal</a></h3>
+<h3 id="deadlocks-lock-waits-and-retries-are-normal" tabindex="-1"><a class="header-anchor" href="#deadlocks-lock-waits-and-retries-are-normal">Deadlocks, lock waits, and retries are normal</a></h3>
 <p>Not every database error means bad application logic. Under load, correct transactions can still collide. Example: transaction A updates <code>orders</code> then <code>inventory</code>. Transaction B updates <code>inventory</code> then <code>orders</code>. Each one holds a lock the other one needs. The diagram below shows that shape:</p>
 <p><img src="03-07.svg" alt="Diagram: two transactions lock rows in opposite order, wait on each other, and the database aborts one to resolve deadlock"></p>
 <p>The database resolves this by aborting one transaction.</p>
@@ -299,7 +299,7 @@ where item_id = ? and available > 0
 <li>Contract schema by enforcing strict constraints and removing legacy fields.</li>
 </ol>
 <p>Treat every step as observable production work. If rollback is impossible for a step, stop and redesign that step before rollout.</p>
-<h3 id="engineer-for-recovery%2C-not-just-durability" tabindex="-1"><a class="header-anchor" href="#engineer-for-recovery%2C-not-just-durability">Engineer for recovery, not just durability</a></h3>
+<h3 id="engineer-for-recovery-not-just-durability" tabindex="-1"><a class="header-anchor" href="#engineer-for-recovery-not-just-durability">Engineer for recovery, not just durability</a></h3>
 <p>Durable bytes are a starting point. Recovery needs tested procedures and enough historical evidence to reconstruct critical business transitions.</p>
 <p>For critical workflows, teams should know in advance:</p>
 <ul>
@@ -318,11 +318,11 @@ where item_id = ? and available > 0
 <p>The rule is the same as in other chapters: exhaust the simpler controls first, then add sharper tools for a specific, measured pressure.</p>
 <h2 id="production-example" tabindex="-1"><a class="header-anchor" href="#production-example">Production example</a></h2>
 <p>These incidents show that database failure modes are common and expensive to recover from, even for mature teams.</p>
-<h3 id="atlassian-2022%3A-recovery-capability-became-the-bottleneck" tabindex="-1"><a class="header-anchor" href="#atlassian-2022%3A-recovery-capability-became-the-bottleneck">Atlassian 2022: recovery capability became the bottleneck</a></h3>
+<h3 id="atlassian-2022-recovery-capability-became-the-bottleneck" tabindex="-1"><a class="header-anchor" href="#atlassian-2022-recovery-capability-became-the-bottleneck">Atlassian 2022: recovery capability became the bottleneck</a></h3>
 <p>In 2022, Atlassian published a detailed post-incident review after maintenance work led to large-scale service disruption and a long restoration effort. The core engineering lesson was recoverability under pressure: how quickly and safely data and service state can be restored, and how prepared teams are to run that recovery process at scale.</p>
 <p>This maps directly to the section above on durability versus recoverability. Having bytes on disk is not the same as being able to return the business to a known, explainable state inside an acceptable time window.</p>
 <p>Source: <a href="https://www.atlassian.com/blog/atlassian-engineering/post-incident-review-april-2022-outage">Atlassian April 2022 incident review</a></p>
-<h3 id="github-2018%3A-short-disruption%2C-long-reconciliation" tabindex="-1"><a class="header-anchor" href="#github-2018%3A-short-disruption%2C-long-reconciliation">GitHub 2018: short disruption, long reconciliation</a></h3>
+<h3 id="github-2018-short-disruption-long-reconciliation" tabindex="-1"><a class="header-anchor" href="#github-2018-short-disruption-long-reconciliation">GitHub 2018: short disruption, long reconciliation</a></h3>
 <p>In 2018, GitHub published an incident analysis after a brief network partition between data centers caused database failover and a prolonged recovery period. The interruption itself was short; the recovery was long because data placement and consistency had to be reconciled carefully before all features could return to normal operation.</p>
 <p>This maps to several chapter themes at once: ambiguous outcomes across boundaries, stale or diverged read paths, and the need to prioritize data correctness over fast but unsafe recovery.</p>
 <p>Source: <a href="https://github.blog/news-insights/company-news/oct21-post-incident-analysis/">GitHub October 21 post-incident analysis</a></p>

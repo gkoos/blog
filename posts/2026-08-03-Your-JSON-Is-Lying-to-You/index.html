@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -549,7 +549,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <span class="token comment">// {"name":"Bob"}</span>
 </code></pre>
 <p>The output happens to match the implicit class serialization in this example, but the intent is now visible in code. Changes to enumerability, prototypes, or private implementation details cannot silently redefine the response shape.</p>
-<h2 id="parsing-is-safe%2C-what-you-do-next-may-not-be" tabindex="-1"><a class="header-anchor" href="#parsing-is-safe%2C-what-you-do-next-may-not-be">Parsing Is Safe, What You Do Next May Not Be</a></h2>
+<h2 id="parsing-is-safe-what-you-do-next-may-not-be" tabindex="-1"><a class="header-anchor" href="#parsing-is-safe-what-you-do-next-may-not-be">Parsing Is Safe, What You Do Next May Not Be</a></h2>
 <p><a href="https://developer.mozilla.org/en-US/docs/Web/Security/Attacks/Prototype_pollution">Prototype pollution</a> is often described as a <code>JSON.parse</code> problem because malicious payloads commonly arrive as JSON. Parsing alone does not change <code>Object.prototype</code>. A <code>&quot;__proto__&quot;</code> member in JSON becomes an own data property with that name.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> value <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token string">'{"__proto__":{"admin":true}}'</span><span class="token punctuation">)</span>
 

@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -357,13 +357,13 @@
 <p>Understanding the distinctions between engines helps engineers select the right tool for their specific time-series workloads, rather than forcing a general-purpose database to do the job.</p>
 <h2 id="trade-offs-and-considerations" tabindex="-1"><a class="header-anchor" href="#trade-offs-and-considerations">Trade-offs and Considerations</a></h2>
 <p>Time-Series Databases excel at workloads that would challenge general-purpose systems, but their optimizations come with compromises. Understanding these trade-offs is essential when selecting or designing a TSDB for your application.</p>
-<h3 id="ingestion-vs.-query-complexity" tabindex="-1"><a class="header-anchor" href="#ingestion-vs.-query-complexity">Ingestion vs. Query Complexity</a></h3>
+<h3 id="ingestion-vs-query-complexity" tabindex="-1"><a class="header-anchor" href="#ingestion-vs-query-complexity">Ingestion vs. Query Complexity</a></h3>
 <ul>
 <li>High-throughput ingestion is a primary goal for most TSDBs, often achieved through append-only storage, sequential writes, and minimal indexing on write paths.</li>
 <li>Complex queries, especially ad hoc joins or multi-metric correlations, may be slower because the storage layout and indexes are optimized for time-based scans rather than relational joins.</li>
 <li>Engineers must balance the need for fast writes with the types of queries required, sometimes precomputing aggregates or using hybrid systems (e.g., TimescaleDB) to handle complex queries efficiently.</li>
 </ul>
-<h3 id="storage-efficiency-vs.-latency" tabindex="-1"><a class="header-anchor" href="#storage-efficiency-vs.-latency">Storage Efficiency vs. Latency</a></h3>
+<h3 id="storage-efficiency-vs-latency" tabindex="-1"><a class="header-anchor" href="#storage-efficiency-vs-latency">Storage Efficiency vs. Latency</a></h3>
 <ul>
 <li>Compression reduces disk usage dramatically but may introduce CPU overhead during queries.</li>
 <li>Some TSDBs allow querying directly on compressed blocks, while others require partial decompression.</li>
@@ -450,7 +450,7 @@
 <li>Fast temporal queries and aggregations for dashboards, alerts, and analytics.</li>
 </ul>
 <p>By choosing a purpose-built TSDB rather than forcing general-purpose databases to handle temporal workloads, engineers gain scalability, performance, and operational simplicity.</p>
-<h2 id="example-workflow%3A-ingesting-and-querying-cpu-usage-with-influxdb" tabindex="-1"><a class="header-anchor" href="#example-workflow%3A-ingesting-and-querying-cpu-usage-with-influxdb">Example Workflow: Ingesting and Querying CPU Usage with InfluxDB</a></h2>
+<h2 id="example-workflow-ingesting-and-querying-cpu-usage-with-influxdb" tabindex="-1"><a class="header-anchor" href="#example-workflow-ingesting-and-querying-cpu-usage-with-influxdb">Example Workflow: Ingesting and Querying CPU Usage with InfluxDB</a></h2>
 <p>This section provides a concrete end-to-end example of a time-series workflow, using InfluxDB to illustrate how data moves from ingestion to visualization, highlighting the architecture and optimizations discussed earlier.</p>
 <h3 id="scenario" tabindex="-1"><a class="header-anchor" href="#scenario">Scenario</a></h3>
 <p>We want to monitor CPU usage across a small cluster of three servers, collecting metrics every second. This example demonstrates the complete TSDB workflow:</p>
@@ -462,7 +462,7 @@
 <li>Visualization</li>
 </ol>
 <p>By following this workflow, we can see how InfluxDB's architecture enables high-throughput writes, efficient storage, fast queries, and automated data lifecycle management.</p>
-<h3 id="step-1%3A-ingestion" tabindex="-1"><a class="header-anchor" href="#step-1%3A-ingestion">Step 1: Ingestion</a></h3>
+<h3 id="step-1-ingestion" tabindex="-1"><a class="header-anchor" href="#step-1-ingestion">Step 1: Ingestion</a></h3>
 <p>Metrics are collected using Telegraf (InfluxDB's agent) or a custom script. Each data point includes:</p>
 <pre class="language-bash"><code class="language-bash">measurement: cpu
 tags: <span class="token assign-left variable">host</span><span class="token operator">=</span>server1
@@ -476,7 +476,7 @@ timestamp: <span class="token number">2025</span>-09-18T10:15:00Z
 <li>Sequential storage: Enables high-throughput ingestion.</li>
 <li>Minimal write overhead: Indexing and compression happen efficiently in the background.</li>
 </ul>
-<h3 id="step-2%3A-storage-and-indexing" tabindex="-1"><a class="header-anchor" href="#step-2%3A-storage-and-indexing">Step 2: Storage and Indexing</a></h3>
+<h3 id="step-2-storage-and-indexing" tabindex="-1"><a class="header-anchor" href="#step-2-storage-and-indexing">Step 2: Storage and Indexing</a></h3>
 <p>InfluxDB organizes data into time-partitioned chunks called TSM (Time-Structured Merge) files, and maintains indexes for fast retrieval.</p>
 <p><strong>Storage highlights:</strong></p>
 <ul>
@@ -485,7 +485,7 @@ timestamp: <span class="token number">2025</span>-09-18T10:15:00Z
 <li>Tag-based indexing: Each metric can be filtered by tags like host, region, or service.</li>
 </ul>
 <p>This architecture enables efficient sequential writes and fast range queries, even on millions of data points.</p>
-<h3 id="step-3%3A-query-execution" tabindex="-1"><a class="header-anchor" href="#step-3%3A-query-execution">Step 3: Query Execution</a></h3>
+<h3 id="step-3-query-execution" tabindex="-1"><a class="header-anchor" href="#step-3-query-execution">Step 3: Query Execution</a></h3>
 <p>Example query: &quot;Average CPU usage for server1 over the last 5 minutes.&quot;</p>
 <p>InfluxQL:</p>
 <pre class="language-sql"><code class="language-sql"><span class="token constant">SELECT</span> <span class="token function">mean</span><span class="token punctuation">(</span>usage_user<span class="token punctuation">)</span>
@@ -500,7 +500,7 @@ timestamp: <span class="token number">2025</span>-09-18T10:15:00Z
 <li>Apply compression-aware aggregation (mean) directly on compressed data when possible..</li>
 <li>Return the aggregated result.</li>
 </ol>
-<h3 id="step-4%3A-retention-and-downsampling" tabindex="-1"><a class="header-anchor" href="#step-4%3A-retention-and-downsampling">Step 4: Retention and Downsampling</a></h3>
+<h3 id="step-4-retention-and-downsampling" tabindex="-1"><a class="header-anchor" href="#step-4-retention-and-downsampling">Step 4: Retention and Downsampling</a></h3>
 <p>Retention Policies:</p>
 <ul>
 <li>Keep 7 days of raw CPU metrics.</li>
@@ -512,7 +512,7 @@ timestamp: <span class="token number">2025</span>-09-18T10:15:00Z
 <li>Store aggregated data in a downsampled measurement to reduce storage and maintain query performance.</li>
 </ul>
 <p>This ensures recent data remains granular, while historical data is summarized efficiently.</p>
-<h3 id="step-5%3A-visualization" tabindex="-1"><a class="header-anchor" href="#step-5%3A-visualization">Step 5: Visualization</a></h3>
+<h3 id="step-5-visualization" tabindex="-1"><a class="header-anchor" href="#step-5-visualization">Step 5: Visualization</a></h3>
 <p>Query results can be fed into Grafana dashboards:</p>
 <ul>
 <li>Real-time metrics: Display per-second CPU usage for recent activity.</li>

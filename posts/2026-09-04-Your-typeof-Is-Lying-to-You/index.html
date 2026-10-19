@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -177,7 +177,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <h2 id="the-deeper-point" tabindex="-1"><a class="header-anchor" href="#the-deeper-point">The deeper point</a></h2>
 <p>JavaScript has at least two ideas floating around the word &quot;type&quot;. One is the runtime classification that <code>typeof</code> exposes. The other is the semantic kind of value you are dealing with in your program: array, regex, Date, Map, plain object, function object, primitive, and so on.</p>
 <p><code>typeof</code> can answer the first question. It cannot answer the second. It also preserves legacy behavior, making it even less useful.</p>
-<h2 id="so-what-should-we-use-instead%3F" tabindex="-1"><a class="header-anchor" href="#so-what-should-we-use-instead%3F">So what should we use instead?</a></h2>
+<h2 id="so-what-should-we-use-instead" tabindex="-1"><a class="header-anchor" href="#so-what-should-we-use-instead">So what should we use instead?</a></h2>
 <p><code>typeof</code> is not wrong, it's just narrow.</p>
 <p>If the question is &quot;is this a primitive&quot;? or &quot;is this callable&quot;? then <code>typeof</code> is the right tool. If the question is &quot;is this an array&quot;?, &quot;is this a <code>Date</code>&quot;? or &quot;is this a <code>Map</code>&quot;? then forget <code>typeof</code>, it collapses all of them into <code>&quot;object&quot;</code>.</p>
 <p>Luckily for us, JavaScript has more specific checks:</p>

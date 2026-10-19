@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,11 +124,11 @@
 <p>Understanding this gap is essential, because it explains much of JavaScript's async behavior: why promises can't be cancelled, why timeouts don't halt execution, and why <code>AbortController</code> is designed as a signaling mechanism instead of a kill switch. Once that model is clear, the limitations around cancellation stop feeling accidental - they follow directly from how JavaScript executes code.</p>
 <h2 id="cancellation-vs-timeout-vs-failure" tabindex="-1"><a class="header-anchor" href="#cancellation-vs-timeout-vs-failure">Cancellation vs Timeout vs Failure</a></h2>
 <p>One reason cancellation is so often misunderstood in JavaScript is that it gets conflated with two very different concepts: timeouts and failures. All three may result in &quot;this operation didn't produce a value&quot;, but they describe fundamentally different situations.</p>
-<h3 id="cancellation%3A-%22i-no-longer-want-this%22" tabindex="-1"><a class="header-anchor" href="#cancellation%3A-%22i-no-longer-want-this%22">Cancellation: &quot;I no longer want this&quot;</a></h3>
+<h3 id="cancellation-i-no-longer-want-this" tabindex="-1"><a class="header-anchor" href="#cancellation-i-no-longer-want-this">Cancellation: &quot;I no longer want this&quot;</a></h3>
 <p>Cancellation is an external decision. The operation itself may be perfectly healthy and capable of completing, but something outside of it - user input, application state, navigation, or a newer request - has made the result irrelevant.</p>
 <p>Importantly, cancellation says nothing about correctness. The operation did not fail. It was simply asked to stop because its result is no longer needed.</p>
 <p>In well-designed systems, cancellation is expected and routine, not exceptional.</p>
-<h3 id="timeout%3A-%22i-stopped-waiting%22" tabindex="-1"><a class="header-anchor" href="#timeout%3A-%22i-stopped-waiting%22">Timeout: &quot;I stopped waiting&quot;</a></h3>
+<h3 id="timeout-i-stopped-waiting" tabindex="-1"><a class="header-anchor" href="#timeout-i-stopped-waiting">Timeout: &quot;I stopped waiting&quot;</a></h3>
 <p>A timeout does not cancel work. It only limits how long a caller is willing to wait for a result.</p>
 <p>In JavaScript, timeouts are commonly implemented using <code>Promise.race()</code>:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">race</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
@@ -139,7 +139,7 @@
 <p>When the timeout wins the race, the awaiting code resumes, but <strong><code>doWork()</code> continues running</strong>. Any side effects it performs will still happen. Any resources it holds will remain allocated until it finishes or cleans up on its own.</p>
 <p>Today, most modern APIs accept an <code>AbortSignal</code> instead. This improves resource cleanup and intent signaling, but it does not change the fundamental model: aborting is still cooperative, and only affects code that opts in.</p>
 <p>This distinction is easy to miss because the caller regains control, creating the illusion that the work has stopped. In reality, the timeout merely stopped observing the result.</p>
-<h3 id="failure%3A-%22something-went-wrong%22" tabindex="-1"><a class="header-anchor" href="#failure%3A-%22something-went-wrong%22">Failure: &quot;Something went wrong&quot;</a></h3>
+<h3 id="failure-something-went-wrong" tabindex="-1"><a class="header-anchor" href="#failure-something-went-wrong">Failure: &quot;Something went wrong&quot;</a></h3>
 <p>Failures describe internal problems: network errors, invalid input, logic bugs, unavailable resources. They are usually represented as rejected promises or thrown errors.</p>
 <p>Unlike cancellation, failures are not intentional. They indicate that the operation could not complete successfully even if its result was still desired.</p>
 <p>Treating cancellation as a failure often leads to awkward error handling. Code starts catching “errors” that are not errors at all, or suppressing failures because they might just be cancellations. Over time, real failures become harder to distinguish from normal control flow.</p>
@@ -147,14 +147,14 @@
 <p>In JavaScript APIs, timeouts and failures are frequently overloaded to stand in for cancellation. This works superficially, but it obscures intent and pushes responsibility onto the caller to guess what actually happened.</p>
 <p>Once you separate these concepts, a pattern emerges: JavaScript is good at expressing waiting and failure, but it has no built-in notion of stopping work. Everything that looks like cancellation is either a timeout, an ignored result, or a cooperative protocol layered on top.</p>
 <p>This also affects debugging: when you log a promise or mutable object while chasing cancellation bugs, <a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your Console Is Lying to You</a> explains why what you inspect later may not be what existed when you logged it.</p>
-<h2 id="why-promises-can't-be-cancelled" tabindex="-1"><a class="header-anchor" href="#why-promises-can't-be-cancelled">Why Promises Can't Be Cancelled</a></h2>
+<h2 id="why-promises-cant-be-cancelled" tabindex="-1"><a class="header-anchor" href="#why-promises-cant-be-cancelled">Why Promises Can't Be Cancelled</a></h2>
 <p>When developers ask why cancellation is hard in JavaScript, what they usually mean is: <em>why can't I cancel a Promise?</em> After all, promises are the foundation of async/await, and most asynchronous work is expressed in terms of them. If promises represented &quot;tasks&quot;, cancellation would seem straightforward.</p>
 <p>But promises were never designed to model tasks.</p>
-<h3 id="promises-represent-results%2C-not-execution" tabindex="-1"><a class="header-anchor" href="#promises-represent-results%2C-not-execution">Promises represent results, not execution</a></h3>
+<h3 id="promises-represent-results-not-execution" tabindex="-1"><a class="header-anchor" href="#promises-represent-results-not-execution">Promises represent results, not execution</a></h3>
 <p>A promise is a placeholder for a value that will be available in the future. It says nothing about how that value is produced, or even whether there is ongoing work associated with it. By the time you have a promise, the underlying operation may already be finished, in progress, or shared with other consumers.</p>
 <p>This distinction is subtle but crucial: <strong>a promise does not own the work that led to it</strong>.</p>
 <p>Once created, a promise must eventually settle - either fulfilled or rejected. There is no third state for &quot;abandoned&quot; or &quot;cancelled&quot;, because that would break the core guarantee that promises make: if you have a reference to one, you can reliably attach handlers and eventually observe an outcome.</p>
-<h3 id="the-%22cancel-a-promise%22-fallacy" tabindex="-1"><a class="header-anchor" href="#the-%22cancel-a-promise%22-fallacy">The &quot;cancel a promise&quot; fallacy</a></h3>
+<h3 id="the-cancel-a-promise-fallacy" tabindex="-1"><a class="header-anchor" href="#the-cancel-a-promise-fallacy">The &quot;cancel a promise&quot; fallacy</a></h3>
 <p>Imagine a hypothetical <code>.cancel()</code> method on promises. What would it actually do?</p>
 <p>Consider this:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> p <span class="token operator">=</span> <span class="token function">fetchData</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -243,7 +243,7 @@ controller<span class="token punctuation">.</span><span class="token function">a
 </ul>
 <p>This is what &quot;resource cleanup&quot; means: the system ensures that things like sockets, memory buffers, or file descriptors are not left dangling. Cleanup is essential to prevent memory leaks, connection exhaustion, or other subtle bugs.</p>
 <p>However, <strong>resource cleanup does not automatically stop all ongoing work</strong>. Any CPU-bound computation, synchronous logic, or code outside cooperative APIs continues running until it naturally completes.</p>
-<h3 id="why-javascript-focuses-on-cleanup%2C-not-termination" tabindex="-1"><a class="header-anchor" href="#why-javascript-focuses-on-cleanup%2C-not-termination">Why JavaScript focuses on cleanup, not termination</a></h3>
+<h3 id="why-javascript-focuses-on-cleanup-not-termination" tabindex="-1"><a class="header-anchor" href="#why-javascript-focuses-on-cleanup-not-termination">Why JavaScript focuses on cleanup, not termination</a></h3>
 <p>JavaScript's execution model enforces <strong>run-to-completion</strong>: once a function begins, it will run to the end of its current synchronous block. The event loop does not allow preemptive interruption. As a result:</p>
 <ul>
 <li>Forcefully killing a function mid-execution would risk leaving shared state inconsistent.</li>
@@ -291,7 +291,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p><strong>Promises could never be reliably observed:</strong></p>
 <p>Consumers expecting a value might never get notified if the underlying task disappears mid-execution.</p>
 <p>Because JavaScript encourages shared objects and composable async code, <strong>preemptive termination is inherently unsafe</strong>.</p>
-<h3 id="why-web-workers-don't-fundamentally-change-this" tabindex="-1"><a class="header-anchor" href="#why-web-workers-don't-fundamentally-change-this">Why Web Workers don't fundamentally change this</a></h3>
+<h3 id="why-web-workers-dont-fundamentally-change-this" tabindex="-1"><a class="header-anchor" href="#why-web-workers-dont-fundamentally-change-this">Why Web Workers don't fundamentally change this</a></h3>
 <p>Some developers think: &quot;I can just run CPU work in a Web Worker and terminate it.&quot; Technically, you can:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> worker <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Worker</span><span class="token punctuation">(</span><span class="token string">'worker.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 worker<span class="token punctuation">.</span><span class="token function">terminate</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// kills the worker thread</span>
@@ -305,7 +305,7 @@ worker<span class="token punctuation">.</span><span class="token function">termi
 <p>Web Workers provide a way to isolate tasks that might need to be forcibly killed, but inside the main thread, JavaScript still cannot preempt code safely. This is why cooperative signals like <code>AbortController</code> are the preferred pattern: they let code exit voluntarily while cleaning up resources.</p>
 <h2 id="how-other-languages-model-cancellation" tabindex="-1"><a class="header-anchor" href="#how-other-languages-model-cancellation">How Other Languages Model Cancellation</a></h2>
 <p>JavaScript's cooperative cancellation model can feel limiting, but looking at other languages helps explain why. Different environments make different trade-offs between safety, control, and composability.</p>
-<h3 id="cooperative-cancellation-(go%2C-rust-async)" tabindex="-1"><a class="header-anchor" href="#cooperative-cancellation-(go%2C-rust-async)">Cooperative cancellation (Go, Rust async)</a></h3>
+<h3 id="cooperative-cancellation-go-rust-async" tabindex="-1"><a class="header-anchor" href="#cooperative-cancellation-go-rust-async">Cooperative cancellation (Go, Rust async)</a></h3>
 <p>Languages like <strong>Go</strong> and <strong>Rust</strong> provide explicit mechanisms for cooperative cancellation:</p>
 <p><strong>Go: context propagation</strong></p>
 <pre class="language-go"><code class="language-go">ctx<span class="token punctuation">,</span> <span class="token literal-property property">cancel</span> <span class="token operator">:</span><span class="token operator">=</span> context<span class="token punctuation">.</span><span class="token function">WithTimeout</span><span class="token punctuation">(</span>context<span class="token punctuation">.</span><span class="token function">Background</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">,</span> time<span class="token punctuation">.</span>Second<span class="token punctuation">)</span>
@@ -443,13 +443,13 @@ controller<span class="token punctuation">.</span><span class="token function">a
 <span class="token punctuation">}</span>
 </code></pre>
 <p>This guarantees <strong>predictable cancellation</strong> without leaving partial operations or resources dangling.</p>
-<h3 id="combining-with-react-or-node.js" tabindex="-1"><a class="header-anchor" href="#combining-with-react-or-node.js">Combining with React or Node.js</a></h3>
+<h3 id="combining-with-react-or-nodejs" tabindex="-1"><a class="header-anchor" href="#combining-with-react-or-nodejs">Combining with React or Node.js</a></h3>
 <ul>
 <li>React: Pass <code>AbortSignal</code> to <code>fetch</code> or long-running operations inside <code>useEffect</code>, and abort in cleanup functions.</li>
 <li>Node.js: Many APIs like <code>fs.promises</code> streams or <code>fetch</code> (via <code>node-fetch</code> or native support) accept signals. Use them to prevent lingering resource usage during server shutdowns or request cancellation.</li>
 </ul>
 <p>By consistently using cooperative patterns, signals, and well-designed APIs, you can implement robust cancellation in JavaScript without breaking promises, leaking resources, or creating unsafe preemption.</p>
-<h3 id="conclusion%3A-stop-trying-to-%E2%80%9Ckill%E2%80%9D-promises" tabindex="-1"><a class="header-anchor" href="#conclusion%3A-stop-trying-to-%E2%80%9Ckill%E2%80%9D-promises">Conclusion: Stop Trying to “Kill” Promises</a></h3>
+<h3 id="conclusion-stop-trying-to-kill-promises" tabindex="-1"><a class="header-anchor" href="#conclusion-stop-trying-to-kill-promises">Conclusion: Stop Trying to “Kill” Promises</a></h3>
 <p>Cancellation in JavaScript is fundamentally different from what developers coming from other languages might expect. Promises are <strong>immutable placeholders for future values</strong>, not handles to running tasks. There is no built-in mechanism to forcibly stop work, and trying to treat them that way leads to fragile, unpredictable code.</p>
 <p>Instead, JavaScript provides <strong>cooperative cancellation</strong> via <code>AbortController</code> and <code>AbortSignal</code>. These tools allow code to:</p>
 <ul>

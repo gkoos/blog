@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -113,7 +113,7 @@
   </div>
   <div class="prose dark:prose-invert max-w-none">
     <p>In a previous article: <a href="/posts/2025-08-10-Go-Interfaces-Composition-Over-Inheritance-And-Common_Sense/">Go Interfaces - Composition Over Inheritance (And Common Sense)</a>, we covered the basics of Go interfaces. It's time to take a deeper dive into how interfaces work under the hood, common pitfalls, and advanced best practices. Understanding these concepts can help you, well, understand these concepts. And write more efficient, maintainable, and bug-free Go code.</p>
-<h2 id="1.-how-go-interfaces-are-internally-stored" tabindex="-1"><a class="header-anchor" href="#1.-how-go-interfaces-are-internally-stored">1. How Go Interfaces Are Internally Stored</a></h2>
+<h2 id="1-how-go-interfaces-are-internally-stored" tabindex="-1"><a class="header-anchor" href="#1-how-go-interfaces-are-internally-stored">1. How Go Interfaces Are Internally Stored</a></h2>
 <p>Go interfaces are more than just a set of methods—they are a specific data structure in memory. Understanding how interfaces are represented internally helps explain some of Go's most notorious pitfalls and performance characteristics we are about to discuss in the forthcoming sections.</p>
 <p>Let's define an interface:</p>
 <pre class="language-go"><code class="language-go">type Logger <span class="token keyword">interface</span> <span class="token punctuation">{</span>
@@ -220,7 +220,7 @@ With non-empty interfaces, you retain access to the interface’s methods.</p>
 <p>Go generics use type parameters, but when you use <code>any</code> (alias for <code>interface{}</code>), you get the empty interface representation. This can affect type inference, method resolution, and performance.</p>
 <p>6. Container Patterns</p>
 <p>Containers like <code>[]interface{}</code> or <code>map[string]interface{}</code> are common, but they lose all method information, which can lead to bugs if you expect to call methods on stored values.</p>
-<h2 id="2.-the-nil-interface-pitfall" tabindex="-1"><a class="header-anchor" href="#2.-the-nil-interface-pitfall">2. The Nil Interface Pitfall</a></h2>
+<h2 id="2-the-nil-interface-pitfall" tabindex="-1"><a class="header-anchor" href="#2-the-nil-interface-pitfall">2. The Nil Interface Pitfall</a></h2>
 <p>In Go, an interface value is only truly <code>nil</code> if both the type pointer and the data pointer are <code>nil</code>. This can lead to some surprising behavior, especially for empty interfaces.</p>
 <ul>
 <li>If you assign <code>nil</code> directly to an interface variable, both pointers are <code>nil</code>, so the interface is <code>nil</code>.</li>
@@ -282,8 +282,8 @@ fmt<span class="token punctuation">.</span><span class="token function">Println<
 <p>7. JSON/Encoding/Decoding<br>
 When decoding into interface fields, the type info may be set but the value may be <code>nil</code>, leading to subtle bugs.</p>
 <p>To avoid these pitfalls in Go, always, <strong>always</strong> be explicit about nil checks and type assertions. When working with interfaces, slices, maps, channels, or custom types, check both the type and the underlying value for nil. Prefer initializing variables to their zero value or using constructors, and avoid assuming that a nil pointer, slice, or interface behaves the same as an empty one. When using type assertions, always check the ok value and handle nils carefully. Clear, defensive code and thorough testing is the only way to prevent subtle bugs from Go’s type/value mechanics.</p>
-<h2 id="3.-empty-interfaces-vs.-generics" tabindex="-1"><a class="header-anchor" href="#3.-empty-interfaces-vs.-generics">3. Empty Interfaces vs. Generics</a></h2>
-<h3 id="how-interface%7B%7D-was-used-for-generic-code-before-go-1.18" tabindex="-1"><a class="header-anchor" href="#how-interface%7B%7D-was-used-for-generic-code-before-go-1.18">How <code>interface{}</code> Was Used for Generic Code Before Go 1.18</a></h3>
+<h2 id="3-empty-interfaces-vs-generics" tabindex="-1"><a class="header-anchor" href="#3-empty-interfaces-vs-generics">3. Empty Interfaces vs. Generics</a></h2>
+<h3 id="how-interface-was-used-for-generic-code-before-go-118" tabindex="-1"><a class="header-anchor" href="#how-interface-was-used-for-generic-code-before-go-118">How <code>interface{}</code> Was Used for Generic Code Before Go 1.18</a></h3>
 <p>Before Go 1.18 introduced generics, developers used <code>interface{}</code> as a workaround for writing generic code. This allowed containers and functions to accept any type, but at the cost of type safety and performance. For example, a slice of <code>interface{}</code> could hold any value:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">var</span> items <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
 items <span class="token operator">=</span> <span class="token function">append</span><span class="token punctuation">(</span>items<span class="token punctuation">,</span> <span class="token number">42</span><span class="token punctuation">)</span>
@@ -303,7 +303,7 @@ items <span class="token operator">=</span> <span class="token function">append<
 <span class="token punctuation">}</span>
 </code></pre>
 <p>This approach was flexible but error-prone, as mistakes in type assertions could cause panics at runtime.</p>
-<h3 id="generics%3A-type-safety%2C-performance%2C-and-expressiveness" tabindex="-1"><a class="header-anchor" href="#generics%3A-type-safety%2C-performance%2C-and-expressiveness">Generics: Type Safety, Performance, and Expressiveness</a></h3>
+<h3 id="generics-type-safety-performance-and-expressiveness" tabindex="-1"><a class="header-anchor" href="#generics-type-safety-performance-and-expressiveness">Generics: Type Safety, Performance, and Expressiveness</a></h3>
 <p>Go 1.18 introduced generics, allowing you to write type-safe, reusable code without sacrificing performance. Generics use type parameters, so the compiler checks types at compile time and generates efficient code for each type.</p>
 <p>Benefits of generics:</p>
 <ul>
@@ -324,7 +324,7 @@ items <span class="token operator">=</span> <span class="token function">append<
     <span class="token keyword">return</span> l<span class="token punctuation">.</span>items<span class="token punctuation">[</span>index<span class="token punctuation">]</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<h3 id="when-to-use-interfaces-vs.-generics" tabindex="-1"><a class="header-anchor" href="#when-to-use-interfaces-vs.-generics">When to Use Interfaces vs. Generics</a></h3>
+<h3 id="when-to-use-interfaces-vs-generics" tabindex="-1"><a class="header-anchor" href="#when-to-use-interfaces-vs-generics">When to Use Interfaces vs. Generics</a></h3>
 <ul>
 <li>Use <strong>interfaces</strong> when you need polymorphism - when different types share a common behavior (method set).</li>
 <li>Use <strong>generics</strong> when you need reusable code for multiple types, but don't require a shared method set.</li>
@@ -335,7 +335,7 @@ items <span class="token operator">=</span> <span class="token function">append<
 <li>If you need to call methods on the values, use interfaces.</li>
 <li>If you just need to store or process values of any type, use generics.</li>
 </ul>
-<h3 id="code-comparison%3A-container-with-interface%7B%7D-vs.-generics" tabindex="-1"><a class="header-anchor" href="#code-comparison%3A-container-with-interface%7B%7D-vs.-generics">Code Comparison: Container with <code>interface{}</code> vs. Generics</a></h3>
+<h3 id="code-comparison-container-with-interface-vs-generics" tabindex="-1"><a class="header-anchor" href="#code-comparison-container-with-interface-vs-generics">Code Comparison: Container with <code>interface{}</code> vs. Generics</a></h3>
 <p><strong>Pre-Go 1.18: Using <code>interface{}</code></strong></p>
 <pre class="language-go"><code class="language-go">type Box struct <span class="token punctuation">{</span>
     items <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
@@ -387,7 +387,7 @@ strBox<span class="token punctuation">.</span><span class="token function">Add</
 <p><strong>Generics</strong> are a compile-time feature. When you use a generic type or function, the Go compiler generates specialized code for each concrete type you use. There's no runtime overhead for type assertions or method tables. The generated code operates directly on the concrete types, just as if you'd written separate code for each type.</p>
 </li>
 </ul>
-<h2 id="4.-type-assertions-and-type-switches" tabindex="-1"><a class="header-anchor" href="#4.-type-assertions-and-type-switches">4. Type Assertions and Type Switches</a></h2>
+<h2 id="4-type-assertions-and-type-switches" tabindex="-1"><a class="header-anchor" href="#4-type-assertions-and-type-switches">4. Type Assertions and Type Switches</a></h2>
 <p>Type assertions and type switches are powerful features in Go that allow you to extract concrete values from interfaces at runtime. They are essential for working with interfaces, especially when you need to handle multiple types or check the type of a value stored in an interface.</p>
 <h3 id="how-type-assertions-and-type-switches-work-under-the-hood" tabindex="-1"><a class="header-anchor" href="#how-type-assertions-and-type-switches-work-under-the-hood">How Type Assertions and Type Switches Work Under the Hood</a></h3>
 <p>Type assertions and type switches are Go's way of extracting concrete values from interfaces at runtime. When you perform a type assertion (<code>v, ok := iface.(T)</code>), Go checks the runtime type information stored in the interface value (the type pointer) against the asserted type. If they match, the value is extracted; otherwise, the assertion fails (and panics if you don’t use the <code>ok</code> form).</p>
@@ -427,7 +427,7 @@ v2<span class="token punctuation">,</span> <span class="token literal-property p
 <li>Overusing type assertions instead of leveraging polymorphism via interfaces.</li>
 </ul>
 <p>Type assertions and switches are powerful tools for extracting concrete values from interfaces, but they should be used with care. Prefer safe forms, document intent, and use polymorphism where possible to keep the code robust and maintainable.</p>
-<h2 id="5.-interface-performance-considerations" tabindex="-1"><a class="header-anchor" href="#5.-interface-performance-considerations">5. Interface Performance Considerations</a></h2>
+<h2 id="5-interface-performance-considerations" tabindex="-1"><a class="header-anchor" href="#5-interface-performance-considerations">5. Interface Performance Considerations</a></h2>
 <p>Interfaces are powerful, but their use can have subtle performance implications in Go programs. Understanding these costs helps you write efficient code and avoid unexpected slowdowns.</p>
 <h3 id="dynamic-dispatch-cost" tabindex="-1"><a class="header-anchor" href="#dynamic-dispatch-cost">Dynamic Dispatch Cost</a></h3>
 <p>Calling methods via an interface uses dynamic dispatch: Go looks up the method implementation at runtime using the method table in the interface’s internal structure. This indirection is fast, but not free - it adds a small overhead compared to direct calls on concrete types.</p>
@@ -454,7 +454,7 @@ v2<span class="token punctuation">,</span> <span class="token literal-property p
 <li>Minimizing interface conversions</li>
 <li>Profiling and benchmarking to identify bottlenecks</li>
 </ul>
-<h2 id="6.-reflection-and-interfaces" tabindex="-1"><a class="header-anchor" href="#6.-reflection-and-interfaces">6. Reflection and Interfaces</a></h2>
+<h2 id="6-reflection-and-interfaces" tabindex="-1"><a class="header-anchor" href="#6-reflection-and-interfaces">6. Reflection and Interfaces</a></h2>
 <p>Reflection is Go's mechanism for inspecting and manipulating values at runtime, and it interacts closely with interfaces. The <code>reflect</code> package operates primarily on interface values, making it a powerful but potentially costly tool.</p>
 <h3 id="how-reflection-interacts-with-interface-values" tabindex="-1"><a class="header-anchor" href="#how-reflection-interacts-with-interface-values">How Reflection Interacts with Interface Values</a></h3>
 <p>When you call <code>reflect.ValueOf(x)</code>, Go wraps <code>x</code> in an empty interface (<code>interface{}</code>) if it isn't one already. Reflection then uses the type and value pointers inside the interface to inspect the concrete type, value, and method set.</p>
@@ -483,9 +483,9 @@ fmt<span class="token punctuation">.</span><span class="token function">Println<
 <li>You need to inspect or modify struct fields/methods dynamically</li>
 </ul>
 <p>Reflection is a powerful tool for working with interfaces and dynamic types, but it comes with significant performance and safety costs. Use it only when necessary, and prefer static code or interface methods for most use cases.</p>
-<h2 id="7.-method-sets-and-interface-satisfaction" tabindex="-1"><a class="header-anchor" href="#7.-method-sets-and-interface-satisfaction">7. Method Sets and Interface Satisfaction</a></h2>
+<h2 id="7-method-sets-and-interface-satisfaction" tabindex="-1"><a class="header-anchor" href="#7-method-sets-and-interface-satisfaction">7. Method Sets and Interface Satisfaction</a></h2>
 <p>Go's method sets determine which types satisfy which interfaces, and understanding them is crucial for avoiding subtle bugs.</p>
-<h3 id="pointer-vs.-value-receivers" tabindex="-1"><a class="header-anchor" href="#pointer-vs.-value-receivers">Pointer vs. Value Receivers</a></h3>
+<h3 id="pointer-vs-value-receivers" tabindex="-1"><a class="header-anchor" href="#pointer-vs-value-receivers">Pointer vs. Value Receivers</a></h3>
 <p>The method set of a type depends on whether its methods have pointer or value receivers:</p>
 <ul>
 <li>A value type (e.g., <code>T</code>) has methods with value receivers (<code>func (t T)</code>) only.</li>
@@ -538,7 +538,7 @@ inc <span class="token operator">=</span> p   <span class="token comment">// OK<
 <li>When in doubt, test interface satisfaction explicitly in your code or with unit tests.</li>
 </ul>
 <p>Method sets are central to Go’s interface satisfaction rules. Always consider receiver types when designing and using interfaces to avoid subtle bugs and ensure your code behaves as expected.</p>
-<h2 id="8.-conclusion" tabindex="-1"><a class="header-anchor" href="#8.-conclusion">8. Conclusion</a></h2>
+<h2 id="8-conclusion" tabindex="-1"><a class="header-anchor" href="#8-conclusion">8. Conclusion</a></h2>
 <p>In this article, we explored advanced topics related to Go interfaces, including their internal representation, common pitfalls, performance considerations, and best practices.</p>
 <p>While you may not need to think about Go’s interface internals, method sets, or reflection every day, understanding these concepts is crucial for diagnosing subtle bugs, writing efficient code, and building robust systems. These details often make the difference when debugging tricky issues, designing APIs, or optimizing performance. Mastery of Go's interface mechanics empowers you to write code that is not only correct, but also maintainable and future-proof.</p>
 

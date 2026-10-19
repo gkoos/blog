@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -139,7 +139,7 @@
 </ul>
 <p>Note that the likes are stored in-memory and reset on server restart. This is just for demonstration purposes, in a real app, you'd use a database.</p>
 <p>The like button is implemented in <code>src/components/LikeButton.tsx</code> using React's <code>useState</code> and <code>useEffect</code> hooks. It handles the optimistic update, error handling, and reversion logic. Probably not how either you or I would implement it in a real app, but it will do for this demo.</p>
-<h2 id="unit-tests-with-mock-service-worker-(msw)" tabindex="-1"><a class="header-anchor" href="#unit-tests-with-mock-service-worker-(msw)">Unit Tests with Mock Service Worker (MSW)</a></h2>
+<h2 id="unit-tests-with-mock-service-worker-msw" tabindex="-1"><a class="header-anchor" href="#unit-tests-with-mock-service-worker-msw">Unit Tests with Mock Service Worker (MSW)</a></h2>
 <p>If you want to unit test your component, there are multiple ways to do that, but one of the smartest way is to use <a href="https://mswjs.io/">Mock Service Worker (MSW)</a> to mock the backend API calls. This way, you can test the component in isolation without relying on the actual backend.</p>
 <p>In the <code>main</code> branch, we set up <a href="https://vitest.dev/">Vitest</a> as the test runner and <a href="https://testing-library.com/docs/react-testing-library/intro/">React Testing Library</a> for rendering the component and simulating user interactions. We also set up MSW to intercept the network requests and return mock responses.</p>
 <p><code>src/components/LikeButton.test.tsx</code> contains the unit tests for the <code>LikeButton</code> component. It tests the following scenarios:</p>

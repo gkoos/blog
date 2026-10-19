@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -301,7 +301,7 @@ func <span class="token function">main</span><span class="token punctuation">(</
 </ul>
 <h2 id="how-interfaces-are-actually-used-in-go" tabindex="-1"><a class="header-anchor" href="#how-interfaces-are-actually-used-in-go">How Interfaces Are Actually Used In Go</a></h2>
 <p>In Go, interfaces are used extensively, often in ways that might feel odd. Here are some common patterns and practices:</p>
-<h3 id="the-io.writer-and-io.reader-pattern" tabindex="-1"><a class="header-anchor" href="#the-io.writer-and-io.reader-pattern">The <code>io.Writer</code> and <code>io.Reader</code> Pattern</a></h3>
+<h3 id="the-iowriter-and-ioreader-pattern" tabindex="-1"><a class="header-anchor" href="#the-iowriter-and-ioreader-pattern">The <code>io.Writer</code> and <code>io.Reader</code> Pattern</a></h3>
 <p>The <code>io.Writer</code> and <code>io.Reader</code> interfaces are foundational in Go. They allow you to write data to various destinations (like files, network connections, or buffers) without caring about the underlying implementation. For example:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
 
@@ -409,7 +409,7 @@ func <span class="token function">main</span><span class="token punctuation">(</
 <li>Any function expecting a <code>fmt.Stringer</code> can now accept <code>MyInt</code>.</li>
 </ol>
 <p>One of the benefits of this approach is <code>loose coupling</code>. With inheritance the child class implements <em>all</em> methods of the parent class, which means if anything changes in the parent, it can break the child. In Go, you start with zero dependencies and only add what you need.</p>
-<h3 id="the-interface%7B%7D-(empty-interface)-hell" tabindex="-1"><a class="header-anchor" href="#the-interface%7B%7D-(empty-interface)-hell">The <code>interface{}</code> (Empty Interface) Hell</a></h3>
+<h3 id="the-interface-empty-interface-hell" tabindex="-1"><a class="header-anchor" href="#the-interface-empty-interface-hell">The <code>interface{}</code> (Empty Interface) Hell</a></h3>
 <p><code>interface{}</code> is Go’s empty interface — an interface with zero methods. It matches any type because every type implements zero or more methods, so every type satisfies an empty interface. It's like <code>Object</code> in Java or <code>any</code> in TypeScript.</p>
 <p>So you can do this:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">var</span> x <span class="token keyword">interface</span><span class="token punctuation">{</span><span class="token punctuation">}</span>
@@ -441,7 +441,7 @@ func <span class="token function">main</span><span class="token punctuation">(</
 <p>So, if you must use <code>interface{}</code>, keep the use localized and minimal.</p>
 <h2 id="the-bad-and-the-ugly" tabindex="-1"><a class="header-anchor" href="#the-bad-and-the-ugly">The Bad And The Ugly</a></h2>
 <p>We saw how Go interfaces work and how they can give you flexibility and power. But they also come with their own set of quirks and frustrations. Here are some common pain points:</p>
-<h3 id="no-explicit-%22implements%22" tabindex="-1"><a class="header-anchor" href="#no-explicit-%22implements%22">No Explicit &quot;Implements&quot;</a></h3>
+<h3 id="no-explicit-implements" tabindex="-1"><a class="header-anchor" href="#no-explicit-implements">No Explicit &quot;Implements&quot;</a></h3>
 <p>If you look at a Go type, you can't tell at a glance which interfaces it implements. You have to read the code and see if it has the right methods. This can make it hard to understand how types relate to each other. Your IDE won't help you find all the places where a type is used as an interface, and you can't easily search for implementations of an interface.</p>
 <h3 id="no-easy-way-to-declare-optional-interface-methods" tabindex="-1"><a class="header-anchor" href="#no-easy-way-to-declare-optional-interface-methods">No easy way to declare optional interface methods</a></h3>
 <p>In Go, interfaces are satisfied only if a type implements all the methods declared. There is no built-in support for optional methods — you can’t say &quot;a type may implement method X, but it’s not required.&quot;</p>
@@ -512,7 +512,7 @@ func <span class="token function">UseLogger</span><span class="token punctuation
 <p>This is powerful, but it can also lead to code that is hard to understand and maintain. You lose the compile-time type safety that Go is known for, and you have to deal with the complexities of reflection: verbose and complex syntax, runtime errors if you get types or method names wrong and performance overhead compared to direct calls.</p>
 <h3 id="interface-pollution" tabindex="-1"><a class="header-anchor" href="#interface-pollution">Interface Pollution</a></h3>
 <p>In Go, it's common to see interfaces exported instead of structs. This can lead to interface pollution, where you end up with many small interfaces that are used everywhere, making it hard to track down where a type is used. This is especially true in large codebases or when using third-party libraries.</p>
-<h2 id="how-to-work-with-it-(best-practices)" tabindex="-1"><a class="header-anchor" href="#how-to-work-with-it-(best-practices)">How to Work With It (Best Practices)</a></h2>
+<h2 id="how-to-work-with-it-best-practices" tabindex="-1"><a class="header-anchor" href="#how-to-work-with-it-best-practices">How to Work With It (Best Practices)</a></h2>
 <p>To avoid the pitfalls of Go interfaces, here are some best practices:</p>
 <ol>
 <li><strong>Use Small Interfaces</strong>: Prefer small, focused interfaces over large, monolithic ones. This makes it easier to implement, understand and reuse. For example, use <code>io.Writer</code> instead of a big <code>BigAbstractThing</code> interface.</li>

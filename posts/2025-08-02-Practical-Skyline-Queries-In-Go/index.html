@@ -35,7 +35,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -119,7 +119,7 @@
   </div>
   <div class="prose dark:prose-invert max-w-none">
     <p><em>(Originally published on <a href="https://dev.to/gkoos/practical-skyline-queries-in-go-1mb9">Dev.to</a>)</em></p>
-<h2 id="skyline-queries%3F" tabindex="-1"><a class="header-anchor" href="#skyline-queries%3F">Skyline Queries?</a></h2>
+<h2 id="skyline-queries" tabindex="-1"><a class="header-anchor" href="#skyline-queries">Skyline Queries?</a></h2>
 <p>Summer is in full swing, the weather outside is hot and sunny. And here I am at my desk, scribbling away while my mind is sipping margaritas in a hotel bar somewhere in the Caribbean. But how do I decide which hotel? Close to the beach? Good reviews? Cheap? Can I find a hotel that's closer to the beach, has better reviews, and is cheaper than all the other hotels? Probably not. But with so many options to choose from, I can eliminate hotels that are worse in every aspect than others. This is the essence of skyline queries: finding the best options in a multi-dimensional problem space (in this case, distance from the beach, prices and reviews).</p>
 <p>I wrote a quick introduction to skyline queries <a href="/posts/2025-07-31-Skyline-Queries-For-Non-Academics/">here</a>, but for those who want something even quicker:</p>
 <p>We have a set of points in a multi-dimensional space, and we want to find the points that are not dominated by any other point. (Point A <em>dominates</em> another point B if A is better than B in all dimensions. Note that &quot;better&quot; can mean either larger - like ratings, or smaller - like distance to the beach.) The points that are not dominated by any other point are called <em>skyline points</em> and we find them by executing a <em>skyline query</em>.</p>
@@ -135,7 +135,7 @@
 <li><strong>Skytree</strong> - this is a data structure that can be used to efficiently find skyline points. It is based on the concept of a tree, where each node represents a point and its children represent the points that are dominated by it. It has a time complexity of O(n log n) for finding skyline points (like similar tree-based algorithms).</li>
 </ol>
 <p>Oddly enough, you will find these algorithms mostly in academic papers, but not in production code. Luckily for us, I created the <a href="https://github.com/gkoos/skyline">skyline</a> library that implements the BNL, Divide&amp;Conquer, and Skytree algorithms in go so we can carry on with this article.</p>
-<h2 id="what-are-we-going-to-build%3F" tabindex="-1"><a class="header-anchor" href="#what-are-we-going-to-build%3F">What Are We Going to Build?</a></h2>
+<h2 id="what-are-we-going-to-build" tabindex="-1"><a class="header-anchor" href="#what-are-we-going-to-build">What Are We Going to Build?</a></h2>
 <p>The title in this article says &quot;practical&quot;, so we <em>must</em> build something, right? However, skyline queries are either very trivial for small datasets or very computation-heavy for large datasets, so hosting a skyline query backend just for the sake of this article can be tricky (and expensive).</p>
 <p>Instead, we will build a simple command line tool that takes a CSV file where columns are dimensions and rows are points, with 2 dimensions to consider for the skyline query as command line arguments. The program calculates the skylines and outputs a new CSV file with the two dimensions and a new column that indicates whether the point is a skyline point or not. Then we can upload this new CSV to a tool like <a href="https://app.rawgraphs.io/">Rawgraphs</a> to visualize the results.</p>
 <p>This way, we neither have to deal with a complex frontend nor hosting a pricey backend. Your computer will do the heavy lifting of calculating the skyline points, the community will do the visualisation and I can keep this article short and sweet. How convenient!</p>
@@ -159,7 +159,7 @@ Skyline calculation completed<span class="token operator">!</span>
 <h3 id="example-data" tabindex="-1"><a class="header-anchor" href="#example-data">Example Data</a></h3>
 <p>You can use the example data from the <code>/data</code> folder in the repository, or create your own CSV file. The file should have a header row with the names of the dimensions, and each subsequent row should contain the values for each point.</p>
 <p><a href="https://www.kaggle.com">Kaggle</a> has some great datasets to play with.</p>
-<h2 id="let's-do-this!" tabindex="-1"><a class="header-anchor" href="#let's-do-this!">Let's Do This!</a></h2>
+<h2 id="lets-do-this" tabindex="-1"><a class="header-anchor" href="#lets-do-this">Let's Do This!</a></h2>
 <p>Ok, it's time to get our hands dirty and build this tool. Open your favorite IDE/code editor and let's get started.</p>
 <h3 id="scaffolding-the-project" tabindex="-1"><a class="header-anchor" href="#scaffolding-the-project">Scaffolding the Project</a></h3>
 <p>First, create a new directory for your project and initialize a Go module:</p>

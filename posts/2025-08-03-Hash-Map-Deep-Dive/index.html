@@ -35,7 +35,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,7 +118,7 @@
 <p><img src="https://i.imgur.com/GiyaHep.jpeg" alt="">
 A <code>dict</code> in Python. <code>map</code> in Go, <code>Object</code> or <code>Map</code> in Javascript. Associative arrays in PHP, <code>Dictionary&lt;TKey, TValue&gt;</code> in C++. Hash maps are implemented in virtually every high-level programming language. And they are awesome! Who doesn't want to store and then access data in constant time? Whether you're working with large datasets or grinding Leetcode problems, very often this data structure comes to the rescue. But what are they exactly and how do they work under the hood? In this article we will try and answer these questions.</p>
 <h2 id="table-of-contents" tabindex="-1"><a class="header-anchor" href="#table-of-contents">Table of Contents</a></h2>
-<nav class="table-of-contents"><ol><li><a href="#table-of-contents">Table of Contents</a></li><li><a href="#what-is-a-hash-map%3F">What Is a Hash Map?</a></li><li><a href="#what-is-a-hash-function%3F">What Is a Hash Function?</a></li><li><a href="#what-is-a-bucket%3F">What Is a Bucket?</a></li><li><a href="#load-factor">Load Factor</a></li><li><a href="#collision-resolution">Collision Resolution</a></li><li><a href="#some-real-world-examples">Some Real-World Examples</a><ol><li><a href="#programming-language-implementations">Programming Language Implementations</a></li><li><a href="#database-systems">Database Systems</a></li><li><a href="#version-control">Version Control</a></li></ol></li><li><a href="#putting-it-all-together%3A-how-implementation-knowledge-matters">Putting It All Together: How Implementation Knowledge Matters</a><ol><li><a href="#bad-implementation-(fights-against-python's-dict)">Bad Implementation (Fights Against Python&#39;s Dict)</a></li><li><a href="#good-implementation-(works-with-python's-dict)">Good Implementation (Works With Python&#39;s Dict)</a></li><li><a href="#performance-difference">Performance Difference</a></li></ol></li><li><a href="#conclusion">Conclusion</a></li></ol></nav><h2 id="what-is-a-hash-map%3F" tabindex="-1"><a class="header-anchor" href="#what-is-a-hash-map%3F">What Is a Hash Map?</a></h2>
+<nav class="table-of-contents"><ol><li><a href="#table-of-contents">Table of Contents</a></li><li><a href="#what-is-a-hash-map%3F">What Is a Hash Map?</a></li><li><a href="#what-is-a-hash-function%3F">What Is a Hash Function?</a></li><li><a href="#what-is-a-bucket%3F">What Is a Bucket?</a></li><li><a href="#load-factor">Load Factor</a></li><li><a href="#collision-resolution">Collision Resolution</a></li><li><a href="#some-real-world-examples">Some Real-World Examples</a><ol><li><a href="#programming-language-implementations">Programming Language Implementations</a></li><li><a href="#database-systems">Database Systems</a></li><li><a href="#version-control">Version Control</a></li></ol></li><li><a href="#putting-it-all-together%3A-how-implementation-knowledge-matters">Putting It All Together: How Implementation Knowledge Matters</a><ol><li><a href="#bad-implementation-(fights-against-python's-dict)">Bad Implementation (Fights Against Python&#39;s Dict)</a></li><li><a href="#good-implementation-(works-with-python's-dict)">Good Implementation (Works With Python&#39;s Dict)</a></li><li><a href="#performance-difference">Performance Difference</a></li></ol></li><li><a href="#conclusion">Conclusion</a></li></ol></nav><h2 id="what-is-a-hash-map" tabindex="-1"><a class="header-anchor" href="#what-is-a-hash-map">What Is a Hash Map?</a></h2>
 <p>At a high level, a hash map, or hash table is a data structure that implements an associative array abstract data type, a structure that can map keys to values. The key is used to uniquely identify a value in the map, and the value is the data that is being stored. Hash maps are designed to provide fast insertion, deletion, and lookup of key-value pairs.</p>
 <p>In fact, the average time complexity for these operations is O(1), which means that they can be performed in constant time! This feature makes hash maps probably the most used data structure in programming, however there are some caveats to this, as we will see later.</p>
 <p>The worst-case time complexity for these operations is O(n), which can happen in certain scenarios, and the more we know about the internals, the more likely we are to avoid these scenarios.</p>
@@ -127,7 +127,7 @@ A <code>dict</code> in Python. <code>map</code> in Go, <code>Object</code> or <c
 <p>a hash table is a data structure that implements an associative array, also called a dictionary or simply map; an associative array is an abstract data type that maps keys to values. A hash table uses a hash function to compute an index, also called a hash code, into an array of buckets or slots, from which the desired value can be found.</p>
 </blockquote>
 <p>So let's take a step back and look at the components of a hash map.</p>
-<h2 id="what-is-a-hash-function%3F" tabindex="-1"><a class="header-anchor" href="#what-is-a-hash-function%3F">What Is a Hash Function?</a></h2>
+<h2 id="what-is-a-hash-function" tabindex="-1"><a class="header-anchor" href="#what-is-a-hash-function">What Is a Hash Function?</a></h2>
 <p>A hash function is a function that takes an input (or &quot;key&quot;) and typically returns an integer that is used to index the data in the hash map. The key is transformed into an integer, which is then used to determine the index in the underlying array where the value is stored.</p>
 <p>A good hash function has the following properties:</p>
 <ul>
@@ -137,7 +137,7 @@ A <code>dict</code> in Python. <code>map</code> in Go, <code>Object</code> or <c
 <li><strong>Minimize Collisions</strong>: The space of possible keys is typically much larger (often infinite) than the space of hash codes. This means that different keys may produce the same hash code. While these collisions are inevitable, a good hash function minimizes the chances of two different keys producing the same hash code.</li>
 </ul>
 <p>A simple example of a hash function is the modulo operation, which takes a key and returns the remainder when divided by the size of the hash table. For example, if we have a hash table of size 10 and a key of 23, the hash code would be <code>23 % 10 = 3</code>, meaning that the value associated with the key 23 would be stored at index 3 in the underlying array. And if the key is 33, the hash code would be <code>33 % 10 = 3</code> as well, which means that we have a collision. In this case, both keys would map to the same index in the array.</p>
-<h2 id="what-is-a-bucket%3F" tabindex="-1"><a class="header-anchor" href="#what-is-a-bucket%3F">What Is a Bucket?</a></h2>
+<h2 id="what-is-a-bucket" tabindex="-1"><a class="header-anchor" href="#what-is-a-bucket">What Is a Bucket?</a></h2>
 <p>A bucket is a slot in the hash table where a key-value pair is stored. In case of a collision, where two different keys produce the same hash code, the bucket can store multiple key-value pairs. This is often done using a linked list or another data structure to handle collisions.</p>
 <p>This diagram illustrates how all this works:
 <img src="https://i.imgur.com/H8wRU0P.png" alt=""></p>
@@ -309,10 +309,10 @@ A <code>dict</code> in Python. <code>map</code> in Go, <code>Object</code> or <c
 <p>These implementations often leverage the same underlying principles of hashing and collision resolution discussed earlier, but they may also incorporate additional optimizations specific to the database context.</p>
 <h3 id="version-control" tabindex="-1"><a class="header-anchor" href="#version-control">Version Control</a></h3>
 <p>Version control systems like Git use hash maps to efficiently manage file changes and track versions. Each commit in Git is identified by a SHA-1 hash of its contents, which serves as a unique key for the commit object. This allows Git to quickly look up commits, branches, and other objects in the repository. Git doesn't use traditional hash table collision resolution, it's designed around the assumption that cryptographic hash collisions won't occur in practice.</p>
-<h2 id="putting-it-all-together%3A-how-implementation-knowledge-matters" tabindex="-1"><a class="header-anchor" href="#putting-it-all-together%3A-how-implementation-knowledge-matters">Putting It All Together: How Implementation Knowledge Matters</a></h2>
+<h2 id="putting-it-all-together-how-implementation-knowledge-matters" tabindex="-1"><a class="header-anchor" href="#putting-it-all-together-how-implementation-knowledge-matters">Putting It All Together: How Implementation Knowledge Matters</a></h2>
 <p>And it's not just about the theory! Understanding how hash maps are implemented in your programming language of choice can lead to significant performance improvements in your code.</p>
 <p>For example, since Python's <code>dict</code> uses open addressing with optimized string handling, understanding this can lead to much better performance. Here's how to write efficient vs inefficient code:</p>
-<h3 id="bad-implementation-(fights-against-python's-dict)" tabindex="-1"><a class="header-anchor" href="#bad-implementation-(fights-against-python's-dict)">Bad Implementation (Fights Against Python's Dict)</a></h3>
+<h3 id="bad-implementation-fights-against-pythons-dict" tabindex="-1"><a class="header-anchor" href="#bad-implementation-fights-against-pythons-dict">Bad Implementation (Fights Against Python's Dict)</a></h3>
 <pre class="language-python"><code class="language-python">def <span class="token function">count_words_bad</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token operator">:</span>
     word_counts <span class="token operator">=</span> <span class="token punctuation">{</span><span class="token punctuation">}</span>
     words <span class="token operator">=</span> text<span class="token punctuation">.</span><span class="token function">split</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -332,7 +332,7 @@ A <code>dict</code> in Python. <code>map</code> in Go, <code>Object</code> or <c
 <li>Open addressing makes key-missing checks expensive</li>
 <li>Doesn't leverage Python's dict optimizations</li>
 </ul>
-<h3 id="good-implementation-(works-with-python's-dict)" tabindex="-1"><a class="header-anchor" href="#good-implementation-(works-with-python's-dict)">Good Implementation (Works With Python's Dict)</a></h3>
+<h3 id="good-implementation-works-with-pythons-dict" tabindex="-1"><a class="header-anchor" href="#good-implementation-works-with-pythons-dict">Good Implementation (Works With Python's Dict)</a></h3>
 <pre class="language-python"><code class="language-python">from collections <span class="token keyword">import</span> defaultdict<span class="token punctuation">,</span> Counter
 
 def <span class="token function">count_words_good_v1</span><span class="token punctuation">(</span>text<span class="token punctuation">)</span><span class="token operator">:</span>

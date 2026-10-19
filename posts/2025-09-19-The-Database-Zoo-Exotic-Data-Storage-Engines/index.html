@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,7 +112,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <h2 id="introduction-%2F-context" tabindex="-1"><a class="header-anchor" href="#introduction-%2F-context">Introduction / Context</a></h2>
+    <h2 id="introduction-context" tabindex="-1"><a class="header-anchor" href="#introduction-context">Introduction / Context</a></h2>
 <p>Over the past two decades, the landscape of data has changed dramatically. Traditional business records and transactional data have been joined by an explosion of new formats:</p>
 <ul>
 <li>Metrics and logs from monitoring systems and IoT devices.</li>
@@ -133,7 +133,7 @@
 </ul>
 <p>By the end of the series, you'll have a clearer picture of why these engines exist, how they work, and when they might be the right tool for your system.</p>
 <p>But before diving into the specialized databases, it's essential to understand the foundations laid by SQL and NoSQL systems. We'll start with a deep dive into their history, architecture, strengths, and limitations to set the stage for why the database zoo has grown so diverse.</p>
-<h2 id="sql-databases%3A-history%2C-architecture%2C-and-workloads" tabindex="-1"><a class="header-anchor" href="#sql-databases%3A-history%2C-architecture%2C-and-workloads">SQL Databases: History, Architecture, and Workloads</a></h2>
+<h2 id="sql-databases-history-architecture-and-workloads" tabindex="-1"><a class="header-anchor" href="#sql-databases-history-architecture-and-workloads">SQL Databases: History, Architecture, and Workloads</a></h2>
 <p>The relational database has been the backbone of data management for more than four decades. It's difficult to overstate its impact: most software engineers' first experience with persistent data is through SQL, and an overwhelming share of enterprise applications still run on relational systems today. To understand why specialized databases emerged, we first need to look at how the relational model was born, what problems it solved, and where its limitations lie.</p>
 <h3 id="the-origins-of-the-relational-model" tabindex="-1"><a class="header-anchor" href="#the-origins-of-the-relational-model">The Origins of the Relational Model</a></h3>
 <p>In 1970, IBM researcher E. F. Codd introduced the relational model of data in his seminal paper <em>A Relational Model of Data for Large Shared Data Banks</em>. His idea was simple yet transformative: instead of exposing low-level storage details like files or hierarchical records, databases should represent data in a logical form based on mathematics: relations (tables), defined by rows (tuples) and columns (attributes).</p>
@@ -206,7 +206,7 @@
 <h3 id="the-turning-point" tabindex="-1"><a class="header-anchor" href="#the-turning-point">The Turning Point</a></h3>
 <p>By the late 2000s, companies like Google, Amazon, and Facebook faced unprecedented data challenges: web-scale traffic, massive user bases, and real-time services that relational systems struggled to support. This environment gave rise to a new generation of databases, collectively called <em>NoSQL</em>, designed to relax some guarantees in exchange for scalability, flexibility, or performance in specific areas.</p>
 <p>Relational databases didn't disappear - in fact, they're still everywhere. But they were no longer the only viable option. The industry began to realize that different data problems sometimes require different tools.</p>
-<h2 id="nosql-databases%3A-history%2C-architecture%2C-and-workloads" tabindex="-1"><a class="header-anchor" href="#nosql-databases%3A-history%2C-architecture%2C-and-workloads">NoSQL Databases: History, Architecture, and Workloads</a></h2>
+<h2 id="nosql-databases-history-architecture-and-workloads" tabindex="-1"><a class="header-anchor" href="#nosql-databases-history-architecture-and-workloads">NoSQL Databases: History, Architecture, and Workloads</a></h2>
 <p>Traditional relational databases - reliable and feature-rich as they were - couldn't keep up with massive traffic, high write volumes, and rapidly evolving data schemas. Tech giants needed systems that could scale horizontally across thousands of commodity servers, ingest millions of writes per second, and serve low-latency queries to millions of users. This need gave rise to the NoSQL movement.</p>
 <h3 id="the-emergence-of-nosql" tabindex="-1"><a class="header-anchor" href="#the-emergence-of-nosql">The Emergence of NoSQL</a></h3>
 <p>&quot;NoSQL&quot; is an umbrella term that refers to non-relational, distributed database systems optimized for particular types of workloads. The term gained popularity in 2009, though the principles had been in development for years in large-scale systems like Google Bigtable, Amazon Dynamo, and Facebook Cassandra. These systems relaxed some of the constraints imposed by relational databases - especially strict consistency and rigid schemas - to achieve high availability, horizontal scalability, and fast write throughput.</p>
@@ -294,13 +294,13 @@
 <p>Machine learning and recommendation systems frequently rely on embeddings and vectors with hundreds or thousands of dimensions. Neither SQL nor typical NoSQL stores are optimized for similarity search in high-dimensional spaces. Indexing and nearest-neighbor queries at scale require algorithms like HNSW (Hierarchical Navigable Small Worlds) or approximate nearest neighbor search, which general-purpose engines do not provide. See <a href="/posts/2025-11-25-The-Database-Zoo-Vector-Databases-and-High-Dimensional-Search/">Vector Databases</a></p>
 <h3 id="massive-analytical-queries" tabindex="-1"><a class="header-anchor" href="#massive-analytical-queries">Massive Analytical Queries</a></h3>
 <p>Analytical workloads over billions of rows, such as aggregations, joins, and scans, expose the limitations of row-oriented storage. Columnar storage, compression, and query execution strategies optimized for analytics are rarely present in standard RDBMS or NoSQL systems, making OLAP-style queries inefficient at scale. See <a href="/posts/2025-10-02-The-Database-Zoo-Probabilistic-Approximate-Databases/">Probabilistic / Approximate Databases</a></p>
-<h3 id="event-sourcing-%2F-append-only-streams" tabindex="-1"><a class="header-anchor" href="#event-sourcing-%2F-append-only-streams">Event Sourcing / Append-Only Streams</a></h3>
+<h3 id="event-sourcing-append-only-streams" tabindex="-1"><a class="header-anchor" href="#event-sourcing-append-only-streams">Event Sourcing / Append-Only Streams</a></h3>
 <p>Applications using event sourcing or logs rely on append-only storage and sequential reads. While key-value or wide-column stores can store events, they are not always optimized for time-ordered retrieval, retention policies, or efficient compaction, leading to performance degradation as data grows.</p>
 <h3 id="spatial-queries" tabindex="-1"><a class="header-anchor" href="#spatial-queries">Spatial Queries</a></h3>
 <p>Geospatial applications - mapping, routing, or location-based services - require specialized indexes and query algorithms. General-purpose databases support basic geospatial operations, but large-scale spatial queries benefit from R-trees, quad-trees, or geohash-based indexing, which are uncommon in standard SQL or NoSQL engines.</p>
 <h3 id="enter-specialized-databases" tabindex="-1"><a class="header-anchor" href="#enter-specialized-databases">Enter Specialized Databases</a></h3>
 <p>These limitations set the stage for specialized databases. Each engine is designed around a particular problem domain, employing custom storage formats, indexing strategies, compression methods, and query execution algorithms to handle workloads that challenge general-purpose systems. By focusing on a niche, specialized databases achieve performance, scalability, and efficiency that relational and NoSQL stores cannot match, while complementing the broader data infrastructure.</p>
-<h2 id="what's-next" tabindex="-1"><a class="header-anchor" href="#what's-next">What's Next</a></h2>
+<h2 id="whats-next" tabindex="-1"><a class="header-anchor" href="#whats-next">What's Next</a></h2>
 <p>This series, The Database Zoo: Exotic Data Storage Engines, will explore these engines in depth. Each post will cover:</p>
 <ul>
 <li>The problem domain: why a general-purpose database falls short.</li>

@@ -35,7 +35,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,7 +127,7 @@
 <p>Even if you can't decide between B, C, or D, you know that A isn’t a good deal — it’s both more expensive and lasts less than others. We say <strong>Laptop B <em>dominates</em> Laptop A</strong> because it's <em>better or equal in all dimensions</em>, and <em>strictly better in at least one</em>.</p>
 <p>This kind of filtering is what <strong>Skyline Queries</strong> are all about: finding the <em>best trade-offs</em> in multi-dimensional data.</p>
 <hr>
-<h2 id="so-what-are-skyline-queries%3F" tabindex="-1"><a class="header-anchor" href="#so-what-are-skyline-queries%3F">So What Are Skyline Queries?</a></h2>
+<h2 id="so-what-are-skyline-queries" tabindex="-1"><a class="header-anchor" href="#so-what-are-skyline-queries">So What Are Skyline Queries?</a></h2>
 <p>Skyline Queries help identify <strong>Pareto-optimal</strong> points in a dataset.</p>
 <p>A point is said to be <strong>Pareto-optimal</strong> if <strong>no other point dominates it</strong>. That is:</p>
 <blockquote>
@@ -179,7 +179,7 @@
 <h2 id="algorithms-for-skyline-queries" tabindex="-1"><a class="header-anchor" href="#algorithms-for-skyline-queries">Algorithms for Skyline Queries</a></h2>
 <p>There are several well-established algorithms to compute skyline sets. Here's an overview of the most well-known ones:</p>
 <hr>
-<h3 id="1.-block-nested-loops-(bnl)" tabindex="-1"><a class="header-anchor" href="#1.-block-nested-loops-(bnl)">1. Block Nested Loops (BNL)</a></h3>
+<h3 id="1-block-nested-loops-bnl" tabindex="-1"><a class="header-anchor" href="#1-block-nested-loops-bnl">1. Block Nested Loops (BNL)</a></h3>
 <p>One of the simplest and earliest skyline algorithms.</p>
 <p><strong>How it works</strong>:</p>
 <ul>
@@ -206,7 +206,7 @@
 </ul>
 <p>🔗 <a href="https://www.cs.umb.edu/~poneil/Skylines/Papers/skyline_sigmod01.pdf">More on BNL (research paper)</a></p>
 <hr>
-<h3 id="2.-divide-and-conquer-(dc)" tabindex="-1"><a class="header-anchor" href="#2.-divide-and-conquer-(dc)">2. Divide and Conquer (DC)</a></h3>
+<h3 id="2-divide-and-conquer-dc" tabindex="-1"><a class="header-anchor" href="#2-divide-and-conquer-dc">2. Divide and Conquer (DC)</a></h3>
 <p>This algorithm breaks the dataset into chunks, computes skylines recursively, and merges them.</p>
 <p><strong>How it works</strong>:</p>
 <ul>
@@ -226,7 +226,7 @@
 </ul>
 <p>🔗 <a href="https://dl.acm.org/doi/10.1145/1142473.1142486">Skyline with Divide &amp; Conquer (academic overview)</a></p>
 <hr>
-<h3 id="3.-skytree" tabindex="-1"><a class="header-anchor" href="#3.-skytree">3. SkyTree</a></h3>
+<h3 id="3-skytree" tabindex="-1"><a class="header-anchor" href="#3-skytree">3. SkyTree</a></h3>
 <p>An advanced and efficient approach using tree structures.</p>
 <p><strong>How it works</strong>:</p>
 <ul>
@@ -246,7 +246,7 @@
 </ul>
 <p>🔗 <a href="https://dl.acm.org/doi/10.1145/1995376.1995403">SkyTree paper with detailed performance</a></p>
 <hr>
-<h3 id="4.-bitmap-based-methods" tabindex="-1"><a class="header-anchor" href="#4.-bitmap-based-methods">4. Bitmap-based Methods</a></h3>
+<h3 id="4-bitmap-based-methods" tabindex="-1"><a class="header-anchor" href="#4-bitmap-based-methods">4. Bitmap-based Methods</a></h3>
 <p><strong>How it works</strong>:</p>
 <ul>
 <li>Represent points as bit vectors.</li>
@@ -265,7 +265,7 @@
 </ul>
 <p>🔗 <a href="https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.74.3307">Bitmap-based skyline methods</a></p>
 <hr>
-<h3 id="5.-nearest-neighbor-(nn)-based" tabindex="-1"><a class="header-anchor" href="#5.-nearest-neighbor-(nn)-based">5. Nearest Neighbor (NN) Based</a></h3>
+<h3 id="5-nearest-neighbor-nn-based" tabindex="-1"><a class="header-anchor" href="#5-nearest-neighbor-nn-based">5. Nearest Neighbor (NN) Based</a></h3>
 <p><strong>How it works</strong>:</p>
 <ul>
 <li>Uses spatial data structures like R-trees or KD-trees.</li>
@@ -283,7 +283,7 @@
 </ul>
 <p>🔗 <a href="https://www.vldb.org/conf/2006/p15-kossmann.pdf">NN Skyline algorithm overview</a></p>
 <hr>
-<h3 id="6.-index-based-methods-(e.g.%2C-bbs)" tabindex="-1"><a class="header-anchor" href="#6.-index-based-methods-(e.g.%2C-bbs)">6. Index-based Methods (e.g., BBS)</a></h3>
+<h3 id="6-index-based-methods-eg-bbs" tabindex="-1"><a class="header-anchor" href="#6-index-based-methods-eg-bbs">6. Index-based Methods (e.g., BBS)</a></h3>
 <p><strong>How it works</strong>:</p>
 <ul>
 <li>Uses <strong>Branch and Bound Skyline (BBS)</strong> over an R-tree index.</li>

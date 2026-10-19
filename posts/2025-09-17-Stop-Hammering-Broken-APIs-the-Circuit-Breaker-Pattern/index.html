@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -127,7 +127,7 @@
 </ul>
 <p>In each case, a single failing service can bring everything down unless failures are isolated and handled gracefully.</p>
 <p>In this article, we'll make the circuit breaker pattern concrete by building a small demo backend with multiple endpoints, then wiring them together into a pipeline. We'll show what happens when endpoints fail, how circuit breakers respond, and how you can observe the difference in practice.</p>
-<h2 id="what-we'll-build" tabindex="-1"><a class="header-anchor" href="#what-we'll-build">What We'll Build</a></h2>
+<h2 id="what-well-build" tabindex="-1"><a class="header-anchor" href="#what-well-build">What We'll Build</a></h2>
 <p>To see what happens when upstream services are unreliable, we'll create a simple Express backend API with three endpoints:</p>
 <ul>
 <li><code>/users</code> - an endpoint to get user information.</li>
@@ -455,7 +455,7 @@ app<span class="token punctuation">.</span><span class="token function">listen</
 <p>You'll notice that after a few failures, the circuit breaker opens, and subsequent requests to the failing endpoint are skipped, as indicated in the console output. When the circuit breaker is open, no request is being sent to the server, so you won't see any corresponding log entries for those skipped requests. In the example logs above, when the circuit breaker is open for 5 seconds, no request is made to the server for the next cycle, so actually 6 seconds pass between the two polls.</p>
 <p>Now how much difference does the circuit breaker make? It depends on the failure rates and the thresholds you set. In our example, with a 30% failure rate for orders and a 100% failure rate for payments, the circuit breaker will open frequently for payments, preventing a flood of failed requests. For orders, it may open occasionally, depending on the random failures.</p>
 <p>Feel free to experiment with different failure rates and circuit breaker settings to see how they affect the behavior of the pipeline. You can adjust the <code>ORDERS_FAILURE_RATE</code> and <code>PAYMENTS_FAILURE_RATE</code> environment variables when starting the server, as well as the <code>threshold</code> and <code>reset</code> options when creating the <code>ffetch</code> client.</p>
-<h2 id="next-steps%3A-beyond-open%2Fclosed-breakers" tabindex="-1"><a class="header-anchor" href="#next-steps%3A-beyond-open%2Fclosed-breakers">Next Steps: Beyond Open/Closed Breakers</a></h2>
+<h2 id="next-steps-beyond-openclosed-breakers" tabindex="-1"><a class="header-anchor" href="#next-steps-beyond-openclosed-breakers">Next Steps: Beyond Open/Closed Breakers</a></h2>
 <p>The simple open/closed breaker is already a big improvement over blindly hammering a failing service. But in larger, distributed systems, engineers often adopt a more nuanced variant: the <em>half-open circuit breaker</em>. This adds a third state to the breaker, allowing a few trial requests through after the cooldown period to test if the service has recovered.</p>
 <p>Think of the three states like this:</p>
 <ul>

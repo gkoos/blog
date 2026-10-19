@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -162,7 +162,7 @@
 <p><strong>Pros</strong>: Simple and easy to reason about.</p>
 <p><strong>Cons</strong>: Poor scalability under heavy writes - all updates serialize through one mutex.</p>
 <p>Use Case: Low concurrency or small datasets.</p>
-<h3 id="using-sync.map" tabindex="-1"><a class="header-anchor" href="#using-sync.map">Using <code>sync.Map</code></a></h3>
+<h3 id="using-syncmap" tabindex="-1"><a class="header-anchor" href="#using-syncmap">Using <code>sync.Map</code></a></h3>
 <p>Go's <code>sync.Map</code> provides a concurrent map with lock-free reads:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">var</span> leaderboard sync<span class="token punctuation">.</span>Map
 
@@ -283,7 +283,7 @@ func <span class="token function">NewTopNMinHeap</span><span class="token punctu
 <span class="token punctuation">}</span>
 </code></pre>
 <p>First, we must implement the <code>heap.Interface</code>, which defines <code>Len</code>, <code>Less</code>, <code>Swap</code>, <code>Push</code>, and <code>Pop</code>. Then, we create a constructor <code>NewTopNMinHeap</code> to initialize the heap. Finally, the <code>Add</code> method handles inserting new scores while maintaining the top-N property: if the heap is not full, we simply push the new score. If it is full and the new score is greater than the minimum (the root), we replace the root and re-heapify (that is, we call <code>heap.Fix</code>).</p>
-<h3 id="shard-operations%3A-score-updates-and-reads" tabindex="-1"><a class="header-anchor" href="#shard-operations%3A-score-updates-and-reads">Shard Operations: Score Updates and Reads</a></h3>
+<h3 id="shard-operations-score-updates-and-reads" tabindex="-1"><a class="header-anchor" href="#shard-operations-score-updates-and-reads">Shard Operations: Score Updates and Reads</a></h3>
 <p>Each shard should expose methods that safely add new scores and retrieve its current top-N snapshot. The mutex <code>mu</code> ensures that concurrent updates to the shard are safe.</p>
 <pre class="language-go"><code class="language-go"><span class="token comment">// leaderboard/leaderboard.go</span>
 
@@ -387,7 +387,7 @@ func <span class="token function">NewLeaderboard</span><span class="token punctu
 <span class="token punctuation">}</span>
 </code></pre>
 <p>Each shard returns a snapshot of its top-N, so we don't hold locks across multiple shards simultaneously. We insert all shard top-N entries into a temporary min-heap of size n to maintain the global top-N efficiently. Since the min-heap stores the smallest top-N score at the root, we reverse the slice to return the highest scores first.</p>
-<h2 id="testing-what-we've-built" tabindex="-1"><a class="header-anchor" href="#testing-what-we've-built">Testing What We've Built</a></h2>
+<h2 id="testing-what-weve-built" tabindex="-1"><a class="header-anchor" href="#testing-what-weve-built">Testing What We've Built</a></h2>
 <p>Now that we have finished our leaderboard, let's see how it works. Here's a simple test program that demonstrates adding scores and retrieving the top-N concurrently:</p>
 <pre class="language-go"><code class="language-go"><span class="token comment">// main.go</span>
 

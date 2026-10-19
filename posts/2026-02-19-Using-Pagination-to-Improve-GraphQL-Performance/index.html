@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -144,7 +144,7 @@
 <pre class="language-bash"><code class="language-bash"><span class="token function">npm</span> start
 </code></pre>
 <p>The GraphQL API will be available at <code>http://localhost:4000</code>, where you can explore the schema and run queries using the Apollo Sandbox.</p>
-<h2 id="the-problem%3A-fetching-all-data-at-once" tabindex="-1"><a class="header-anchor" href="#the-problem%3A-fetching-all-data-at-once">The Problem: Fetching All Data at Once</a></h2>
+<h2 id="the-problem-fetching-all-data-at-once" tabindex="-1"><a class="header-anchor" href="#the-problem-fetching-all-data-at-once">The Problem: Fetching All Data at Once</a></h2>
 <p>Before introducing pagination, let's start with the simplest approach: returning <em>all</em> records from a GraphQL field in a single request.</p>
 <p>In our app, the <code>allProducts</code> query does exactly that. It loads all 500,000 products from the database and returns them as a single response. This kind of query is easy to write, easy to understand, and surprisingly common in early GraphQL schemas.</p>
 <p>Here's the resolver behind it:</p>

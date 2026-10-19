@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -119,7 +119,7 @@
 <p>It is elegant for a reason: many problems are naturally recursive, and the code often mirrors how we explain the logic out loud. For tree walks, nested structures, and divide-and-conquer patterns, recursion can be easier to read than explicit loops.</p>
 <p>The catch is physical limits. Even with a correct base case and sound logic, each recursive call still consumes stack space. At some depth, you crash with stack overflow.</p>
 <p>If you read <a href="/posts/2026-03-28-Your-Debounce-Is-Lying-to-You/">Your Debounce Is Lying to You</a> and <a href="/posts/2026-03-31-Your-Throttling-Is-Lying-to-You/">Your Throttling Is Lying to You</a>, this is the recursion version of the same pattern: elegant abstraction, hidden operational edge. Even dependency management can lie to you, as explored in <a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a>. For a different category of silent failure, <a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/">Your JS Date Is Lying to You</a> covers the parsing, mutation, and timezone traps built into the JavaScript Date API.</p>
-<h2 id="problem-setup%3A-recursion-hits-the-wall" tabindex="-1"><a class="header-anchor" href="#problem-setup%3A-recursion-hits-the-wall">Problem Setup: Recursion Hits The Wall</a></h2>
+<h2 id="problem-setup-recursion-hits-the-wall" tabindex="-1"><a class="header-anchor" href="#problem-setup-recursion-hits-the-wall">Problem Setup: Recursion Hits The Wall</a></h2>
 <p>You can run everything below directly in a browser console. Let's start simple: a recursive sum of all integers from 1 to n.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">sum</span><span class="token punctuation">(</span><span class="token parameter">n</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">if</span> <span class="token punctuation">(</span>n <span class="token operator">===</span> <span class="token number">0</span><span class="token punctuation">)</span> <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
@@ -165,7 +165,7 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>This version runs in linear time, but it still risks stack overflow at large <code>n</code> due to the same TCO uncertainty. The exponential version is a red herring for this discussion because it fails for a completely different reason: stack overflow and exponential blowup are two separate problems. They look the same from the outside (the page hangs or crashes) but require completely different fixes.</p>
-<h2 id="runtime-reality-(at-the-time-of-writing)" tabindex="-1"><a class="header-anchor" href="#runtime-reality-(at-the-time-of-writing)">Runtime Reality (At The Time Of Writing)</a></h2>
+<h2 id="runtime-reality-at-the-time-of-writing" tabindex="-1"><a class="header-anchor" href="#runtime-reality-at-the-time-of-writing">Runtime Reality (At The Time Of Writing)</a></h2>
 <p>At the time of writing (May 2026), proper tail-call optimization support is not something you can count on across JavaScript runtimes.</p>
 <table>
 <thead>

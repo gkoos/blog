@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -139,7 +139,7 @@
 <p>It gives the feeling that requests are &quot;under control,&quot; but it does not control request lifecycle: response ordering, cancellation of stale work, or failure behavior.</p>
 <p>That is why it feels like debounce is &quot;lying&quot; in production: the UI looks smoothed, while the network layer is still fragile.</p>
 <p>In this article, we will keep debounce for what it is good at (UI smoothing), then harden the request path with cancellation, retries, and better error handling.</p>
-<h2 id="the-illusion-of-%22fixed%22-behavior" tabindex="-1"><a class="header-anchor" href="#the-illusion-of-%22fixed%22-behavior">The Illusion of &quot;Fixed&quot; Behavior</a></h2>
+<h2 id="the-illusion-of-fixed-behavior" tabindex="-1"><a class="header-anchor" href="#the-illusion-of-fixed-behavior">The Illusion of &quot;Fixed&quot; Behavior</a></h2>
 <p>Debounce is convincing: you type quickly, the UI triggers fewer calls, and the network tab looks quieter. It <em>feels</em> like the system is now stable. But in production, under real network conditions, many things can go wrong. You will experience stale data, wasted requests, silent failures and other unexpected behaviors.</p>
 <p>This is true for any network request, but debounce adds another layer of complexity: it makes the UI look smooth while the network can still be unpredictable. This mismatch can create a false sense of security.</p>
 <p>Debounce itself only guarantees one thing:</p>
@@ -169,7 +169,7 @@
 <p><img src="./screenshot2.png" alt=""></p>
 <p>The UI also shows toast notifications for request success and failure, which will become relevant in later sections.</p>
 <p>This is our baseline setup, it demonstrates the basic pattern. There is a 300ms debounce on the input, and the backend immediately responds with the query and a timestamp. The UI appends each response to the list.</p>
-<h2 id="problem-1%3A-race-conditions-(aka-stale-ui)" tabindex="-1"><a class="header-anchor" href="#problem-1%3A-race-conditions-(aka-stale-ui)">Problem 1: Race Conditions (aka Stale UI)</a></h2>
+<h2 id="problem-1-race-conditions-aka-stale-ui" tabindex="-1"><a class="header-anchor" href="#problem-1-race-conditions-aka-stale-ui">Problem 1: Race Conditions (aka Stale UI)</a></h2>
 <p>On your local machine, everything is fast and smooth. But in production, network conditions are unpredictable. Requests can take varying amounts of time to complete, so there is no guarantee that responses will arrive in the same order they were sent. Let's see what happens if we add random delays to the server response to simulate real network conditions.</p>
 <p>Check out the <code>01-stale-requests</code> branch and restart the server:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">git</span> checkout 01-stale-requests
@@ -207,7 +207,7 @@
 <li>After catching an error, we check if it's an <code>AbortError</code> and return early: these are expected and not real failures.</li>
 </ul>
 <p>The result: in normal flow, only the last request in a typing burst ever completes. Previous ones are cancelled at the network level, not just ignored after the fact. (For absolute safety, you can also guard the render step with a request ID check. This covers the tiny edge window where a response resolves right before a newer request aborts the previous one.)</p>
-<h2 id="problem-2%3A-network-failures" tabindex="-1"><a class="header-anchor" href="#problem-2%3A-network-failures">Problem 2: Network Failures</a></h2>
+<h2 id="problem-2-network-failures" tabindex="-1"><a class="header-anchor" href="#problem-2-network-failures">Problem 2: Network Failures</a></h2>
 <p>The network is not only unpredictable in terms of latency, but also in terms of reliability. Sometimes a request can fail that would have succeeded if retried. This can be due to transient server issues like network congestion, temporary spikes in load, or database timeouts. If we want a more robust user experience, we need to handle these failures gracefully.</p>
 <p>Let's simulate random failures in our backend. Check out the <code>02-failures</code> branch and restart the server:</p>
 <pre class="language-bash"><code class="language-bash"><span class="token function">git</span> checkout 02-failures

@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -130,7 +130,7 @@ user<span class="token punctuation">.</span>name <span class="token operator">=<
 <pre class="language-bash"><code class="language-bash">  name: <span class="token string">"Alice"</span>
 </code></pre>
 <p>Oops. So what's going on? <code>console.log()</code> is the most-used debugging tool in JavaScript, but it can be subtly unreliable. Not because it is broken, but because <strong>it optimizes for speed and interactivity rather than for accuracy</strong>. It was built for fast exploration in a live, interactive environment, and those priorities come with tradeoffs that can genuinely mislead you during debugging. Over the next sections, we'll look at a few ways the console can mislead you - and, more importantly, why each one exists.</p>
-<h2 id="objects-aren't-snapshots" tabindex="-1"><a class="header-anchor" href="#objects-aren't-snapshots">Objects Aren't Snapshots</a></h2>
+<h2 id="objects-arent-snapshots" tabindex="-1"><a class="header-anchor" href="#objects-arent-snapshots">Objects Aren't Snapshots</a></h2>
 <p>When you pass an object to <code>console.log()</code> in browser DevTools, the browser does not immediately serialize it into a string. Instead, it stores a <strong>live reference</strong> to that object and defers the actual rendering until you expand the entry. This is called lazy evaluation, and it is what caused the surprise.</p>
 <p>The collapsed <code>▶ Object</code> you see is essentially a placeholder: the properties shown inside it are evaluated at the moment you click the arrow, not at the moment you called <code>console.log()</code>. By then, your code has already continued running. That means what you're seeing is not a frozen record of the object at the time of logging, but a live view into whatever the object happens to look like when DevTools renders it. In the example:</p>
 <ol>
@@ -169,7 +169,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 </code></pre>
 <p>The promise resolved after you logged it, but the console shows both the pending and resolved states depending on when you inspect it. The mechanism differs from the mutable object earlier: the promise genuinely settled from pending to fulfilled once, rather than being mutated repeatedly. The symptom, though, is the same: what you read depends on when you look, not on when you logged.</p>
 <p>Unlike objects, DevTools isn't showing a live mutable object here: the promise really did transition from pending to fulfilled exactly once. But the experience is similar: <strong>what you learn from the console depends on when you inspect it, not merely when you logged it</strong>.</p>
-<h2 id="the-heisenbug-effect%3A-logging-changes-reality" tabindex="-1"><a class="header-anchor" href="#the-heisenbug-effect%3A-logging-changes-reality">The <a href="https://en.wikipedia.org/wiki/Heisenbug">Heisenbug</a> Effect: Logging Changes Reality</a></h2>
+<h2 id="the-heisenbug-effect-logging-changes-reality" tabindex="-1"><a class="header-anchor" href="#the-heisenbug-effect-logging-changes-reality">The <a href="https://en.wikipedia.org/wiki/Heisenbug">Heisenbug</a> Effect: Logging Changes Reality</a></h2>
 <p>At some point, every JavaScript developer hits this: you have a bug, add one <code>console.log</code> to debug, rerun the flow, and the bug disappears. This may sound unbelievable at first, but <strong>logging can change timing enough to hide races and ordering bugs</strong>.</p>
 <p><code>console.log</code> is not free. It does formatting work, sends data to DevTools, and can trigger object inspection overhead. In hot paths, that extra work shifts scheduling just enough to change outcomes.</p>
 <p>Common places where this matters:</p>
@@ -251,7 +251,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p>The console may be showing the right event, but the wrong address.</p>
 <h2 id="when-you-actually-need-a-snapshot" tabindex="-1"><a class="header-anchor" href="#when-you-actually-need-a-snapshot">When You Actually Need a Snapshot</a></h2>
 <p>Most of the time, live inspection is useful. But sometimes you need one hard guarantee: &quot;show me exactly what this value looked like at this moment.&quot; That is when you take a snapshot explicitly.</p>
-<h3 id="option-1%3A-structuredclone-(best-default)" tabindex="-1"><a class="header-anchor" href="#option-1%3A-structuredclone-(best-default)">Option 1: <code>structuredClone</code> (best default)</a></h3>
+<h3 id="option-1-structuredclone-best-default" tabindex="-1"><a class="header-anchor" href="#option-1-structuredclone-best-default">Option 1: <code>structuredClone</code> (best default)</a></h3>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> snap <span class="token operator">=</span> <span class="token function">structuredClone</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span>
 console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>snap<span class="token punctuation">)</span>
 </code></pre>
@@ -267,7 +267,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li>Cannot clone DOM nodes</li>
 <li>Can throw on unsupported values</li>
 </ul>
-<h3 id="option-2%3A-json.parse(json.stringify(obj))-(legacy-fallback)" tabindex="-1"><a class="header-anchor" href="#option-2%3A-json.parse(json.stringify(obj))-(legacy-fallback)">Option 2: <code>JSON.parse(JSON.stringify(obj))</code> (legacy fallback)</a></h3>
+<h3 id="option-2-jsonparsejsonstringifyobj-legacy-fallback" tabindex="-1"><a class="header-anchor" href="#option-2-jsonparsejsonstringifyobj-legacy-fallback">Option 2: <code>JSON.parse(JSON.stringify(obj))</code> (legacy fallback)</a></h3>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> snap <span class="token operator">=</span> <span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">parse</span><span class="token punctuation">(</span><span class="token constant">JSON</span><span class="token punctuation">.</span><span class="token function">stringify</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span><span class="token punctuation">)</span>
 console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>snap<span class="token punctuation">)</span>
 </code></pre>
@@ -283,7 +283,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li>Breaks on circular references</li>
 <li>Loses prototype/class information</li>
 </ul>
-<h3 id="option-3%3A-lodash.clonedeep-(library-route)" tabindex="-1"><a class="header-anchor" href="#option-3%3A-lodash.clonedeep-(library-route)">Option 3: <code>lodash.cloneDeep</code> (library route)</a></h3>
+<h3 id="option-3-lodashclonedeep-library-route" tabindex="-1"><a class="header-anchor" href="#option-3-lodashclonedeep-library-route">Option 3: <code>lodash.cloneDeep</code> (library route)</a></h3>
 <pre class="language-js"><code class="language-js"><span class="token keyword">import</span> cloneDeep <span class="token keyword">from</span> <span class="token string">'lodash/cloneDeep'</span>
 
 <span class="token keyword">const</span> snap <span class="token operator">=</span> <span class="token function">cloneDeep</span><span class="token punctuation">(</span>obj<span class="token punctuation">)</span>
@@ -308,14 +308,14 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li>Fall back to JSON method only when you know the data shape is JSON-safe.</li>
 <li>If cloning cost is too high, log narrow primitives (<code>id</code>, <code>status</code>, <code>version</code>) instead of whole objects.</li>
 </ol>
-<h2 id="choose-the-right-tool%3A-a-quick-decision-tree" tabindex="-1"><a class="header-anchor" href="#choose-the-right-tool%3A-a-quick-decision-tree">Choose the Right Tool: A Quick Decision Tree</a></h2>
+<h2 id="choose-the-right-tool-a-quick-decision-tree" tabindex="-1"><a class="header-anchor" href="#choose-the-right-tool-a-quick-decision-tree">Choose the Right Tool: A Quick Decision Tree</a></h2>
 <p><code>console.log</code> is still useful, but it should be your first pass, not your final instrument. Use the tool that matches the question you are actually asking.</p>
-<h3 id="%22what-was-the-exact-value-at-this-moment%3F%22" tabindex="-1"><a class="header-anchor" href="#%22what-was-the-exact-value-at-this-moment%3F%22">&quot;What was the exact value at this moment?&quot;</a></h3>
+<h3 id="what-was-the-exact-value-at-this-moment" tabindex="-1"><a class="header-anchor" href="#what-was-the-exact-value-at-this-moment">&quot;What was the exact value at this moment?&quot;</a></h3>
 <p>Use a snapshot.</p>
 <pre class="language-js"><code class="language-js">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token function">structuredClone</span><span class="token punctuation">(</span>state<span class="token punctuation">)</span><span class="token punctuation">)</span>
 </code></pre>
 <p>This avoids live-reference surprises and gives you evidence you can trust later. Cloning can be expensive for large objects, so reserve it for the values you actually need to freeze.</p>
-<h3 id="%22what-did-the-dom-look-like-when-the-ui-broke%3F%22" tabindex="-1"><a class="header-anchor" href="#%22what-did-the-dom-look-like-when-the-ui-broke%3F%22">&quot;What did the DOM look like when the UI broke?&quot;</a></h3>
+<h3 id="what-did-the-dom-look-like-when-the-ui-broke" tabindex="-1"><a class="header-anchor" href="#what-did-the-dom-look-like-when-the-ui-broke">&quot;What did the DOM look like when the UI broke?&quot;</a></h3>
 <p>Snapshot the relevant DOM facts, not the element object itself.</p>
 <pre class="language-js"><code class="language-js">console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
   <span class="token literal-property property">path</span><span class="token operator">:</span> location<span class="token punctuation">.</span>pathname<span class="token punctuation">,</span>
@@ -336,17 +336,17 @@ console<span class="token punctuation">.</span><span class="token function">log<
 console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>snapshot<span class="token punctuation">)</span>
 </code></pre>
 <p>That gives your test evidence from the point where the page was actually inspected, instead of a remote object you may expand after the UI has already moved on.</p>
-<h3 id="%22how-does-this-value-evolve-over-time%3F%22" tabindex="-1"><a class="header-anchor" href="#%22how-does-this-value-evolve-over-time%3F%22">&quot;How does this value evolve over time?&quot;</a></h3>
+<h3 id="how-does-this-value-evolve-over-time" tabindex="-1"><a class="header-anchor" href="#how-does-this-value-evolve-over-time">&quot;How does this value evolve over time?&quot;</a></h3>
 <p>Use breakpoints and step-through debugging.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">debugger</span>
 </code></pre>
 <p>Then inspect call stack, scope, and update order directly instead of inferring from scattered logs. The art of debugging is a vast topic itself, but the key is to <strong>observe the program's execution in a controlled way</strong>.</p>
-<h3 id="%22why-is-framework-state-stale-here%3F%22" tabindex="-1"><a class="header-anchor" href="#%22why-is-framework-state-stale-here%3F%22">&quot;Why is framework state stale here?&quot;</a></h3>
+<h3 id="why-is-framework-state-stale-here" tabindex="-1"><a class="header-anchor" href="#why-is-framework-state-stale-here">&quot;Why is framework state stale here?&quot;</a></h3>
 <p>Use framework DevTools (React/Vue/Svelte), not raw logs after update calls. They show lifecycle timing, render phases, and batched updates, which is exactly the scheduling that ad-hoc logging gets wrong.</p>
-<h3 id="%22why-does-this-stack-trace-point-to-the-wrong-line%3F%22" tabindex="-1"><a class="header-anchor" href="#%22why-does-this-stack-trace-point-to-the-wrong-line%3F%22">&quot;Why does this stack trace point to the wrong line?&quot;</a></h3>
+<h3 id="why-does-this-stack-trace-point-to-the-wrong-line" tabindex="-1"><a class="header-anchor" href="#why-does-this-stack-trace-point-to-the-wrong-line">&quot;Why does this stack trace point to the wrong line?&quot;</a></h3>
 <p>Check your source maps and build artifacts.</p>
 <p>Make sure the JavaScript bundle and source map came from the same build, disable cache while debugging, and reproduce in a development build when possible. In production, treat source-mapped line numbers as clues, not absolute proof.</p>
-<h3 id="%22what-happened-in-production%3F%22" tabindex="-1"><a class="header-anchor" href="#%22what-happened-in-production%3F%22">&quot;What happened in production?&quot;</a></h3>
+<h3 id="what-happened-in-production" tabindex="-1"><a class="header-anchor" href="#what-happened-in-production">&quot;What happened in production?&quot;</a></h3>
 <p>Use structured logging with stable fields.</p>
 <pre class="language-js"><code class="language-js">logger<span class="token punctuation">.</span><span class="token function">info</span><span class="token punctuation">(</span><span class="token string">'request_finished'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span>
   requestId<span class="token punctuation">,</span>

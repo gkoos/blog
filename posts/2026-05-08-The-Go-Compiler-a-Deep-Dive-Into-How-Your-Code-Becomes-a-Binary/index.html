@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -138,7 +138,7 @@
 <li><a href="#sec-summary">Summary</a></li>
 </ol>
 <p><a id="sec-introduction"></a></p>
-<h2 id="introduction%3A-what-go-build-is-really-doing" tabindex="-1"><a class="header-anchor" href="#introduction%3A-what-go-build-is-really-doing">Introduction: What go build Is Really Doing</a></h2>
+<h2 id="introduction-what-go-build-is-really-doing" tabindex="-1"><a class="header-anchor" href="#introduction-what-go-build-is-really-doing">Introduction: What go build Is Really Doing</a></h2>
 <p>Who this section is for: everyone; start here if you want the big picture before the internals.</p>
 <p>You write a function, run <code>go build</code>, and it works. The binary appears. Milliseconds later you're running it. Easy, right?</p>
 <p>But somewhere between the <code>.go</code> source file and the machine instructions the CPU executes, a lot happened. Not the module resolution, not the build cache (we covered both of those in <a href="/posts/2026-01-08-the-go-build-system-optimised-for-humans-and-machines/"><em>The Go Build System: Optimised for Humans and Machines</em></a>): the compiler itself. The thing that reads your Go source and turns it into actual object code.</p>
@@ -157,7 +157,7 @@
 </code></pre>
 <p>We'll cover each stage, the data structures that carry your code from one to the next, and the tools that let you observe every transformation yourself.</p>
 <p><a id="sec-historical-context"></a></p>
-<h2 id="historical-context%3A-from-c-to-go%2C-and-back" tabindex="-1"><a class="header-anchor" href="#historical-context%3A-from-c-to-go%2C-and-back">Historical Context: From C to Go, and Back</a></h2>
+<h2 id="historical-context-from-c-to-go-and-back" tabindex="-1"><a class="header-anchor" href="#historical-context-from-c-to-go-and-back">Historical Context: From C to Go, and Back</a></h2>
 <p>Who this section is for: readers who want historical context and design rationale before implementation details.</p>
 <p>To understand why Go's compiler looks the way it does today, it helps to rewind.</p>
 <p>Early Go used a compiler and runtime largely written in C, with architecture-specific tool binaries like 6g, 8g, and 5g. That implementation worked, but it carried the usual costs of a mixed-language toolchain: harder refactoring, more fragile boundaries between runtime and compiler internals, and a steeper contributor path.</p>
@@ -237,7 +237,7 @@
 <span class="token function">Token</span><span class="token punctuation">(</span>_Rbrace<span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token operator">&lt;</span>encoded<span class="token operator">></span><span class="token punctuation">,</span> lit<span class="token operator">=</span><span class="token string">""</span><span class="token punctuation">)</span>
 </code></pre>
 <p>(Positions are compact 32-bit encoded values, not raw byte offsets — the <code>&lt;encoded&gt;</code> placeholders above reflect that. The compiler reconstructs exact line and column from the encoded value when needed.)</p>
-<h3 id="why-this-design%3F" tabindex="-1"><a class="header-anchor" href="#why-this-design%3F">Why This Design?</a></h3>
+<h3 id="why-this-design" tabindex="-1"><a class="header-anchor" href="#why-this-design">Why This Design?</a></h3>
 <p>Why is the lexer separate from the parser? And why compact positions?</p>
 <p>The separation is clean: the lexer handles the messy task of decoding bytes (including escape sequences, numbers, and keywords), while the parser focuses on structure. This makes both easier to test and reason about.</p>
 <p>The compact positions pay off across the pipeline. Every node in the AST, IR, and SSA carries position information for error reporting. Compressing this from ~16 bytes per position (separate file, line, column fields) to 4 bytes per token or node saves significant memory during compilation of large codebases. Go's position encoding is a lesson in practical systems design: the overhead matters when scaling to real programs.</p>
@@ -310,7 +310,7 @@ type CallExpr struct <span class="token punctuation">{</span>
   <span class="token keyword">return</span> left
 </code></pre>
 <p>This simple structure ensures that <code>2 + 3 * 4</code> is parsed as <code>2 + (3 * 4)</code>.</p>
-<h3 id="a-simple-example%3A-parsing-a-function-declaration" tabindex="-1"><a class="header-anchor" href="#a-simple-example%3A-parsing-a-function-declaration">A Simple Example: Parsing a Function Declaration</a></h3>
+<h3 id="a-simple-example-parsing-a-function-declaration" tabindex="-1"><a class="header-anchor" href="#a-simple-example-parsing-a-function-declaration">A Simple Example: Parsing a Function Declaration</a></h3>
 <p>Let's trace what the parser builds for a tiny function:</p>
 <pre class="language-go"><code class="language-go">func <span class="token function">add</span><span class="token punctuation">(</span>a int<span class="token punctuation">)</span> int <span class="token punctuation">{</span>
     <span class="token keyword">return</span> a <span class="token operator">+</span> <span class="token number">1</span>
@@ -336,7 +336,7 @@ _Rbrace<span class="token punctuation">,</span> <span class="token string">"}"</
 <p>Each node has its position from the token stream, so error messages can point exactly to where a problem occurred.</p>
 <p><img src="diagram-1-ast-tree.svg" alt="AST Tree Structure"></p>
 <p><em>The AST for <code>func add(a int) int { return a + 1 }</code>. FuncDecl is the root; its three children are the function name, the signature (with Params and Results), and the Block(Body). The body contains a ReturnStmt whose BinaryExpr holds both operands and the operator as sibling leaf nodes.</em></p>
-<h3 id="why-this-matters%3A-better-error-recovery" tabindex="-1"><a class="header-anchor" href="#why-this-matters%3A-better-error-recovery">Why This Matters: Better Error Recovery</a></h3>
+<h3 id="why-this-matters-better-error-recovery" tabindex="-1"><a class="header-anchor" href="#why-this-matters-better-error-recovery">Why This Matters: Better Error Recovery</a></h3>
 <p>Because Go's parser is hand-written, it can implement error recovery. If you write:</p>
 <pre class="language-go"><code class="language-go">func <span class="token function">add</span><span class="token punctuation">(</span>a int<span class="token punctuation">,</span> b int <span class="token punctuation">{</span>  <span class="token comment">// missing closing parenthesis before {</span>
     <span class="token keyword">return</span> a <span class="token operator">+</span> b
@@ -461,7 +461,7 @@ func Apply<span class="token punctuation">[</span><span class="token constant">T
 <p>After type checking, the AST is now semantically meaningful. Every identifier is resolved, every operation is type-safe, and every expression has a known type. But the AST is still surface-level syntax.</p>
 <p>The next phase, IR (Intermediate Representation), takes this type-checked AST and converts it into a form optimized for compilation: desugaring high-level constructs into more primitive operations, normalizing the representation, and setting up for optimization passes later.</p>
 <p><a id="sec-ir"></a></p>
-<h2 id="ir-(intermediate-representation)---the-compiler's-internal-language" tabindex="-1"><a class="header-anchor" href="#ir-(intermediate-representation)---the-compiler's-internal-language">IR (Intermediate Representation) - The Compiler's Internal Language</a></h2>
+<h2 id="ir-intermediate-representation---the-compilers-internal-language" tabindex="-1"><a class="header-anchor" href="#ir-intermediate-representation---the-compilers-internal-language">IR (Intermediate Representation) - The Compiler's Internal Language</a></h2>
 <p>Who this section is for: readers interested in lowering and desugaring between frontend semantics and optimizer-friendly forms.</p>
 <p>At this point, the compiler has a fully type-checked AST. So why introduce another representation? Because the AST is designed to preserve source structure, not to make optimization easy. The compiler lowers syntax nodes into its own internal IR under <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ir"><code>cmd/compile/internal/ir</code></a>. This IR is closer to execution semantics and easier to transform. In practice, this is where Go starts turning &quot;what you wrote&quot; into &quot;what the machine should do&quot;.</p>
 <h3 id="why-ir-exists" tabindex="-1"><a class="header-anchor" href="#why-ir-exists">Why IR Exists</a></h3>
@@ -492,7 +492,7 @@ func Apply<span class="token punctuation">[</span><span class="token constant">T
 <li><code>range</code> loops are expanded into explicit iterator/index forms, depending on operand type.</li>
 </ul>
 <p>This is one of the most important mental models in compiler work: many &quot;language features&quot; are not compiled directly, they are first reduced into a smaller core language.</p>
-<h3 id="go-1.23-example%3A-range-over-function" tabindex="-1"><a class="header-anchor" href="#go-1.23-example%3A-range-over-function">Go 1.23 Example: Range Over Function</a></h3>
+<h3 id="go-123-example-range-over-function" tabindex="-1"><a class="header-anchor" href="#go-123-example-range-over-function">Go 1.23 Example: Range Over Function</a></h3>
 <p>Go 1.23 introduced range-over-function iterators. Source like:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">for</span> <span class="token literal-property property">v</span> <span class="token operator">:</span><span class="token operator">=</span> range iter <span class="token punctuation">{</span>
 	<span class="token function">use</span><span class="token punctuation">(</span>v<span class="token punctuation">)</span>
@@ -500,10 +500,10 @@ func Apply<span class="token punctuation">[</span><span class="token constant">T
 </code></pre>
 <p>where <code>iter</code> is a supported iterator-function shape (a push iterator), such as <code>func(func(T) bool)</code> or <code>func(func(K, V) bool)</code>, is not emitted as a magical new machine-level loop form. Instead, the compiler lowers it into callback-oriented control flow that existing middle-end passes already understand.</p>
 <p>That is exactly what IR is for: absorb high-level language evolution without forcing every later phase to learn every syntactic feature directly.</p>
-<h3 id="go-1.23-example%3A-stack-slot-overlap" tabindex="-1"><a class="header-anchor" href="#go-1.23-example%3A-stack-slot-overlap">Go 1.23 Example: Stack Slot Overlap</a></h3>
+<h3 id="go-123-example-stack-slot-overlap" tabindex="-1"><a class="header-anchor" href="#go-123-example-stack-slot-overlap">Go 1.23 Example: Stack Slot Overlap</a></h3>
 <p>Another practical IR-adjacent improvement in Go 1.23 is stack slot overlap: locals whose live ranges do not overlap can share stack memory in the same function.</p>
 <p>This reduces stack frame size, which can improve cache behavior and lower memory pressure. It's a good example of why normalization and liveness-aware internal representations matter before final code generation.</p>
-<h3 id="what-ir.func-represents" tabindex="-1"><a class="header-anchor" href="#what-ir.func-represents">What <code>ir.Func</code> Represents</a></h3>
+<h3 id="what-irfunc-represents" tabindex="-1"><a class="header-anchor" href="#what-irfunc-represents">What <code>ir.Func</code> Represents</a></h3>
 <p><code>ir.Func</code> is the main unit passed forward into optimization and code generation pipelines. It contains:</p>
 <ul>
 <li>function metadata (name, ABI-related details, pragmas)</li>
@@ -543,7 +543,7 @@ func Apply<span class="token punctuation">[</span><span class="token constant">T
 </ul>
 <p>Those are hard to answer cleanly in mutable, statement-style IR. SSA makes them much easier because each value is immutable and has explicit dependencies.</p>
 <p>In short, SSA turns many global reasoning problems into local graph rewrites.</p>
-<h3 id="core-structures%3A-ssa.func%2C-ssa.block%2C-ssa.value" tabindex="-1"><a class="header-anchor" href="#core-structures%3A-ssa.func%2C-ssa.block%2C-ssa.value">Core Structures: <code>ssa.Func</code>, <code>ssa.Block</code>, <code>ssa.Value</code></a></h3>
+<h3 id="core-structures-ssafunc-ssablock-ssavalue" tabindex="-1"><a class="header-anchor" href="#core-structures-ssafunc-ssablock-ssavalue">Core Structures: <code>ssa.Func</code>, <code>ssa.Block</code>, <code>ssa.Value</code></a></h3>
 <p>Go's SSA representation is a graph of blocks and values.</p>
 <ul>
 <li><code>ssa.Func</code>: one compiled function in SSA form.</li>
@@ -574,7 +574,7 @@ type Value struct <span class="token punctuation">{</span>
 <span class="token punctuation">}</span>
 </code></pre>
 <p>The exact fields vary, but this shape is what matters: values in blocks, blocks in a function, with explicit control and data edges.</p>
-<h3 id="example%3A-from-imperative-code-to-ssa" tabindex="-1"><a class="header-anchor" href="#example%3A-from-imperative-code-to-ssa">Example: From Imperative Code to SSA</a></h3>
+<h3 id="example-from-imperative-code-to-ssa" tabindex="-1"><a class="header-anchor" href="#example-from-imperative-code-to-ssa">Example: From Imperative Code to SSA</a></h3>
 <p>Take this function:</p>
 <pre class="language-go"><code class="language-go">func <span class="token function">larger</span><span class="token punctuation">(</span>a<span class="token punctuation">,</span> b int<span class="token punctuation">)</span> int <span class="token punctuation">{</span>
 		<span class="token literal-property property">m</span> <span class="token operator">:</span><span class="token operator">=</span> a
@@ -608,7 +608,7 @@ b3:
 <p>The phi in block <code>b3</code> says: &quot;if control came from <code>b1</code>, use <code>v3</code>; if from <code>b2</code>, use <code>v4</code>.&quot; That single construct captures merge semantics cleanly and enables aggressive optimization.</p>
 <p><img src="diagram-2-ssa-cfg.svg" alt="SSA Control Flow Graph"></p>
 <p><em>The SSA control flow graph for <code>larger(a, b int) int</code>. Block b0 evaluates the condition and branches; b1 and b2 each copy the winning value; b3 is the merge point. The phi node <code>v5 = Phi v3 v4</code> selects the correct value depending on which block transferred control — no mutation needed.</em></p>
-<h3 id="what-go's-ssa-is-and-is-not" tabindex="-1"><a class="header-anchor" href="#what-go's-ssa-is-and-is-not">What Go's SSA Is and Is Not</a></h3>
+<h3 id="what-gos-ssa-is-and-is-not" tabindex="-1"><a class="header-anchor" href="#what-gos-ssa-is-and-is-not">What Go's SSA Is and Is Not</a></h3>
 <p>Go's SSA often gets compared to LLVM IR, but they are not interchangeable.</p>
 <ul>
 <li>Go's SSA is tightly integrated with Go runtime requirements.</li>
@@ -658,7 +658,7 @@ b3:
 <li>Final placement decisions happen near code generation and register allocation.</li>
 </ul>
 <p>Thinking of it as a pipeline of cooperating passes is more accurate than looking for one &quot;optimizer&quot; stage.</p>
-<h3 id="inlining-(ir-level%2C-before-ssa)" tabindex="-1"><a class="header-anchor" href="#inlining-(ir-level%2C-before-ssa)">Inlining (IR-Level, Before SSA)</a></h3>
+<h3 id="inlining-ir-level-before-ssa" tabindex="-1"><a class="header-anchor" href="#inlining-ir-level-before-ssa">Inlining (IR-Level, Before SSA)</a></h3>
 <p>Inlining substitutes a function call with the body of the callee when profitable. In Go, this happens on IR before SSA construction, which matters because inlined code then participates in all later SSA optimizations.</p>
 <p>Go uses a budget model: each candidate call has a cost estimate, and functions above threshold are rejected. Pragmas like <code>//go:noinline</code> force a function to remain as a call boundary.</p>
 <p>Recent evolution:</p>
@@ -671,7 +671,7 @@ b3:
 <pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m"</span>
 </code></pre>
 <p>Look for lines such as <code>inlining call to ...</code> and devirtualization notes when PGO is enabled.</p>
-<h3 id="escape-analysis-(ir-level%2C-before-ssa)" tabindex="-1"><a class="header-anchor" href="#escape-analysis-(ir-level%2C-before-ssa)">Escape Analysis (IR-Level, Before SSA)</a></h3>
+<h3 id="escape-analysis-ir-level-before-ssa" tabindex="-1"><a class="header-anchor" href="#escape-analysis-ir-level-before-ssa">Escape Analysis (IR-Level, Before SSA)</a></h3>
 <p>Escape analysis decides whether an allocation can stay on the stack or must move to the heap. The rule of thumb: if a value may outlive the stack frame where it was created, the compiler conservatively treats it as escaping.</p>
 <p>Typical escape triggers:</p>
 <ul>
@@ -683,7 +683,7 @@ b3:
 <pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-m=2"</span>
 </code></pre>
 <p>You will see diagnostics like <code>moved to heap: x</code> and explanations about why.</p>
-<h3 id="dead-code-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#dead-code-elimination-(ssa)">Dead Code Elimination (SSA)</a></h3>
+<h3 id="dead-code-elimination-ssa" tabindex="-1"><a class="header-anchor" href="#dead-code-elimination-ssa">Dead Code Elimination (SSA)</a></h3>
 <p>Once SSA is built, unreachable blocks and unused values become straightforward to remove:</p>
 <ul>
 <li>constant-folded branches may expose dead successors,</li>
@@ -691,19 +691,19 @@ b3:
 <li>resulting CFG simplification unlocks further passes.</li>
 </ul>
 <p>This is one reason small source changes can produce surprisingly different assembly: one constant or branch hint can cascade through the SSA graph.</p>
-<h3 id="bounds-check-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#bounds-check-elimination-(ssa)">Bounds Check Elimination (SSA)</a></h3>
+<h3 id="bounds-check-elimination-ssa" tabindex="-1"><a class="header-anchor" href="#bounds-check-elimination-ssa">Bounds Check Elimination (SSA)</a></h3>
 <p>Go inserts bounds checks for <a href="/posts/2025-09-06-arrays-slices-and-maps-in-go/">slice and array</a> safety, but SSA passes try to prove those checks redundant.</p>
 <p>If the compiler can show that an index is always within range at a use site, it removes the check. Proofs come from dataflow facts: induction variables, dominating conditions, and range constraints.</p>
 <p>In practice, much of this reasoning is concentrated in the <code>prove</code> pass (<a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa/prove.go"><code>cmd/compile/internal/ssa/prove.go</code></a>), which propagates conditional facts over the dominator tree.</p>
 <p>This is especially visible in tight loops over slices where loop structure communicates clear bounds.</p>
-<h3 id="nil-check-elimination-(ssa)" tabindex="-1"><a class="header-anchor" href="#nil-check-elimination-(ssa)">Nil Check Elimination (SSA)</a></h3>
+<h3 id="nil-check-elimination-ssa" tabindex="-1"><a class="header-anchor" href="#nil-check-elimination-ssa">Nil Check Elimination (SSA)</a></h3>
 <p>Similarly, the compiler removes redundant nil checks when non-nilness is provable at a point in the graph. This frequently piggybacks on dominance and load/store ordering facts already established in SSA.</p>
 <p>Inlining decisions feed directly into this: when caller and callee logic are fused earlier, prove-style reasoning often has stronger facts available, so more nil checks can disappear. Less redundant checking means fewer instructions and cleaner hot paths.</p>
-<h3 id="register-allocation-(late-ssa%2Fbackend-boundary)" tabindex="-1"><a class="header-anchor" href="#register-allocation-(late-ssa%2Fbackend-boundary)">Register Allocation (Late SSA/Backend Boundary)</a></h3>
+<h3 id="register-allocation-late-ssabackend-boundary" tabindex="-1"><a class="header-anchor" href="#register-allocation-late-ssabackend-boundary">Register Allocation (Late SSA/Backend Boundary)</a></h3>
 <p>SSA values are abstract. Before machine code is emitted, they must be mapped to real registers or stack slots.</p>
 <p>Go uses a linear-scan style allocator tuned for compile speed and solid generated code quality. Spills happen when register pressure is high; spill reduction often depends on earlier simplification passes shrinking live ranges.</p>
 <p>In practice, this phase can dominate the shape of final assembly in numerically heavy or branch-dense functions.</p>
-<h3 id="hot-block-alignment-(go-1.23%2B%2C-amd64%2F386)" tabindex="-1"><a class="header-anchor" href="#hot-block-alignment-(go-1.23%2B%2C-amd64%2F386)">Hot Block Alignment (Go 1.23+, amd64/386)</a></h3>
+<h3 id="hot-block-alignment-go-123-amd64386" tabindex="-1"><a class="header-anchor" href="#hot-block-alignment-go-123-amd64386">Hot Block Alignment (Go 1.23+, amd64/386)</a></h3>
 <p>With PGO profiles, Go can align frequently executed loop blocks to cache-line boundaries on supported architectures. This typically yields modest throughput gains at a small code size cost.</p>
 <p>Disable for experiments with:</p>
 <pre class="language-bash"><code class="language-bash">go build <span class="token parameter variable">-gcflags</span><span class="token operator">=</span><span class="token string">"-d=alignhot=0"</span>
@@ -744,7 +744,7 @@ go tool compile <span class="token parameter variable">-d</span> <span class="to
 <li>and other target directories</li>
 </ul>
 <p>Those backends know the target instruction set, calling convention details, and target-specific lowering choices.</p>
-<h3 id="lowering%3A-generic-ssa-ops-to-target-ops" tabindex="-1"><a class="header-anchor" href="#lowering%3A-generic-ssa-ops-to-target-ops">Lowering: Generic SSA Ops to Target Ops</a></h3>
+<h3 id="lowering-generic-ssa-ops-to-target-ops" tabindex="-1"><a class="header-anchor" href="#lowering-generic-ssa-ops-to-target-ops">Lowering: Generic SSA Ops to Target Ops</a></h3>
 <p>Earlier SSA ops are generic enough to support multiple architectures. During lowering, they become target-specific forms.</p>
 <p>Go uses rewrite rules generated from files in <a href="https://github.com/golang/go/tree/master/src/cmd/compile/internal/ssa/_gen"> <code>cmd/compile/internal/ssa/gen</code></a>, including architecture-specific <code>*.rules</code> files. Conceptually, rules look like pattern rewrites:</p>
 <pre class="language-text"><code class="language-text">(ADDconst (ADDconst x [c1]) [c2]) -> (ADDconst x [c1+c2])
@@ -843,14 +843,14 @@ go build <span class="token parameter variable">-gcflags</span><span class="toke
 <h2 id="practical-implications-for-developers" tabindex="-1"><a class="header-anchor" href="#practical-implications-for-developers">Practical Implications for Developers</a></h2>
 <p>Who this section is for: engineers turning compiler insight into day-to-day coding and review decisions.</p>
 <p>Compiler internals are only useful if they change how you write and review code. The good news is that they do, and in predictable ways.</p>
-<h3 id="1.-stack-vs-heap-is-a-design-choice%2C-not-random-fate" tabindex="-1"><a class="header-anchor" href="#1.-stack-vs-heap-is-a-design-choice%2C-not-random-fate">1. Stack vs Heap Is a Design Choice, Not Random Fate</a></h3>
+<h3 id="1-stack-vs-heap-is-a-design-choice-not-random-fate" tabindex="-1"><a class="header-anchor" href="#1-stack-vs-heap-is-a-design-choice-not-random-fate">1. Stack vs Heap Is a Design Choice, Not Random Fate</a></h3>
 <p>Escape analysis decisions are strongly shaped by API boundaries.</p>
 <ul>
 <li>Returning pointers, capturing locals in closures, and storing values behind interfaces can push allocations to heap.</li>
 <li>Keeping data flow local, concrete, and short-lived often keeps values on stack.</li>
 </ul>
 <p>This does not mean &quot;never use interfaces&quot; or &quot;never return pointers&quot;, just that performance-sensitive paths benefit from explicit ownership and lifetime thinking.</p>
-<h3 id="2.-small-structural-changes-can-unlock-inlining" tabindex="-1"><a class="header-anchor" href="#2.-small-structural-changes-can-unlock-inlining">2. Small Structural Changes Can Unlock Inlining</a></h3>
+<h3 id="2-small-structural-changes-can-unlock-inlining" tabindex="-1"><a class="header-anchor" href="#2-small-structural-changes-can-unlock-inlining">2. Small Structural Changes Can Unlock Inlining</a></h3>
 <p>Inlining is not purely about line count. Call-site context, budget, and profile information matter.</p>
 <ul>
 <li>Splitting large helper functions into smaller hot/cold pieces can improve inlining on hot paths.</li>
@@ -858,7 +858,7 @@ go build <span class="token parameter variable">-gcflags</span><span class="toke
 <li>PGO can shift inlining and devirtualization decisions in your favor for production workloads.</li>
 </ul>
 <p>If a critical call is not inlined, check diagnostics before guessing.</p>
-<h3 id="3.-loop-shape-directly-affects-bounds-and-nil-check-elimination" tabindex="-1"><a class="header-anchor" href="#3.-loop-shape-directly-affects-bounds-and-nil-check-elimination">3. Loop Shape Directly Affects Bounds and Nil Check Elimination</a></h3>
+<h3 id="3-loop-shape-directly-affects-bounds-and-nil-check-elimination" tabindex="-1"><a class="header-anchor" href="#3-loop-shape-directly-affects-bounds-and-nil-check-elimination">3. Loop Shape Directly Affects Bounds and Nil Check Elimination</a></h3>
 <p>SSA-based optimizations are proof-driven. The compiler removes checks when your code structure makes safety obvious.</p>
 <ul>
 <li>Canonical loops with clear induction variables are easier to optimize.</li>
@@ -866,21 +866,21 @@ go build <span class="token parameter variable">-gcflags</span><span class="toke
 <li>Complex aliasing or opaque helper calls inside loops can block proofs.</li>
 </ul>
 <p>Readable code and optimization-friendly code are often the same code when invariants are explicit.</p>
-<h3 id="4.-interfaces-are-great%2C-but-they-have-mechanical-costs" tabindex="-1"><a class="header-anchor" href="#4.-interfaces-are-great%2C-but-they-have-mechanical-costs">4. Interfaces Are Great, But They Have Mechanical Costs</a></h3>
+<h3 id="4-interfaces-are-great-but-they-have-mechanical-costs" tabindex="-1"><a class="header-anchor" href="#4-interfaces-are-great-but-they-have-mechanical-costs">4. Interfaces Are Great, But They Have Mechanical Costs</a></h3>
 <p><a href="/posts/2025-08-13-go-interfaces-beyond-the-basics/">Interface</a> dispatch and conversion are essential Go tools, but they can introduce allocation and devirtualization barriers in tight loops. Guideline:</p>
 <ul>
 <li>use interfaces at package boundaries and abstraction seams,</li>
 <li>keep inner numeric or allocation-sensitive loops concrete when profiling says it matters.</li>
 </ul>
 <p>The compiler keeps improving here, especially with profile guidance, but source shape still influences outcomes.</p>
-<h3 id="5.-generics-improve-expressiveness%2C-not-automatic-free-speed" tabindex="-1"><a class="header-anchor" href="#5.-generics-improve-expressiveness%2C-not-automatic-free-speed">5. Generics Improve Expressiveness, Not Automatic Free Speed</a></h3>
+<h3 id="5-generics-improve-expressiveness-not-automatic-free-speed" tabindex="-1"><a class="header-anchor" href="#5-generics-improve-expressiveness-not-automatic-free-speed">5. Generics Improve Expressiveness, Not Automatic Free Speed</a></h3>
 <p>Generics remove boilerplate and preserve type safety, but performance still depends on what the instantiated code enables downstream.</p>
 <ul>
 <li>Some generic abstractions optimize beautifully.</li>
 <li>Others can inhibit inlining or expose additional interface-like costs depending on usage.</li>
 </ul>
 <p>The right approach is empirical: inspect diagnostics and benchmark representative inputs.</p>
-<h3 id="6.-unsafe-code-skips-safety-rails-and-compiler-assumptions" tabindex="-1"><a class="header-anchor" href="#6.-unsafe-code-skips-safety-rails-and-compiler-assumptions">6. Unsafe Code Skips Safety Rails and Compiler Assumptions</a></h3>
+<h3 id="6-unsafe-code-skips-safety-rails-and-compiler-assumptions" tabindex="-1"><a class="header-anchor" href="#6-unsafe-code-skips-safety-rails-and-compiler-assumptions">6. Unsafe Code Skips Safety Rails and Compiler Assumptions</a></h3>
 <p>unsafe can be the right tool in carefully constrained hotspots, but it bypasses checks that normally support optimizer reasoning and correctness guarantees. Treat unsafe blocks as low-level modules:</p>
 <ul>
 <li>isolate them,</li>

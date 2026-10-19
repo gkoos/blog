@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -380,13 +380,13 @@
 <p>Selecting the right vector database depends on use case requirements: whether you need full operational simplicity, extreme scalability, hybrid queries, or tight ML integration. Understanding these distinctions allows engineers to choose the best engine for their high-dimensional search workloads, rather than relying on general-purpose databases or custom implementations.</p>
 <h2 id="trade-offs-and-considerations" tabindex="-1"><a class="header-anchor" href="#trade-offs-and-considerations">Trade-offs and Considerations</a></h2>
 <p>Vector databases excel at workloads involving high-dimensional similarity search, but their optimizations come with compromises. Understanding these trade-offs is essential when selecting or designing a vector database for your application.</p>
-<h3 id="accuracy-vs.-latency" tabindex="-1"><a class="header-anchor" href="#accuracy-vs.-latency">Accuracy vs. Latency</a></h3>
+<h3 id="accuracy-vs-latency" tabindex="-1"><a class="header-anchor" href="#accuracy-vs-latency">Accuracy vs. Latency</a></h3>
 <ul>
 <li>Approximate nearest neighbor (ANN) indexes provide sub-linear query time, enabling fast searches over billions of vectors.</li>
 <li>However, faster indexes (like HNSW or IVF+PQ) may return approximate results, potentially missing the exact nearest neighbors.</li>
 <li>Engineers must balance search speed with recall requirements. In some applications, slightly lower accuracy is acceptable for much faster queries, while others require near-perfect matches.</li>
 </ul>
-<h3 id="storage-efficiency-vs.-query-speed" tabindex="-1"><a class="header-anchor" href="#storage-efficiency-vs.-query-speed">Storage Efficiency vs. Query Speed</a></h3>
+<h3 id="storage-efficiency-vs-query-speed" tabindex="-1"><a class="header-anchor" href="#storage-efficiency-vs-query-speed">Storage Efficiency vs. Query Speed</a></h3>
 <ul>
 <li>Many vector databases use quantization, compression, or dimension reduction to reduce storage footprint.</li>
 <li>Aggressive compression lowers disk and memory usage but can increase query latency or reduce search accuracy.</li>
@@ -422,7 +422,7 @@
 <p>Use cases with dynamic embeddings (e.g., user profiles in recommendation systems) require careful strategy to maintain query performance.</p>
 </li>
 </ul>
-<h3 id="cost-vs.-performance" tabindex="-1"><a class="header-anchor" href="#cost-vs.-performance">Cost vs. Performance</a></h3>
+<h3 id="cost-vs-performance" tabindex="-1"><a class="header-anchor" href="#cost-vs-performance">Cost vs. Performance</a></h3>
 <ul>
 <li>GPU acceleration improves throughput and lowers latency but increases infrastructure cost.</li>
 <li>Distributed storage and indexing also add operational expense.</li>
@@ -467,7 +467,7 @@ Understanding these trade-offs ensures that vector search applications deliver r
 <li>Handles dynamic updates for new items and changing user preferences.</li>
 </ul>
 <p><strong>Example</strong>: A streaming service leverages FAISS to provide real-time content recommendations, using vector embeddings for movies, shows, and user preferences to improve engagement.</p>
-<h3 id="image%2C-audio%2C-and-video-search" tabindex="-1"><a class="header-anchor" href="#image%2C-audio%2C-and-video-search">Image, Audio, and Video Search</a></h3>
+<h3 id="image-audio-and-video-search" tabindex="-1"><a class="header-anchor" href="#image-audio-and-video-search">Image, Audio, and Video Search</a></h3>
 <p><strong>Scenario</strong>: A media platform wants users to search for images or video clips using example content instead of keywords.</p>
 <p><strong>Challenges:</strong></p>
 <ul>
@@ -512,7 +512,7 @@ Understanding these trade-offs ensures that vector search applications deliver r
 <li>Enables scalable, real-time RAG workflows.</li>
 </ul>
 <p><strong>Example</strong>: A SaaS company integrates Pinecone with a large language model to provide contextual, accurate, and fast answers to user queries, improving support efficiency and satisfaction.</p>
-<h2 id="example-workflow%3A-building-a-semantic-search-engine-with-milvus" tabindex="-1"><a class="header-anchor" href="#example-workflow%3A-building-a-semantic-search-engine-with-milvus">Example Workflow: Building a Semantic Search Engine with Milvus</a></h2>
+<h2 id="example-workflow-building-a-semantic-search-engine-with-milvus" tabindex="-1"><a class="header-anchor" href="#example-workflow-building-a-semantic-search-engine-with-milvus">Example Workflow: Building a Semantic Search Engine with Milvus</a></h2>
 <p>This section provides a concrete end-to-end example of a vector search workflow, using Milvus to illustrate how data moves from embedding generation to similarity search, highlighting architecture and optimizations discussed earlier.</p>
 <h3 id="scenario" tabindex="-1"><a class="header-anchor" href="#scenario">Scenario</a></h3>
 <p>We want to build a semantic search engine for a knowledge base containing 1 million documents. Users will enter natural language queries, and the system will return the most semantically relevant documents.</p>
@@ -525,7 +525,7 @@ Understanding these trade-offs ensures that vector search applications deliver r
 <li>Retrieval and presentation</li>
 </ol>
 <p>Following this workflow demonstrates how a vector database enables fast, accurate similarity search at scale.</p>
-<h3 id="step-1%3A-embedding-generation" tabindex="-1"><a class="header-anchor" href="#step-1%3A-embedding-generation">Step 1: Embedding Generation</a></h3>
+<h3 id="step-1-embedding-generation" tabindex="-1"><a class="header-anchor" href="#step-1-embedding-generation">Step 1: Embedding Generation</a></h3>
 <p>Each document is transformed into a high-dimensional vector using a transformer model (e.g., <a href="https://www.sbert.net/">Sentence-BERT</a>):</p>
 <pre class="language-python"><code class="language-python">from sentence_transformers <span class="token keyword">import</span> SentenceTransformer
 
@@ -538,7 +538,7 @@ document_embedding <span class="token operator">=</span> model<span class="token
 <li>Captures semantic meaning, enabling similarity-based retrieval.</li>
 <li>Embeddings are the core data type stored in vector databases.</li>
 </ul>
-<h3 id="step-2%3A-vector-storage-and-indexing" tabindex="-1"><a class="header-anchor" href="#step-2%3A-vector-storage-and-indexing">Step 2: Vector Storage and Indexing</a></h3>
+<h3 id="step-2-vector-storage-and-indexing" tabindex="-1"><a class="header-anchor" href="#step-2-vector-storage-and-indexing">Step 2: Vector Storage and Indexing</a></h3>
 <p>Vectors are stored in Milvus with an ANN index (HNSW):</p>
 <pre class="language-python"><code class="language-python">from pymilvus <span class="token keyword">import</span> connections<span class="token punctuation">,</span> FieldSchema<span class="token punctuation">,</span> CollectionSchema<span class="token punctuation">,</span> DataType<span class="token punctuation">,</span> Collection
 
@@ -561,7 +561,7 @@ collection<span class="token punctuation">.</span><span class="token function">c
 <li>Supports incremental inserts for dynamic document collections.</li>
 <li>Efficient disk and memory management for high-dimensional data.</li>
 </ul>
-<h3 id="step-3%3A-query-execution" tabindex="-1"><a class="header-anchor" href="#step-3%3A-query-execution">Step 3: Query Execution</a></h3>
+<h3 id="step-3-query-execution" tabindex="-1"><a class="header-anchor" href="#step-3-query-execution">Step 3: Query Execution</a></h3>
 <p>A user submits a query:</p>
 <pre class="language-python"><code class="language-python">query_embedding <span class="token operator">=</span> model<span class="token punctuation">.</span><span class="token function">encode</span><span class="token punctuation">(</span><span class="token string">"How do I reset my password?"</span><span class="token punctuation">)</span>
 results <span class="token operator">=</span> collection<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span><span class="token punctuation">[</span>query_embedding<span class="token punctuation">]</span><span class="token punctuation">,</span> <span class="token string">"embedding"</span><span class="token punctuation">,</span> param<span class="token operator">=</span><span class="token punctuation">{</span><span class="token string-property property">"metric_type"</span><span class="token operator">:</span><span class="token string">"COSINE"</span><span class="token punctuation">}</span><span class="token punctuation">,</span> limit<span class="token operator">=</span><span class="token number">5</span><span class="token punctuation">)</span>
@@ -573,7 +573,7 @@ results <span class="token operator">=</span> collection<span class="token punct
 <li>Results ranked by similarity score.</li>
 <li>Only top-k results returned for low-latency response.</li>
 </ol>
-<h3 id="step-4%3A-hybrid-filtering" tabindex="-1"><a class="header-anchor" href="#step-4%3A-hybrid-filtering">Step 4: Hybrid Filtering</a></h3>
+<h3 id="step-4-hybrid-filtering" tabindex="-1"><a class="header-anchor" href="#step-4-hybrid-filtering">Step 4: Hybrid Filtering</a></h3>
 <p>Optionally, filter results by metadata, e.g., document category or publication date:</p>
 <pre class="language-python"><code class="language-python">results <span class="token operator">=</span> collection<span class="token punctuation">.</span><span class="token function">search</span><span class="token punctuation">(</span>
     <span class="token punctuation">[</span>query_embedding<span class="token punctuation">]</span><span class="token punctuation">,</span>
@@ -589,7 +589,7 @@ results <span class="token operator">=</span> collection<span class="token punct
 <li>Enables precise, context-aware retrieval.</li>
 <li>Reduces irrelevant results while leveraging ANN efficiency.</li>
 </ul>
-<h3 id="step-5%3A-retrieval-and-presentation" tabindex="-1"><a class="header-anchor" href="#step-5%3A-retrieval-and-presentation">Step 5: Retrieval and Presentation</a></h3>
+<h3 id="step-5-retrieval-and-presentation" tabindex="-1"><a class="header-anchor" href="#step-5-retrieval-and-presentation">Step 5: Retrieval and Presentation</a></h3>
 <p>The system returns document IDs and similarity scores, which are then mapped back to full documents:</p>
 <pre class="language-python"><code class="language-python"><span class="token keyword">for</span> res <span class="token keyword">in</span> results<span class="token punctuation">[</span><span class="token number">0</span><span class="token punctuation">]</span><span class="token operator">:</span>
     <span class="token function">print</span><span class="token punctuation">(</span>f<span class="token string">"Doc ID: {res.id}, Score: {res.score}"</span><span class="token punctuation">)</span>

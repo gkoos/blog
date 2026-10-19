@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How to Implement a Distributed Recovery Ramp</title>
+  <meta name="description" content="A breaker closing can return full traffic to a dependency that is still fragile. How to ramp admission back gradually by giving the application control of the shared limit and leaving enforcement to the library.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="How to Implement a Distributed Recovery Ramp">
+  <meta property="og:description" content="A breaker closing can return full traffic to a dependency that is still fragile. How to ramp admission back gradually by giving the application control of the shared limit and leaving enforcement to the library.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="How to Implement a Distributed Recovery Ramp">
+  <meta name="twitter:description" content="A breaker closing can return full traffic to a dependency that is still fragile. How to ramp admission back gradually by giving the application control of the shared limit and leaving enforcement to the library.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <!-- Search -->
+          <form action="/search" method="get" role="search" class="flex-1 min-w-0 max-w-xs mx-2 sm:mx-4">
+            <label for="header-search" class="sr-only">Search</label>
+            <input id="header-search" type="search" name="q" placeholder="Search…" autocomplete="off"
+              class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-colors" />
+          </form>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="/series" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Series</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none" data-pagefind-body>
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">How to Implement a Distributed Recovery Ramp</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-10-19T00:00:00.000Z" data-pagefind-meta="date:2026-10-19T00:00:00.000Z">Mon Oct 19 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2" data-pagefind-ignore>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">resilience</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>This series follows circuit breakers, bulkheads, and rate limiters from their in-process foundations to implementations that coordinate across a fleet. This article examines how to implement a distributed recovery ramp, using <a href="https://github.com/gkoos/caracal">Caracal</a> as reference.</em></p>
+<ol>
+<li><a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/">How to Implement a Distributed Circuit Breaker</a></li>
+<li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
+<li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
+<li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
+<li><a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a></li>
+<li><a href="/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/">How to Implement a Distributed Recovery Ramp</a></li>
+</ol>
+<p><em>The earlier posts in the series covered well known, universally accepted patterns for handling failures in distributed systems. Their implementation was relatively straightforward. This post presents a more opinionated approach that seems to be working for my use case, but unlike the previous ones, it involves more judgment and trade-offs rather than a clear-cut solution.</em></p>
+<p>A circuit breaker stops calls to a failing dependency and eventually lets a few probes through to see whether it can accept work again. When those probes succeed, the breaker closes and ordinary traffic resumes. A dependency that can handle a few requests may still struggle under its usual load, especially while caches are cold or capacity is coming back online. A <strong>recovery ramp</strong> gives it time by increasing the admitted traffic gradually.</p>
+<p>I wanted to add this to <a href="https://github.com/gkoos/caracal">Caracal</a>, my resilience library. But this is a surprisingly tricky problem once distribution and shared limits come into play. I asked an AI to help design it first (:D), expecting that the existing primitives would make the work fairly straightforward. We could start with a low concurrency limit and raise it as the dependency recovered. The proposals soon involved teaching the breaker about other policies, inferring limits from the surrounding pipeline, or installing temporary policies that would disappear when recovery finished.</p>
+<p>Each proposal required a decision about who should own recovery. The library can enforce a concurrency ceiling, but deciding how quickly to raise it requires knowledge of the dependency and what the application considers acceptable. Distribution complicates that boundary further: a process reacting to a breaker transition can change its own behaviour while the rest of the fleet continues admitting traffic as before. The mechanism has to preserve shared accounting without making the library responsible for the recovery strategy.</p>
+<p>The design I settled on gives applications a way to update existing distributed policies while Caracal continues enforcing their shared limits. A recovery ramp becomes one use of that capability. Getting there took more judgement than writing the ramp itself, and the AI wasn't being particularly helpful in untangling the mess of ownership and coordination decisions this seemingly simple feature entails.</p>
+<h2 id="what-i-tried-and-dismissed" tabindex="-1"><a class="header-anchor" href="#what-i-tried-and-dismissed">What I tried and dismissed</a></h2>
+<p>First I tried to put the ramp inside the circuit breaker. After successful probes, the breaker would continue restricting admission and gradually let more calls through. That gives it responsibility for a concurrency budget alongside its health decisions. A breaker can <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#the-probe-budget-has-to-be-a-global-one">count its own half-open probes</a>, but extending that restriction into normal operation means deciding how it should interact with the admission policies the application already uses. And not very reusable either: what if the application wants to use the same ramp logic for multiple breakers or different types of admission policies?</p>
+<p>The next idea was to infer those policies from the surrounding pipeline and ramp back towards their configured limits. Consider an operation with <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#multiple-bulkheads-acquired-in-order">a per-customer bulkhead inside a shared bulkhead</a> protecting the dependency. Both limits apply, but they govern different populations of calls. The library would have to choose which budget to change and how that choice affects other operations sharing it. Policy order alone cannot supply that meaning, and some applications have no normal bulkhead to provide a target at all. It would be very clever if I could get it right, but zero chance of doing so reliably in all cases.</p>
+<p>Explicitly binding a recovery policy to the breaker removes the guesswork about which policy participates, but it still leaves a lifecycle to define. Suppose a temporary bulkhead starts at three concurrent calls and eventually reaches twenty. If the normal ceiling is fifty, leaving the temporary policy active keeps the application below its intended capacity. Removing it requires a definition of completion and a way to retire its restriction while calls admitted under it are still running. And that lifecycle management would have to be implemented in the library, which brings the complexity of ownership question back into the library's domain. Same problem as before: it's too complex to handle every edge case reliably (for me anyway).</p>
+<p>Replacing policy instances looked simpler because the application could choose its own steps. It could use a bulkhead of three for a while, then switch to ten. The <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#what-a-permit-actually-holds">accounting needs to survive the switch</a> though: with fresh counters, the new bulkhead could admit ten calls while the old one still had three in flight. Preserving the existing accounting makes this a settings change on the same budget, which is the capability we eventually chose to build.</p>
+<p>A general API for adding, removing, and reordering policies would also allow a ramp, but it would require rules for calls already executing through an earlier pipeline. Removing a policy cannot erase its outstanding permits or prevent their eventual release. That scope was much larger than the recovery problem required, but a subset of it could be used to implement the ramp: <strong>changing the limits on existing policies while preserving their current state</strong>. With that approach, the library enforces the shared limits, and the application controls the progression of the ramp without disturbing the pipeline's identity. I finally got to a design that felt both practical and reusable. And it also shows a very severe limitation of today's LLMs: <strong>they are much better at solving a problem you've defined than at figuring out which problem actually needs solving.</strong> Each of the earlier proposals was plausible, and an LLM could probably have produced a convincing implementation of any of them. The difficulty was recognizing that they were solving the wrong problem, following the consequences of each design decision, and eventually arriving at a different abstraction altogether. That took several substantial conceptual jumps, with no tests or compiler errors to tell us when we were heading in the wrong direction.</p>
+<h2 id="the-distributed-catch" tabindex="-1"><a class="header-anchor" href="#the-distributed-catch">The distributed catch</a></h2>
+<p>With that boundary settled, I could focus on how a settings change would take effect. The application code reacting to the breaker runs in one process, but the policy it wants to adjust can share a budget across the whole fleet. Giving that handler a way to change its local policy would leave the other replicas using their original limits.</p>
+<p>Suppose one replica's successful probe closes the shared breaker. That replica emits a local event, and its application handler lowers a bulkhead limit to three. The other replicas can see that the breaker is closed when they next check Redis, but they do not receive the event emitted in the first process. If their bulkheads still use the constructor limit of twenty, they can continue admitting calls under that higher ceiling. Sharing an <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#whose-limit-is-it">occupancy counter</a> does not help when callers apply different limits to it.</p>
+<p>This meant the new setting had to be authoritative wherever the shared budget was enforced. Caracal's distributed policies already contact Redis to make admission decisions, so those commands could read the current configuration and use it in the same atomic operation. The application would publish a change through a separate call. A replica handling ordinary traffic would then use that setting on its next admission, without first receiving a broadcast or making another round trip to fetch configuration.</p>
+<p>The scope of the change matters too. Lowering the concurrency allowed for one partner API should affect replicas calling that API, without changing an unrelated customer's budget. The configuration therefore belongs to the same policy identity as the runtime accounting, including its operation and resolved scope. A process only needs configuration information for the identities it actually uses.</p>
+<p>That also separates observing the trigger from enforcing the result. Every replica can run the same application controller, although only a replica that receives the relevant local event will react to that transition. The resulting configuration is shared, and repeated proposals for the same settings can leave it unchanged. Competing proposals still need revision checks so that a delayed controller cannot overwrite newer intent. None of this guarantees that another controller will reconstruct a missed recovery event, which remains an application concern.</p>
+<p>There was a close precedent in <a href="https://github.com/SGrondin/bottleneck#clustering">Bottleneck's clustering support</a>. It stores limiter settings in Redis, and calling updateSettings() changes the settings used by connected limiters. That was a useful example of shared runtime configuration with application-controlled updates. Caracal needed to define the same kind of capability around its existing policy identities and accounting.</p>
+<p><a href="https://www.envoyproxy.io/docs/envoy/latest/intro/arch_overview/upstream/load_balancing/slow_start">Envoy's slow start</a> addresses warming capacity through load balancing: it gradually increases an endpoint's weight. That works with a pool of endpoints among which traffic can be distributed. Caracal controls admission to a scoped operation, so its ramp has to change how much work is allowed through. The existing Redis decision point gave it somewhere to enforce that change without introducing a configuration broadcast system.</p>
+<h2 id="who-owns-recovery" tabindex="-1"><a class="header-anchor" href="#who-owns-recovery">Who owns recovery?</a></h2>
+<p>Using Redis as the enforcement point gave the fleet a shared ceiling, but the decision to move that ceiling still needed an owner. The breaker provides a useful signal when successful probes allow it to close. The application then has to decide what that signal means for the dependency it calls, including how much traffic to admit while confidence builds.</p>
+<p>For a dependency with a predictable warm-up period, the application can follow a fixed schedule, raising concurrency from three to six, then twelve, and eventually twenty. Another application can wait for latency to settle before allowing each increase. Both use the same limit-update mechanism, but they express different assumptions about recovering capacity. Caracal has no basis for choosing between them from the policy composition alone.</p>
+<p>This also means that the breaker can be closed while the application still considers the dependency to be recovering. Closing the breaker allows ordinary calls again, the application's ramp determines how much of that traffic gets through the admission policy. If failures cause the breaker to reopen, the application can put the admission limit back at its recovery floor and abandon the current progression. Completion is another application decision: it restores the intended operating limit on the existing policy, with its accounting still intact.</p>
+<p>This split made the settings feature useful beyond recovery. An operator reducing traffic during maintenance can use the same mechanism without involving a breaker at all. Caracal owns enforcement and the rules for applying an update to live state, while the application owns the reason for the change. With that responsibility assigned, the remaining design work was to define a configuration contract that concurrent callers could use safely.</p>
+<h2 id="shared-settings-unchanged-policies" tabindex="-1"><a class="header-anchor" href="#shared-settings-unchanged-policies">Shared settings, unchanged policies</a></h2>
+<p>The configuration contract follows the division of responsibility: an application submits settings for a particular distributed policy identity, and Caracal applies them to the budget already associated with that identity. The policy stays in the pipeline, so changing its configuration leaves the existing accounting in place.</p>
+<p>Until an application writes an override, each policy uses its constructor settings, which count as revision zero. The first explicit update creates a shared record at revision one. From then on, the stored settings take precedence over the corresponding constructor values, including in replicas that start after the update. Ordinary coordination calls cannot overwrite that record with their local defaults.</p>
+<p>The public API exposes a configuration manager using the same Redis dataset and namespace as the policy's coordinator. With an existing Redis client, lowering a bulkhead's limit looks like this:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> redisConfigurationManager <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal/redis"</span>
+
+<span class="token keyword">const</span> manager <span class="token operator">=</span> <span class="token function">redisConfigurationManager</span><span class="token punctuation">(</span>redis<span class="token punctuation">,</span> <span class="token punctuation">{</span>
+  namespace<span class="token operator">:</span> <span class="token string">"svc:prod"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> identity <span class="token operator">=</span> <span class="token punctuation">{</span>
+  policy<span class="token operator">:</span> <span class="token string">"bulkhead"</span><span class="token punctuation">,</span>
+  name<span class="token operator">:</span> <span class="token string">"partner-api-capacity"</span><span class="token punctuation">,</span>
+  operation<span class="token operator">:</span> <span class="token string">"submit"</span><span class="token punctuation">,</span>
+  scope<span class="token operator">:</span> <span class="token string">"partner-a"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span> <span class="token keyword">as</span> <span class="token keyword">const</span>
+
+<span class="token keyword">const</span> current <span class="token operator">=</span> <span class="token keyword">await</span> manager<span class="token punctuation">.</span><span class="token function">read</span><span class="token punctuation">(</span>identity<span class="token punctuation">)</span>
+<span class="token keyword">const</span> result <span class="token operator">=</span> <span class="token keyword">await</span> manager<span class="token punctuation">.</span><span class="token function">update</span><span class="token punctuation">(</span>
+  identity<span class="token punctuation">,</span>
+  current<span class="token operator">?.</span>revision <span class="token operator">??</span> <span class="token number">0</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> policy<span class="token operator">:</span> <span class="token string">"bulkhead"</span><span class="token punctuation">,</span> limit<span class="token operator">:</span> <span class="token number">3</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+<span class="token punctuation">)</span>
+</code></pre>
+<p>The read returns the shared snapshot, or null if there is no override. The update supplies the revision on which the proposal is based, allowing Redis to reject a conflicting change if another writer has moved the configuration forward. The caller must handle that result before treating the proposal as accepted. These are explicit management calls, separate from executing the protected operation.</p>
+<p>Each update replaces the complete set of supported mutable settings for that policy. For a bulkhead, that is just its limit. For a rate limiter, the snapshot includes both rate and burst, so a decision cannot observe a new rate paired with an old burst. The record also carries its revision and a changedAt timestamp from Redis. It retains the requested settings beside the normalized values used for enforcement, with numeric settings serialized as decimal strings.</p>
+<p>The record lives alongside the policy's runtime keys and uses the same Redis hash tag, placing them in the same Cluster slot. An admission command reads the record and applies its settings within the existing atomic operation. Its reply carries the revision used for that decision, along with the full snapshot when the caller's known revision differs. This adds work inside the command and some response data, while preserving the number of coordination calls per execution. An explicit manager read is available when application code needs to inspect the stored configuration independently of traffic.</p>
+<p>Configuration records have no TTL. When recovery finishes, the application writes its normal operating settings as another revision, while existing execution leases and runtime retention keep their own expiry rules. That keeps the lifetime of a configuration separate from the work governed by it. Preserving that work also requires precise rules for when each mutable setting takes effect, particularly for calls that were already admitted before an update.</p>
+<h2 id="changing-limits-without-resetting-state" tabindex="-1"><a class="header-anchor" href="#changing-limits-without-resetting-state">Changing limits without resetting state</a></h2>
+<p>A complete configuration snapshot makes the settings change atomic, but each field still needs a rule for how it interacts with existing work. I restricted updates to fields whose effects could be defined against the policy's current state. Applying an update leaves that state in place, and the next relevant coordination command makes its decision using the new settings.</p>
+<p>For a bulkhead, the mutable field is limit. If three calls hold permits and the ceiling rises to ten, there is room for seven more calls, assuming those permits remain active. Lowering the ceiling also preserves existing holders: if eight calls are running when the limit becomes three, <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#what-a-permit-actually-holds">those calls continue</a>, and new acquisitions are refused until occupancy falls below three. Permit renewal and release keep their existing rules.</p>
+<p>The rate limiter allows rate and burst to change together. It uses <a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/#advancing-the-timestamp">GCRA</a>, which records a theoretical arrival time representing the schedule built up by earlier admissions. That timestamp survives an update. The next admission uses the new spacing and burst allowance against the existing schedule, preserving any outstanding time debt. Increasing burst can deliberately make more traffic admissible, while changing rate controls how subsequent admissions advance the schedule.</p>
+<p>The breaker has more mutable fields because its decisions depend on both health observations and its current state. <code>failureThreshold</code> and <code>minimumThroughput</code> are evaluated against the retained observations when the next outcome is recorded. Changing <code>windowSize</code> trims that history on the next observation if necessary, while increasing it only creates room for future observations. History discarded under an earlier, smaller window stays discarded.</p>
+<p>An update to <code>openMs</code> changes when an OPEN breaker becomes eligible for probes. The elapsed time is still measured from when it originally opened. If it has already been open for five seconds and the duration is reduced to three, the next probe-admission check can move it to <code>HALF_OPEN</code>. Increasing the duration after it has reached HALF_OPEN leaves that state intact, with its existing probes.</p>
+<p>Within <code>HALF_OPEN</code>, <code>halfOpenProbes</code> controls new probe admissions. Lowering it preserves probes already in flight, just as lowering a bulkhead limit preserves permit holders. <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#the-settings-are-not-independent"><code>halfOpenSuccesses</code></a> changes the target checked at the next successful probe settlement, retaining the successes already accumulated. Writing a lower target does not itself close the breaker, and an ignored result only releases its probe slot. A failed probe still reopens it through the ordinary transition rules.</p>
+<p>Lease durations and retention settings stay fixed, along with policy identity and callbacks. During review, <code>openMs</code> exposed a hidden dependency: the original implementation also used it to derive cleanup retention for <code>CLOSED</code> breaker state. Making it mutable would have changed two behaviours at once. I separated that cleanup duration from the shared setting and resolved it at construction, so changing the OPEN waiting period leaves cleanup retention alone.</p>
+<p>These rules keep configuration revisions separate from <a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/#generations-become-epochs">breaker generations</a>. An update changes the settings used for later decisions, while an ordinary state transition can still advance the generation and invalidate probes as before. The remaining validation work is to ensure that a proposed snapshot contains coherent values, especially when several replicas are trying to change it.</p>
+<h2 id="validation-duplicates-and-uncertainty" tabindex="-1"><a class="header-anchor" href="#validation-duplicates-and-uncertainty">Validation, duplicates, and uncertainty</a></h2>
+<p>Preserving runtime state makes the validity of the new settings especially important. A breaker override with <code>minimumThroughput</code> greater than <code>windowSize</code> would require more observations than the window could ever retain, preventing its failure threshold from being evaluated. Both values can be valid individually while the combination is unusable. Shared updates therefore validate the complete snapshot, including that relationship and the bounds on derived rate-limit arithmetic.</p>
+<p>Normalization uses the same TypeScript helpers as policy construction, with stricter cross-field validation for shared breaker overrides. A rate becomes a whole-millisecond emission interval, and a failure threshold becomes an integer numerator in thousandths. The Redis scripts consume those effective values. Equality also uses the normalized configuration, so different requested numbers that resolve to the same behaviour leave the revision unchanged.</p>
+<p>That equality rule matters when the same application code runs in several replicas. Suppose two controllers both read revision seven, where the bulkhead limit is three, and both propose six. The first update writes revision eight. The second finds that its proposed settings already match and returns unchanged, even though its expected revision is now stale. It preserves both revision eight and its changedAt timestamp, allowing duplicate proposals without restarting the step's clock.</p>
+<p>A differing proposal must still match the current revision. If a delayed controller tries to restore the limit to three using revision seven, it receives a conflict with the stored snapshot. Automatically substituting revision eight and trying again would turn an obsolete proposal into a successful overwrite. The application has to reconsider its intent against the returned configuration before making another change.</p>
+<p>A lost response introduces a different uncertainty. Redis can commit an update before the connection fails, leaving the caller unable to tell whether it was applied. Repeating the same proposal with the original expected revision can apply it if the first attempt never ran, or return unchanged if those settings are already stored. If a different configuration has since replaced them, the stale retry conflicts. This protects the current record without keeping a receipt history, but the result cannot establish whether the original attempt committed before a later writer intervened.</p>
+<p>Revision information observed through ordinary traffic has its own limits. Replies can arrive out of order, so a lower revision alone cannot distinguish a delayed response from configuration loss or rollback. The coordinator's cached revision only helps Redis decide whether to include the full record in its next reply; enforcement continues using the record on the server. An explicit manager read provides the shared snapshot as of that call, without making cached observations authoritative or publishing them back to Redis.</p>
+<p>Management reads also validate the stored record. A malformed record produces a ConfigurationError with reason corrupt-record, while an unknown schema version produces unsupported-schema. Silently falling back to constructor settings would conceal the problem and change admission behaviour, so these errors remain visible to the caller. A missing record is a separate case: it means there is no shared override and the policy uses its revision-zero baseline.</p>
+<p>Those checks define how individual updates behave under competition and uncertain delivery. They still leave operational boundaries to account for, particularly when Redis is unavailable or replicas run different versions of the configuration protocol.</p>
+<h2 id="the-operational-boundaries" tabindex="-1"><a class="header-anchor" href="#the-operational-boundaries">The operational boundaries</a></h2>
+<p>An atomic update gives one policy identity a coherent configuration on the Redis primary serving the command. The fleet still depends on Redis availability, and a failover or data-loss event can remove settings that an application previously observed. The guarantees around that update therefore have to fit the existing coordination model.</p>
+<p>During a Redis outage, distributed bulkheads and rate limiters <a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/#the-composed-system-depends-on-its-coordinator">continue to fail closed</a> because they cannot establish admission. The breaker follows its existing onCoordinatorError setting, which defaults to fail-open when the process has no retained knowledge that the scope is OPEN or HALF_OPEN. While that non-closed state remains its last known state, an outage rejects calls for that scope regardless of the setting. Cached configuration cannot reconstruct shared occupancy or current dependency health, so I kept those behaviours instead of introducing a local substitute for distributed enforcement.</p>
+<p>Deployment order matters even while Redis is healthy. Every participant sharing an identity must understand the configuration protocol before overrides are enabled. An older replica can execute its own Lua scripts with constructor settings and ignore the shared record entirely. A schema version helps a newer client reject a format it cannot interpret, but it cannot identify another process running old code. Rolling back to a release that predates the feature also leaves the records behind: that release uses its baselines, and a later upgrade reactivates the stored overrides.</p>
+<p>Persistent records bring an identity-management cost. A valid update to a mistyped scope can create a dormant record that becomes active if the same scope is used later. Renaming a scope leaves the old record behind, and there is no public deletion or listing API to manage it. Applications need bounded identities and an administrative approach to retained records. Configuration can also survive the loss of breaker runtime state, so a fresh breaker generation does not automatically invalidate a limit left by an earlier recovery attempt.</p>
+<p>Atomicity stops at <a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/#what-each-admission-commits">one policy identity</a>. A controller changing both a breaker and an admission policy must choose the order and handle the interval between those writes. There is also a reaction window between the breaker closing and an event handler publishing a lower admission ceiling, during which ordinary calls can already pass. The settings mechanism governs subsequent decisions; eliminating that window would require tighter coupling between the breaker transition and admission.</p>
+<p>The shared record also has no exclusive owner. Restoring the normal limit when a process shuts down looks like sensible cleanup, but during a rolling restart that process can overwrite the ceiling still governing recovery in the surviving replicas. A controller's departure does not establish that the dependency has recovered. Restoring normal settings belongs to the application's recovery lifecycle, with the same revision checks as any other change.</p>
+<p>A separate client for configuration writes needs an actual permissions boundary. <a href="https://redis.io/docs/latest/operate/oss_and_stack/management/security/acl/">Redis ACLs</a> control commands and key access, and the coordination clients already need scripting and runtime-state write permissions. Calling one connection the writer does not restrict the grants held by the others. Strict separation requires verifying the deployed permissions against the scripts involved; the broad grants used by the existing coordinators assume trusted participants.</p>
+<p>These limits keep the configuration feature within Caracal's existing coordination model, while leaving recovery strategy in application code. With those boundaries explicit, I could test a controller against a dependency that failed and later resumed successful responses. The useful evidence would be the workload admitted at each step, alongside the configuration writes.</p>
+<h2 id="what-the-measured-run-shows" tabindex="-1"><a class="header-anchor" href="#what-the-measured-run-shows">What the measured run shows</a></h2>
+<p>I created a new <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/16-recovery-ramp">case study</a> in the Caracal Sandbox to exercise that boundary with four replicas sharing a bulkhead whose normal limit was eight. The application controller set a floor of one and doubled the limit once per second until it reached eight.</p>
+<p>The scenario makes the dependency fail one second into the run and resume successful responses at three seconds. A local breaker event reporting a transition from HALF_OPEN to CLOSED starts the controller's recovery ladder. An OPEN event cancels that process's progression and proposes the floor again. Every replica runs the controller because any of them can receive the relevant transition event, while Redis holds the shared configuration they update.</p>
+<p>The recorded ladder was 1 -&gt; 2 -&gt; 4 -&gt; 8, paired with revisions. Its start entry appeared three milliseconds after the close event. The floor had already been established while the breaker was open, so the start entry confirmed revision one rather than creating another revision. This distinction matters when reading the controller log: a successful proposal can leave the existing record unchanged.</p>
+<p>To check enforcement, I used the dependency's own sampled in-flight timeline. The per-step check waits 300 milliseconds after each logged step before examining samples up to the next step, allowing calls admitted under an earlier ceiling to drain. Those windows produced:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:right">Limit</th>
+<th style="text-align:right">Revision</th>
+<th style="text-align:right">Sampled peak in flight</th>
+<th style="text-align:right">Samples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">1</td>
+<td style="text-align:right">46</td>
+</tr>
+<tr>
+<td style="text-align:right">2</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">2</td>
+<td style="text-align:right">45</td>
+</tr>
+<tr>
+<td style="text-align:right">4</td>
+<td style="text-align:right">3</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">46</td>
+</tr>
+<tr>
+<td style="text-align:right">8</td>
+<td style="text-align:right">4</td>
+<td style="text-align:right">8</td>
+<td style="text-align:right">825</td>
+</tr>
+</tbody>
+</table>
+<p>Each window reached its configured ceiling, and all its samples stayed within it. A check of the overall peak alone would accept a controller that jumped directly to eight. Matching the dependency's observations to each step makes the intermediate limits testable too, while leaving the settling intervals outside that per-step assertion. Sampling also bounds the evidence to what the instrument observed.</p>
+<p>The checks cover the ordering of the ladder and its trigger, including that it finishes at the constructor baseline. This run recorded zero conflicts: one replica observed the close and drove the ramp. Demonstrating competing controllers would require a run that actually creates that collision. The ramp also completed before shutdown, leaving restored false, so the shutdown restore path remained unexercised.</p>
+<p>The dependency's configured capacity stayed at sixteen throughout this experiment; the timeline changed its failure rate. The evidence therefore establishes that the application-directed concurrency steps reached shared enforcement across the replicas. Measuring whether those steps prevent another overload during warm-up requires a dependency whose available capacity itself changes, followed by a comparison against immediate restoration of the normal ceiling.</p>
+<p>The controller also supports a rate target with burst held constant, but this study exercises concurrency. A rate-ramp experiment needs an arrival-rate measurement, such as the instrument used in <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/12-rate-distributed">case study 12</a>. Those experiments would extend the evidence to recovery effectiveness and rate enforcement, while this run gives a concrete check of the shared bulkhead mechanism.</p>
+<h2 id="the-judgement-behind-the-mechanism" tabindex="-1"><a class="header-anchor" href="#the-judgement-behind-the-mechanism">The judgement behind the mechanism</a></h2>
+<p>The measured ladder gave me an external check on the mechanism I had chosen. Once the application supplied a sequence of limits, I could check whether the dependency's observed concurrency followed it. The experiment also exposed the limits of that evidence: recovery effectiveness needs a different workload, and competing controllers need a run that actually makes them compete.</p>
+<p>The earlier ownership decision had no equivalent pass condition. A ramp embedded in the breaker could satisfy its own tests, as could a temporary admission policy with a carefully implemented lifecycle. Those tests would establish behaviour within the chosen design. Choosing between the designs required following their consequences into applications with different policy compositions and deciding how much responsibility the library should take on.</p>
+<p>That was where I needed the most judgement during the AI-assisted work. A plausible implementation made each proposal look more settled than it was, even while its assumptions about ownership remained unresolved. I had to keep working through what happened to the surrounding policies and existing calls before the narrower settings-update feature became clear. Once that boundary was defined, there were concrete invariants to implement and test. To give credit where it's due, the LLM did a decent job at implementing the boring but necessary parts: tests, boilerplate, and documentation.</p>
+<p>The <a href="https://github.com/gkoos/caracal/blob/main/docs/redis.md#shared-configuration">shared configuration API</a> shipped in Caracal 0.9.0, and the <a href="https://github.com/gkoos/caracal-sandbox/blob/main/apps/partner-api/src/ramp.ts">application controller</a> shows one way to use it for recovery. Its schedule is an application choice that can be tested against the dependency it protects. Caracal's responsibility is to apply those settings consistently to the existing shared budget, preserving the work already accounted for while the application decides how that budget should move.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

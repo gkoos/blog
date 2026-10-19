@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -121,7 +121,7 @@
   </div>
   <div class="prose dark:prose-invert max-w-none">
     <p><em>Anthropic has just announced <a href="https://support.claude.com/en/articles/16266773-how-claude-marks-ai-generated-content">how Claude marks AI-generated content</a>, bringing text watermarking into immediate practical discussion. A watermark in plain text is less intuitive than one in an image or a file because copied text appears to leave its provenance behind. These two articles examine the mechanism and its implications. This first article explains how statistical text watermarking works from first principles, the <a href="/posts/2026-08-12-What-Does-a-Text-Watermark-Actually-Prove">second</a> examines what detecting such a watermark would allow us to conclude.</em></p>
-<h2 id="how-do-you-watermark-plain-text%3F" tabindex="-1"><a class="header-anchor" href="#how-do-you-watermark-plain-text%3F">How Do You Watermark Plain Text?</a></h2>
+<h2 id="how-do-you-watermark-plain-text" tabindex="-1"><a class="header-anchor" href="#how-do-you-watermark-plain-text">How Do You Watermark Plain Text?</a></h2>
 <p>Images provide an obvious place for a watermark: a system can alter pixel values by amounts too small for a person to notice, while a detector can still recover the resulting pattern. Digital files can also carry metadata that records their origin or editing history. Plain text appears to offer neither option because it consists only of characters on a page.</p>
 <p>Copy a paragraph from a document into Notepad and save it as a new file. The operation discards most of the surrounding information, including document metadata and details of the original formatting. What remains is the sequence of words and punctuation that the reader can see. Any marker that depends on the original file has disappeared.</p>
 <p>The text still contains more information than its literal meaning, however. A writer repeatedly chooses between words such as <code>but</code> and <code>however</code>, contractions such as <code>don't</code> and <code>do not</code>, and several ways of arranging the same thought. Sentence length, punctuation, vocabulary, and grammatical construction introduce further choices. Each version can communicate substantially the same idea while leaving a different sequence of characters behind. Natural language as an encoding system is inherently redundant, and <strong>that redundancy allows a writer to leave a statistical signal in the text itself</strong>.</p>
@@ -231,7 +231,7 @@ unhappy       13%
 <p><img src="01.svg" alt="The expected watermark signal weakens as more of the original wording is replaced."></p>
 <p>Ordinary corrections often leave enough original choices for detection, especially in a long passage. Extensive rewriting replaces a larger share of the evidence, and a fresh paraphrase can produce a new token sequence with little connection to the original pattern. A watermark's <strong>robustness</strong> is its ability to remain detectable after the text has been edited. It can be measured by how the detector's confidence falls as more of the original choices are replaced.</p>
 <p>Things get tricky when someone edits specifically to defeat detection. A strong watermark should tolerate ordinary transformations while avoiding unnatural language or a rigid generation process. Making the pattern harder to remove generally requires influencing more choices or applying a stronger bias, which increases the chance that the intervention affects the output itself.</p>
-<h2 id="does-the-watermark-affect-the-output%3F" tabindex="-1"><a class="header-anchor" href="#does-the-watermark-affect-the-output%3F">Does the Watermark Affect the Output?</a></h2>
+<h2 id="does-the-watermark-affect-the-output" tabindex="-1"><a class="header-anchor" href="#does-the-watermark-affect-the-output">Does the Watermark Affect the Output?</a></h2>
 <p>Watermarking changes the generation distribution, but a changed distribution does not establish a loss of quality. A slightly less probable token can remain correct, fluent, clear, and appropriate for the context. If the highest-probability choice were always the best one, selecting the top token at every step would consistently produce the best possible response, which it does not.</p>
 <p>The amount of safe room depends on the uncertainty at a particular position. Some contexts leave almost no reasonable choice:</p>
 <pre class="language-text"><code class="language-text">The capital of France is ...

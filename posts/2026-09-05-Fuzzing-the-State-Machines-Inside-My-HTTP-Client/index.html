@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -209,7 +209,7 @@ t=3 ms  original would return 200
 </code></pre>
 <p>Anything acceptable, including a <code>4xx</code> that is not a <code>429</code>, settles the request the moment it arrives. Transport errors keep their original fail-fast behaviour, since a thrown connection error is not a response anyone can fall back to. The comment in there is load-bearing; it is the sentence I wish had been in my head when I wrote the original version.</p>
 <p>With that change, the property passes its thousand cases, and the three-millisecond counterexample stays in the suite permanently, not as a test I wrote but as a case the generator can still reach.</p>
-<h2 id="five-more-properties%2C-nothing-found" tabindex="-1"><a class="header-anchor" href="#five-more-properties%2C-nothing-found">Five more properties, nothing found</a></h2>
+<h2 id="five-more-properties-nothing-found" tabindex="-1"><a class="header-anchor" href="#five-more-properties-nothing-found">Five more properties, nothing found</a></h2>
 <p>One confirmed hunch is a weak result. If the only rule I could state was the one I already suspected, the exercise would amount to an expensive way of writing a regression test. So before touching anything else I wrote five more hedge properties, none of them aimed at a behaviour I doubted.</p>
 <p>They generate between two and four attempts and require that a reachable success still wins. They generate a <code>maxHedges</code> between zero and five and require that exactly <code>1 + maxHedges</code> attempts get launched when everything stays retryable. They mix thrown transport errors into the responses. They check that every loser is aborted once a winner settles and that no scheduled attempt starts afterwards. They abort from outside at generated moments and require that every launched attempt notices, that nothing new starts, and that no timer survives.</p>
 <h2 id="into-the-core-client" tabindex="-1"><a class="header-anchor" href="#into-the-core-client">Into the core client</a></h2>

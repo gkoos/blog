@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -163,7 +163,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p>All three results follow from the module systems' contracts. An ESM named import refers to a binding owned by the exporting module. When that module assigns a new value to the binding, the importer observes it. CommonJS returns the value of <code>module.exports</code>, which is an ordinary object in this example. Destructuring reads one property from that object and stores its current value in a local variable. Keeping the object preserves the shared reference, so later property mutations remain visible.</p>
 <p>This distinction reaches far beyond destructuring. <code>import</code> and <code>require</code> hide several operations behind the familiar idea of bringing code into a file: resolving a module, creating or retrieving its module instance, evaluating its code, and exposing something to another module. ESM and CommonJS make different decisions at each stage. Those decisions determine when side effects run, what a circular dependency can observe, whether two consumers share state, and why a package can work through <code>import</code> while failing through <code>require</code>.</p>
 <p>The examples in this article use native module behavior in current Node.js. Browsers support ESM without CommonJS, while bundlers and transpilers can generate interop wrappers with behavior of their own. Code transformed by a build tool may demonstrate behavior that the Node.js loaders do not guarantee, so each environment should be treated separately.</p>
-<h2 id="bindings%2C-values%2C-and-objects" tabindex="-1"><a class="header-anchor" href="#bindings%2C-values%2C-and-objects">Bindings, Values, and Objects</a></h2>
+<h2 id="bindings-values-and-objects" tabindex="-1"><a class="header-anchor" href="#bindings-values-and-objects">Bindings, Values, and Objects</a></h2>
 <p>An ESM export connects a local name in one module to an imported name in another. The imported name provides a read-only view of the exporter's binding rather than storing a private copy of its value.</p>
 <pre class="language-js"><code class="language-js"><span class="token comment">// counter.mjs</span>
 <span class="token keyword">export</span> <span class="token keyword">let</span> count <span class="token operator">=</span> <span class="token number">0</span>
@@ -489,7 +489,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 </code></pre>
 <p>Synchronous loading is available only when the complete ESM graph can finish without top-level <code>await</code>. If <code>formatter.mjs</code> or one of its dependencies awaits at the top level, <code>require()</code> throws instead of turning the operation into an asynchronous one. Dynamic <code>import()</code> is the appropriate CommonJS entry point for that graph.</p>
 <p>This behavior has changed across Node.js releases. Libraries supporting older Node versions cannot assume that <code>require()</code> can load ESM at all. Their supported runtime range and published package entry points determine whether synchronous interop is available.</p>
-<h3 id="why-.default-and-__esmodule-appear" tabindex="-1"><a class="header-anchor" href="#why-.default-and-__esmodule-appear">Why <code>.default</code> and <code>__esModule</code> Appear</a></h3>
+<h3 id="why-default-and-__esmodule-appear" tabindex="-1"><a class="header-anchor" href="#why-default-and-__esmodule-appear">Why <code>.default</code> and <code>__esModule</code> Appear</a></h3>
 <p>An ESM default export is still a named binding in the module namespace, using the special name <code>default</code>. CommonJS has one exported value in <code>module.exports</code>. Converting between those shapes requires a convention for deciding whether a CommonJS value represents the namespace or the default value inside it.</p>
 <p>Transpilers have long marked generated ESM-shaped CommonJS output with an <code>__esModule</code> property. A simplified transformation looks like this:</p>
 <pre class="language-js"><code class="language-js"><span class="token comment">// original ESM</span>

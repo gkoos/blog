@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -158,7 +158,7 @@ controller<span class="token punctuation">.</span><span class="token function">a
 <p>These approaches form a foundation for predictable asynchronous systems and connect naturally to coordination and flow-control patterns.</p>
 <h2 id="timeouts-are-a-form-of-cancellation" tabindex="-1"><a class="header-anchor" href="#timeouts-are-a-form-of-cancellation">Timeouts Are a Form of Cancellation</a></h2>
 <p>In asynchronous systems, a timeout is essentially a signal that the result is no longer needed. Unlike synchronous code, where a function returns immediately, async operations continue running unless explicitly told to stop. Historically, developers used <code>Promise.race()</code> to enforce timeouts, but modern JavaScript provides first-class signal-based primitives that are more composable and predictable.</p>
-<h3 id="historical-approach%3A-promise.race()" tabindex="-1"><a class="header-anchor" href="#historical-approach%3A-promise.race()">Historical Approach: <code>Promise.race()</code></a></h3>
+<h3 id="historical-approach-promiserace" tabindex="-1"><a class="header-anchor" href="#historical-approach-promiserace">Historical Approach: <code>Promise.race()</code></a></h3>
 <p>Before modern signal combinators, developers often used <code>Promise.race()</code> to enforce timeouts:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">function</span> <span class="token function">fetchWithTimeout</span><span class="token punctuation">(</span><span class="token parameter">url<span class="token punctuation">,</span> ms</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -178,7 +178,7 @@ controller<span class="token punctuation">.</span><span class="token function">a
 <span class="token punctuation">}</span>
 </code></pre>
 <p>This pattern works, but it quickly becomes verbose when multiple layers of asynchronous operations need timeouts. Each layer must handle the race, duplicating logic and introducing potential inconsistencies.</p>
-<h3 id="modern-approach%3A-abortsignal.timeout()" tabindex="-1"><a class="header-anchor" href="#modern-approach%3A-abortsignal.timeout()">Modern Approach: <code>AbortSignal.timeout()</code></a></h3>
+<h3 id="modern-approach-abortsignaltimeout" tabindex="-1"><a class="header-anchor" href="#modern-approach-abortsignaltimeout">Modern Approach: <code>AbortSignal.timeout()</code></a></h3>
 <p>With AbortSignal.timeout(), timeouts can be expressed declaratively:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> timeoutSignal <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// signal that aborts after 5 seconds</span>
 
@@ -191,7 +191,7 @@ controller<span class="token punctuation">.</span><span class="token function">a
   <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
 <p>Here, the timeout is a <strong>signal that automatically aborts after the given time</strong>. This pattern scales better across layers. Each function can accept an <code>AbortSignal</code>, and timeouts can be composed naturally without duplicating logic. No extra <code>Promise.race()</code>, no manual timers: the timeout is a signal that aborts automatically. Each function can accept an <code>AbortSignal</code>, making timeouts composable across layers without duplicating logic.</p>
-<h3 id="composing-multiple-signals%3A-abortsignal.any()" tabindex="-1"><a class="header-anchor" href="#composing-multiple-signals%3A-abortsignal.any()">Composing Multiple Signals: <code>AbortSignal.any()</code></a></h3>
+<h3 id="composing-multiple-signals-abortsignalany" tabindex="-1"><a class="header-anchor" href="#composing-multiple-signals-abortsignalany">Composing Multiple Signals: <code>AbortSignal.any()</code></a></h3>
 <p>Often, multiple cancellation sources exist simultaneously: user aborts, parent signals, or timeouts. <code>AbortSignal.any()</code> lets you combine them into a single signal:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> userController <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// user-initiated abort</span>
 <span class="token keyword">const</span> timeoutSignal  <span class="token operator">=</span> AbortSignal<span class="token punctuation">.</span><span class="token function">timeout</span><span class="token punctuation">(</span><span class="token number">5000</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// timeout abort</span>
@@ -212,7 +212,7 @@ controller<span class="token punctuation">.</span><span class="token function">a
 <p>The evolution from <code>Promise.race()</code> to <code>AbortSignal.timeout()</code> and <code>AbortSignal.any()</code> illustrates a key principle: <strong>timeouts and cancellation should be expressed declaratively, not imperatively</strong>. Modern APIs treat signals as first-class primitives that are composable, predictable, and safe to propagate across multiple async operations.</p>
 <h2 id="composing-async-work-without-losing-control" tabindex="-1"><a class="header-anchor" href="#composing-async-work-without-losing-control">Composing Async Work Without Losing Control</a></h2>
 <p>Once cancellation and timeouts are handled, the next challenge is composing multiple asynchronous operations in a way that remains predictable and controllable. In production systems, tasks rarely run in isolation: you may need to fetch multiple resources concurrently, process streams in parallel, or coordinate nested services. Without a principled approach, these operations quickly become brittle, leaking resources or leaving partially completed work.</p>
-<h3 id="theory%3A-why-composition-is-hard" tabindex="-1"><a class="header-anchor" href="#theory%3A-why-composition-is-hard">Theory: Why Composition Is Hard</a></h3>
+<h3 id="theory-why-composition-is-hard" tabindex="-1"><a class="header-anchor" href="#theory-why-composition-is-hard">Theory: Why Composition Is Hard</a></h3>
 <p>The difficulty arises because each async operation can fail, cancel, or timeout independently. Naively combining promises with <code>Promise.all</code> or nested await calls often leads to:</p>
 <ul>
 <li>Unhandled rejections if one task fails.</li>
@@ -267,7 +267,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p>By following these patterns, asynchronous operations remain predictable, composable, and maintainable — even in deep call stacks or large-scale applications.</p>
 <h2 id="bounded-concurrency" tabindex="-1"><a class="header-anchor" href="#bounded-concurrency">Bounded Concurrency</a></h2>
 <p>In large-scale asynchronous systems, running all tasks at once can be as dangerous as running none. Fetching hundreds of URLs, processing large streams, or spawning compute-heavy operations simultaneously can overwhelm network, memory, or CPU resources. <strong>Bounded concurrency</strong> enforces a limit on the number of tasks running in parallel, allowing systems to remain responsive and predictable.</p>
-<h3 id="theory%3A-why-concurrency-needs-bounds" tabindex="-1"><a class="header-anchor" href="#theory%3A-why-concurrency-needs-bounds">Theory: Why Concurrency Needs Bounds</a></h3>
+<h3 id="theory-why-concurrency-needs-bounds" tabindex="-1"><a class="header-anchor" href="#theory-why-concurrency-needs-bounds">Theory: Why Concurrency Needs Bounds</a></h3>
 <p>Resources are always finite. Without limits, uncontrolled concurrency can lead to:</p>
 <ul>
 <li>Memory usage can spike, network bandwidth can be saturated, or connection pools can be exhausted.</li>
@@ -298,7 +298,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 </code></pre>
 <p>Here, <code>runWithConcurrency</code> accepts an array of task functions, a concurrency limit, and an <code>AbortSignal</code>. It ensures that only <code>limit</code> tasks run simultaneously. When a task completes, it frees up a slot for the next task.</p>
 <p>Each task receives a signal, allowing cancellation or timeouts to propagate. The concurrency limit ensures that only <code>limit</code> tasks are active simultaneously, preventing resource overload.</p>
-<h3 id="example%3A-fetching-multiple-urls-with-limits" tabindex="-1"><a class="header-anchor" href="#example%3A-fetching-multiple-urls-with-limits">Example: Fetching Multiple URLs with Limits</a></h3>
+<h3 id="example-fetching-multiple-urls-with-limits" tabindex="-1"><a class="header-anchor" href="#example-fetching-multiple-urls-with-limits">Example: Fetching Multiple URLs with Limits</a></h3>
 <p>Let's see how to use <code>runWithConcurrency</code> to fetch multiple URLs with a concurrency limit:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> urls <span class="token operator">=</span> <span class="token punctuation">[</span><span class="token string">'/data1'</span><span class="token punctuation">,</span> <span class="token string">'/data2'</span><span class="token punctuation">,</span> <span class="token string">'/data3'</span><span class="token punctuation">,</span> <span class="token string">'/data4'</span><span class="token punctuation">,</span> <span class="token string">'/data5'</span><span class="token punctuation">]</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> controller <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">AbortController</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -341,7 +341,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <p>Bounded concurrency turns an otherwise chaotic async workflow into a controlled, predictable system, and when combined with cancellation and timeouts, it gives developers precise control over both execution and resource usage.</p>
 <h2 id="controlled-error-handling" tabindex="-1"><a class="header-anchor" href="#controlled-error-handling">Controlled Error Handling</a></h2>
 <p>In real-world asynchronous systems, errors are inevitable. Tasks may fail due to network issues, timeouts, user cancellations, or unexpected exceptions. The challenge is to handle these failures without undermining the coordination patterns established in previous sections: cancellation, timeouts, and bounded concurrency.</p>
-<h3 id="theory%3A-separation-of-concerns" tabindex="-1"><a class="header-anchor" href="#theory%3A-separation-of-concerns">Theory: Separation of Concerns</a></h3>
+<h3 id="theory-separation-of-concerns" tabindex="-1"><a class="header-anchor" href="#theory-separation-of-concerns">Theory: Separation of Concerns</a></h3>
 <p>A key principle is <strong>separating error handling from orchestration</strong>. Orchestration controls how tasks run and interact, while error handling decides what to do when they fail. Mixing these concerns can lead to brittle systems:</p>
 <ul>
 <li>Cancelling a parent task should stop children without forcing global failures.</li>
@@ -407,7 +407,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <h3 id="observability-matters" tabindex="-1"><a class="header-anchor" href="#observability-matters">Observability Matters</a></h3>
 <p>Async patterns are tricky: cancellations, timeouts, and partial failures can silently affect results. Logging or metrics that expose which tasks were aborted, which timed out, and which failed partially make debugging tractable. Without this, even correct patterns become almost impossible to reason about when things go wrong.</p>
 <p>For local debugging, be careful with raw console inspection: <a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your Console Is Lying to You</a> shows why object logs, promise state, and timing-sensitive races can be misleading.</p>
-<h3 id="patterns-are-tools%2C-not-rules" tabindex="-1"><a class="header-anchor" href="#patterns-are-tools%2C-not-rules">Patterns Are Tools, Not Rules</a></h3>
+<h3 id="patterns-are-tools-not-rules" tabindex="-1"><a class="header-anchor" href="#patterns-are-tools-not-rules">Patterns Are Tools, Not Rules</a></h3>
 <p>Finally, <strong>none of these patterns are universal laws</strong>. The right choice depends on task criticality, resource constraints, and workflow semantics. Observing systems in production shows that developers who rigidly apply patterns without considering context often introduce complexity without benefit.</p>
 <h2 id="composing-complex-pipelines" tabindex="-1"><a class="header-anchor" href="#composing-complex-pipelines">Composing Complex Pipelines</a></h2>
 <p>Real-world asynchronous workflows rarely consist of a single task. Often, multiple operations must run concurrently, sequentially, or in a mix, with cancellation, timeouts, concurrency limits, and error handling coordinated across stages. Understanding how these primitives interact is crucial for building robust pipelines.</p>
@@ -426,12 +426,12 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li><strong>Coupled orchestration and error handling that make the pipeline fragile or hard to reason about.</strong>: careful separation of concerns is essential to maintain clarity and correctness.</li>
 </ul>
 <p>By thinking in terms of pipeline structure, stage policies, and signal propagation, developers can design workflows that remain predictable and maintainable, even as complexity grows.</p>
-<h2 id="frameworks-%26-libraries" tabindex="-1"><a class="header-anchor" href="#frameworks-%26-libraries">Frameworks &amp; Libraries</a></h2>
+<h2 id="frameworks-libraries" tabindex="-1"><a class="header-anchor" href="#frameworks-libraries">Frameworks &amp; Libraries</a></h2>
 <p>Many libraries and frameworks implement or wrap some of these asynchronous patterns. These tools implement common patterns effectively, but mastering the underlying primitives ensures you can use them safely and predictably.</p>
-<h3 id="concurrency-%26-queuing-libraries" tabindex="-1"><a class="header-anchor" href="#concurrency-%26-queuing-libraries">Concurrency &amp; Queuing Libraries</a></h3>
+<h3 id="concurrency-queuing-libraries" tabindex="-1"><a class="header-anchor" href="#concurrency-queuing-libraries">Concurrency &amp; Queuing Libraries</a></h3>
 <p><strong>p-limit / p-queue</strong>: Lightweight tools for bounding concurrency in promise-based workflows. They let you enforce parallelism limits per stage or globally.</p>
 <p>Observation: These libraries handle execution limits but don’t propagate cancellation signals automatically, so you still need to integrate AbortSignal manually for clean task abortion.</p>
-<h3 id="reactive-%26-stream-based-libraries" tabindex="-1"><a class="header-anchor" href="#reactive-%26-stream-based-libraries">Reactive &amp; Stream-Based Libraries</a></h3>
+<h3 id="reactive-stream-based-libraries" tabindex="-1"><a class="header-anchor" href="#reactive-stream-based-libraries">Reactive &amp; Stream-Based Libraries</a></h3>
 <p><strong>RxJS, most.js, Highland.js</strong>: Functional reactive libraries that represent async operations as streams or observables. They provide composable pipelines, backpressure support, and declarative error handling.</p>
 <p>Observation: They excel at structuring complex flows, but cancellation semantics may differ from native <code>AbortSignal</code>, and timeouts often need explicit operators. Understanding the underlying primitives helps bridge these gaps.</p>
 <h3 id="framework-level-apis" tabindex="-1"><a class="header-anchor" href="#framework-level-apis">Framework-Level APIs</a></h3>

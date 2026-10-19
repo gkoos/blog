@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -149,7 +149,7 @@ mu<span class="token punctuation">.</span><span class="token function">Lock</spa
 counter<span class="token operator">++</span>
 mu<span class="token punctuation">.</span><span class="token function">Unlock</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
 </code></pre>
-<h2 id="channels%3A-for-communication%2C-not-just-safety" tabindex="-1"><a class="header-anchor" href="#channels%3A-for-communication%2C-not-just-safety">Channels: For Communication, Not Just Safety</a></h2>
+<h2 id="channels-for-communication-not-just-safety" tabindex="-1"><a class="header-anchor" href="#channels-for-communication-not-just-safety">Channels: For Communication, Not Just Safety</a></h2>
 <p>Channels shine when goroutines need to communicate or signal events. They can be used to implement fan-out/fan-in patterns, worker pools, or pipelines:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
 
@@ -192,7 +192,7 @@ func <span class="token function">main</span><span class="token punctuation">(</
 <li>Higher overhead than a mutex for simple state protection.</li>
 <li>Overcomplicates code if used for every shared variable.</li>
 </ul>
-<h2 id="mutexes%3A-the-right-tool-for-shared-state" tabindex="-1"><a class="header-anchor" href="#mutexes%3A-the-right-tool-for-shared-state">Mutexes: The Right Tool for Shared State</a></h2>
+<h2 id="mutexes-the-right-tool-for-shared-state" tabindex="-1"><a class="header-anchor" href="#mutexes-the-right-tool-for-shared-state">Mutexes: The Right Tool for Shared State</a></h2>
 <p>First of all, what is a mutex? A mutex (short for mutual exclusion) is a synchronization primitive that ensures only one goroutine (or thread) can access a piece of shared data at a time. It acts like a lock around critical sections, preventing race conditions when multiple goroutines attempt to read or write the same state concurrently.</p>
 <p>A <code>sync.Mutex</code> is designed to guard access to a shared resource. If you just need safe access to a map, counter, or struct, a mutex is often simpler and faster.</p>
 <p>Imagine you're maintaining a cache that multiple goroutines need to read and update. A <code>sync.Mutex</code> is the simplest and most efficient way to guard that shared map:</p>
@@ -266,7 +266,7 @@ func <span class="token function">get</span><span class="token punctuation">(</s
 </li>
 </ul>
 <p>That extra bookkeeping makes channels slower when all you need is to guard a shared variable.</p>
-<h3 id="benchmark%3A-mutex-vs-channel-counter" tabindex="-1"><a class="header-anchor" href="#benchmark%3A-mutex-vs-channel-counter">Benchmark: Mutex vs Channel Counter</a></h3>
+<h3 id="benchmark-mutex-vs-channel-counter" tabindex="-1"><a class="header-anchor" href="#benchmark-mutex-vs-channel-counter">Benchmark: Mutex vs Channel Counter</a></h3>
 <p>Let's put this to the test with Go's benchmarking framework:</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">package</span> main
 
@@ -316,17 +316,17 @@ BenchmarkChannelCounter<span class="token operator">-</span><span class="token n
 <p>So why the huge gap? The mutex path compiles down to a single atomic CPU instruction. The channel path involves synchronization between two goroutines, queue management, and possibly waking up a sleeping goroutine — a substantial amount of runtime work that <a href="/posts/2026-05-08-the-go-compiler-a-deep-dive-into-how-your-code-becomes-a-binary/">the compiler's code generation</a> cannot optimize away.</p>
 <p>This demonstrates why mutexes are the right tool for protecting simple shared state.</p>
 <h2 id="real-world-examples" tabindex="-1"><a class="header-anchor" href="#real-world-examples">Real-World Examples</a></h2>
-<h3 id="1.-web-server-request-counting" tabindex="-1"><a class="header-anchor" href="#1.-web-server-request-counting">1. Web Server Request Counting</a></h3>
+<h3 id="1-web-server-request-counting" tabindex="-1"><a class="header-anchor" href="#1-web-server-request-counting">1. Web Server Request Counting</a></h3>
 <p>Imagine you're running an HTTP server and want to count requests:</p>
 <ul>
 <li>Mutex version: Fast, scalable, and works fine under load.</li>
 <li>Channel version: Every request handler has to ship a message through a channel, creating a bottleneck and slowing down throughput.</li>
 </ul>
 <p>In production, that's the difference between comfortably handling 100k requests/sec and falling behind at 10k requests/sec.</p>
-<h3 id="2.-shared-cache" tabindex="-1"><a class="header-anchor" href="#2.-shared-cache">2. Shared Cache</a></h3>
+<h3 id="2-shared-cache" tabindex="-1"><a class="header-anchor" href="#2-shared-cache">2. Shared Cache</a></h3>
 <p>If multiple goroutines read and write a cache (like map[string]User), a mutex is perfect. Reads and writes happen inline with minimal cost.</p>
 <p>With a channel-based &quot;cache manager goroutine&quot;, every single read/write becomes a request–response round trip. Instead of O(1) map lookups, you now have O(1) + channel send/receive + scheduling. This introduces latency and makes your cache slower than just hitting the database in some cases.</p>
-<h3 id="3.-worker-pool-for-task-processing" tabindex="-1"><a class="header-anchor" href="#3.-worker-pool-for-task-processing">3. Worker Pool for Task Processing</a></h3>
+<h3 id="3-worker-pool-for-task-processing" tabindex="-1"><a class="header-anchor" href="#3-worker-pool-for-task-processing">3. Worker Pool for Task Processing</a></h3>
 <p>With a mutex you could have a slice of tasks, protect it with a sync.Mutex, and have multiple goroutines pull work out of it. Each goroutine locks, pops a task, unlocks, processes, and repeats.</p>
 <p>But with channels, you can just push tasks into a job channel, spin up N workers, and let them consume concurrently:</p>
 <pre class="language-go"><code class="language-go"><span class="token literal-property property">jobs</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token function">make</span><span class="token punctuation">(</span>chan string<span class="token punctuation">,</span> <span class="token number">100</span><span class="token punctuation">)</span>
@@ -347,7 +347,7 @@ BenchmarkChannelCounter<span class="token operator">-</span><span class="token n
 </code></pre>
 <p>Here, channels are a natural fit because the problem is work distribution, not just shared memory safety.</p>
 <p>Using a mutex would require writing your own coordination logic, which is more error-prone and less readable.</p>
-<h3 id="4.-event-notifications-%2F-pub-sub" tabindex="-1"><a class="header-anchor" href="#4.-event-notifications-%2F-pub-sub">4. Event Notifications / Pub-Sub</a></h3>
+<h3 id="4-event-notifications-pub-sub" tabindex="-1"><a class="header-anchor" href="#4-event-notifications-pub-sub">4. Event Notifications / Pub-Sub</a></h3>
 <p>With a mutex, you could maintain a slice of subscribers guarded by a mutex. Every time an event happens, you'd lock, loop over subscribers, and call their handler functions. This works, but it mixes synchronization, iteration, and business logic.</p>
 <p>Why goroutines + channels are better: channels let you decouple event production from consumption. Each subscriber can listen on its own channel and handle events at its own pace:</p>
 <pre class="language-go"><code class="language-go"><span class="token literal-property property">subscribers</span> <span class="token operator">:</span><span class="token operator">=</span> <span class="token punctuation">[</span><span class="token punctuation">]</span>chan string<span class="token punctuation">{</span><span class="token punctuation">}</span>

@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -120,7 +120,7 @@
 <p>If you want to connect this to production failure handling at service boundaries, see <a href="/posts/2026-07-01-Beyond-Happy-Path-Engineering-the-Network/">Beyond Happy Path Engineering: the Network</a> and <a href="/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/">Beyond Happy Path Engineering: Time</a>.</p>
 <p>In JavaScript, backpressure exists in multiple places: Node.js streams, the Fetch API, Web Streams, and even async loops over large datasets. But it can be tricky. The language gives you the tools: <code>ReadableStream</code>, <code>WritableStream</code>, stream events like <code>drain</code> - but it doesn't enforce correct usage. And many developers end up ignoring these signals, mostly because the code &quot;just works&quot; on small datasets. Then the data grows, the load increases, and suddenly your app is struggling to keep up: crashes, OOMs, and latency spikes seem to come out of nowhere.</p>
 <p>This article will unpack what backpressure really is, why it matters in JavaScript, and how to write async code that respects it. By the end, you'll see that backpressure isn't a limitation, it's a feature of well-behaved systems, and understanding it can save you from countless production headaches.</p>
-<h2 id="what-backpressure-actually-is-(and-isn't)" tabindex="-1"><a class="header-anchor" href="#what-backpressure-actually-is-(and-isn't)">What Backpressure Actually Is (and Isn't)</a></h2>
+<h2 id="what-backpressure-actually-is-and-isnt" tabindex="-1"><a class="header-anchor" href="#what-backpressure-actually-is-and-isnt">What Backpressure Actually Is (and Isn't)</a></h2>
 <p>Backpressure is one of those concepts that feels obvious once you see it, but most developers only realize it happening when their app starts breaking under load. Let’s unpack it carefully.</p>
 <h3 id="producer-vs-consumer" tabindex="-1"><a class="header-anchor" href="#producer-vs-consumer">Producer vs Consumer</a></h3>
 <p>At its core, backpressure is about <strong>communication between a producer and a consumer</strong>:</p>
@@ -166,7 +166,7 @@
 <p>Message queues, like RabbitMQ or Kafka, implement backpressure as well. Producers either block or receive signals when queues are full, ensuring consumers aren't overwhelmed. Systems that ignore this risk data loss or memory exhaustion.</p>
 <h3 id="why-it-matters-for-js-developers" tabindex="-1"><a class="header-anchor" href="#why-it-matters-for-js-developers">Why It Matters for JS Developers</a></h3>
 <p>These examples show that backpressure is a property of any system where <strong>work is produced faster than it can be consumed</strong>. JavaScript inherits the same problem in streams, async iterators, fetch, and beyond. What's different in JS is the language gives you the primitives, but not the enforcement: if you ignore the signals, your memory grows and your app breaks.</p>
-<h2 id="backpressure-in-node.js-streams" tabindex="-1"><a class="header-anchor" href="#backpressure-in-node.js-streams">Backpressure in Node.js Streams</a></h2>
+<h2 id="backpressure-in-nodejs-streams" tabindex="-1"><a class="header-anchor" href="#backpressure-in-nodejs-streams">Backpressure in Node.js Streams</a></h2>
 <p>Node.js popularized backpressure through its <code>streams API</code>, which provides a robust mechanism for controlling data flow between producers and consumers. Understanding streams is essential for writing high-performance, memory-safe Node applications.</p>
 <h3 id="readable-streams-and-highwatermark" tabindex="-1"><a class="header-anchor" href="#readable-streams-and-highwatermark">Readable Streams and <code>highWaterMark</code></a></h3>
 <p>A <em>Readable Stream</em> is a source of data: like a file, HTTP request, or socket. Internally, Node buffers data in memory. The key parameter controlling backpressure is <code>highWaterMark</code>, which sets the soft limit of the internal buffer:</p>
@@ -174,7 +174,7 @@
 <span class="token keyword">const</span> stream <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">createReadStream</span><span class="token punctuation">(</span><span class="token string">'largefile.txt'</span><span class="token punctuation">,</span> <span class="token punctuation">{</span> <span class="token literal-property property">highWaterMark</span><span class="token operator">:</span> <span class="token number">16</span> <span class="token operator">*</span> <span class="token number">1024</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
 <p>Here, <code>highWaterMark</code> is 16 KB. When the buffer reaches this limit, the stream stops reading from the underlying source until the buffer is drained. This is the first layer of backpressure: the producer slows down when the consumer cannot keep up.</p>
-<h3 id="writable-streams-and-the-write()-return-value" tabindex="-1"><a class="header-anchor" href="#writable-streams-and-the-write()-return-value">Writable Streams and the <code>write()</code> Return Value</a></h3>
+<h3 id="writable-streams-and-the-write-return-value" tabindex="-1"><a class="header-anchor" href="#writable-streams-and-the-write-return-value">Writable Streams and the <code>write()</code> Return Value</a></h3>
 <p>A <em>Writable Stream</em> consumes data. The most common mistake is ignoring the return value of <code>write()</code>. This boolean tells you whether the internal buffer is full:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> fs <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'fs'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> writable <span class="token operator">=</span> fs<span class="token punctuation">.</span><span class="token function">createWriteStream</span><span class="token punctuation">(</span><span class="token string">'output.txt'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -189,7 +189,7 @@
 <span class="token punctuation">}</span>
 </code></pre>
 <p>If you ignore <code>false</code> and keep writing, Node will buffer everything in memory, eventually causing your app to run out of memory. The <code>drain</code> event signals that it's safe to resume writing.</p>
-<h3 id="using-pipe()-for-automatic-backpressure" tabindex="-1"><a class="header-anchor" href="#using-pipe()-for-automatic-backpressure">Using <code>pipe()</code> for Automatic Backpressure</a></h3>
+<h3 id="using-pipe-for-automatic-backpressure" tabindex="-1"><a class="header-anchor" href="#using-pipe-for-automatic-backpressure">Using <code>pipe()</code> for Automatic Backpressure</a></h3>
 <p>Node streams also support automatic backpressure management through <code>pipe()</code>. When you <em>pipe</em> a readable to a writable, Node internally listens for the consumer's signals and pauses/resumes the producer accordingly:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> fs <span class="token operator">=</span> <span class="token function">require</span><span class="token punctuation">(</span><span class="token string">'fs'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 
@@ -208,7 +208,7 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 </ul>
 <p>Streams exist because they provide flow control by design. Learning to respect the signals (<code>write()</code> return value, <code>drain</code>, <code>pipe()</code>) is how you implement real backpressure in Node.js.</p>
 <p>Node streams expose a built-in contract between producer and consumer. If you ignore it, your memory grows - if you respect it, your application handles large or fast data sources safely.</p>
-<h2 id="how-async%2Fawait-can-accidentally-destroy-backpressure" tabindex="-1"><a class="header-anchor" href="#how-async%2Fawait-can-accidentally-destroy-backpressure">How <code>async/await</code> Can Accidentally Destroy Backpressure</a></h2>
+<h2 id="how-asyncawait-can-accidentally-destroy-backpressure" tabindex="-1"><a class="header-anchor" href="#how-asyncawait-can-accidentally-destroy-backpressure">How <code>async/await</code> Can Accidentally Destroy Backpressure</a></h2>
 <p><code>async/await</code> is one of JavaScript's greatest abstractions for writing readable asynchronous code. But it can also mask backpressure problems, making you think your consumer is keeping up when it isn't. Understanding this is crucial for building reliable, memory-safe applications. The root cause ties back to how the <a href="/posts/2025-10-25-Modern-Javascript-Concurrency/">event loop schedules work</a> — <code>await</code> yields control, but doesn't inherently slow down the producer.</p>
 <h3 id="the-illusion-of-sequential-safety" tabindex="-1"><a class="header-anchor" href="#the-illusion-of-sequential-safety">The Illusion of Sequential Safety</a></h3>
 <p>It's easy to assume that wrapping work in await naturally enforces proper flow control:</p>
@@ -217,13 +217,13 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 <span class="token punctuation">}</span>
 </code></pre>
 <p>At first glance, this seems safe: each chunk is processed before moving to the next. But if <code>process(chunk)</code> launches asynchronous tasks internally - like database writes or network requests - the actual concurrency may be much higher than it appears. The producer continues to deliver new chunks to your loop while earlier tasks are still pending, causing memory growth.</p>
-<h3 id="the-promise.all()-trap" tabindex="-1"><a class="header-anchor" href="#the-promise.all()-trap">The <code>Promise.all()</code> Trap</a></h3>
+<h3 id="the-promiseall-trap" tabindex="-1"><a class="header-anchor" href="#the-promiseall-trap">The <code>Promise.all()</code> Trap</a></h3>
 <p>A common pattern is to process multiple chunks concurrently using Promise.all():</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> chunks <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">getAllChunks</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">await</span> Promise<span class="token punctuation">.</span><span class="token function">all</span><span class="token punctuation">(</span>chunks<span class="token punctuation">.</span><span class="token function">map</span><span class="token punctuation">(</span>processChunk<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
 <p>This eagerly starts all chunk processing in parallel. For small datasets, this works fine, but with large streams, you're effectively <strong>removing any backpressure, because the producer's work is no longer paced by the consumer</strong>! Memory usage spikes, and your process may crash.</p>
-<h3 id="why-await-%E2%89%A0-flow-control" tabindex="-1"><a class="header-anchor" href="#why-await-%E2%89%A0-flow-control">Why Await ≠ Flow Control</a></h3>
+<h3 id="why-await-flow-control" tabindex="-1"><a class="header-anchor" href="#why-await-flow-control">Why Await ≠ Flow Control</a></h3>
 <p>Even <code>for await</code> loops don't inherently enforce backpressure if the work inside the loop is asynchronous:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">for</span> <span class="token keyword">await</span> <span class="token punctuation">(</span><span class="token keyword">const</span> chunk <span class="token keyword">of</span> readableStream<span class="token punctuation">)</span> <span class="token punctuation">{</span>
   <span class="token function">someAsyncTask</span><span class="token punctuation">(</span>chunk<span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// fire-and-forget</span>
@@ -247,9 +247,9 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 </code></pre>
 <p>Here, <code>p-map</code> ensures at most 5 chunks are processed concurrently, preventing runaway memory growth while still allowing parallelism.</p>
 <p>Remember, <code>async/await</code> is syntactic sugar, not a flow-control mechanism. If your asynchronous work inside a loop or <code>Promise.all()</code> is unbounded, you break backpressure and risk crashes or latency spikes.</p>
-<h2 id="backpressure-in-fetch%2C-web-streams%2C-and-the-browser" tabindex="-1"><a class="header-anchor" href="#backpressure-in-fetch%2C-web-streams%2C-and-the-browser">Backpressure in Fetch, Web Streams, and the Browser</a></h2>
+<h2 id="backpressure-in-fetch-web-streams-and-the-browser" tabindex="-1"><a class="header-anchor" href="#backpressure-in-fetch-web-streams-and-the-browser">Backpressure in Fetch, Web Streams, and the Browser</a></h2>
 <p>Backpressure of course isn't limited to Node.js. In the browser, modern APIs like <code>fetch</code> and <code>Web Streams</code> expose similar flow-control mechanisms, though they can be even subtler because of the single-threaded UI environment.</p>
-<h3 id="fetch-%2B-streams" tabindex="-1"><a class="header-anchor" href="#fetch-%2B-streams">Fetch + Streams</a></h3>
+<h3 id="fetch-streams" tabindex="-1"><a class="header-anchor" href="#fetch-streams">Fetch + Streams</a></h3>
 <p>When you call fetch, the response body can be accessed as a stream:</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> response <span class="token operator">=</span> <span class="token keyword">await</span> <span class="token function">fetch</span><span class="token punctuation">(</span><span class="token string">'/large-file'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 <span class="token keyword">const</span> reader <span class="token operator">=</span> response<span class="token punctuation">.</span>body<span class="token punctuation">.</span><span class="token function">getReader</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -292,7 +292,7 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 </ul>
 <p>As we can see, backpressure in the browser works similarly to Node.js streams: <strong>the consumer drives the pace of the producer</strong>. Properly used, it prevents memory spikes and keeps your app responsive. Ignoring these mechanisms - by reading entire responses at once, launching unbounded promises, or blocking the UI - defeats backpressure, creating systems that can crash or become unresponsive under load.</p>
 <p>It's still about signaling readiness, not just awaiting asynchronous operations. JavaScript provides the primitives in both Node and the browser, but <strong>developers must respect them</strong>.</p>
-<h2 id="buffers%3A-the-double-edged-sword" tabindex="-1"><a class="header-anchor" href="#buffers%3A-the-double-edged-sword">Buffers: The Double-Edged Sword</a></h2>
+<h2 id="buffers-the-double-edged-sword" tabindex="-1"><a class="header-anchor" href="#buffers-the-double-edged-sword">Buffers: The Double-Edged Sword</a></h2>
 <p>Buffers are everywhere in JavaScript streams. They act as <strong>shock absorbers</strong>, temporarily storing data when the producer is faster than the consumer. While buffers are essential for smooth streaming, <strong>they can also mask backpressure problems</strong> if misused.</p>
 <h3 id="what-buffers-do" tabindex="-1"><a class="header-anchor" href="#what-buffers-do">What Buffers Do</a></h3>
 <p>A buffer's main purpose is to <strong>decouple producer speed from consumer speed</strong>. By holding onto data temporarily, buffers allow small variations in processing time without immediately stalling the producer. In the example earlier:</p>
@@ -363,7 +363,7 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 <h2 id="designing-backpressure-friendly-javascript-code" tabindex="-1"><a class="header-anchor" href="#designing-backpressure-friendly-javascript-code">Designing Backpressure-Friendly JavaScript Code</a></h2>
 <p>Understanding backpressure conceptually is important, but the real benefit comes from writing code that respects it. In JavaScript, both Node.js and the browser provide primitives for flow control—but it's up to the developer to use them correctly.</p>
 <p>This section focuses on patterns and strategies for designing JavaScript applications that handle high-volume or fast data streams safely, without repeating low-level stream API details.</p>
-<h3 id="think-in-terms-of-flow%2C-not-tasks" tabindex="-1"><a class="header-anchor" href="#think-in-terms-of-flow%2C-not-tasks">Think in Terms of Flow, Not Tasks</a></h3>
+<h3 id="think-in-terms-of-flow-not-tasks" tabindex="-1"><a class="header-anchor" href="#think-in-terms-of-flow-not-tasks">Think in Terms of Flow, Not Tasks</a></h3>
 <p>Backpressure is about coordinating producer and consumer rates. Instead of thinking in terms of &quot;launch tasks as fast as possible&quot;, design your system around how much work can actually be handled at a time.</p>
 <ul>
 <li>Identify natural boundaries: buffers, streams, network requests, or event loops.</li>
@@ -398,7 +398,7 @@ readable<span class="token punctuation">.</span><span class="token function">pip
 <li>Focus on designing pipelines that express intentional flow control rather than ad-hoc buffering.</li>
 </ul>
 <p>Backpressure-friendly design is system thinking applied in JavaScript: coordinate producers and consumers, limit concurrency, and observe flow continuously. By applying these principles, your applications can handle large datasets, fast streams, or bursts of requests without depending on trial-and-error or unbounded buffers.</p>
-<h2 id="conclusion%3A-respect-the-flow" tabindex="-1"><a class="header-anchor" href="#conclusion%3A-respect-the-flow">Conclusion: Respect the Flow</a></h2>
+<h2 id="conclusion-respect-the-flow" tabindex="-1"><a class="header-anchor" href="#conclusion-respect-the-flow">Conclusion: Respect the Flow</a></h2>
 <p>Backpressure isn't an optional detail in asynchronous JavaScript, it's a fundamental property of any system where producers can generate data faster than consumers can handle. From Node.js streams to <code>fetch</code> and Web Streams in the browser, JavaScript provides primitives that allow consumers to signal readiness and prevent runaway memory growth or latency spikes.</p>
 <p>The key lessons are:</p>
 <ul>

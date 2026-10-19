@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +154,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li><strong>Design code around predictable scheduling</strong>: promise chains, async iteration, and event-driven streams can help structure work without blocking.</li>
 <li>Be aware that <strong>microtask-heavy code can starve timers</strong>, delaying scheduled callbacks.</li>
 </ul>
-<h2 id="beyond-the-event-loop%3A-using-workers" tabindex="-1"><a class="header-anchor" href="#beyond-the-event-loop%3A-using-workers">Beyond the Event Loop: Using Workers</a></h2>
+<h2 id="beyond-the-event-loop-using-workers" tabindex="-1"><a class="header-anchor" href="#beyond-the-event-loop-using-workers">Beyond the Event Loop: Using Workers</a></h2>
 <p>While the event loop enables concurrency within a single thread, true parallelism in JavaScript requires <em>workers</em>. Workers run in separate execution contexts, allowing code to execute on multiple threads simultaneously without blocking the main thread.</p>
 <h3 id="types-of-workers" tabindex="-1"><a class="header-anchor" href="#types-of-workers">Types of Workers</a></h3>
 <ul>
@@ -164,7 +164,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 </ul>
 <h3 id="communication" tabindex="-1"><a class="header-anchor" href="#communication">Communication</a></h3>
 <p>Workers do not share memory by default. They communicate through message passing using <code>postMessage</code> and events. For more advanced use cases, <code>SharedArrayBuffer</code> and <code>Atomics</code> allow shared memory, but careful synchronization is required.</p>
-<h3 id="example%3A-using-a-web-worker" tabindex="-1"><a class="header-anchor" href="#example%3A-using-a-web-worker">Example: Using a Web Worker</a></h3>
+<h3 id="example-using-a-web-worker" tabindex="-1"><a class="header-anchor" href="#example-using-a-web-worker">Example: Using a Web Worker</a></h3>
 <pre class="language-js"><code class="language-js"><span class="token comment">// main.js</span>
 <span class="token keyword">const</span> worker <span class="token operator">=</span> <span class="token keyword">new</span> <span class="token class-name">Worker</span><span class="token punctuation">(</span><span class="token string">'worker.js'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 worker<span class="token punctuation">.</span><span class="token function-variable function">onmessage</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token parameter">e</span><span class="token punctuation">)</span> <span class="token operator">=></span> console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'Worker says:'</span><span class="token punctuation">,</span> e<span class="token punctuation">.</span>data<span class="token punctuation">)</span><span class="token punctuation">;</span>
@@ -187,7 +187,7 @@ self<span class="token punctuation">.</span><span class="token function-variable
 <ul>
 <li>Workers enable true parallelism in JavaScript, complementing the event loop's cooperative concurrency. They are explicit and isolated, making them powerful tools for scalable and responsive applications.</li>
 </ul>
-<h2 id="async-iterators%3A-structured-concurrency-for-streams" tabindex="-1"><a class="header-anchor" href="#async-iterators%3A-structured-concurrency-for-streams">Async Iterators: Structured Concurrency for Streams</a></h2>
+<h2 id="async-iterators-structured-concurrency-for-streams" tabindex="-1"><a class="header-anchor" href="#async-iterators-structured-concurrency-for-streams">Async Iterators: Structured Concurrency for Streams</a></h2>
 <p>While workers enable parallelism, not all concurrency requires multiple threads. Modern JavaScript provides <em>async iterators</em> as a way to handle ongoing asynchronous streams of data in a structured and predictable way. They let you consume asynchronous data <strong>incrementally</strong>, rather than waiting for the entire dataset or stream to be ready.</p>
 <h3 id="how-async-iterators-work" tabindex="-1"><a class="header-anchor" href="#how-async-iterators-work">How Async Iterators Work</a></h3>
 <p>An async iterator implements the <code>Symbol.asyncIterator</code> method and exposes a <code>next()</code> method that returns a promise. You can use <code>for await...of</code> loops to consume values as they become available. This pattern is particularly useful for streaming APIs, event processing, or any scenario where data arrives over time.</p>
@@ -287,7 +287,7 @@ self<span class="token punctuation">.</span><span class="token function-variable
 <li>Streaming APIs and async iterators allow non-blocking handling of data from network requests, file reads, or media streams.</li>
 <li>Shared memory with <code>SharedArrayBuffer</code> and <code>Atomics</code> enables low-latency coordination between workers, but <strong>must be used carefully to avoid race conditions</strong>.</li>
 </ul>
-<h3 id="node.js%2C-deno%2C-bun" tabindex="-1"><a class="header-anchor" href="#node.js%2C-deno%2C-bun">Node.js, Deno, Bun</a></h3>
+<h3 id="nodejs-deno-bun" tabindex="-1"><a class="header-anchor" href="#nodejs-deno-bun">Node.js, Deno, Bun</a></h3>
 <ul>
 <li>Node.js, Deno, and Bun use <code>libuv</code> to implement the event loop and a thread pool for async I/O, allowing concurrency for network and file operations without blocking the main thread.</li>
 <li>Worker threads provide true parallelism for CPU-intensive tasks, with optional shared memory via <code>SharedArrayBuffer</code>.</li>
@@ -312,7 +312,7 @@ self<span class="token punctuation">.</span><span class="token function-variable
 <ul>
 <li>While the core concurrency primitives - event loop, workers, async iterators, and shared memory - are consistent across JavaScript runtimes, the practical application and limitations differ, and choosing the right pattern depends on your environment and workload.</li>
 </ul>
-<h2 id="structured-concurrency%3A-the-missing-abstraction" tabindex="-1"><a class="header-anchor" href="#structured-concurrency%3A-the-missing-abstraction">Structured Concurrency: The Missing Abstraction</a></h2>
+<h2 id="structured-concurrency-the-missing-abstraction" tabindex="-1"><a class="header-anchor" href="#structured-concurrency-the-missing-abstraction">Structured Concurrency: The Missing Abstraction</a></h2>
 <p>Despite the rich set of concurrency primitives in JavaScript, managing multiple async tasks safely and predictably remains challenging. Developers often rely on patterns like <code>Promise.all()</code>, <code>AbortController</code>, or manual cleanup to coordinate related tasks, but these approaches can be error-prone and hard to reason about.</p>
 <p>Structured concurrency is a concept being explored by TC39 via the <a href="https://github.com/tc39/proposal-concurrency-control">JavaScript Concurrency Control Proposal</a>, aiming to provide:</p>
 <ul>
@@ -325,7 +325,7 @@ self<span class="token punctuation">.</span><span class="token function-variable
 <ul>
 <li>Structured concurrency aims to make task lifetimes explicit and predictable, reducing bugs and making async code execution easier to follow, especially as applications scale.</li>
 </ul>
-<h2 id="determinism%2C-testing%2C-and-debugging" tabindex="-1"><a class="header-anchor" href="#determinism%2C-testing%2C-and-debugging">Determinism, Testing, and Debugging</a></h2>
+<h2 id="determinism-testing-and-debugging" tabindex="-1"><a class="header-anchor" href="#determinism-testing-and-debugging">Determinism, Testing, and Debugging</a></h2>
 <p>Asynchronous and concurrent code introduces ordering and timing issues that can make bugs hard to reproduce. Even if your tasks aren't truly parallel, the cooperative nature of JavaScript concurrency means that the <strong>sequence in which async operations complete can affect program behavior</strong>.</p>
 <p>Debugging async ordering with console output has its own traps: <a href="/posts/2026-06-28-Your-Console-Is-Lying-to_You/">Your Console Is Lying to You</a> covers live object inspection, promise timing, and how logging can change fragile scheduling behavior.</p>
 <h3 id="common-challenges" tabindex="-1"><a class="header-anchor" href="#common-challenges">Common Challenges</a></h3>

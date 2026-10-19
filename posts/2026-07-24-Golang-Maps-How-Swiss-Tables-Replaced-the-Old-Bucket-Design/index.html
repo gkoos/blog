@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -123,7 +123,7 @@
 <p>Go 1.24 shipped one of the biggest map-internals changes in years: the classic bucket-plus-overflow implementation has been replaced by a Swiss Table-inspired design. The external API did not change, your code still writes <code>map[K]V</code> and calls <code>make</code>, indexing, <code>delete</code>, and <code>range</code> the same way as before. Under the hood, however, lookup and insert paths were reshaped around tighter metadata, flatter probing patterns, and much better cache locality.</p>
 <p>The practical effect is straightforward: less pointer chasing, fewer cache misses, higher useful load factors, and faster common operations in many workloads. In microbenchmarks this can be dramatic, while full applications usually see smaller but still meaningful aggregate wins. Memory behavior also improves in many scenarios, especially where old overflow chains used to accumulate.</p>
 <p>This post focuses on what changed specifically in Go's runtime design, why those choices matter, and where the trade-offs still show up. If you want a conceptual refresher on hash tables first, see <a href="/posts/2025-08-03-Hash-Map-Deep-Dive/">Hash Map Deep Dive</a>.</p>
-<h2 id="go's-old-map-implementation-(pre-1.24)" tabindex="-1"><a class="header-anchor" href="#go's-old-map-implementation-(pre-1.24)">Go's Old Map Implementation (Pre-1.24)</a></h2>
+<h2 id="gos-old-map-implementation-pre-124" tabindex="-1"><a class="header-anchor" href="#gos-old-map-implementation-pre-124">Go's Old Map Implementation (Pre-1.24)</a></h2>
 <p>Before Go 1.24, maps used a bucketed design that had been refined for years and worked well for a wide range of workloads. Each map owned an array of buckets. Each bucket held up to 8 key/value pairs, plus metadata used to speed up matching and track slot state. When a bucket filled up, the runtime allocated an overflow bucket and chained it to the original one.</p>
 <p>At a high level, the layout looked like this:</p>
 <p><img src="01.svg" alt="Diagram: pre-1.24 map layout with buckets, 8 slots per bucket, and overflow chains"></p>
@@ -147,11 +147,11 @@ type bmap struct <span class="token punctuation">{</span>   <span class="token c
 <p>This design had real strengths: it was stable, battle-tested, and supported incremental growth so resize work did not arrive as one huge latency spike. During growth, the map kept both old and new bucket arrays for a while, and operations gradually evacuated old buckets into their new positions as the map was accessed.</p>
 <p>The main cost was memory locality under pressure. Overflow chains introduced pointer chasing, and pointer chasing means cache misses. Once hot buckets started spilling into overflow, lookups and inserts could bounce across non-contiguous memory. The implementation also had practical load-factor limits around 81 percent (roughly 6.5 filled slots per 8-slot bucket) before growth pressure and collision costs became harder to ignore.</p>
 <p>So the old map was not a broken design waiting to be replaced, but an effective implementation with trade-offs that became more visible as modern CPUs, cache behavior, and high-throughput services pushed for tighter, flatter probe paths.</p>
-<h2 id="swiss-tables%3A-core-design" tabindex="-1"><a class="header-anchor" href="#swiss-tables%3A-core-design">Swiss Tables: Core Design</a></h2>
+<h2 id="swiss-tables-core-design" tabindex="-1"><a class="header-anchor" href="#swiss-tables-core-design">Swiss Tables: Core Design</a></h2>
 <p>Historically, Swiss Tables came out of Google's internal performance work on hash tables and were later documented and open-sourced through <a href="https://abseil.io/">Abseil</a> — Google's open-source C++ library collection — as <code>flat_hash_map</code> and related containers. The <a href="https://abseil.io/about/design/swisstables">design notes</a> are still the best primary reference for the model and its trade-offs.</p>
 <p>Swiss Tables keep the same high-level hash-table contract, but reorganize the data path around two ideas: <strong>compact per-slot metadata</strong> and <strong>probe-friendly contiguous groups</strong>. The design has since been adopted across several runtimes and databases because it moves the common-case probe work onto a much more cache-efficient path.</p>
 <p>The first thing to understand is that Swiss Tables do not start probing by reading full keys. They start by reading metadata bytes that are cheap to scan in bulk. Only candidates survive to full key comparison. This sounds small, but it changes where CPU time goes.</p>
-<h3 id="hash-split%3A-one-part-for-placement%2C-one-part-for-filtering" tabindex="-1"><a class="header-anchor" href="#hash-split%3A-one-part-for-placement%2C-one-part-for-filtering">Hash split: one part for placement, one part for filtering</a></h3>
+<h3 id="hash-split-one-part-for-placement-one-part-for-filtering" tabindex="-1"><a class="header-anchor" href="#hash-split-one-part-for-placement-one-part-for-filtering">Hash split: one part for placement, one part for filtering</a></h3>
 <p>A key is hashed once, then split into two logical pieces:</p>
 <ul>
 <li><code>h1</code>: used to choose the initial group index.</li>
@@ -174,7 +174,7 @@ type bmap struct <span class="token punctuation">{</span>   <span class="token c
 </code></pre>
 <p>Control bytes encode slot state (empty, deleted, occupied) and, for occupied slots, include the <code>h2</code> fingerprint bits. Because those 8 control bytes are contiguous, the runtime can inspect all slot states for a group in one tight operation.</p>
 <p><img src="02.svg" alt="Diagram: Swiss Table group with control bytes, key slots, value slots, and slot-state metadata"></p>
-<h3 id="probe-sequence%3A-filter-first%2C-compare-keys-second" tabindex="-1"><a class="header-anchor" href="#probe-sequence%3A-filter-first%2C-compare-keys-second">Probe sequence: filter first, compare keys second</a></h3>
+<h3 id="probe-sequence-filter-first-compare-keys-second" tabindex="-1"><a class="header-anchor" href="#probe-sequence-filter-first-compare-keys-second">Probe sequence: filter first, compare keys second</a></h3>
 <p>Lookup becomes a two-stage loop:</p>
 <ol>
 <li>Read the current group's control bytes.</li>
@@ -243,7 +243,7 @@ probe within that segment's Swiss groups
 if segment exceeds thresholds, split that segment and update directory
 </code></pre>
 <p>That directory update is much cheaper than rebuilding every segment, and it composes well with Go's preference for incremental runtime work.</p>
-<h3 id="preserving-go's-range-semantics-while-tables-change" tabindex="-1"><a class="header-anchor" href="#preserving-go's-range-semantics-while-tables-change">Preserving Go's range semantics while tables change</a></h3>
+<h3 id="preserving-gos-range-semantics-while-tables-change" tabindex="-1"><a class="header-anchor" href="#preserving-gos-range-semantics-while-tables-change">Preserving Go's range semantics while tables change</a></h3>
 <p>One of the hardest constraints is preserving Go's map iteration behavior while inserts, deletes, and growth are happening.</p>
 <p>In Go, iterating with <code>range</code> over a map has deliberately loose ordering guarantees, but it still has safety and consistency expectations. The runtime cannot expose torn state, lose reachability to entries that should still be visible under the language rules, or let relocation mechanics violate iterator correctness.</p>
 <p>With segmented Swiss-style storage, this means iterators must understand that entries may move as segments split or internal probe layouts change. The runtime therefore couples iteration state to map-internal versioning and traversal metadata so the iterator can continue safely even while structure evolves.</p>
@@ -253,7 +253,7 @@ if segment exceeds thresholds, split that segment and update directory
 <p>Segmented growth helps here too. Smaller relocation steps are easier to integrate with barriered writes and reduce the size of any single pointer-moving operation. This does not remove complexity, but it narrows blast radius and keeps runtime bookkeeping more tractable.</p>
 <p>Swiss-style metadata probing delivers the raw algorithmic win, but Go-specific adaptations — segmented growth, iterator-safe migration, and GC-barrier integration — are what make that win usable at scale in a garbage-collected, latency-sensitive runtime. The performance numbers in the next section reflect both layers working together.</p>
 <p>(The code-level rules behind those adaptations, from the triangular probe sequence and the tombstone invariant to the extendible-hashing growth steps, are in the companion <a href="https://gaborkoos.substack.com/i/208581428/go-swiss-map-internals-too-nerdy-for-the-public-article">Director's Cut</a> in the <a href="https://gaborkoos.substack.com/">import chaos newsletter</a>.)</p>
-<h2 id="performance-%26-memory-analysis-(deeper-dive)" tabindex="-1"><a class="header-anchor" href="#performance-%26-memory-analysis-(deeper-dive)">Performance &amp; Memory Analysis (Deeper Dive)</a></h2>
+<h2 id="performance-memory-analysis-deeper-dive" tabindex="-1"><a class="header-anchor" href="#performance-memory-analysis-deeper-dive">Performance &amp; Memory Analysis (Deeper Dive)</a></h2>
 <p>The easiest way to get misled by map benchmarks is to look only at a single synthetic test and assume that number transfers directly to production. For Swiss maps in Go, the public data tells a more nuanced story: the micro-level wins are real and often large, the application-level aggregate win is smaller but still positive, and a few workload shapes do regress enough to deserve attention.</p>
 <p>The official release notes for Go 1.24 report that runtime work, including the new Swiss map implementation, lowered CPU overhead by about 2 to 3 percent on average across a representative benchmark suite (<a href="https://go.dev/doc/go1.24#runtime">Go 1.24 release notes, Runtime section</a>). That is a whole-runtime number, not a map-only number, but it is useful as a reality check because it is measured across mixed workloads.</p>
 <p>For map-focused results, the most concrete summary from the runtime team is in Michael Pratt's closing comment on the Swiss map tracking issue: large-map access and assignment were reported around 30 to 35 percent faster, iteration about 10 percent faster overall and up to about 60 percent faster on low-load large maps, while full-application benchmarks in Sweet showed a geometric-mean speedup around 1.5 percent (<a href="https://github.com/golang/go/issues/54766#issuecomment-2542444404">golang/go#54766 comment</a>, <a href="https://cs.opensource.google/go/x/benchmarks/+/master:sweet/">Sweet benchmark suite</a>).</p>

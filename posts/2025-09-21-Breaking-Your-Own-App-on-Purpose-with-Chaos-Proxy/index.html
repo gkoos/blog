@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,7 +156,7 @@
 </blockquote>
 <p>Well, sure, you're an engineer. You can do that. But how do you test it? How do you simulate a slow network? You could use the browser's dev tools to throttle the network, but that's manual and tedious. You could use a library like <a href="https://mswjs.io/">msw</a> to mock the API responses, but that's a bit overkill for this simple app. You could even modify the API routes to introduce artificial delays, but that would be messy and not very elegant. Or use something like <a href="https://github.com/Shopify/toxiproxy">toxiproxy</a> to simulate network conditions, but that's also a bit heavy for this use case.</p>
 <p>Essentially, your problem is two-fold: you have to simulate a slow network for both development and testing (and here doesn't even matter which one you do first, this is not a TDD-focused article). For testing, you want to be able to run your tests in CI/CD pipelines, where you can't rely on manual network throttling. You could mock the API calls and use fake timers, but that gets you to a point where your tests are more complex than your code and not even testing the real behavior of the app. For development, you want to be able to see the loading indicator in action without having to change your code or the API routes.</p>
-<h2 id="the-solution%3A-chaos-proxy" tabindex="-1"><a class="header-anchor" href="#the-solution%3A-chaos-proxy">The Solution: Chaos Proxy</a></h2>
+<h2 id="the-solution-chaos-proxy" tabindex="-1"><a class="header-anchor" href="#the-solution-chaos-proxy">The Solution: Chaos Proxy</a></h2>
 <p>Between ridiculously complex chaos engineering tools (like <a href="https://www.gremlin.com/">Gremlin</a> and <a href="https://github.com/Netflix/chaosmonkey">Chaos Monkey</a>) and convoluted, overengineered testing techniques, you want something lightweight and easy that covers both your development and testing needs.</p>
 <p>That's where <a href="https://github.com/gkoos/chaos-proxy">Chaos Proxy</a> comes in. It's a simple reverse proxy that adds latency, drops requests, and simulates other network conditions. As a chaos engineering tool, it's barely a child's toy, but for this particular use case, it's perfect. It can be used to simulate a slow network for both development and testing, without modifying the app or the API routes.</p>
 <h2 id="implementing-the-skeleton-and-the-loading-indicator" tabindex="-1"><a class="header-anchor" href="#implementing-the-skeleton-and-the-loading-indicator">Implementing the Skeleton and the Loading Indicator</a></h2>

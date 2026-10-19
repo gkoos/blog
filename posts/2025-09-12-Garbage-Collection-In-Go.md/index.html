@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,7 +112,7 @@
     
   </div>
   <div class="prose dark:prose-invert max-w-none">
-    <h1 id="garbage-collection-in-go%3A-from-reference-counting-to-tri-color-to-green-tea" tabindex="-1"><a class="header-anchor" href="#garbage-collection-in-go%3A-from-reference-counting-to-tri-color-to-green-tea">Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</a></h1>
+    <h1 id="garbage-collection-in-go-from-reference-counting-to-tri-color-to-green-tea" tabindex="-1"><a class="header-anchor" href="#garbage-collection-in-go-from-reference-counting-to-tri-color-to-green-tea">Garbage Collection in Go: From Reference Counting to Tri-Color to Green Tea</a></h1>
 <h2 id="introduction" tabindex="-1"><a class="header-anchor" href="#introduction">Introduction</a></h2>
 <p>Garbage collection (GC) is one of the most critical components of any modern programming language runtime. It decides how and when memory is reclaimed, directly impacting latency, throughput, and the overall responsiveness of applications.</p>
 <p>Go has always prioritized simplicity and developer productivity, and its garbage collector plays a major role in that story. Unlike languages such as C and C++ that leave memory management to the programmer, Go ships with a sophisticated GC designed to keep latency low while scaling to multi-core systems.</p>
@@ -137,7 +137,7 @@ leading up to Go's current approach. We'll cover three major milestones:</p>
 <p>By the end, you'll not only understand what changed in Go 1.25, but also gain deeper insight into the
 trade-offs behind GC design - knowledge that's valuable far beyond Go itself.</p>
 <p>The full code for the toy implementations, benchmarks, and demos is available in this repository: <a href="https://github.com/gkoos/article-gc">https://github.com/gkoos/article-gc</a></p>
-<h2 id="heap-representation-(real-go-vs.-our-simplification)" tabindex="-1"><a class="header-anchor" href="#heap-representation-(real-go-vs.-our-simplification)">Heap Representation (Real Go vs. Our Simplification)</a></h2>
+<h2 id="heap-representation-real-go-vs-our-simplification" tabindex="-1"><a class="header-anchor" href="#heap-representation-real-go-vs-our-simplification">Heap Representation (Real Go vs. Our Simplification)</a></h2>
 <blockquote>
 <p><strong>Disclaimer:</strong> The toy implementations below are for educational purposes and do not reflect all optimizations, concurrency mechanisms, or edge cases present in Go's production garbage collector.</p>
 </blockquote>
@@ -239,7 +239,7 @@ Objects are divided into three sets during a collection cycle:</p>
 </ul>
 <p><strong>Historical note:</strong> Dijkstra's 1978 &quot;on-the-fly&quot; GC introduced the idea of tri-color marking, and it's influenced JVM, .NET, and Go.</p>
 <hr>
-<h3 id="green-tea-(go-1.25%2B)" tabindex="-1"><a class="header-anchor" href="#green-tea-(go-1.25%2B)">Green Tea (Go 1.25+)</a></h3>
+<h3 id="green-tea-go-125" tabindex="-1"><a class="header-anchor" href="#green-tea-go-125">Green Tea (Go 1.25+)</a></h3>
 <p>Go 1.25 introduced a major change with <em>Green Tea</em>, an algorithm designed to scale better across many cores and reduce coordination costs.</p>
 <p>Instead of thinking in terms of objects and colors, Green Tea shifts the perspective to <strong>spans</strong> - contiguous chunks of memory that contain multiple objects of the same size class.</p>
 <p>Key ideas:</p>
@@ -260,7 +260,7 @@ Objects are divided into three sets during a collection cycle:</p>
 <li>Still young - long-term behavior in production is being studied.</li>
 </ul>
 <p><strong>Historical note:</strong> Green Tea builds on decades of research into parallel and concurrent GCs. Similar span- and region-based strategies appear in JVM G1GC and Azul's collectors, but Go's variant is tuned specifically for its concurrency model.</p>
-<h3 id="other-algorithms-(honorable-mentions)" tabindex="-1"><a class="header-anchor" href="#other-algorithms-(honorable-mentions)">Other Algorithms (Honorable Mentions)</a></h3>
+<h3 id="other-algorithms-honorable-mentions" tabindex="-1"><a class="header-anchor" href="#other-algorithms-honorable-mentions">Other Algorithms (Honorable Mentions)</a></h3>
 <p>While our focus is on Reference Counting, Tri-Color, and Green Tea, other garbage collection strategies are worth knowing about:</p>
 <ul>
 <li>
@@ -402,7 +402,7 @@ func <span class="token function">freeObject</span><span class="token punctuatio
 <ul>
 <li><code>TriColorGC()</code> runs synchronously: the main allocation loop cannot proceed while it executes.</li>
 </ul>
-<h3 id="green-tea-(span-based-approximation)" tabindex="-1"><a class="header-anchor" href="#green-tea-(span-based-approximation)">Green Tea (Span-based Approximation)</a></h3>
+<h3 id="green-tea-span-based-approximation" tabindex="-1"><a class="header-anchor" href="#green-tea-span-based-approximation">Green Tea (Span-based Approximation)</a></h3>
 <p>Our toy model won't fully replicate Go 1.25's span-based GC, but we can simulate the key idea: <em>work distribution at the span level</em>.</p>
 <p>Here we treat each &quot;span&quot; as a batch of objects and mark them together.</p>
 <pre class="language-go"><code class="language-go"><span class="token keyword">const</span> spanSize <span class="token operator">=</span> <span class="token number">2</span> <span class="token comment">// just for demonstration</span>
@@ -540,7 +540,7 @@ func <span class="token function">GreenTeaGC</span><span class="token punctuatio
 </code></pre>
 <p>This output indicates that the main work completed faster with Green Tea, demonstrating its advantage in reducing application pause times.</p>
 <p>Although this is a simplified model and the numbers are illustrative only, it effectively showcases the key differences between blocking and incremental GC strategies, aligning with Go's goals for low-latency garbage collection.</p>
-<h2 id="playground%3A-experimenting-with-garbage-collection" tabindex="-1"><a class="header-anchor" href="#playground%3A-experimenting-with-garbage-collection">Playground: Experimenting with Garbage Collection</a></h2>
+<h2 id="playground-experimenting-with-garbage-collection" tabindex="-1"><a class="header-anchor" href="#playground-experimenting-with-garbage-collection">Playground: Experimenting with Garbage Collection</a></h2>
 <p>To make these ideas more interactive, <code>cmd/demo/main.go</code> serves as a playground for experimenting with our toy heap and garbage collectors.</p>
 <ul>
 <li>What it does: Lets you create objects, set up references, define roots, and trigger the different GC strategies (Reference Counting, Tri-Color, and Green Tea).</li>

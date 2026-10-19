@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -394,13 +394,13 @@
 <p>The cost is that results are approximate, though error bounds are well understood and tunable. For many real-world use cases—analytics, observability, telemetry—this trade-off is acceptable, as exact answers are rarely worth the additional cost.</p>
 <h2 id="real-world-examples" tabindex="-1"><a class="header-anchor" href="#real-world-examples">Real-World Examples</a></h2>
 <p>To see how these systems work in practice, let's look at scenarios where probabilistic approaches deliver value:</p>
-<h3 id="netflix-%E2%80%93-streaming-analytics-with-druid" tabindex="-1"><a class="header-anchor" href="#netflix-%E2%80%93-streaming-analytics-with-druid">Netflix – Streaming Analytics with Druid</a></h3>
+<h3 id="netflix-streaming-analytics-with-druid" tabindex="-1"><a class="header-anchor" href="#netflix-streaming-analytics-with-druid">Netflix – Streaming Analytics with Druid</a></h3>
 <p>Netflix uses Apache Druid to power real-time dashboards for user activity and content engagement. Druid's use of HyperLogLog and sketches allows engineers to track distinct users, session counts, and engagement metrics across millions of concurrent streams with sub-second latency.</p>
-<h3 id="yelp-%E2%80%93-user-behavior-analytics" tabindex="-1"><a class="header-anchor" href="#yelp-%E2%80%93-user-behavior-analytics">Yelp – User Behavior Analytics</a></h3>
+<h3 id="yelp-user-behavior-analytics" tabindex="-1"><a class="header-anchor" href="#yelp-user-behavior-analytics">Yelp – User Behavior Analytics</a></h3>
 <p>Yelp relies on Druid for interactive analytics on clickstream and business engagement data. With approximate queries, they can aggregate billions of daily events to understand user behavior and ad performance without resorting to costly batch jobs.</p>
-<h3 id="shopify-%E2%80%93-operational-monitoring-with-materialize" tabindex="-1"><a class="header-anchor" href="#shopify-%E2%80%93-operational-monitoring-with-materialize">Shopify – Operational Monitoring with Materialize</a></h3>
+<h3 id="shopify-operational-monitoring-with-materialize" tabindex="-1"><a class="header-anchor" href="#shopify-operational-monitoring-with-materialize">Shopify – Operational Monitoring with Materialize</a></h3>
 <p>Shopify adopted Materialize to process streaming data from Kafka in real time. Approximate aggregations help them monitor high-volume event streams (such as checkout attempts or API calls) continuously, keeping operational dashboards fresh without overloading storage.</p>
-<h3 id="cloudflare-%E2%80%93-edge-analytics" tabindex="-1"><a class="header-anchor" href="#cloudflare-%E2%80%93-edge-analytics">Cloudflare – Edge Analytics</a></h3>
+<h3 id="cloudflare-edge-analytics" tabindex="-1"><a class="header-anchor" href="#cloudflare-edge-analytics">Cloudflare – Edge Analytics</a></h3>
 <p>Cloudflare uses ClickHouse for network and security analytics across trillions of HTTP requests per day. Built-in approximate functions (<code>uniqHLL12</code>, quantile sketches) allow engineers to quickly answer questions like “how many unique IPs attacked this endpoint in the last 10 minutes?” across global data.</p>
 <h3 id="redisbloom-in-fraud-detection" tabindex="-1"><a class="header-anchor" href="#redisbloom-in-fraud-detection">RedisBloom in Fraud Detection</a></h3>
 <p>Several fintech companies embed RedisBloom in fraud detection pipelines. Bloom filters and Count-Min Sketches let them flag suspicious transaction patterns (for example, repeated failed login attempts across accounts) without storing all raw transaction data in memory.</p>

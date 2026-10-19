@@ -1883,5 +1883,25 @@
         
       </item>
     
+      <item>
+        <title>How to Implement a Distributed Recovery Ramp</title>
+        <link>https://blog.gaborkoos.com/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/</guid>
+        <pubDate>Mon, 19 Oct 2026 00:00:00 GMT</pubDate>
+
+        <description>A breaker closing can return full traffic to a dependency that is still fragile. How to ramp admission back gradually by giving the application control of the shared limit and leaving enforcement to the library.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>distributed systems</category>
+        
+        <category>resilience</category>
+        
+        <category>series--Distributed Resilience</category>
+        
+      </item>
+    
   </channel>
 </rss>

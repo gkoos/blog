@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792286129581" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1792369098815" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -133,7 +133,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 </ul>
 <p>The channel primitive embodies the CSP principle that underpins Go's concurrency philosophy: <em>don't communicate by sharing memory; share memory by communicating.</em></p>
 <p>In contrast to Java's <code>BlockingQueue</code> or pthreads condition variables, Go chose to make channels built into the language, with first-class syntax and tight runtime integration. This allows channels to express communication patterns naturally while remaining safe and type-checked.</p>
-<h2 id="hchan%3A-memory-layout-%26-implementation-details" tabindex="-1"><a class="header-anchor" href="#hchan%3A-memory-layout-%26-implementation-details"><code>hchan</code>: Memory Layout &amp; Implementation Details</a></h2>
+<h2 id="hchan-memory-layout-implementation-details" tabindex="-1"><a class="header-anchor" href="#hchan-memory-layout-implementation-details"><code>hchan</code>: Memory Layout &amp; Implementation Details</a></h2>
 <p>Every channel created with <code>make(chan T, N)</code> is represented internally by an <code>hchan</code> struct. Here's a simplified view:</p>
 <pre class="language-go"><code class="language-go">type hchan struct <span class="token punctuation">{</span>
     qcount   uint           <span class="token comment">// number of elements in the buffer</span>
@@ -177,7 +177,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 <li>This <code>sudog</code> is put into the channel's wait queue (a linked list for senders and another for receivers).</li>
 <li>When a matching operation happens, the <code>sudog</code> is popped off the queue, and the corresponding goroutine is woken up.</li>
 </ol>
-<h3 id="what's-inside-a-sudog%3F" tabindex="-1"><a class="header-anchor" href="#what's-inside-a-sudog%3F">What's Inside a sudog?</a></h3>
+<h3 id="whats-inside-a-sudog" tabindex="-1"><a class="header-anchor" href="#whats-inside-a-sudog">What's Inside a sudog?</a></h3>
 <p>From the Go runtime source (<code>runtime/runtime2.go</code>), a <code>sudog</code> holds:</p>
 <ul>
 <li>A pointer to the goroutine (<code>*g</code>) that's blocked.</li>
@@ -208,13 +208,13 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 <li>Used to resume the blocked goroutine by handing its value off and scheduling it runnable again.</li>
 <li>Recycled by the runtime's pool for reuse (to avoid allocations every time).</li>
 </ul>
-<h3 id="why-not-just-store-the-goroutine%3F" tabindex="-1"><a class="header-anchor" href="#why-not-just-store-the-goroutine%3F">Why Not Just Store the Goroutine?</a></h3>
+<h3 id="why-not-just-store-the-goroutine" tabindex="-1"><a class="header-anchor" href="#why-not-just-store-the-goroutine">Why Not Just Store the Goroutine?</a></h3>
 <p>Because the runtime needs extra context: not only which goroutine is waiting, but also what it's doing (sending or receiving, which channel, which value pointer, which select case). The <code>sudog</code> bundles all of that into a single structure.</p>
 <p>A key detail is that <code>sudog</code>s are pooled and reused by the runtime. This reduces garbage collector pressure, since channel-heavy programs (like servers handling thousands of goroutines) would otherwise generate massive amounts of short-lived allocations every time a goroutine blocks.</p>
 <p>Another subtlety: a single goroutine can be represented by multiple <code>sudog</code>s at once. This happens in a select statement, where the same goroutine is registered as waiting on several channels simultaneously. When one case succeeds, the runtime cancels the others and recycles those extra <code>sudog</code>s.</p>
-<h2 id="lifecycle-of-send%2Freceive" tabindex="-1"><a class="header-anchor" href="#lifecycle-of-send%2Freceive">Lifecycle of Send/Receive</a></h2>
+<h2 id="lifecycle-of-sendreceive" tabindex="-1"><a class="header-anchor" href="#lifecycle-of-sendreceive">Lifecycle of Send/Receive</a></h2>
 <p>Channel operations have a multi-step journey that ensures correctness under concurrency. Let's break down both sending and receiving:</p>
-<h3 id="sending-a-value-(ch-%3C--v)" tabindex="-1"><a class="header-anchor" href="#sending-a-value-(ch-%3C--v)">Sending a Value (<code>ch &lt;- v</code>)</a></h3>
+<h3 id="sending-a-value-ch---v" tabindex="-1"><a class="header-anchor" href="#sending-a-value-ch---v">Sending a Value (<code>ch &lt;- v</code>)</a></h3>
 <p><strong>1. Acquire lock</strong></p>
 <ul>
 <li>Every send operation starts by acquiring the channel’s mutex.</li>
@@ -256,7 +256,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 <li>Multiple blocked senders: senders are dequeued in FIFO order to avoid starvation.</li>
 <li>Spurious wakeups: the scheduler may wake a goroutine that finds the buffer still full, it will requeue itself.</li>
 </ul>
-<h3 id="receiving-a-value-(x-%3A%3D-%3C-ch)" tabindex="-1"><a class="header-anchor" href="#receiving-a-value-(x-%3A%3D-%3C-ch)">Receiving a Value (<code>x := &lt;-ch</code>)</a></h3>
+<h3 id="receiving-a-value-x--ch" tabindex="-1"><a class="header-anchor" href="#receiving-a-value-x--ch">Receiving a Value (<code>x := &lt;-ch</code>)</a></h3>
 <p><strong>1. Acquire lock</strong></p>
 <ul>
 <li>Protects access to the buffer and queues.</li>
@@ -304,7 +304,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 <li>Multiple blocked receivers on a channel that becomes closed: all are unparked and see zero values.</li>
 <li>Receivers that wake up due to a sender being unblocked from a select statement handle the value correctly, even under high concurrency.</li>
 </ul>
-<h3 id="simplified-pseudo-code%3A-chansend-%2F-chanrecv" tabindex="-1"><a class="header-anchor" href="#simplified-pseudo-code%3A-chansend-%2F-chanrecv">Simplified Pseudo-Code: <code>chansend</code> / <code>chanrecv</code></a></h3>
+<h3 id="simplified-pseudo-code-chansend-chanrecv" tabindex="-1"><a class="header-anchor" href="#simplified-pseudo-code-chansend-chanrecv">Simplified Pseudo-Code: <code>chansend</code> / <code>chanrecv</code></a></h3>
 <pre class="language-go"><code class="language-go">func <span class="token function">chansend</span><span class="token punctuation">(</span><span class="token parameter">c <span class="token operator">*</span>hchan<span class="token punctuation">,</span> val <span class="token constant">T</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
     <span class="token function">lock</span><span class="token punctuation">(</span>c<span class="token punctuation">)</span>
 
@@ -357,7 +357,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
     <span class="token keyword">return</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<h3 id="direct-stack-copy-vs.-buffered-copy" tabindex="-1"><a class="header-anchor" href="#direct-stack-copy-vs.-buffered-copy">Direct Stack Copy vs. Buffered Copy</a></h3>
+<h3 id="direct-stack-copy-vs-buffered-copy" tabindex="-1"><a class="header-anchor" href="#direct-stack-copy-vs-buffered-copy">Direct Stack Copy vs. Buffered Copy</a></h3>
 <p>An important optimization in Go's channel implementation is how values are copied:</p>
 <ul>
 <li><strong>Buffered path:</strong> if the channel has a buffer and it's not full, a sender copies its value into the heap-allocated channel buffer. Later, when a receiver comes along, the value is copied again - from the buffer into the receiver's stack. That's two memory moves, plus buffer bookkeeping.</li>
@@ -496,7 +496,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 </ul>
 </li>
 </ol>
-<h2 id="memory-model-%26-synchronization" tabindex="-1"><a class="header-anchor" href="#memory-model-%26-synchronization">Memory Model &amp; Synchronization</a></h2>
+<h2 id="memory-model-synchronization" tabindex="-1"><a class="header-anchor" href="#memory-model-synchronization">Memory Model &amp; Synchronization</a></h2>
 <p>One of the most important - yet often overlooked - aspects of Go channels is how they fit into the Go memory model. At first glance, channels might seem like simple FIFO queues, but they are also synchronization points that define <em>happens-before</em> relationships between goroutines.</p>
 <h3 id="happens-before-with-channels" tabindex="-1"><a class="header-anchor" href="#happens-before-with-channels">Happens-Before with Channels</a></h3>
 <p>The Go memory model states:</p>
@@ -587,7 +587,7 @@ go <span class="token function">func</span><span class="token punctuation">(</sp
 </ul>
 <h2 id="scheduler-integration" tabindex="-1"><a class="header-anchor" href="#scheduler-integration">Scheduler Integration</a></h2>
 <p>Go's channels are not just clever data structures - they're tightly woven into the runtime scheduler. This integration is what makes blocking channel operations feel natural and efficient.</p>
-<h3 id="the-g%2Fm%2Fp-model" tabindex="-1"><a class="header-anchor" href="#the-g%2Fm%2Fp-model">The G/M/P Model</a></h3>
+<h3 id="the-gmp-model" tabindex="-1"><a class="header-anchor" href="#the-gmp-model">The G/M/P Model</a></h3>
 <p>Go's scheduler uses three main entities:</p>
 <ul>
 <li><strong>G (Goroutine):</strong> The lightweight, user-space thread of execution.</li>
