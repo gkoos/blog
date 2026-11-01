@@ -20,6 +20,7 @@ tags:
 4. [How to Implement a Distributed Rate Limiter](/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/)
 5. [How to Combine Circuit Breakers, Bulkheads, and Rate Limiters](/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/)
 6. [How to Implement a Distributed Recovery Ramp](/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/)
+7. [Distributed Resilience - Cutting the Cost of Centralized Coordination](/posts/2026-11-01-Distributed-Resilience-Cutting-the-Cost-of-Centralized-Coordination/)
 
 Your service runs on twenty replicas that all call the same API. Following the earlier articles, you have given them a shared rate budget of 100 calls a second, with a burst allowance of 20. A distributed bulkhead caps concurrent calls at 20, and a circuit breaker records their outcomes so the fleet can stop calling when the API starts failing. Under normal load, the partner answers in about 80 ms and requests pass through all the policies nicely.
 

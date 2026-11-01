@@ -20,6 +20,7 @@ tags:
 4. [How to Implement a Distributed Rate Limiter](/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/)
 5. [How to Combine Circuit Breakers, Bulkheads, and Rate Limiters](/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/)
 6. [How to Implement a Distributed Recovery Ramp](/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/)
+7. [Distributed Resilience - Cutting the Cost of Centralized Coordination](/posts/2026-11-01-Distributed-Resilience-Cutting-the-Cost-of-Centralized-Coordination/)
 
 *The earlier posts in the series covered well known, universally accepted patterns for handling failures in distributed systems. Their implementation was relatively straightforward. This post presents a more opinionated approach that seems to be working for my use case, but unlike the previous ones, it involves more judgment and trade-offs rather than a clear-cut solution.*
 
