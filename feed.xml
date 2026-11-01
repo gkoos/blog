@@ -1903,5 +1903,25 @@
         
       </item>
     
+      <item>
+        <title>Distributed Resilience - Cutting the Cost of Centralized Coordination</title>
+        <link>https://blog.gaborkoos.com/posts/2026-11-01-Distributed-Resilience-Cutting-the-Cost-of-Centralized-Coordination/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-11-01-Distributed-Resilience-Cutting-the-Cost-of-Centralized-Coordination/</guid>
+        <pubDate>Sun, 01 Nov 2026 00:00:00 GMT</pubDate>
+
+        <description>A shared coordinator makes distributed limits correct and puts itself on the critical path of every admission. How to let each replica hold a bounded piece of the fleet&#39;s authority, what that costs, and what a four-replica sandbox measured.</description>
+        
+        <category>javascript</category>
+        
+        <category>typescript</category>
+        
+        <category>distributed systems</category>
+        
+        <category>resilience</category>
+        
+        <category>series--Distributed Resilience</category>
+        
+      </item>
+    
   </channel>
 </rss>

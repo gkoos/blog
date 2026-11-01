@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Distributed Resilience - Cutting the Cost of Centralized Coordination</title>
+  <meta name="description" content="A shared coordinator makes distributed limits correct and puts itself on the critical path of every admission. How to let each replica hold a bounded piece of the fleet&#39;s authority, what that costs, and what a four-replica sandbox measured.">
+
+  <!-- Facebook Meta Tags -->
+  <meta property="og:url" content="https://gaborkoos.com">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Distributed Resilience - Cutting the Cost of Centralized Coordination">
+  <meta property="og:description" content="A shared coordinator makes distributed limits correct and puts itself on the critical path of every admission. How to let each replica hold a bounded piece of the fleet&#39;s authority, what that costs, and what a four-replica sandbox measured.">
+  <meta property="og:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="twitter:domain" content="gaborkoos.com">
+  <meta property="twitter:url" content="https://gaborkoos.com">
+  <meta name="twitter:title" content="Distributed Resilience - Cutting the Cost of Centralized Coordination">
+  <meta name="twitter:description" content="A shared coordinator makes distributed limits correct and puts itself on the critical path of every admission. How to let each replica hold a bounded piece of the fleet&#39;s authority, what that costs, and what a four-replica sandbox measured.">
+  <meta name="twitter:image" content="https://opengraph.b-cdn.net/production/images/74740c4e-d40d-49be-83fb-7170084dbda1.png?token=3Pxj4Ccc7Z93zXgN6-HhJM8U3lpcnqtTs8xNIPoUzF4&height=614&width=620&expires=33290472379">
+
+  <!-- Meta Tags Generated via https://www.opengraph.xyz -->
+
+  <!-- Analytics -->
+  <script data-goatcounter="https://gkoos.goatcounter.com/count"  async src="//gc.zgo.at/count.js"></script>
+
+  
+  
+  
+
+
+
+  <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1793560687372" />
+  <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
+  <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="/assets/css/fix-katex.css">
+
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-['Inter',system-ui,sans-serif] antialiased leading-relaxed">
+  <!-- Header/Navigation with Theme Switcher -->
+  <header class="border-b border-gray-100 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 sticky top-0 z-10 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-6">
+      <nav>
+        <div class="flex items-center justify-between">
+          <div>
+            <a href="/" class="text-base sm:text-xl font-semibold text-gray-900 dark:text-white hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              a developer blog
+            </a>
+          </div>
+          <!-- Search -->
+          <form action="/search" method="get" role="search" class="flex-1 min-w-0 max-w-xs mx-2 sm:mx-4">
+            <label for="header-search" class="sr-only">Search</label>
+            <input id="header-search" type="search" name="q" placeholder="Search…" autocomplete="off"
+              class="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 py-1.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-teal-500 focus:border-teal-500 transition-colors" />
+          </form>
+          <div class="flex items-center space-x-4">
+            <!-- Theme Switcher Button (always visible) -->
+            <button id="theme-toggle" aria-label="Toggle dark mode" class="p-2 rounded focus:outline-none bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 transition-colors" style="display:inline-block;">
+              <span id="theme-toggle-light" style="display:none">🌞</span>
+              <span id="theme-toggle-dark" style="display:none">🌙</span>
+            </button>
+            <!-- Hamburger Menu Button (mobile only) -->
+            <button id="mobile-menu-toggle" aria-label="Toggle menu" class="md:hidden p-2 rounded focus:outline-none text-gray-700 dark:text-gray-200">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path id="hamburger-icon" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <!-- Navigation Links -->
+        <div id="mobile-menu" class="hidden md:flex md:items-center md:space-x-6 md:mt-0 mt-4 flex-col md:flex-row space-y-2 md:space-y-0">
+          <a href="/" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Home</a>
+          <a href="/series" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Series</a>
+          <a href="https://gaborkoos.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">About</a>
+          <a href="/publications" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Publications</a>
+          <a href="/code" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Code</a>
+          <a href="/consulting" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Consulting</a>
+          <a href="/categories" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Categories</a>
+          <a href="https://gaborkoos.substack.com" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">Newsletter</a>
+          <a href="/feed.xml" class="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors block md:inline">RSS</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+
+  <main class="max-w-4xl mx-auto px-6 py-12 transition-colors">
+  <div class="prose prose-lg prose-gray dark:prose-invert max-w-none" data-pagefind-body>
+    
+<article>
+  <h1 class="text-3xl font-bold mb-4">Distributed Resilience - Cutting the Cost of Centralized Coordination</h1>
+  <div class="flex items-center space-x-4 text-sm text-gray-500 mb-6">
+    <time datetime="2026-11-01T00:00:00.000Z" data-pagefind-meta="date:2026-11-01T00:00:00.000Z">Sun Nov 01 2026</time>
+    
+    
+      <span class="text-gray-300">•</span>
+      <div class="flex flex-wrap gap-2" data-pagefind-ignore>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">javascript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">typescript</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">distributed systems</div>
+        
+          <div class="flex items-center rounded-full bg-teal-500 text-white dark:bg-teal-400/10 dark:text-teal-300 px-3 py-1 text-xs font-medium leading-5">resilience</div>
+        
+      </div>
+    
+  </div>
+  <div class="prose dark:prose-invert max-w-none">
+    <p><em>This series follows circuit breakers, bulkheads, and rate limiters from their in-process foundations to implementations that coordinate across a fleet. This article examines how to take the coordinator off the request path, using <a href="https://github.com/gkoos/caracal">Caracal</a> as reference.</em></p>
+<ol>
+<li><a href="/posts/2026-09-14-How-to-Implement-a-Distributed-Circuit-Breaker/">How to Implement a Distributed Circuit Breaker</a></li>
+<li><a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/">How to Implement a Distributed Bulkhead</a></li>
+<li><a href="/posts/2026-09-22-Rate-Limiting-Without-the-Refill-Loop-Token-Bucket-vs-GCRA/">Rate Limiting Without the Refill Loop: Token Bucket vs GCRA</a></li>
+<li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
+<li><a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a></li>
+<li><a href="/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/">How to Implement a Distributed Recovery Ramp</a></li>
+<li><a href="/posts/2026-11-01-Distributed-Resilience-Cutting-the-Cost-of-Centralized-Coordination/">Distributed Resilience - Cutting the Cost of Centralized Coordination</a></li>
+</ol>
+<p>In the earlier posts in this series, we built the distributed resilience policies in <a href="https://github.com/gkoos/caracal">Caracal</a>. We started with a circuit breaker that shares observations across replicas, then added fleet-wide limits on concurrency and request rate. Redis holds the shared state and makes admission decisions atomically, allowing every replica to enforce the same policy against the same accounting.</p>
+<p>The <a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">composition article</a> brought those policies together and examined how their order changes what each one counts. The <a href="/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/">recovery ramp</a> then added shared runtime configuration, allowing an application to adjust the fleet’s limits while preserving existing work. By this point, Caracal could coordinate protection across a fleet and change its settings during recovery, with Redis involved in every admission.</p>
+<h2 id="the-coordinator-becomes-a-bottleneck" tabindex="-1"><a class="header-anchor" href="#the-coordinator-becomes-a-bottleneck">The coordinator becomes a bottleneck</a></h2>
+<p>In the original, strictly coordinated implementation, each policy makes its admission decision through a Redis call. A distributed bulkhead acquires a permit before starting work and releases it after the work settles, while the breaker reads its shared state and later reports the outcome. Composing policies adds coordinator calls around the same execution, with the admission checks completing before the dependency receives any work. The time spent waiting for those replies becomes part of the request's latency.</p>
+<p>The coordinator receives those checks at the rate requests arrive, including checks that end in rejection. At 1000 attempted calls a second, one admission check per call produces 1000 coordinator commands a second, before accounting for permit releases or outcome reports. Lowering the downstream limit reduces admitted work, while incoming requests continue to require admission decisions. The shared limit therefore leaves the coordinator exposed to the traffic being refused.</p>
+<p>A coordinator outage also prevents the distributed rate limiter and bulkhead from admitting work, because neither policy has enough information locally to establish that capacity is available. The breaker's fail-open setting governs only its own admission decision, so a later policy in the pipeline still refuses the call when Redis is unreachable. The application depends on the coordinator being available as well as the partner API it calls.</p>
+<p>I wanted to reduce these coordination calls while keeping admission informed by activity across the fleet. I began by investigating a design in which replicas exchanged their observations directly and made decisions from the state they held locally.</p>
+<h2 id="the-bright-idea-i-expected-to-win" tabindex="-1"><a class="header-anchor" href="#the-bright-idea-i-expected-to-win">The bright idea I expected to win</a></h2>
+<p>First I focused on the circuit breaker, since each replica already observes whether its own calls succeed or fail. Sharing those observations gives a process information about calls made elsewhere in the fleet, and the admission decision then runs against a local copy of that shared history. I expected this to preserve the benefit of a fleet-wide window while removing the coordinator calls from ordinary execution.</p>
+<p>The implementation used <a href="https://en.wikipedia.org/wiki/Gossip_protocol">gossip</a> to exchange counters between peers. Each replica recorded successes and failures in short time buckets, keeping a separate counter component for each process that produced observations. Receivers merged a component by retaining the larger value, which prevented duplicate updates from counting the same observation twice. An older value arriving after a newer one left that component unchanged. This is a <a href="https://en.wikipedia.org/wiki/Conflict-free_replicated_data_type">conflict-free replicated data type</a> type, or <em>CRDT</em>, with expiry rules that prevent an old message from restoring observations whose window has already passed.</p>
+<p>I was really proud of this idea. I built a deterministic simulator to compare the design with independent local breakers and a reference breaker that received the fleet's observations immediately. Requests had stable identities, with outcomes assigned independently of which requests a breaker admitted, so rejecting one request left the later workload unchanged. The experiments included a dependency that failed immediately and one whose failures only became visible when callers timed out. Replaying the same workload under each design showed how many additional failing calls it admitted, alongside successful calls lost through rejection.</p>
+<p>The simulator initially gave gossip a substantial advantage over independent breakers. In a cold-start profile, where the dependency failed before the replicas had accumulated any history, gossip reduced additional failed admissions from 200 to 52.4 across the fleet, averaged over thirty seeds. The protocol passed the experiment's stated protection and recovery budgets in all four tested profiles. Those results justified implementing the same comparison with real processes and Redis.</p>
+<p>Unfortunately, the real-process runs reduced that advantage considerably. With ten replicas receiving 500 requests a second, I started the dependency in failure for twelve seconds and then allowed it to recover, offering each design 20,001 requests over the run. Across ten seeded runs, the mean number of additional failed calls per replica, measured against the reference from the same seed, was:</p>
+<table>
+<thead>
+<tr>
+<th>Design</th>
+<th style="text-align:right">Additional failed calls per replica</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reference breaker</td>
+<td style="text-align:right">0 by definition</td>
+</tr>
+<tr>
+<td>Independent local breakers</td>
+<td style="text-align:right">18.7</td>
+</tr>
+<tr>
+<td>Gossip-based breakers</td>
+<td style="text-align:right">15.3</td>
+</tr>
+<tr>
+<td>Caracal's Redis-coordinated breaker</td>
+<td style="text-align:right">4.3</td>
+</tr>
+</tbody>
+</table>
+<p>Gossip reduced that excess by 18% compared with independent breakers, against the simulator's 74% reduction. The receiving replica continued admitting calls while observations travelled through the gossip protocol, and an update arriving after the failure threshold had been crossed left those earlier calls unaffected. The CRDT's merge rules ensured agreement once the same evidence had arrived, while admission depended on the evidence available at the instant of the decision. Caracal also used a count-based window rather than the experiment's time-bucketed window, with its retention aligned to the same ten-second period, so the comparison included those different detection mechanisms.</p>
+<p>I also tried a hybrid that retained the gossiped observations and added a shared OPEN flag in Redis. A replica that detected failure claimed the flag, and the others checked it periodically to stop traffic before their own windows had enough evidence. Recovery remained local, however, and repeated OPEN claims kept the shared restriction active after the dependency recovered. In a separate five-seed cold-start comparison, the hybrid rejected a mean of 4,507 requests that would have succeeded, against 1,697 for gossip alone. Giving a central flag control over admission required a recovery protocol that kept the replicas' state consistent with that flag.</p>
+<p>Several assumptions in the simulator also needed correcting once I measured the coordinator itself. It assigned twenty milliseconds to a Redis round trip, while simple exchanges against Redis on the same machine measured a median of 0.35 milliseconds. The original byte estimate assumed a small counter read, although the modelled coordinator actually retrieved an entire bucketed window. Replacing those assumptions with measurements changed the cost comparison, and the real-process runs became necessary checks on conclusions drawn from the simulation.</p>
+<h2 id="delegation-not-replacement" tabindex="-1"><a class="header-anchor" href="#delegation-not-replacement">Delegation, not replacement</a></h2>
+<p>The design I pursued next kept the verdict authoritative in Redis and cached it in each replica. <a href="https://github.com/laurells/redeye">RedEye</a> provided a working implementation to measure, with a versioned local cache refreshed by store responses and transition notifications. Its failure-rate strategy uses an exponentially weighted average and a single recovery trial, so its failure counts also reflect a different detection and recovery policy. Comparing that implementation with its own cache disabled isolated the saving: over 10,000 healthy calls, caching reduced store operations from 20,000 to 10,002. Each outcome still required a write, while almost every admission read was eliminated.</p>
+<p>I took that separation into Caracal: Redis would continue to determine the shared verdict, and replicas would use it locally for a defined period. A replica then needed rules for accepting a newer verdict and handling an expired one, while the coordinator retained responsibility for deciding when the fleet should open or recover. The experiment's full comparison extends beyond this article, but these measurements gave me a concrete basis for keeping centralized authority and reducing the calls needed to use it.</p>
+<p>The reframing that worked was smaller than the idea it replaced. Keep the coordinator as the source of truth, and let each replica hold a bounded piece of its authority, enforce it locally, and refresh it. The replica is not inventing policy; it is spending something it was given.</p>
+<p>The three policies need three different contracts, because the state they delegate is different in kind, and those differences decide what happens when the coordinator is unreachable.</p>
+<p><strong>A breaker verdict is re-derivable.</strong> The verdict is a function of observations the coordinator holds, so any replica could compute it given the data. That means a verdict can be cached, versioned, and <strong>reconciled</strong>: when the replica can reach the coordinator again, it adopts whatever the current verdict is. The failure mode is bounded staleness, and the replica can be configured to fail closed when its verdict is too old to trust.</p>
+<p><strong>A bulkhead allocation is reclaimable.</strong> A slot is not derivable from anything, but it can be <strong>leased</strong>. Give a replica a number of slots valid for a period, and let the lease expire: if the replica dies, the capacity comes back on its own, without anyone reconciling anything. A grace period lets a replica that was merely slow hand its slots back before the coordinator reissues them.</p>
+<p><strong>A rate-limit grant is consumable.</strong> Permits are spent, and no read can reconstruct what a replica holds — the coordinator only knows what it issued. So a grant is never reconciled. It is issued with a deadline anchored to the moment the request was <em>sent</em> rather than the moment the reply arrived, so a slow reply cannot extend its life; it is deduplicated by operation id, so a retried issuance cannot be granted twice; and if it expires unused, it is simply gone.</p>
+<p>Each delegated coordinator in Caracal implements the interface already used by its policy. Its local admission logic follows the rules above, allowing an application to change coordination strategies while keeping the existing policy composition.</p>
+<h2 id="the-breaker-first" tabindex="-1"><a class="header-anchor" href="#the-breaker-first">The breaker first</a></h2>
+<p>The breaker is the hardest of the three, so I started there. Its delegated state is a <em>decision</em> rather than a quantity, being wrong about it means admitting traffic to a dependency that is failing, and it has the most machinery: a verdict, a generation, a probe budget, and a policy for what to do when the coordinator cannot be reached. If the shape holds for the breaker, the other two are arithmetic.</p>
+<p>It is also the policy where I had the most prior art to borrow from. <a href="https://github.com/laurells/redeye">RedEye</a> is a Node circuit breaker with a Redis-backed distributed mode, and it does a version of this: an <strong>exclusive trial claim</strong> for recovery, held by a per-call ownership token so a claim can only be released by the instance that took it, with the claim expiring on its own so a slow dependency cannot wedge recovery; and an <strong>open-state cache</strong>, with a benchmark that compares no caching against a refresh interval and a local cache rather than assuming the cache pays for itself.</p>
+<p>Two things I took from it directly: cache the verdict, and fail closed rather than inventing one. What I changed: a single exclusive trial serialises recovery on one call at a time, and with a fleet of replicas the interesting question is how many probes are in flight <em>across the fleet</em>, not per process. So the trial became a budget, a fixed number of probe tokens, each with a deadline, held in the coordinator. A token that expires frees its slot on its own, which is the same anti-wedging property as an expiring claim, but the overshoot is bounded by design instead of being bounded to &quot;at most two&quot; by an ownership token. That distinction turned out to matter more than I expected, and I will come back to it.</p>
+<p>The replica stores a version with each cached verdict and rejects an update that is older than the one it already holds. A delayed CLOSED reply therefore leaves a newer OPEN verdict in place. To handle a change of coordinator, the session also supports a separate identifier called an incarnation. The deployment supplies this identifier, and the session switches to a new one only after reading the coordinator's current state. It then rejects messages carrying the retired identifier. The default Redis integration uses a fixed identifier, so detecting a replacement requires deployment support. The session reads the coordinator's current state at startup and again after reconnecting. Periodic reads also refresh the cache when no notifications arrive, while a notification triggers an earlier read through the same version checks.</p>
+<p>The one genuinely fiddly piece is the deadline: the coordinator reports <a href="/posts/2026-07-19-Beyond-Happy-Path-Engineering-Time/">the server's clock reading</a> and the record's expiry in <em>server</em> time, and a client cannot turn that into a local deadline without knowing the server's clock. So the remaining validity is treated as a duration and anchored to the moment the read was <em>sent</em>, which makes the replica's deadline conservative: it can be early, never late.</p>
+<p>From the outside, opting in is a different coordinator and nothing else. The strict coordinators are unchanged and remain the default:</p>
+<pre class="language-ts"><code class="language-ts"><span class="token keyword">import</span> <span class="token punctuation">{</span> circuitBreaker <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal"</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> redisCircuitBreakerCoordinator <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal/redis"</span>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> createServalBreaker <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">"@gkoos/caracal/serval"</span>
+
+<span class="token keyword">const</span> breaker <span class="token operator">=</span> <span class="token function">createServalBreaker</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  namespace<span class="token operator">:</span> <span class="token string">"svc:prod"</span><span class="token punctuation">,</span>
+  authority<span class="token operator">:</span> <span class="token function">redisCircuitBreakerCoordinator</span><span class="token punctuation">(</span>redis<span class="token punctuation">,</span> <span class="token punctuation">{</span> namespace<span class="token operator">:</span> <span class="token string">"svc:prod"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  replicaId<span class="token operator">:</span> <span class="token string">"replica-1"</span><span class="token punctuation">,</span>
+  freshnessMs<span class="token operator">:</span> <span class="token number">1_000</span><span class="token punctuation">,</span>          <span class="token comment">// how long a cached verdict admits without a read</span>
+  staleClosed<span class="token operator">:</span> <span class="token string">"fail-closed"</span><span class="token punctuation">,</span>  <span class="token comment">// what to do once a CLOSED verdict is too old</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token keyword">const</span> policy <span class="token operator">=</span> circuitBreaker<span class="token punctuation">.</span><span class="token function">distributed</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  name<span class="token operator">:</span> <span class="token string">"partner-api"</span><span class="token punctuation">,</span>
+  coordinator<span class="token operator">:</span> breaker<span class="token punctuation">.</span>coordinator<span class="token punctuation">,</span>
+  <span class="token function-variable function">scope</span><span class="token operator">:</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=></span> <span class="token string">"global"</span><span class="token punctuation">,</span>
+  minimumThroughput<span class="token operator">:</span> <span class="token number">20</span><span class="token punctuation">,</span>
+  failureThreshold<span class="token operator">:</span> <span class="token number">0.5</span><span class="token punctuation">,</span>
+  openMs<span class="token operator">:</span> <span class="token number">5_000</span><span class="token punctuation">,</span>
+  halfOpenProbes<span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span>
+  halfOpenSuccesses<span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre>
+<p>The policy is unchanged, the coordinator decides whether an admission costs a round trip or is answered from what the replica already holds.</p>
+<h2 id="then-the-other-two" tabindex="-1"><a class="header-anchor" href="#then-the-other-two">Then the other two</a></h2>
+<p>The delegated bulkhead requests an allocation of concurrent slots from Redis. With a fleet-wide limit of twenty, an allocation of four reserves four slots for one replica against that shared total. The replica acquires and releases slots within its allocation locally, so completing a call makes room for another without contacting Redis. A per-replica ceiling limits how much of the fleet's capacity one process holds.</p>
+<p>While handling traffic, the coordinator renews the allocation before its deadline. If renewal fails and the deadline passes, the replica stops admitting new work and keeps tracking calls already running. Redis retains the reservation for an additional grace period before making those slots available elsewhere. As with the <a href="/posts/2026-09-17-How-to-Implement-a-Distributed-Bulkhead/#a-permit-that-nobody-can-return">leases in the original bulkhead</a>, reclamation leaves running work unaffected, so a replacement allocation can overlap calls started under an expired one.</p>
+<p>The rate limiter obtains consumable permits from a separate Redis issuer. Redis charges the shared budget when it issues a grant, and the replica spends one permit for each local admission. A grant of ten permits therefore allows ten calls to start within its validity period, with no permit returned when a call finishes. Spending those permits after issuance also changes the timing of admissions compared with checking the shared rate schedule on every call.</p>
+<p>Each issuance carries an operation ID, allowing a retry after a lost reply to retrieve the recorded grant without charging the budget again. Grants use the send-time deadline described above, and unused permits are discarded when that deadline passes. The coordinator replenishes exhausted stock through another issuance request, while an unreachable issuer leaves the replica limited to its remaining unexpired permits. Once those are spent or expire, further calls are refused until a new grant arrives.</p>
+<p>Both coordinators keep their own local accounting and obtain authority through policy-specific Redis issuers. The session used by the breaker does not reconstruct their allocations or restore spent permits.</p>
+<h2 id="what-the-sandbox-measured" tabindex="-1"><a class="header-anchor" href="#what-the-sandbox-measured">What the sandbox measured</a></h2>
+<p>I measured the implementation in the <a href="https://github.com/gkoos/caracal-sandbox">Caracal sandbox</a>, where four application processes call an HTTP dependency through either strict or delegated coordinators. The healthy comparisons ran for fifteen seconds with a target of 400 requests a second and at most twenty client requests in flight. The dependency had a configured response time of thirty milliseconds, and its own counters recorded the calls it received and their peak concurrency.</p>
+<p>A wrapper around each replica's Redis client counted coordination commands, including calls made to obtain or renew delegated authority. The tables divide that count by all client executions, including rejected requests, and cover the complete policy pipeline. The latency figures come from the load generator and include policy rejections as well as calls that reached the dependency.</p>
+<p>The concurrency comparison uses <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/02-distributed-basic">study 02</a> as the strict baseline and <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/18-serval-delegated">study 18</a> for delegation, both configured with a shared bulkhead limit of five. The saved baseline used Caracal 0.10.0, while the delegated run used the published 0.12.0 package, so these results compare the recorded configurations across those releases.</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th style="text-align:right">Strict</th>
+<th style="text-align:right">Delegated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Caracal version</td>
+<td style="text-align:right">0.10.0</td>
+<td style="text-align:right">0.12.0</td>
+</tr>
+<tr>
+<td>Dependency peak in flight</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">5</td>
+</tr>
+<tr>
+<td>Successful client requests/s</td>
+<td style="text-align:right">105</td>
+<td style="text-align:right">107</td>
+</tr>
+<tr>
+<td>Client p99 latency</td>
+<td style="text-align:right">59 ms</td>
+<td style="text-align:right">54 ms</td>
+</tr>
+<tr>
+<td>Redis commands per execution</td>
+<td style="text-align:right">2.50</td>
+<td style="text-align:right">0.35</td>
+</tr>
+</tbody>
+</table>
+<p>The delegated run completed 1,598 calls and refused 4,693 for capacity, with no dependency failures or breaker openings. Its allocation was reused across those successful calls, and the saturated pool answered capacity refusals locally. The reduction in coordinator traffic therefore covered a workload in which most incoming requests were rejected.</p>
+<p>For the rate comparison, <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/28-serval-rate-burst">studies 28 and 29</a> both used published Caracal 0.12.0 with a shared rate of 100 calls a second and a burst of forty. The delegated coordinator requested grants of up to forty permits, while the strict coordinator checked each admission individually. Both studies gave the dependency capacity for sixty-four concurrent calls so that the configured burst had room to complete.</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th style="text-align:right">Strict</th>
+<th style="text-align:right">Delegated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Calls received by the dependency</td>
+<td style="text-align:right">1,541</td>
+<td style="text-align:right">1,539</td>
+</tr>
+<tr>
+<td>Mean dependency requests/s</td>
+<td style="text-align:right">103</td>
+<td style="text-align:right">103</td>
+</tr>
+<tr>
+<td>Peak arrivals in a one-second window</td>
+<td style="text-align:right">140</td>
+<td style="text-align:right">140</td>
+</tr>
+<tr>
+<td>Dependency peak in flight</td>
+<td style="text-align:right">20</td>
+<td style="text-align:right">11</td>
+</tr>
+<tr>
+<td>Client p99 latency</td>
+<td style="text-align:right">58 ms</td>
+<td style="text-align:right">52 ms</td>
+</tr>
+<tr>
+<td>Redis commands per execution</td>
+<td style="text-align:right">4.24</td>
+<td style="text-align:right">1.03</td>
+</tr>
+</tbody>
+</table>
+<p>The mean rate includes the allowance spent from the initial burst. Both configurations reached the same peak one-second rate under this workload, while their peak concurrency differed because admissions were distributed differently over time. The ten-permit delegated run in <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/25-serval-rate-delegated">study 25</a> also recorded 1.03 commands per execution, so increasing the grant produced no reduction in that aggregate measure. That comparison changes the configured burst along with the grant size, and the load generator's steady arrivals leave simultaneous spending of held grants across replicas untested.</p>
+<p>The dependency-failure comparison in <a href="https://github.com/gkoos/caracal-sandbox/tree/main/case-studies/23-serval-dependency-fault">studies 23 and 24</a> used published Caracal 0.12.0 in both runs. Each run lasted twenty seconds, with the dependency failing every call from the third second through the ninth. Both configurations used a ten-observation breaker window and a bulkhead limit of five, while the delegated breaker retained a CLOSED verdict for up to five seconds.</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th style="text-align:right">Strict</th>
+<th style="text-align:right">Delegated</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Successful client requests</td>
+<td style="text-align:right">1,018</td>
+<td style="text-align:right">953</td>
+</tr>
+<tr>
+<td>Failed calls recorded by the dependency</td>
+<td style="text-align:right">55</td>
+<td style="text-align:right">191</td>
+</tr>
+<tr>
+<td>Dependency peak in flight</td>
+<td style="text-align:right">5</td>
+<td style="text-align:right">5</td>
+</tr>
+<tr>
+<td>Probe-started events</td>
+<td style="text-align:right">6</td>
+<td style="text-align:right">6</td>
+</tr>
+<tr>
+<td>Client p99 latency</td>
+<td style="text-align:right">53 ms</td>
+<td style="text-align:right">106 ms</td>
+</tr>
+<tr>
+<td>Redis commands per execution</td>
+<td style="text-align:right">2.25</td>
+<td style="text-align:right">0.35</td>
+</tr>
+</tbody>
+</table>
+<p>Both breakers returned to CLOSED after the dependency recovered. A cached CLOSED verdict allows a replica to admit work until a reply updates that verdict or its freshness period ends. Retries were enabled in both runs, so the dependency's failure count includes repeated attempts made for the same client execution.</p>
+<p>Each table describes one saved run per configuration in a single-machine sandbox. The summaries retain the library version and configuration, and the study files provide the workload settings needed to repeat the comparison.</p>
+<h2 id="failure-behavior-and-operating-limits" tabindex="-1"><a class="header-anchor" href="#failure-behavior-and-operating-limits">Failure behavior and operating limits</a></h2>
+<p>The outage studies disconnected each application's Redis client from the fourth second until the 12th, while leaving Redis and its stored state intact. Across the full fifteen-second runs, the strict configuration completed 767 client requests and the delegated configuration completed 884. Both recorded a peak of five calls in flight at the dependency. Delegation allowed replicas to continue using authority they already held, but that authority still expired during the outage, after which they needed Redis before they could resume admitting work.</p>
+<p>The breaker in these studies was configured to allow calls when coordination failed. The distributed bulkhead still required a valid allocation, so the breaker's failure policy could not keep the application serving once those allocations expired. A separate run added a local bulkhead with a ceiling of two calls per process. With four processes, that placed an additional limit of eight on their combined locally tracked concurrency, although the measured peak remained five and never exercised that limit. A local ceiling constrains each process while distributed authority remains usable, and it does not extend the allocation's lifetime.</p>
+<p>The rate limiter has less authority to carry through an outage because every admission spends a permit. In the delegated rate-outage study, the dependency received 407 calls over fifteen seconds, averaging 27 a second against a configured rate of 100. That average covers the whole run, including the periods before disconnection and after reconnection. The limiter recorded 1,864 admissions for which it could not obtain a coordinator decision, while the bulkhead also refused work during the outage. The result reflects the composed pipeline, with exhausted or expired rate grants preventing further admissions until the issuer became reachable. Adding a local rate limiter would constrain each process's request rate, but it would not replenish the distributed grant.</p>
+<p>The amount of coordinator traffic also depends on how authority is consumed. A bulkhead allocation can serve successive calls as slots are released, whereas a rate grant must be replaced after its permits are spent. An issuer refusal can include a retry delay, allowing the replica to reject further calls locally until that delay passes. Requests to replenish stock still require coordination, and those attempts contribute to the rate limiter's higher command count in the preceding results. During the outage, the recording wrapper also counted calls that failed on a disconnected Redis client, so its figures measure coordination attempts rather than commands confirmed to have reached Redis.</p>
+<p>The dependency-failure studies exposed a problem in the original probe accounting. The breaker limited probes currently in flight, and settling a probe returned its allowance even when the result supplied no evidence about the dependency. A replica holding a cached HALF_OPEN verdict continued forwarding admission requests to the coordinator. When subsequent policies refused those probes, each inconclusive settlement made room for another, allowing the next request to repeat the process. An early local-build run recorded 512 probe starts with <code>halfOpenProbes</code> set to three, and the breaker never returned to CLOSED. The dependency's measured peak concurrency remained five, so that probe count describes repeated admissions over the run.</p>
+<p>The shared breaker script now keeps an inconclusive result from restoring the probe allowance for the current recovery window. The allowance is renewed on the configured cooldown, and leased probe tokens can still be reclaimed when their holders disappear. This change affects the strict coordinator as well as the delegated one. The corrected run reported in the preceding section completed recovery with six probe-started events.</p>
+<p>A separate failed run exposed a mismatch between the breaker configuration and the observations it received. Its window retained the last hundred outcomes, while the bulkhead rejected much of the offered traffic before a dependency call began. Those policy refusals correctly supplied no evidence about dependency health. With fewer completed calls reaching the breaker during the fault, healthy outcomes from before the failure remained in the window longer, and the breaker did not open during the injected failure. I reduced the study's window to ten observations so that it could respond within that failure interval. The window size needs to reflect how often dependency calls complete after admission control.</p>
+<h2 id="closing" tabindex="-1"><a class="header-anchor" href="#closing">Closing</a></h2>
+<p>The experiments led me to keep shared admission authority in Redis and reduce how often replicas need to consult it. This design is available in Caracal as an experimental feature called <a href="https://github.com/gkoos/caracal/tree/main/docs/serval">Serval</a>, whose delegated coordinators use the existing policy interfaces. In the sandbox, reusable bulkhead allocations reduced coordination traffic while keeping admitted throughput close to the strict configuration.</p>
+<p>The dependency-failure comparison also shows why command counts alone cannot determine the choice. The delegated configuration sent more failing calls to the dependency while using fewer coordinator commands. Its cached verdict allowed work to continue before the replica learned that the breaker had opened, and the freshness setting controls how long that remains possible. During a coordinator outage, the application can use its remaining authority only until the relevant deadline or budget is exhausted.</p>
+<p>I would keep strict coordination where its measured cost is acceptable, while delegation becomes useful when those exchanges consume enough latency or coordinator capacity to justify the additional local state and its failure behavior. Caracal allows that decision to be made separately for each policy, so an application can reuse bulkhead allocations locally while continuing to check the shared breaker on every admission.</p>
+
+  </div>
+</article>
+
+  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 mt-20 transition-colors">
+    <div class="max-w-4xl mx-auto px-6 py-12">
+      <div class="text-center text-sm text-gray-600 dark:text-gray-300">
+        Subscribe to the newsletter:
+        <iframe src="https://gaborkoos.substack.com/embed?transparent=1" width="480" height="320" style="border: 0; background: transparent; display: block; margin: 0 auto; width: min(480px, 100%); max-width: 100%;" frameborder="0" scrolling="no"></iframe>
+        <p>&copy; <span id="footer-year"></span> Gabor Koos</p>
+      </div>
+    </div>
+  </footer>
+  <!-- Theme Switcher & Mobile Menu Script -->
+  <script>
+    // Footer year
+    document.getElementById('footer-year').textContent = new Date().getFullYear();
+    
+    // Theme switcher logic
+    const root = document.documentElement;
+    const themeToggle = document.getElementById('theme-toggle');
+    const lightIcon = document.getElementById('theme-toggle-light');
+    const darkIcon = document.getElementById('theme-toggle-dark');
+    function setTheme(mode) {
+      if (mode === 'dark') {
+        root.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        darkIcon.style.display = 'none';
+        lightIcon.style.display = '';
+      } else {
+        root.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        darkIcon.style.display = '';
+        lightIcon.style.display = 'none';
+      }
+    }
+    // Initial theme
+    const userTheme = localStorage.getItem('theme');
+    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (userTheme === 'dark' || (!userTheme && systemDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+    // Button is always visible; only icons are toggled
+    themeToggle.addEventListener('click', () => {
+      if (root.classList.contains('dark')) {
+        setTheme('light');
+      } else {
+        setTheme('dark');
+      }
+    });
+
+    // Mobile menu toggle
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const mobileMenu = document.getElementById('mobile-menu');
+    const hamburgerIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
+    
+    mobileMenuToggle.addEventListener('click', () => {
+      const isHidden = mobileMenu.classList.contains('hidden');
+      if (isHidden) {
+        mobileMenu.classList.remove('hidden');
+        mobileMenu.classList.add('flex');
+        hamburgerIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+      } else {
+        mobileMenu.classList.add('hidden');
+        mobileMenu.classList.remove('flex');
+        hamburgerIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+      }
+    });
+  </script>
+</body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('pre code').forEach(function (codeBlock) {
+    var pre = codeBlock.parentNode;
+    pre.style.position = 'relative';
+    pre.style.overflow = 'auto';
+
+    var button = document.createElement('button');
+    button.className = 'copy-btn';
+    button.type = 'button';
+    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    button.style = 'position:absolute;top:0.2em;right:0.2em;padding:0.05em 0.05em;width:1.2em;height:1.2em;display:flex;align-items:center;justify-content:center;background:#eee;border-radius:0.2em;border:none;cursor:pointer;z-index:1;opacity:0.7;box-shadow:0 2px 8px rgba(0,0,0,0.08);transition:opacity 0.2s;pointer-events:auto;';
+    button.onmouseenter = function() { button.style.opacity = '1'; };
+    button.onmouseleave = function() { button.style.opacity = '0.7'; };
+    pre.appendChild(button);
+    button.addEventListener('click', function () {
+      navigator.clipboard.writeText(codeBlock.innerText);
+      var original = button.innerHTML;
+      button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(function () {
+        button.innerHTML = original;
+      }, 1200);
+    });
+  });
+});
+</script>
+
+</body>
+</html>

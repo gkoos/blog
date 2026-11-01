@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1792453484627" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1793560687372" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -124,6 +124,7 @@
 <li><a href="/posts/2026-09-24-How-to-Implement-a-Distributed-Rate-Limiter/">How to Implement a Distributed Rate Limiter</a></li>
 <li><a href="/posts/2026-09-25-How-to-Combine-Circuit-Breakers-Bulkheads-and-Rate-Limiters/">How to Combine Circuit Breakers, Bulkheads, and Rate Limiters</a></li>
 <li><a href="/posts/2026-10-19-How-to-Implement-a-Distributed-Recovery-Ramp/">How to Implement a Distributed Recovery Ramp</a></li>
+<li><a href="/posts/2026-11-01-Distributed-Resilience-Cutting-the-Cost-of-Centralized-Coordination/">Distributed Resilience - Cutting the Cost of Centralized Coordination</a></li>
 </ol>
 <p><em>The earlier posts in the series covered well known, universally accepted patterns for handling failures in distributed systems. Their implementation was relatively straightforward. This post presents a more opinionated approach that seems to be working for my use case, but unlike the previous ones, it involves more judgment and trade-offs rather than a clear-cut solution.</em></p>
 <p>A circuit breaker stops calls to a failing dependency and eventually lets a few probes through to see whether it can accept work again. When those probes succeed, the breaker closes and ordinary traffic resumes. A dependency that can handle a few requests may still struggle under its usual load, especially while caches are cold or capacity is coming back online. A <strong>recovery ramp</strong> gives it time by increasing the admitted traffic gradually.</p>
