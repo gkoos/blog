@@ -149,7 +149,7 @@ fetch(url, { signal })
 controller.abort();
 ```
 
-Here, `controller.abort()` doesn't magically stop every line of JavaScript. Instead, it informs any cooperating API - in this case, `fetch` - that the work is no longer desired. `fetch` responds by rejecting its promise with an `AbortError` and closing the underlying network connection. That's all that happens automatically.
+Here, `controller.abort()` doesn't magically stop every line of JavaScript. Instead, it informs any cooperating API - in this case, `fetch` - that the work is no longer desired. `fetch` responds by rejecting its promise with an `AbortError` and closing the underlying network connection. That's all that happens automatically. The rejection is a `DOMException` whose `name` is the same in every runtime but whose message text is not; [Host-Generated Errors](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#host-generated-errors) lists the messages in Node.js, Deno, Bun, and three browsers.
 
 ### What AbortController can do
 

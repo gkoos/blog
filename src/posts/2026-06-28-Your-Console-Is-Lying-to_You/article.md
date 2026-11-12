@@ -341,7 +341,7 @@ logger.info('request_finished', {
 })
 ```
 
-Production debugging needs queryable logs, correlation IDs, and timestamped events, not console snapshots. Tracing requests across services and time belongs in observability tooling, not the console.
+Production debugging needs queryable logs, correlation IDs, and timestamped events, not console snapshots. Tracing requests across services and time belongs in observability tooling, not the console. When the logged value is an error, [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#your-logger-may-be-hiding-the-failure) shows what Pino and Winston keep of it by default.
 
 ## Conclusion
 
@@ -352,4 +352,4 @@ Remember, `console.log()` is not broken. It is optimized for speed, interactivit
 
 Do not stop using the console, stop trusting it blindly.
 
-This is part of the same hidden-assumption pattern as [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/), [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/), [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/), [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/), [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/), and [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/).
+This is part of the same hidden-assumption pattern as [Your HTTP Client Is Lying to You](/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/), [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/), [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/), [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/), [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/), [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/), and [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/).

@@ -315,7 +315,7 @@ console.log(copy)
 // { tags: {}, lookup: {}, pattern: {}, error: {} }
 ```
 
-Nothing in the result identifies the original type of each empty object. Their contents have also been discarded, so the receiver cannot reconstruct them from the JSON alone.
+Nothing in the result identifies the original type of each empty object. Their contents have also been discarded, so the receiver cannot reconstruct them from the JSON alone. [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#json-does-not-understand-errors) looks at the `Error` case in detail.
 
 Special numeric values follow another conversion rule. JSON numbers cannot represent `NaN` or either sign of infinity, so `JSON.stringify` writes `null` for them.
 
@@ -899,3 +899,4 @@ The remaining posts apply the same idea to other familiar abstractions. Each one
 - [Your Recursion Is Lying to You](/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/)
 - [Your Package Manager Is Lying to You](/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/)
 - [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/)
+- [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/)

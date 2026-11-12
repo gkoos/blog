@@ -251,3 +251,4 @@ Dependency tools are not the only place where clean abstractions can hide operat
 - [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/)
 - [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/)
 - [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/)
+- [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/)

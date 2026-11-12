@@ -440,3 +440,4 @@ Dates are not the only things lying to you in JavaScript. Other posts in the ser
 - [Your console.log Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)
 - [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/)
 - [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/)
+- [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/)

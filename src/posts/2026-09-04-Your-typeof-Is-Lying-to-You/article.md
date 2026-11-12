@@ -101,6 +101,8 @@ if (typeof err === "object") {
 
 And there you go, you fell into the classic trap.
 
+The same trap waits in `catch` blocks, which receive whatever was thrown, `null` included. [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#thrown-values-are-not-always-errors) covers it.
+
 ## The deeper point
 
 JavaScript has at least two ideas floating around the word "type". One is the runtime classification that `typeof` exposes. The other is the semantic kind of value you are dealing with in your program: array, regex, Date, Map, plain object, function object, primitive, and so on.
@@ -144,4 +146,5 @@ And JavaScript has even bigger lies:
 - [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/)
 - [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/)
 - [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/)
-- [YourModules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/) 
+- [Your Modules Are Lying to You](/posts/2026-08-14-Your-Modules-Are-Lying-to-You/)
+- [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/)

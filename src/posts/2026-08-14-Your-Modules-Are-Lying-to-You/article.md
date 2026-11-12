@@ -850,3 +850,4 @@ The same hidden-assumption pattern appears elsewhere in JavaScript tooling and d
 - [Your Console Is Lying to You](/posts/2026-06-28-Your-Console-Is-Lying-to_You/) covers live object inspection and timing-sensitive output.
 - [Your JS Date Is Lying to You](/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/) explores parsing, mutation, timezones, and normalization.
 - [Your JSON Is Lying to You](/posts/2026-08-03-Your-JSON-Is-Lying-to-You/) follows values that change shape while crossing a serialization boundary.
+- [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/) follows a failure from creation to the log line and shows what each serializer and boundary keeps.

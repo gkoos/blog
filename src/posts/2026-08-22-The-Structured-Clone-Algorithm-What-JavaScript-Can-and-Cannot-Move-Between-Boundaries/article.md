@@ -563,7 +563,7 @@ function toErrorMessage(error) {
 }
 ```
 
-The conversion chooses the fields that matter to the application instead of inheriting an engine's current `Error` serialization behaviour.
+The conversion chooses the fields that matter to the application instead of inheriting an engine's current `Error` serialization behaviour. [Your JS Error Is Lying to You](/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#structured-cloning-keeps-more-but-not-everything) compares what `structuredClone` keeps of an error in Node.js, Deno, Bun, Chrome, Firefox, and WebKit.
 
 ### Host Objects Depend on the Environment
 
