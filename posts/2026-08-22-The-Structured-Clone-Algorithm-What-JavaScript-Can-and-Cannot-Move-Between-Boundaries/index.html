@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1793560687372" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1794454889300" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -555,7 +555,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
   <span class="token punctuation">}</span>
 <span class="token punctuation">}</span>
 </code></pre>
-<p>The conversion chooses the fields that matter to the application instead of inheriting an engine's current <code>Error</code> serialization behaviour.</p>
+<p>The conversion chooses the fields that matter to the application instead of inheriting an engine's current <code>Error</code> serialization behaviour. <a href="/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#structured-cloning-keeps-more-but-not-everything">Your JS Error Is Lying to You</a> compares what <code>structuredClone</code> keeps of an error in Node.js, Deno, Bun, Chrome, Firefox, and WebKit.</p>
 <h3 id="host-objects-depend-on-the-environment" tabindex="-1"><a class="header-anchor" href="#host-objects-depend-on-the-environment">Host Objects Depend on the Environment</a></h3>
 <p>Web APIs opt supported platform objects into structured serialization. <code>Blob</code>, <code>File</code>, and several graphics types define how their internal data crosses a boundary. A DOM node has no corresponding representation and throws a <code>DataCloneError</code>:</p>
 <pre class="language-js"><code class="language-js"><span class="token function">structuredClone</span><span class="token punctuation">(</span>document<span class="token punctuation">.</span>body<span class="token punctuation">)</span>

@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1793560687372" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1794454889300" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -197,7 +197,7 @@ p<span class="token punctuation">.</span><span class="token function">then</span
 <span class="token comment">// Later, trigger abort</span>
 controller<span class="token punctuation">.</span><span class="token function">abort</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre>
-<p>Here, <code>controller.abort()</code> doesn't magically stop every line of JavaScript. Instead, it informs any cooperating API - in this case, <code>fetch</code> - that the work is no longer desired. <code>fetch</code> responds by rejecting its promise with an <code>AbortError</code> and closing the underlying network connection. That's all that happens automatically.</p>
+<p>Here, <code>controller.abort()</code> doesn't magically stop every line of JavaScript. Instead, it informs any cooperating API - in this case, <code>fetch</code> - that the work is no longer desired. <code>fetch</code> responds by rejecting its promise with an <code>AbortError</code> and closing the underlying network connection. That's all that happens automatically. The rejection is a <code>DOMException</code> whose <code>name</code> is the same in every runtime but whose message text is not; <a href="/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#host-generated-errors">Host-Generated Errors</a> lists the messages in Node.js, Deno, Bun, and three browsers.</p>
 <h3 id="what-abortcontroller-can-do" tabindex="-1"><a class="header-anchor" href="#what-abortcontroller-can-do">What AbortController can do</a></h3>
 <ul>
 <li><strong>Signal intent</strong>: Any consumer that observes the signal can react.</li>

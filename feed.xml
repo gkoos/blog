@@ -1923,5 +1923,31 @@
         
       </item>
     
+      <item>
+        <title>Your JS Error Is Lying to You</title>
+        <link>https://blog.gaborkoos.com/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/</link>
+        <guid>https://blog.gaborkoos.com/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/</guid>
+        <pubDate>Thu, 12 Nov 2026 00:00:00 GMT</pubDate>
+
+        <description>A JavaScript Error is a runtime object, and what you learn from it depends on the tool that inspects it. Follow a failure through creation, stack traces, cause chains, runtimes, serialization, process boundaries, and logs to see what survives.</description>
+        
+        <category>tutorials</category>
+        
+        <category>javascript</category>
+        
+        <category>errors</category>
+        
+        <category>error-handling</category>
+        
+        <category>debugging</category>
+        
+        <category>logging</category>
+        
+        <category>... is lying to you</category>
+        
+        <category>series--JavaScript Is Lying to You</category>
+        
+      </item>
+    
   </channel>
 </rss>

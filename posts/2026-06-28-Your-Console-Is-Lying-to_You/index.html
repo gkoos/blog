@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1793560687372" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1794454889300" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -355,7 +355,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
   durationMs<span class="token punctuation">,</span>
 <span class="token punctuation">}</span><span class="token punctuation">)</span>
 </code></pre>
-<p>Production debugging needs queryable logs, correlation IDs, and timestamped events, not console snapshots. Tracing requests across services and time belongs in observability tooling, not the console.</p>
+<p>Production debugging needs queryable logs, correlation IDs, and timestamped events, not console snapshots. Tracing requests across services and time belongs in observability tooling, not the console. When the logged value is an error, <a href="/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#your-logger-may-be-hiding-the-failure">Your JS Error Is Lying to You</a> shows what Pino and Winston keep of it by default.</p>
 <h2 id="conclusion" tabindex="-1"><a class="header-anchor" href="#conclusion">Conclusion</a></h2>
 <p>Remember, <code>console.log()</code> is not broken. It is optimized for speed, interactivity, and convenience, not for preserving exact truth at every point in time. That tradeoff is why you may see confusing behavior around live references, async timing, scheduler boundaries, and framework updates. The logs are often technically correct, but easy to misinterpret. Use the console as a fast exploration tool, then upgrade your approach when the question gets precise:</p>
 <ul>
@@ -364,7 +364,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li>Need production truth? Structured logs with stable fields and correlation IDs.</li>
 </ul>
 <p>Do not stop using the console, stop trusting it blindly.</p>
-<p>This is part of the same hidden-assumption pattern as <a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a>, <a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a>, <a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a>, <a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/">Your JS Date Is Lying to You</a>, <a href="/posts/2026-08-03-Your-JSON-Is-Lying-to-You/">Your JSON Is Lying to You</a>, and <a href="/posts/2026-08-14-Your-Modules-Are-Lying-to-You/">Your Modules Are Lying to You</a>.</p>
+<p>This is part of the same hidden-assumption pattern as <a href="/posts/2026-04-19-Your-HTTP-Client-Is-Lying-to-You/">Your HTTP Client Is Lying to You</a>, <a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a>, <a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a>, <a href="/posts/2026-07-21-Your-JS-Date-Is-Lying-to-You/">Your JS Date Is Lying to You</a>, <a href="/posts/2026-08-03-Your-JSON-Is-Lying-to-You/">Your JSON Is Lying to You</a>, <a href="/posts/2026-08-14-Your-Modules-Are-Lying-to-You/">Your Modules Are Lying to You</a>, and <a href="/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/">Your JS Error Is Lying to You</a>.</p>
 
   </div>
 </article>

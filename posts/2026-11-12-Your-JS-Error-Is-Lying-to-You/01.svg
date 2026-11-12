@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1040" height="540" viewBox="0 0 1040 540" role="img" aria-labelledby="title desc">
+  <title id="title">The failure structure of an AggregateError</title>
+  <desc id="desc">An AggregateError named All attempts failed has three members. Two are errors that each have a cause, Primary unavailable caused by ECONNREFUSED and Replica timed out caused by ETIMEDOUT. The third is a nested AggregateError named Fallbacks failed with two members, Region A unavailable and Region B unavailable. Members of errors are drawn as solid lines and causes as dashed lines.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2f4858"/>
+    </marker>
+    <marker id="arrowcause" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#b08f54"/>
+    </marker>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#18313f" flood-opacity="0.14"/>
+    </filter>
+  </defs>
+
+  <rect width="1040" height="540" fill="#f7f4ee"/>
+
+  <text x="520" y="44" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#20313a">One AggregateError, several branches</text>
+  <text x="520" y="72" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" fill="#53646d">A member of errors is an independent failure, and a cause is the failure underneath one error</text>
+
+  <!-- edges: members of errors -->
+  <path d="M 520 160 V 200 H 150 V 236" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 520 160 V 200 H 410 V 236" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 520 160 V 200 H 770 V 236" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 770 296 V 336 H 640 V 372" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <path d="M 770 296 V 336 H 900 V 372" fill="none" stroke="#2f4858" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- edges: causes -->
+  <line x1="150" y1="296" x2="150" y2="372" stroke="#b08f54" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#arrowcause)"/>
+  <line x1="410" y1="296" x2="410" y2="372" stroke="#b08f54" stroke-width="2.5" stroke-dasharray="7 6" marker-end="url(#arrowcause)"/>
+  <rect x="120" y="318" width="60" height="26" rx="13" fill="#efe8d8" stroke="#b08f54"/>
+  <text x="150" y="336" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#654d23">cause</text>
+  <rect x="380" y="318" width="60" height="26" rx="13" fill="#efe8d8" stroke="#b08f54"/>
+  <text x="410" y="336" text-anchor="middle" font-family="Arial, sans-serif" font-size="13" font-weight="700" fill="#654d23">cause</text>
+
+  <!-- root -->
+  <g filter="url(#shadow)">
+    <rect x="410" y="104" width="220" height="56" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="520" y="129" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#654d23">All attempts failed</text>
+    <text x="520" y="148" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">AggregateError</text>
+  </g>
+
+  <!-- level 2 -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="240" width="200" height="56" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="150" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Primary unavailable</text>
+    <text x="150" y="284" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">Error</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="310" y="240" width="200" height="56" rx="8" fill="#ffffff" stroke="#2f4858" stroke-width="2"/>
+    <text x="410" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#20313a">Replica timed out</text>
+    <text x="410" y="284" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">Error</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="670" y="240" width="200" height="56" rx="8" fill="#efe8d8" stroke="#b08f54" stroke-width="2"/>
+    <text x="770" y="265" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#654d23">Fallbacks failed</text>
+    <text x="770" y="284" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">AggregateError</text>
+  </g>
+
+  <!-- level 3 -->
+  <g filter="url(#shadow)">
+    <rect x="50" y="376" width="200" height="56" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="150" y="401" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">ECONNREFUSED</text>
+    <text x="150" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">Error</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="310" y="376" width="200" height="56" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="410" y="401" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">ETIMEDOUT</text>
+    <text x="410" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">Error</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="540" y="376" width="200" height="56" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="640" y="401" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">Region A unavailable</text>
+    <text x="640" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">Error</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="800" y="376" width="200" height="56" rx="8" fill="#f4e4df" stroke="#c37a68" stroke-width="2"/>
+    <text x="900" y="401" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#7b3b2e">Region B unavailable</text>
+    <text x="900" y="420" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#53646d">Error</text>
+  </g>
+
+  <!-- legend -->
+  <g font-family="Arial, sans-serif" font-size="13" fill="#53646d">
+    <rect x="50" y="487" width="22" height="16" rx="4" fill="#efe8d8" stroke="#b08f54" stroke-width="1.5"/>
+    <text x="80" y="500">AggregateError</text>
+    <rect x="220" y="487" width="22" height="16" rx="4" fill="#ffffff" stroke="#2f4858" stroke-width="1.5"/>
+    <text x="250" y="500">Error with a cause</text>
+    <rect x="400" y="487" width="22" height="16" rx="4" fill="#f4e4df" stroke="#c37a68" stroke-width="1.5"/>
+    <text x="430" y="500">Error with no cause</text>
+    <line x1="600" y1="495" x2="640" y2="495" stroke="#2f4858" stroke-width="2.5"/>
+    <text x="650" y="500">member of errors</text>
+    <line x1="800" y1="495" x2="840" y2="495" stroke="#b08f54" stroke-width="2.5" stroke-dasharray="7 6"/>
+    <text x="850" y="500">cause</text>
+  </g>
+</svg>

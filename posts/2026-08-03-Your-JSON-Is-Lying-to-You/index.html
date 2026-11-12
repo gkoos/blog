@@ -33,7 +33,7 @@
 
 
   <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico" />
-  <link rel="stylesheet" href="/assets/css/styles.css?v=1793560687372" />
+  <link rel="stylesheet" href="/assets/css/styles.css?v=1794454889300" />
   <link rel="stylesheet" href="/assets/css/vendor/prism-tomorrow.css" />
   <link rel="stylesheet" href="/assets/css/fix-inline-code.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -328,7 +328,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span>copy<span class="token punctuation">)</span>
 <span class="token comment">// { tags: {}, lookup: {}, pattern: {}, error: {} }</span>
 </code></pre>
-<p>Nothing in the result identifies the original type of each empty object. Their contents have also been discarded, so the receiver cannot reconstruct them from the JSON alone.</p>
+<p>Nothing in the result identifies the original type of each empty object. Their contents have also been discarded, so the receiver cannot reconstruct them from the JSON alone. <a href="/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/#json-does-not-understand-errors">Your JS Error Is Lying to You</a> looks at the <code>Error</code> case in detail.</p>
 <p>Special numeric values follow another conversion rule. JSON numbers cannot represent <code>NaN</code> or either sign of infinity, so <code>JSON.stringify</code> writes <code>null</code> for them.</p>
 <pre class="language-js"><code class="language-js"><span class="token keyword">const</span> measurements <span class="token operator">=</span> <span class="token punctuation">{</span>
   <span class="token literal-property property">current</span><span class="token operator">:</span> <span class="token number">NaN</span><span class="token punctuation">,</span>
@@ -766,6 +766,7 @@ console<span class="token punctuation">.</span><span class="token function">log<
 <li><a href="/posts/2026-05-09-Your-Recursion-Is-Lying-to-You/">Your Recursion Is Lying to You</a></li>
 <li><a href="/posts/2026-06-11-Your-Package-Manager-Is-Lying-to-You/">Your Package Manager Is Lying to You</a></li>
 <li><a href="/posts/2026-08-14-Your-Modules-Are-Lying-to-You/">Your Modules Are Lying to You</a></li>
+<li><a href="/posts/2026-11-12-Your-JS-Error-Is-Lying-to-You/">Your JS Error Is Lying to You</a></li>
 </ul>
 
   </div>
