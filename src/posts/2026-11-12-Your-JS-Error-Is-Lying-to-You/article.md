@@ -15,6 +15,7 @@ tags:
 - "... is lying to you"
 - series--JavaScript Is Lying to You
 ---
+*Featured in [TLDR Dev 2026-11-12](https://tldr.tech/dev/2026-11-12)*
 
 *Warning: this is a very, very long article. The TLDR below lists the findings, and the table of contents links to each section.*
 
